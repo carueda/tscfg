@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/carueda/tscfg.svg?branch=master)](https://travis-ci.org/carueda/tscfg)
+
 ## what is this?
 
 tscfg is a command line tool that takes a configuration specification 
