@@ -111,4 +111,7 @@ int port       = cfg.endpoint.interface_.port;
 
 Reference objects will never be null if the corresponding field is required according to
 the specification. It will only be null if it is marked optional with no default value and
-has been omitted in the input configuration. 
+has been omitted in the input configuration.
+ 
+The generated code looks [like this](src/main/java/mypackage/TrCfg.java). 
+Example of use [here](src/main/java/mypackage/Use.java).
