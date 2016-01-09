@@ -91,15 +91,15 @@ object Accessor {
   }
 
   case object GetBoolean extends Accessor {
-    def javaType = "double"
+    def javaType = "boolean"
     def instance(path: String) = s"""c.getBoolean("$path")"""
   }
   case object GetBooleanOrNull extends Accessor {
-    def javaType = "Double"
+    def javaType = "Boolean"
     def instance(path: String) = s"""c.hasPath("$path") ? Boolean.valueOf(c.getBoolean("$path")) : null"""
   }
   case class GetBooleanOr(value: String) extends Accessor {
-    def javaType = "double"
+    def javaType = "boolean"
     def instance(path: String) = s"""c.hasPath("$path") ? c.getBoolean("$path") : $value"""
   }
 
