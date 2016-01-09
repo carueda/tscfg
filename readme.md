@@ -12,20 +12,19 @@ and execution of the generated classes in your code.
 
 ### status
 
-Note, this was an interesting exercise `;)`
-motivated by the lack of something similar to 
+This tool was an motivated by the lack of something similar to 
 [PureConfig](https://github.com/melrief/pureconfig)
-but for java.
+but for java (please point to any that I have missed!)
 It's usable to some extent but can be improved in several ways
 (for example, missing types include lists, durations, ..).
-Feel free to play, fork, etc.
+Feel free to play, fork, enter issues, submit PRs, etc.
 
-Avoiding boiler-plate is in general much easier in Scala 
-(PureConfig for example uses case classes for the configuration spec)
+Of course, avoiding boiler-plate is in general much easier in Scala 
 than in Java!
+(PureConfig, for example, uses case classes for the configuration spec).
 
-In tscfg's approach the configuration spec is also captured in a configuration file
-so the familiar syntax/format is still used.
+In tscfg's approach, the configuration spec is itself also captured in a configuration file
+so the familiar syntax/format (as supported by Typesafe Config) is still used.
 With this input the tool generates corresponding POJO classes. 
 
 
@@ -55,13 +54,13 @@ endpoint {
 Any unrecognized explicit type is still processed by inferring the type according to the given value.
 So, any existing regular configuration file can be given to tscfg.
 
-> note: such type inference is not actually done yet; any unrecognized type is handled as a required string (ie.,
+> note: not implemented yet; any unrecognized type is handled as a required string (ie.,
 as if "string" was given)
 
 ## generation
 
 ```shell
-$ java -jar tscfg-0.0.1.jar
+$ java -jar tscfg-x.y.z.jar
 
 USAGE: tscfg.Main inputFile [packageName [className [destDir]]]
 Defaults:
