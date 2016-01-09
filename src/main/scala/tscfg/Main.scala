@@ -8,12 +8,12 @@ import scala.collection.mutable
 import com.typesafe.config.{ConfigRenderOptions, ConfigValue, Config, ConfigFactory}
 
 /**
-  * The main program. See usage below.
+  * The main program. Run with no arguments to see usage.
   */
 object Main {
 
-  val defaultPackageName = "mypackage"
-  val defaultClassName   = "TsCfg"
+  val defaultPackageName = "example"
+  val defaultClassName   = "ExampleCfg"
   val defaultDestDir     = "/tmp"
 
   def main(args: Array[String]): Unit = {

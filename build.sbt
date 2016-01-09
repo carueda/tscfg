@@ -1,12 +1,14 @@
 name := "tscfg"
 
-val tscfgVersion = "0.0.1"
+val tscfgVersion = "0.0.3"
 
 version := tscfgVersion
 
 scalaVersion := "2.11.7"
 
 libraryDependencies += "com.typesafe" % "config" % "1.2.1"
+
+libraryDependencies ++= Seq("org.specs2" %% "specs2-core" % "3.7" % "test")
 
 mainClass in assembly := Some("tscfg.Main")
 

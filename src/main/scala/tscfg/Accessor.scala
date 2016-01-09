@@ -3,26 +3,6 @@ package tscfg
 
 object Accessor {
 
-  def main(args: Array[String]): Unit = {
-
-    List(
-      "string|hello world",
-      "string?",
-      "int",
-      "int?",
-      "int | 8080",
-      "boolean?",
-      "boolean | true"
-    ) foreach { spec =>
-      val accessor = parseValueSpec(spec)
-
-      println()
-      println(s"$accessor accessor for spec: '$spec'")
-      val instance = accessor.instance("some.path")
-      println(s"instance:\n  |${instance.replace("\n", "\n  |")}")
-    }
-  }
-
   def parseValueSpec(spec: String): Accessor = {
     val tokens = spec.split("""\s*\|\s*""")
     val type_ = tokens(0).toLowerCase
@@ -41,7 +21,7 @@ object Accessor {
       case "boolean"   => if (isOr) GetBooleanOr(tokens(1)) else GetBoolean
       case "boolean?"  => if (isOr) GetBooleanOr(tokens(1)) else GetBooleanOrNull
 
-      case _           => GetStringOrNull  // TODO: examine the given value to determine more concrete accessor
+      case _           => GetString  // TODO: examine the given value to determine more concrete accessor
     }
   }
 

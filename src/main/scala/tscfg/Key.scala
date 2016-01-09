@@ -1,8 +1,5 @@
 package tscfg
 
-/**
-  * Created by carueda on 1/7/16.
-  */
 abstract class Key extends Ordered[Key] {
   val parent: Key
   val simple: String
@@ -32,13 +29,4 @@ object Key {
   }
 
   val root = SimpleKey("/")
-}
-
-object KeyTest {
-  def main(args: Array[String]): Unit = {
-    assert(Key("/") == Key.root)
-    assert(Key("abc.edf").toString == "abc.edf")
-    assert(Key("abc.edf").parent.toString == "abc")
-    assert(Key("abc").parent.toString == "/")
-  }
 }
