@@ -10,10 +10,21 @@ and execution of the generated classes in your code.
 
 ### status
 
-Note, this was just an interesting programing exercise `;)`.
-It usable to some extent but can be improved in several ways
+Note, this was an interesting exercise `;)`
+motivated by the lack of something similar to 
+[PureConfig](https://github.com/melrief/pureconfig)
+but for java.
+It's usable to some extent but can be improved in several ways
 (for example, missing types include lists, durations, ..).
 Feel free to play, fork, etc.
+
+Avoiding boiler-plate is in general much easier in Scala 
+(PureConfig for example uses case classes for the configuration spec)
+than in Java!
+
+In tscfg's approach the configuration spec is also captured in a configuration file
+so no new syntax/format is introduced at all.
+With this input the tool generates corresponding POJO classes. 
 
 
 ## configuration spec
