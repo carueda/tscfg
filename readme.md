@@ -113,5 +113,5 @@ Reference objects will never be null if the corresponding field is required acco
 the specification. It will only be null if it is marked optional with no default value and
 has been omitted in the input configuration.
  
-The generated code looks [like this](src/main/java/mypackage/TrCfg.java). 
-Example of use [here](src/main/java/mypackage/Use.java).
+The generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/mypackage/TsCfg.java). 
+Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java/mypackage/Use.java).
