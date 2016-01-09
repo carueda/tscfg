@@ -205,10 +205,15 @@ object generator {
 
             n.map(name) match {
               case ln@LeafNode(k, v) =>
-                s"""ind + "$id = " + this.$id + "\\n""""
+                (if(ln.accessor.javaType == "String") {
+                  s"""ind + "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
+                }
+                else {
+                  s"""ind + "$id = " + this.$id"""
+                }) + s""" + "  // ${ln.accessor.javaType}\\n" """
 
               case BranchNode(k) =>
-                s"""ind + "$id:\\n" + this.$id.toString(ind + "    ") + """""
+                s"""ind + "$id = {\\n" + this.$id.toString(ind + "    ") + ind + "}\\n" """
             }
           }
 
