@@ -62,18 +62,20 @@ as if "string" was given)
 ```shell
 $ java -jar tscfg-x.y.z.jar
 
-USAGE: tscfg.Main inputFile [packageName [className [destDir]]]
-Defaults:
-  packageName:  example
-  className:    ExampleCfg
-  destDir:      /tmp
-Output is written to $destDir/$className.java
+tscfg x.y.z
+USAGE:
+   tscfg.Main --spec inputFile [--packageName pn] [--className cn] [--destDir dd]
+   Defaults:
+     packageName:  example
+     className:    ExampleCfg
+     destDir:      /tmp
+ Output is written to $destDir/$className.java
 ```
 
 So, with the example above saved in `def.example.conf` we can run:
 
 ```shell
-$ java -jar tscfg-0.0.1.jar def.example.conf
+$ java -jar tscfg-x.y.z.jar --spec def.example.conf
 
 parsing: def.example.conf
 generating: /tmp/ExampleCfg.java
@@ -115,9 +117,15 @@ int port       = cfg.endpoint.interface_.port;
 
 > note that java reserved words are appended "_"
 
-Reference objects will never be null if the corresponding field is required according to
+An object reference will never be null if the corresponding field is required according to
 the specification. It will only be null if it is marked optional with no default value and
 has been omitted in the input configuration.
  
 The generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java). 
 Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
+
+## tests
+
+- [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ExampleSpec.scala). 
+- [AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/AccessorSpec.scala). 
+- [KeySpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/KeySpec.scala). 
