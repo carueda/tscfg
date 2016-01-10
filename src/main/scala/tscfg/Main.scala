@@ -8,14 +8,12 @@ import com.typesafe.config.ConfigFactory
   * The main program. Run with no arguments to see usage.
   */
 object Main {
-  val version = ConfigFactory.load().getString("tscfg.version")
-
   val defaultPackageName = "example"
   val defaultClassName   = "ExampleCfg"
   val defaultDestDir     = "/tmp"
 
   val usage = s"""
-             |tscfg $version
+             |tscfg ${generator.version}
              |USAGE:
              |  tscfg.Main --spec inputFile [--packageName pn] [--className cn] [--destDir dd]
              |  Defaults:
