@@ -1,8 +1,11 @@
 package tscfg
 import Accessor._
 import org.specs2.mutable.Specification
+import tscfg.generator.GenOpts
 
 class AccessorSpec extends Specification {
+
+  implicit val genOpts = GenOpts()
 
   """"type correspondences to java"""" should {
     """"string" (and all variations) be String""" in {
@@ -51,6 +54,32 @@ class AccessorSpec extends Specification {
       parseValueSpec("boolean")
         .instance("path") must_== """c.getBoolean("path")"""
     }
+    """have hasPathOrNull condition for type with default value"""" in {
+      parseValueSpec("string | hello world")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getString("path") : "hello world""""
+      parseValueSpec("string?")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getString("path") : null"""
+
+      parseValueSpec("int | 1")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getInt("path") : 1"""
+      parseValueSpec("int?")
+        .instance("path") must_== """c.hasPathOrNull("path") ? Integer.valueOf(c.getInt("path")) : null"""
+
+      parseValueSpec("double | 1")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDouble("path") : 1"""
+      parseValueSpec("double?")
+        .instance("path") must_== """c.hasPathOrNull("path") ? Double.valueOf(c.getDouble("path")) : null"""
+
+      parseValueSpec("boolean | true")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getBoolean("path") : true"""
+      parseValueSpec("boolean?")
+        .instance("path") must_== """c.hasPathOrNull("path") ? Boolean.valueOf(c.getBoolean("path")) : null"""
+    }
+  }
+
+  """"field access code for j7 (ie., Typesafe Config <= 1.2.1)""" should {
+    implicit val genOpts = GenOpts(j7 = true)
+      parseValueSpec("string")
     """have hasPath condition for type with default value"""" in {
       parseValueSpec("string | hello world")
         .instance("path") must_== """c.hasPath("path") ? c.getString("path") : "hello world""""

@@ -1,12 +1,12 @@
 name := "tscfg"
 
-val tscfgVersion = setVersion("0.1.2")
+val tscfgVersion = setVersion("0.1.3")
 
 version := tscfgVersion
 
 scalaVersion := "2.11.7"
 
-libraryDependencies += "com.typesafe" % "config" % "1.2.1"
+libraryDependencies += "com.typesafe" % "config" % "1.3.0"
 
 libraryDependencies += "org.specs2" %% "specs2-core" % "3.7" % "test"
 

@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/carueda/tscfg.svg?branch=master)](https://travis-ci.org/carueda/tscfg)
 
-## what is this?
+## tscfg
 
 tscfg is a command line tool that takes a configuration specification 
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
@@ -12,10 +12,10 @@ and execution of the generated classes in your code.
 
 ### status
 
-This tool was an motivated by the lack of something similar to 
+This tool was motivated by the lack of something similar to 
 [PureConfig](https://github.com/melrief/pureconfig)
-but for java (please point to any that I have missed!)
-It's usable to some extent but can be improved in several ways
+but for java (please point me to any that I have missed!)
+It's already usable to some extent but can be improved in several ways
 (for example, missing types include lists, durations, ..).
 Feel free to play, fork, enter issues, submit PRs, etc.
 
@@ -51,8 +51,8 @@ endpoint {
 }
 ```
 
-Any unrecognized explicit type is still processed by inferring the type according to the given value.
-So, any existing regular configuration file can be given to tscfg.
+Any value not recognized as an explicit type is still processed by inferring the type according to that value.
+So, any existing regular configuration file can still be input to tscfg.
 
 > note: not implemented yet; any unrecognized type is handled as a required string (ie.,
 as if "string" was given)
@@ -63,16 +63,17 @@ as if "string" was given)
 $ java -jar tscfg-x.y.z.jar
 
 tscfg x.y.z
-USAGE:
-   tscfg.Main --spec inputFile [--packageName pn] [--className cn] [--destDir dd]
-   Defaults:
-     packageName:  example
-     className:    ExampleCfg
-     destDir:      /tmp
- Output is written to $destDir/$className.java
+Usage:  tscfg.Main --spec inputFile [options]
+Options (default):
+  --pn packageName  (tscfg.example)
+  --cn className    (ExampleCfg)
+  --dd destDir      (/tmp)
+  --j7 generate code for java <= 7 (8)
+Output is written to $destDir/$className.java
 ```
 
-So, with the example above saved in `def.example.conf` we can run:
+So, to generate class `tscfg.example.ExampleCfg` with the example above 
+saved in `def.example.conf`, we can run:
 
 ```shell
 $ java -jar tscfg-x.y.z.jar --spec def.example.conf
@@ -81,14 +82,12 @@ parsing: def.example.conf
 generating: /tmp/ExampleCfg.java
 ```
 
-to generate the class `example.ExampleCfg`.
+## accessing the generated configuration
 
-## using the generated configuration objects
+Usual Typesafe Config mechanism to load the file, for example:
 
 ```java
 File configFile = new File("my.conf");
-
-// usual Typesafe Config mechanism to load the file
 Config tsConfig = ConfigFactory.parseFile(configFile).resolve();
 ```
 
@@ -96,9 +95,8 @@ To access the configuration fields, instead of:
 ```java
 Config endpoint = tsConfig.getConfig("endpoint");
 String path    = endpoint.getString("path");
-String url     = endpoint.hasPath("url")    ? endpoint.getString("url") : "http://example.net";
-Integer serial = endpoint.hasPath("serial") ? endpoint.getInt("serial") : null;
-int port       = endpoint.hasPath("port")   ? endpoint.getInt("interface.port") : 8080;
+Integer serial = endpoint.hasPathOrNull("serial") ? endpoint.getInt("serial") : null;
+int port       = endpoint.hasPathOrNull("port")   ? endpoint.getInt("interface.port") : 8080;
 ```
 
 you can:
@@ -110,7 +108,6 @@ which will make all verifications about required settings and associated types.
 then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
 ```java
 String path    = cfg.endpoint.path;
-String url     = cfg.endpoint.url;
 Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```

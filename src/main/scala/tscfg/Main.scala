@@ -3,43 +3,42 @@ package tscfg
 import java.io.{File, PrintWriter}
 
 import com.typesafe.config.ConfigFactory
+import tscfg.generator.GenOpts
 
 /**
   * The main program. Run with no arguments to see usage.
   */
 object Main {
-  val defaultPackageName = "example"
-  val defaultClassName   = "ExampleCfg"
   val defaultDestDir     = "/tmp"
 
   val usage = s"""
              |tscfg ${generator.version}
-             |USAGE:
-             |  tscfg.Main --spec inputFile [--packageName pn] [--className cn] [--destDir dd]
-             |  Defaults:
-             |    packageName:  $defaultPackageName
-             |    className:    $defaultClassName
-             |    destDir:      $defaultDestDir
+             |Usage:  tscfg.Main --spec inputFile [options]
+             |Options (default):
+             |  --pn packageName  (${generator.defaultPackageName})
+             |  --cn className    (${generator.defaultClassName})
+             |  --dd destDir      ($defaultDestDir)
+             |  --j7 generate code for java <= 7 (8)
              |Output is written to $$destDir/$$className.java
     """.stripMargin
 
-  case class Opts(inputFilename: Option[String] = None,
-                  packageName: String = defaultPackageName,
-                  className: String = defaultClassName,
-                  destDir: String = defaultDestDir
+  case class CmdLineOpts(inputFilename: Option[String] = None,
+                         packageName: String = generator.defaultPackageName,
+                         className: String =   generator.defaultClassName,
+                         destDir: String = defaultDestDir,
+                         j7: Boolean = false
                  )
 
   def main(args: Array[String]): Unit = {
-    val opts = getOpts(args.toList)
-    generate(opts)
+    generate(getOpts(args.toList))
   }
 
-  def getOpts(args: List[String]): Opts = {
+  def getOpts(args: List[String]): CmdLineOpts = {
     if (args.isEmpty) {
       println(usage)
       sys.exit(0)
     }
-    def traverseList(list: List[String], opts: Opts = Opts()): Opts = {
+    def traverseList(list: List[String], opts: CmdLineOpts = CmdLineOpts()): CmdLineOpts = {
       def chkVal(v: String): String = {
         if (!v.startsWith("-")) v
         else {
@@ -50,12 +49,14 @@ object Main {
       list match {
         case "--spec" :: filename :: rest =>
           traverseList(rest, opts.copy(inputFilename = Some(chkVal(filename))))
-        case "--packageName" :: packageName :: rest =>
+        case "--pn" :: packageName :: rest =>
           traverseList(rest, opts.copy(packageName = chkVal(packageName)))
-        case "--className" :: className :: rest =>
+        case "--cn" :: className :: rest =>
           traverseList(rest, opts.copy(className = chkVal(className)))
-        case "--destDir" :: destDir :: rest =>
+        case "--dd" :: destDir :: rest =>
           traverseList(rest, opts.copy(destDir = chkVal(destDir)))
+        case "--j7" :: rest =>
+          traverseList(rest, opts.copy(j7 = true))
         case opt :: nil =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
@@ -72,18 +73,21 @@ object Main {
     opts
   }
 
-  def generate(opts: Opts): Unit = {
+  def generate(opts: CmdLineOpts): Unit = {
     require(opts.inputFilename.isDefined)
+    println(s"CmdLineOpts: $opts")
+
     val inputFilename = opts.inputFilename.get
     val destFilename  = s"${opts.destDir}/${opts.className}.java"
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
+    implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7)
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
 
     println(s"generating: ${destFile.getAbsolutePath}")
-    generator.java(config, opts.packageName, opts.className, out)
+    generator.java(config, out)
 
     out.close()
   }
