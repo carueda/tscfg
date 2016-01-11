@@ -15,10 +15,10 @@ public class Use {
 
     // but, instead of:
     Config endpoint = tsConfig.getConfig("endpoint");
-//    String path    = endpoint.getString("path");
-//    String url     = endpoint.hasPath("url")    ? endpoint.getString("url") : "http://example.net";
-//    Integer serial = endpoint.hasPath("serial") ? endpoint.getInt("serial") : null;
-//    int port       = endpoint.hasPath("port")   ? endpoint.getInt("interface.port") : 8080;
+    String path    = endpoint.getString("path");
+    String url     = endpoint.hasPathOrNull("url")    ? endpoint.getString("url") : "http://example.net";
+    Integer serial = endpoint.hasPathOrNull("serial") ? endpoint.getInt("serial") : null;
+    int port       = endpoint.hasPathOrNull("port")   ? endpoint.getInt("interface.port") : 8080;
 
     // you can:
     ExampleCfg cfg = new ExampleCfg(tsConfig);

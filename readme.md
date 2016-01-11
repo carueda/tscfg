@@ -82,7 +82,7 @@ parsing: def.example.conf
 generating: /tmp/ExampleCfg.java
 ```
 
-## accessing the generated configuration
+## configuration access
 
 Usual Typesafe Config mechanism to load the file, for example:
 
@@ -91,7 +91,7 @@ File configFile = new File("my.conf");
 Config tsConfig = ConfigFactory.parseFile(configFile).resolve();
 ```
 
-To access the configuration fields, instead of:
+Now, to access the configuration fields, instead of:
 ```java
 Config endpoint = tsConfig.getConfig("endpoint");
 String path    = endpoint.getString("path");
@@ -103,16 +103,17 @@ you can:
 ```java
 ExampleCfg cfg = new ExampleCfg(tsConfig);
 ```
-which will make all verifications about required settings and associated types.
+which will make all verifications about required settings and associated types. 
+In particular, as is typical with Config use, an exception will be thrown is this verification fails.
 
-then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
+Then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
 ```java
 String path    = cfg.endpoint.path;
 Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```
 
-> note that java reserved words are appended "_"
+> note that java reserved words are appended "_".
 
 An object reference will never be null if the corresponding field is required according to
 the specification. It will only be null if it is marked optional with no default value and
