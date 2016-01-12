@@ -1,6 +1,6 @@
 name := "tscfg"
 
-val tscfgVersion = setVersion("0.1.3")
+val tscfgVersion = setVersion("0.1.4")
 
 version := tscfgVersion
 
