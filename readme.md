@@ -51,6 +51,25 @@ endpoint {
 }
 ```
 
+Excluding constructors and other methods, this basically becomes 
+the immutable class:
+
+```java
+public class ExampleCfg {
+  public final Endpoint endpoint;
+  public static class Endpoint {
+    public final String path;
+    public final String url;
+    public final Integer serial;
+
+    public final Interface interface_;
+    public static class Interface {
+      public final int port;
+    }
+  }
+}
+```
+
 Any value not recognized as an explicit type is still processed by inferring the type according to that value.
 So, any existing regular configuration file can still be input to tscfg.
 
@@ -113,7 +132,7 @@ Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```
 
-> note that java reserved words are appended "_".
+> note that java keywords and special literals (like "false") are appended "_".
 
 An object reference will never be null if the corresponding field is required according to
 the specification. It will only be null if it is marked optional with no default value and
@@ -124,6 +143,7 @@ Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java
 
 ## tests
 
-- [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ExampleSpec.scala). 
-- [AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/AccessorSpec.scala). 
-- [KeySpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/KeySpec.scala). 
+- [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ExampleSpec.scala) 
+- [AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/AccessorSpec.scala)
+- [javaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/javaIdentifierSpec.scala)
+- [KeySpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/KeySpec.scala)

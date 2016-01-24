@@ -1,3 +1,7 @@
+2016-01-24 - 0.1.4
+
+- consider all java keywords and special literals to generate valid identifier
+
 2016-01-11 - 0.1.3
  
 - generate code for java 8 by default.
