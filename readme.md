@@ -145,5 +145,5 @@ Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java
 
 - [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ExampleSpec.scala) 
 - [AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/AccessorSpec.scala)
-- [javaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/javaIdentifierSpec.scala)
+- [javaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaIdentifierSpec.scala)
 - [KeySpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/KeySpec.scala)
