@@ -1,5 +1,6 @@
 2016-01-24 - 0.1.4
 
+- include source info in preamble of generated file
 - consider all java keywords and special literals to generate valid identifier
 
 2016-01-11 - 0.1.3

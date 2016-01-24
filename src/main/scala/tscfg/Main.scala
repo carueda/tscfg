@@ -81,7 +81,8 @@ object Main {
     val destFilename  = s"${opts.destDir}/${opts.className}.java"
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
-    implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7)
+    implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
+      preamble = Some(s"source: $inputFilename"))
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
