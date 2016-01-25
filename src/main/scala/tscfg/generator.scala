@@ -25,7 +25,8 @@ object generator {
   case class GenOpts(packageName: String = defaultPackageName,
                      className: String   = defaultClassName,
                      j7: Boolean         = false,
-                     preamble: Option[String] = None
+                     preamble: Option[String] = None,
+                     genScala: Boolean   = false
                     )
   /**
     * Generates java code for the given configuration spec.
@@ -34,8 +35,8 @@ object generator {
     * @param out          code is written here
     * @param genOpts      generation options
     */
-  def java(config: Config, out: Writer)
-          (implicit genOpts: GenOpts): Unit = {
+  def generate(config: Config, out: Writer)
+              (implicit genOpts: GenOpts): Unit = {
 
     createAllNodes(config)
 
@@ -43,7 +44,10 @@ object generator {
       case w: PrintWriter => w
       case w => new PrintWriter(w)
     }
-    genJava(Node.root, pw)
+    if(genOpts.genScala)
+      tscfg.scalaGenerator.genScala(Node.root, pw)
+    else
+      genJava(Node.root, pw)
   }
 
   // we first traverse the list of elements to build a tree representation.
