@@ -27,6 +27,8 @@ In tscfg's approach, the configuration spec is itself also captured in a configu
 so the familiar syntax/format (as supported by Typesafe Config) is still used.
 With this input the tool generates corresponding POJO classes. 
 
+Why the trouble if you can simply access the properties with Typesafe Config directly? -- see FAQ below.
+
 
 ## configuration spec
 
@@ -140,6 +142,16 @@ has been omitted in the input configuration.
  
 The generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java). 
 Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
+
+## FAQ
+
+\* Why the trouble? -- I can just access the configuration values directly with Typesafe Config 
+and put them in my own classes
+  
+Sure. However, as the number of configuration properties and levels of nesting increase,
+the benefits of automated generation of the typesafe, immutable POJOs, 
+along with the centralized verification,
+may become more apparent.
 
 ## tests
 
