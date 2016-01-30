@@ -162,8 +162,8 @@ Straightforward to add. Feel free to contribute if you are so inclined.
 
 Yes, it's there too. Use the `--scala` option and case classes will be generated.
 Optional fields are generated with type `Option[T]`.
-Looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.java). 
-Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaUse.java).
+Looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala). 
+Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
   
 
 ## tests
