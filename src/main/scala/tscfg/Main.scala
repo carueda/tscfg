@@ -18,9 +18,9 @@ object Main {
              |  --pn packageName  (${generator.defaultPackageName})
              |  --cn className    (${generator.defaultClassName})
              |  --dd destDir      ($defaultDestDir)
-             |  --j7 generate code for java <= 7 (8)
-             |  --scala generate scala code (java)
-             |Output is written to $$destDir/$$className.java
+             |  --j7 generate code for java <= 7  (8)
+             |  --scala generate scala code  (java)
+             |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
@@ -28,7 +28,7 @@ object Main {
                          className: String =   generator.defaultClassName,
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
-                         scala: Boolean = false
+                         language: String = "java"
                  )
 
   def main(args: Array[String]): Unit = {
@@ -60,7 +60,7 @@ object Main {
         case "--j7" :: rest =>
           traverseList(rest, opts.copy(j7 = true))
         case "--scala" :: rest =>
-          traverseList(rest, opts.copy(scala = true))
+          traverseList(rest, opts.copy(language = "scala"))
         case opt :: nil =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
@@ -81,7 +81,7 @@ object Main {
     require(opts.inputFilename.isDefined)
     println(s"CmdLineOpts: $opts")
 
-    val ext = if(opts.scala) "scala" else "java"
+    val ext = opts.language
 
     val inputFilename = opts.inputFilename.get
     val destFilename  = s"${opts.destDir}/${opts.className}.$ext"
@@ -89,7 +89,7 @@ object Main {
     val out = new PrintWriter(destFile)
     implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
       preamble = Some(s"source: $inputFilename"),
-      genScala = opts.scala)
+      language = opts.language)
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()

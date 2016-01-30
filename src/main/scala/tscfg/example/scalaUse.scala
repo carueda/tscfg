@@ -21,6 +21,7 @@ object scalaUse {
     val url: String = if (endpoint.hasPathOrNull("url")) endpoint.getString("url") else "http://example.net"
     val serial: Option[Int] = if (endpoint.hasPathOrNull("serial")) Some(endpoint.getInt("serial")) else None
     val port: Int = if (endpoint.hasPathOrNull("port")) endpoint.getInt("interface.port") else 8080
+    val `type`: Option[String] = if (endpoint.hasPathOrNull("type")) Some(endpoint.getString("type")) else None
 
     // you can:
     val cfg: ScalaExampleCfg = ScalaExampleCfg(tsConfig)
@@ -28,6 +29,7 @@ object scalaUse {
     val url2: String = cfg.endpoint.url
     val serial2: Option[Int] = cfg.endpoint.serial
     val port2: Int = cfg.endpoint.interface.port
+    val type2: Option[String] = cfg.endpoint.interface.`type`
 
     println("\n*** TsCfg: *** ")
     println(cfg.toString)
