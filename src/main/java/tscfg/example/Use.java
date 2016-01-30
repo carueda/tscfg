@@ -29,12 +29,12 @@ public class Use {
     int port2       = cfg.endpoint.interface_.port;
     String type2    = cfg.endpoint.interface_.type;
 
-    System.out.println("*** TsCfg: *** ");
+    System.out.println("\n*** tscfg toString: ***");
     System.out.println(cfg.toString());
 
+    System.out.println("\n*** Typesafe Config toString: ***");
     ConfigRenderOptions options = ConfigRenderOptions.defaults()
         .setFormatted(true).setComments(true).setOriginComments(false);
-    System.out.println("*** tsConfig: ***");
     System.out.println(tsConfig.root().render(options));
   }
 }
