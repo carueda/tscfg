@@ -34,7 +34,7 @@ object scalaGenerator {
     }
 
     def genForLeaf(ln: LeafNode): Unit = {
-      out.println(s"  $scalaId: ${ln.accessor.scalaType}")
+      out.println(s"  $scalaId: ${ln.accessor.`type`}")
     }
 
     def genForBranch(bn: BranchNode): Unit = {
@@ -47,10 +47,10 @@ object scalaGenerator {
       var comma = ""
       orderedNames foreach { name =>
         out.print(comma)
-        out.print(s"  ${scalaIdentifier(name)}: ")
+        out.print(s"  ${scalaIdentifier(name)} : ")  // note, space before : for proper tokenization
         bn.map(name) match {
           case ln@LeafNode(k, v) =>
-            out.print(s"""${ln.accessor.scalaType}""")
+            out.print(s"""${ln.accessor.`type`}""")
 
           case BranchNode(k)  =>
             val className = upperFirst(k.simple)
@@ -80,7 +80,7 @@ object scalaGenerator {
         out.print(comma)
         bn.map(name) match {
           case ln@LeafNode(k, v) =>
-            out.print(s"""      ${ln.accessor.scalaInstance(k.simple)}""")
+            out.print(s"""      ${ln.accessor.instance(k.simple)}""")
 
           case BranchNode(k)  =>
             val className = upperFirst(k.simple)

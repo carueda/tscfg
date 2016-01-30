@@ -60,7 +60,7 @@ object generator {
   }
 
   case class LeafNode(key: Key, value: ConfigValue)(implicit genOpts: GenOpts) extends Node {
-    val accessor = Accessor.parseValueSpec(value.unwrapped().toString)
+    val accessor = Accessor(value.unwrapped().toString)
   }
 
   case class BranchNode(key: Key) extends Node {

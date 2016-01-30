@@ -19,6 +19,7 @@ public class Use {
     String url     = endpoint.hasPathOrNull("url")    ? endpoint.getString("url") : "http://example.net";
     Integer serial = endpoint.hasPathOrNull("serial") ? endpoint.getInt("serial") : null;
     int port       = endpoint.hasPathOrNull("port")   ? endpoint.getInt("interface.port") : 8080;
+    String type    = endpoint.hasPathOrNull("type")   ? endpoint.getString("interface.type") : null;
 
     // you can:
     ExampleCfg cfg = new ExampleCfg(tsConfig);
@@ -26,8 +27,8 @@ public class Use {
     String url2     = cfg.endpoint.url;
     Integer serial2 = cfg.endpoint.serial;
     int port2       = cfg.endpoint.interface_.port;
+    String type2    = cfg.endpoint.interface_.type;
 
-    System.out.println("port2=" + port2);
     System.out.println("*** TsCfg: *** ");
     System.out.println(cfg.toString());
 

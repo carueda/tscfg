@@ -34,7 +34,7 @@ object javaGenerator {
       }
 
       def genForLeaf(ln: LeafNode): Unit = {
-        out.println(s"${indent}public final ${ln.accessor.javaType} $javaId;")
+        out.println(s"${indent}public final ${ln.accessor.`type`} $javaId;")
       }
 
       def genForBranch(bn: BranchNode): Unit = {
@@ -84,7 +84,7 @@ object javaGenerator {
 
           bn.map(name) match {
             case ln@LeafNode(k, v) =>
-              (if(ln.accessor.javaType == "String") {
+              (if(ln.accessor.`type` == "String") {
                 s"""i+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
               }
               else {
