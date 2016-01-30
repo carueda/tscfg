@@ -18,15 +18,17 @@ object Main {
              |  --pn packageName  (${generator.defaultPackageName})
              |  --cn className    (${generator.defaultClassName})
              |  --dd destDir      ($defaultDestDir)
-             |  --j7 generate code for java <= 7 (8)
-             |Output is written to $$destDir/$$className.java
+             |  --j7 generate code for java <= 7  (8)
+             |  --scala generate scala code  (java)
+             |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
                          packageName: String = generator.defaultPackageName,
                          className: String =   generator.defaultClassName,
                          destDir: String = defaultDestDir,
-                         j7: Boolean = false
+                         j7: Boolean = false,
+                         language: String = "java"
                  )
 
   def main(args: Array[String]): Unit = {
@@ -57,6 +59,8 @@ object Main {
           traverseList(rest, opts.copy(destDir = chkVal(destDir)))
         case "--j7" :: rest =>
           traverseList(rest, opts.copy(j7 = true))
+        case "--scala" :: rest =>
+          traverseList(rest, opts.copy(language = "scala"))
         case opt :: nil =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
@@ -77,18 +81,21 @@ object Main {
     require(opts.inputFilename.isDefined)
     println(s"CmdLineOpts: $opts")
 
+    val ext = opts.language
+
     val inputFilename = opts.inputFilename.get
-    val destFilename  = s"${opts.destDir}/${opts.className}.java"
+    val destFilename  = s"${opts.destDir}/${opts.className}.$ext"
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
     implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
-      preamble = Some(s"source: $inputFilename"))
+      preamble = Some(s"source: $inputFilename"),
+      language = opts.language)
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
 
     println(s"generating: ${destFile.getAbsolutePath}")
-    generator.java(config, out)
+    generator.generate(config, out)
 
     out.close()
   }

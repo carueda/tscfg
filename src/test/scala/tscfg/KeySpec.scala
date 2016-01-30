@@ -28,4 +28,9 @@ class KeySpec extends Specification {
       Key("foo.baz").simple must_== "baz"
     }
   }
+  """Key("foo.baz.bar").parts""" should {
+    """be List("foo", "baz", "bar")""" in {
+      Key("foo.baz.bar").parts must_== List("foo", "baz", "bar")
+    }
+  }
 }

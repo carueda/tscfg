@@ -1,5 +1,8 @@
-2016-01-24 - 0.1.4
+2016-01-24 - 0.1.5
 
+- scala generation
+
+2016-01-24 - 0.1.4
 - include source info in preamble of generated file
 - consider all java keywords and special literals to generate valid identifier
 

@@ -5,7 +5,7 @@
 tscfg is a command line tool that takes a configuration specification 
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
 and generates all the Java boiler-plate to make the definitions 
-available in type safe POJOs.
+available in type safe, immutable objects.
 
 Typesafe Config is used by the tool for the generation, and required for compilation 
 and execution of the generated classes in your code.
@@ -14,7 +14,7 @@ and execution of the generated classes in your code.
 
 This tool was motivated by the lack of something similar to 
 [PureConfig](https://github.com/melrief/pureconfig)
-but for java (please point me to any that I have missed!)
+but for java (please point me to any that I may have missed!)
 It's already usable to some extent but can be improved in several ways
 (for example, missing types include lists, durations, ..).
 Feel free to play, fork, enter issues, submit PRs, etc.
@@ -90,7 +90,8 @@ Options (default):
   --cn className    (ExampleCfg)
   --dd destDir      (/tmp)
   --j7 generate code for java <= 7 (8)
-Output is written to $destDir/$className.java
+  --scala generate scala code  (java)
+Output is written to $destDir/$className.ext
 ```
 
 So, to generate class `tscfg.example.ExampleCfg` with the example above 
@@ -134,7 +135,7 @@ Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```
 
-> note that java keywords and special literals (like "false") are appended "_".
+> note that java keywords are appended "_".
 
 An object reference will never be null if the corresponding field is required according to
 the specification. It will only be null if it is marked optional with no default value and
@@ -145,17 +146,32 @@ Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java
 
 ## FAQ
 
-\* Why the trouble? -- I can just access the configuration values directly with Typesafe Config 
-and put them in my own classes
+**Why the trouble? -- I can just access the configuration values directly with Typesafe Config 
+and put them in my own classes**
   
 Sure. However, as the number of configuration properties and levels of nesting increase,
-the benefits of automated generation of the typesafe, immutable POJOs, 
+the benefits of automated generation of the typesafe, immutable objects, 
 along with the centralized verification,
 may become more apparent.
+
+**Can tscfg generate `Optional<T>` by default for optional fields?**
+
+Straightforward to add. Feel free to contribute if you are so inclined.
+ 
+**What about generating for Scala?**
+
+Yes, it's there too. Use the `--scala` option and case classes will be generated.
+Optional fields are generated with type `Option[T]`.
+Looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.java). 
+Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaUse.java).
+  
 
 ## tests
 
 - [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ExampleSpec.scala) 
-- [AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/AccessorSpec.scala)
+- [JavaAccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaAccessorSpec.scala)
+- [Java7AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/Java7AccessorSpec.scala)
 - [javaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaIdentifierSpec.scala)
+- [scalaAccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/ScalaAccessorSpec.scala)
+- [scalaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/scalaIdentifierSpec.scala)
 - [KeySpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/KeySpec.scala)
