@@ -58,7 +58,39 @@ object scalaGenerator {
         }
         comma = ",\n"
       }
-      out.println("\n)")
+      out.println("\n) {")
+
+      // toString():
+      out.println(s"""  override def toString: String = toString("")""")
+
+      // <toString(i:String)>
+      out.println(s"""  def toString(i:String): String = {""")
+      val ids = orderedNames map { name =>
+        val id = scalaIdentifier(name)
+
+        bn.map(name) match {
+          case ln@LeafNode(k, v) =>
+            (if(ln.accessor.`type` == "String") {
+              s"""  i+ "$name = " + '"' + this.$id + '"'"""
+            }
+            else if(ln.accessor.`type` == "Option[String]") {
+              val value = s"""if(this.$id.isDefined) "Some(" +'"' +this.$id.get+ '"' + ")" else "None""""
+              s"""  i+ "$name = " + (""" + value + ")"
+            }
+            else {
+              s"""  i+ "$name = " + this.$id"""
+            }) + s""" + "\\n""""
+
+          case BranchNode(k) =>
+            val className = upperFirst(k.simple)
+            s"""  i+ "$className(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
+        }
+      }
+      out.println(s"  ${ids.mkString("+\n  ")}")
+      out.println(s"  }")
+      // <toString(i:String)>
+
+      out.println("}")
       // </class>
 
       // recurse to the subnodes:
