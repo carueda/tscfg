@@ -17,115 +17,128 @@ object scalaGenerator {
     out.println(s"package ${genOpts.packageName}\n")
     out.println(s"import com.typesafe.config.Config\n")
 
-    gen(node, out)
-  }
+    gen(node)
 
-  def gen(n: Node, out: PrintWriter)
-         (implicit genOpts: GenOpts): Unit = {
+    def gen(n: Node, indent: String = "")
+           (implicit genOpts: GenOpts): Unit = {
 
-    val simple = n.key.simple
-    val symbol = if (simple == "/") genOpts.className else simple
+      val simple = n.key.simple
+      val symbol = if (simple == "/") genOpts.className else simple
 
-    val scalaId = scalaIdentifier(symbol)
+      val scalaId = scalaIdentifier(symbol)
 
-    n match {
-      case ln: LeafNode  => genForLeaf(ln)
-      case n: BranchNode => genForBranch(n)
+      n match {
+        case ln: LeafNode  => genForLeaf(ln)
+        case n: BranchNode => genForBranch(n)
+      }
+
+      def genForLeaf(ln: LeafNode): Unit = {
+        out.println(s"${indent}  $scalaId: ${ln.accessor.`type`}")
+      }
+
+      def genForBranch(bn: BranchNode): Unit = {
+        var comma = ""
+
+        val className = upperFirst(symbol)
+
+        val orderedNames = bn.map.keys.toList.sorted
+
+        // <object>
+        out.println(s"${indent}object $className {")
+
+        // <recurse>
+        orderedNames foreach { name =>
+          bn.map(name) match {
+            case sbn@BranchNode(k) => gen(sbn, indent + "  ")
+            case _ =>
+          }
+        }
+        // </recurse>
+
+        // <apply>
+        out.println(s"${indent}  def apply(c: Config): $className = {")
+        out.println(s"${indent}    $className(")
+
+        comma = indent
+        orderedNames foreach { name =>
+          out.print(comma)
+          bn.map(name) match {
+            case ln@LeafNode(k, v) =>
+              out.print(s"""      ${ln.accessor.instance(k.simple)}""")
+
+            case BranchNode(k)  =>
+              val className = upperFirst(k.simple)
+              out.print(s"""      $className(c.getConfig("${k.simple}"))""")
+          }
+          comma = s",\n${indent}"
+        }
+        out.println()
+        out.println(s"${indent}    )")
+        out.println(s"${indent}  }")
+        // </apply>
+
+        out.println(s"${indent}}")
+        // </object>
+
+        // <class>
+        out.println(s"${indent}case class $className(")
+        comma = ""
+        orderedNames foreach { name =>
+          out.print(comma)
+          out.print(s"${indent}  ${scalaIdentifier(name)} : ")  // note, space before : for proper tokenization
+          bn.map(name) match {
+            case ln@LeafNode(k, v) =>
+              out.print(s"""${ln.accessor.`type`}""")
+
+            case BranchNode(k)  =>
+              // use full qualified class name
+              val className = genOpts.className + "." + k.parts.map(upperFirst).mkString(".")
+              out.print(s"""$className""")
+          }
+          comma = ",\n"
+        }
+
+        // <class-body>
+        out.println(s"\n${indent}) {")
+
+
+        // toString():
+        out.println(s"""${indent}  override def toString: String = toString("")""")
+
+        // <toString(i:String)>
+        out.println(s"""${indent}  def toString(i:String): String = {""")
+        val ids = orderedNames map { name =>
+          val id = scalaIdentifier(name)
+
+          bn.map(name) match {
+            case ln@LeafNode(k, v) =>
+              (if(ln.accessor.`type` == "String") {
+                s"""  i+ "$name = " + '"' + this.$id + '"'"""
+              }
+              else if(ln.accessor.`type` == "Option[String]") {
+                val value = s"""if(this.$id.isDefined) "Some(" +'"' +this.$id.get+ '"' + ")" else "None""""
+                s"""  i+ "$name = " + (""" + value + ")"
+              }
+              else {
+                s"""  i+ "$name = " + this.$id"""
+              }) +
+              s""" + "\\n""""
+
+            case BranchNode(k) =>
+              val className = upperFirst(k.simple)
+              s"""  i+ "$className(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
+          }
+        }
+        out.println(s"${indent}  ${ids.mkString(s"+\n${indent}  ")}")
+        out.println(s"${indent}  }")
+        // <toString(i:String)>
+
+        out.println(s"${indent}}")
+        // </class-body>
+        // </class>
+      }
     }
 
-    def genForLeaf(ln: LeafNode): Unit = {
-      out.println(s"  $scalaId: ${ln.accessor.`type`}")
-    }
-
-    def genForBranch(bn: BranchNode): Unit = {
-      val className = upperFirst(symbol)
-
-      val orderedNames = bn.map.keys.toList.sorted
-
-      // <class>
-      out.println(s"case class $className(")
-      var comma = ""
-      orderedNames foreach { name =>
-        out.print(comma)
-        out.print(s"  ${scalaIdentifier(name)} : ")  // note, space before : for proper tokenization
-        bn.map(name) match {
-          case ln@LeafNode(k, v) =>
-            out.print(s"""${ln.accessor.`type`}""")
-
-          case BranchNode(k)  =>
-            val className = upperFirst(k.simple)
-            out.print(s"""$className""")
-        }
-        comma = ",\n"
-      }
-      out.println("\n) {")
-
-      // toString():
-      out.println(s"""  override def toString: String = toString("")""")
-
-      // <toString(i:String)>
-      out.println(s"""  def toString(i:String): String = {""")
-      val ids = orderedNames map { name =>
-        val id = scalaIdentifier(name)
-
-        bn.map(name) match {
-          case ln@LeafNode(k, v) =>
-            (if(ln.accessor.`type` == "String") {
-              s"""  i+ "$name = " + '"' + this.$id + '"'"""
-            }
-            else if(ln.accessor.`type` == "Option[String]") {
-              val value = s"""if(this.$id.isDefined) "Some(" +'"' +this.$id.get+ '"' + ")" else "None""""
-              s"""  i+ "$name = " + (""" + value + ")"
-            }
-            else {
-              s"""  i+ "$name = " + this.$id"""
-            }) + s""" + "\\n""""
-
-          case BranchNode(k) =>
-            val className = upperFirst(k.simple)
-            s"""  i+ "$className(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
-        }
-      }
-      out.println(s"  ${ids.mkString("+\n  ")}")
-      out.println(s"  }")
-      // <toString(i:String)>
-
-      out.println("}")
-      // </class>
-
-      // recurse to the subnodes:
-      orderedNames foreach { name =>
-        bn.map(name) match {
-          case sbn@BranchNode(k) => gen(sbn, out)
-          case _ =>
-        }
-      }
-
-      // <constructor>
-      // <object>
-      out.println(s"object $className {")
-      out.println(s"  def apply(c: Config): $className = {")
-      out.println(s"    $className(")
-
-      comma = ""
-      orderedNames foreach { name =>
-        out.print(comma)
-        bn.map(name) match {
-          case ln@LeafNode(k, v) =>
-            out.print(s"""      ${ln.accessor.instance(k.simple)}""")
-
-          case BranchNode(k)  =>
-            val className = upperFirst(k.simple)
-            out.print(s"""      $className(c.getConfig("${k.simple}"))""")
-        }
-        comma = ",\n"
-      }
-      out.println("\n    )")
-      out.println(s"  }")
-      out.println(s"}")
-      // </object>
-      // </constructor>
-    }
   }
 
   /**

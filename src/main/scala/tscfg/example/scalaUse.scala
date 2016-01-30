@@ -31,12 +31,12 @@ object scalaUse {
     val port2: Int = cfg.endpoint.interface.port
     val type2: Option[String] = cfg.endpoint.interface.`type`
 
-    println("\n*** TsCfg: *** ")
+    println("\n*** tscfg toString: *** ")
     println(cfg.toString)
 
+    println("\n*** Typesafe Config toString: *** ")
     val options: ConfigRenderOptions = ConfigRenderOptions.defaults
       .setFormatted(true).setComments(true).setOriginComments(false)
-    println("\n*** tsConfig: ***")
     println(tsConfig.root.render(options))
   }
 

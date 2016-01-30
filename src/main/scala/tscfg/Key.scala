@@ -5,15 +5,19 @@ abstract class Key extends Ordered[Key] {
   val simple: String
 
   def compare(that: Key): Int = toString.compare(that.toString)
+
+  def parts: List[String]
 }
 
 case class SimpleKey(simple: String) extends Key {
   val parent: Key = Key.root
   override val toString = simple
+  def parts: List[String] = List(simple)
 }
 
 case class CompositeKey(parent: Key, simple: String) extends Key {
   override val toString = parent + "." + simple
+  def parts: List[String] = parent.parts :+ simple
 }
 
 object Key {
