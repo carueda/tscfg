@@ -15,8 +15,8 @@ and execution of the generated classes in your code.
 This tool was motivated by the lack of something similar to 
 [PureConfig](https://github.com/melrief/pureconfig)
 but for java (please point me to any that I may have missed!)
-It's already usable to some extent but can be improved in several ways
-(for example, missing types include lists, durations, ..).
+It's already usable but can be improved in several ways
+(for example, missing types include lists, durations).
 Feel free to play, fork, enter issues, submit PRs, etc.
 
 Of course, avoiding boiler-plate is in general much easier in Scala 
@@ -29,6 +29,7 @@ With this input the tool generates corresponding POJO classes.
 
 Why the trouble if you can simply access the properties with Typesafe Config directly? -- see FAQ below.
 
+> As of v0.1.5, Scala output can also be generated.
 
 ## configuration spec
 
@@ -154,9 +155,9 @@ the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification,
 may become more apparent.
 
-**Can tscfg generate `Optional<T>` by default for optional fields?**
+**Could tscfg generate `Optional<T>` by default for optional fields?**
 
-Straightforward to add. Feel free to contribute if you are so inclined.
+Yes, and it would be rather straightforward to add. Feel free to contribute!
  
 **What about generating for Scala?**
 
