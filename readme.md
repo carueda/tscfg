@@ -19,42 +19,75 @@ It's already usable but can be improved in several ways
 (for example, missing types include lists, durations).
 Feel free to play, fork, enter issues, submit PRs, etc.
 
-Of course, avoiding boiler-plate is in general much easier in Scala 
-than in Java!
+Avoiding boiler-plate is in general much easier in Scala than in Java!
 (PureConfig, for example, uses case classes for the configuration spec).
 
 In tscfg's approach, the configuration spec is itself also captured in a configuration file
 so the familiar syntax/format (as supported by Typesafe Config) is still used.
 With this input the tool generates corresponding POJO classes. 
 
-Why the trouble if you can simply access the properties with Typesafe Config directly? -- see FAQ below.
+But, you may wonder, why the trouble if the properties can simply be accessed with Typesafe Config directly? -- see FAQ below.
 
 > As of v0.1.5, Scala output can also be generated.
 
 ## configuration spec
 
-It's a regular configuration file where each field value indicates the
-corresponding type and, optionally, a default value, for example:
+Any source parseable by Typesafe Config can be used as input to the tscfg generator.
+For example, from this configuration:
+
+```properties
+service {
+  url = "http://example.net/rest"
+  poolSize = 32
+  debug = true
+  factor = 0.75
+}
+```
+
+tscfg will generate the following immutable class
+(excluding constructors and other methods):
+
+```java
+public class Cfg {
+  public final Service service;
+  public static class Service {
+    public final String url;
+    public final int poolSize;
+    public final boolean debug;
+    public final double factor;
+  }
+}
+```
+
+The tool determines the type of each field according to the given value
+in the input configuration.
+Used in this way, however, all fields are required. 
+
+To allow the specification of optional fields and default values, 
+while also indicating the type,
+a string with a simple syntax as follows can be used
+(illustrated below with the integer type):
+
+| field spec | meaning | java type/default | scala type/default
+|---|---|---|---|
+| `name = "int"`  | required integer | `int` | `Int`
+| `name = "int|3"`  | optional integer with default value `3` | `int` | `Int`
+| `name = "int?"` | optional integer | `Integer/null` | `Option[Int]/None`
+
+The following is a complete example exercising this mechanism.
 
 ```properties
 endpoint {
-  # a required String
   path = "string"
-
-  # a String with default value "http://example.net"
   url = "String | http://example.net"
-
-  # an optional Integer with default value null
   serial = "int?"
-
   interface {
-    # an int with default value 8080
     port = "int | 8080"
   }
 }
 ```
 
-Excluding constructors and other methods, this basically becomes 
+Again, excluding constructors and other methods, this basically becomes 
 the immutable class:
 
 ```java
@@ -73,13 +106,9 @@ public class ExampleCfg {
 }
 ```
 
-Any value not recognized as an explicit type is still processed by inferring the type according to that value.
-So, any existing regular configuration file can still be input to tscfg.
-
-> note: not implemented yet; any unrecognized type is handled as a required string (ie.,
-as if "string" was given)
-
 ## generation
+
+You will need a JRE 8 and the latest "fat" tscfg-x.y.z.jar from the [releases](https://github.com/carueda/tscfg/releases).
 
 ```shell
 $ java -jar tscfg-x.y.z.jar
