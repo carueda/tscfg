@@ -70,8 +70,8 @@ a string with a simple syntax as follows can be used
 
 | field spec | meaning | java type/default | scala type/default
 |---|---|---|---|
-| `name = "int"`  | required integer | `int` | `Int`
-| `name = "int|3"`  | optional integer with default value `3` | `int` | `Int`
+| `name = "int"`  | required integer | `int`/no default | `Int`
+| `name = "int|3"`  | optional integer with default value `3` | `int/3` | `Int/3`
 | `name = "int?"` | optional integer | `Integer/null` | `Option[Int]/None`
 
 The following is a complete example exercising this mechanism.
