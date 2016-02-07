@@ -17,7 +17,6 @@ object javaGenerator {
       out.println(s"// ${p.replace("\n", "\n// ")}\n")
     }
     out.println(s"package ${genOpts.packageName};\n")
-    out.println(s"import com.typesafe.config.Config;\n")
 
     gen(node)
 
@@ -56,7 +55,7 @@ object javaGenerator {
         orderedNames foreach { name => gen(bn.map(name), indent + "  ") }
 
         // <constructor>
-        out.println(s"$indent  public $className(Config c) {")
+        out.println(s"$indent  public $className($TypesafeConfigClassName c) {")
         orderedNames foreach { name =>
           out.print(s"$indent    this.${javaIdentifier(name)} = ")
           bn.map(name) match {
@@ -151,4 +150,6 @@ object javaGenerator {
 
     "null",     "true",     "false"
   )
+
+  val TypesafeConfigClassName = classOf[com.typesafe.config.Config].getName
 }

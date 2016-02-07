@@ -1,3 +1,6 @@
+2016-02-07 - 0.2.1
+- fix #5: incorrect reference with "config" fragment in path
+
 2016-02-07 - 0.2.0
 - fix #2: implement type inference
 

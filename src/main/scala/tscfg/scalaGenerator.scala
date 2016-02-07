@@ -15,7 +15,6 @@ object scalaGenerator {
       out.println(s"// ${p.replace("\n", "\n// ")}\n")
     }
     out.println(s"package ${genOpts.packageName}\n")
-    out.println(s"import com.typesafe.config.Config\n")
 
     gen(node)
 
@@ -56,7 +55,7 @@ object scalaGenerator {
         // </recurse>
 
         // <apply>
-        out.println(s"${indent}  def apply(c: Config): $className = {")
+        out.println(s"${indent}  def apply(c: $TypesafeConfigClassName): $className = {")
         out.println(s"${indent}    $className(")
 
         comma = indent
@@ -169,4 +168,6 @@ object scalaGenerator {
     "trait",    "try",      "true",    "type",    "val",
     "var",      "while",    "with",    "yield"
   )
+
+  val TypesafeConfigClassName = classOf[com.typesafe.config.Config].getName
 }
