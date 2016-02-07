@@ -1,5 +1,7 @@
-2016-01-24 - 0.1.5
+2016-02-07 - 0.2.0
+- fix #2: implement type inference
 
+2016-01-24 - 0.1.5
 - scala generation
 
 2016-01-24 - 0.1.4
@@ -7,7 +9,6 @@
 - consider all java keywords and special literals to generate valid identifier
 
 2016-01-11 - 0.1.3
- 
 - generate code for java 8 by default.
   Found out that Typesafe Config's `hasPath` method returns `false` for actually existing paths that just
   happen to be defined with `null`!  So, `hasPathOrNull` is now used in the generated code, and this method 

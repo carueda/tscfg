@@ -1,9 +1,8 @@
 package tscfg
 
-import org.specs2.mutable.Specification
 import tscfg.generator.GenOpts
 
-class ScalaAccessorSpec extends Specification {
+class ScalaAccessorSpec extends BaseAccessorSpec {
 
   implicit val genOpts = GenOpts(language = "scala")
 
@@ -62,5 +61,39 @@ class ScalaAccessorSpec extends Specification {
       ScalaAccessor("boolean?")
         .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getBoolean("path")) else None"""
     }
+
+    """type inference""" should {
+      """map "some string" to String""" in {
+        ScalaAccessor("some string").`type` must_== "String"
+      }
+      """map true to Boolean""" in {
+        ScalaAccessor(true).`type` must_== "Boolean"
+      }
+      """map false to Boolean""" in {
+        ScalaAccessor(false).`type` must_== "Boolean"
+      }
+      """map 123 to Int""" in {
+        ScalaAccessor(123).`type` must_== "Int"
+      }
+      s"""map Integer.MAX_VALUE=${Integer.MAX_VALUE} to Int""" in {
+        ScalaAccessor(Integer.MAX_VALUE).`type` must_== "Int"
+      }
+      s"""map Integer.MIN_VALUE=${Integer.MIN_VALUE} to Int""" in {
+        ScalaAccessor(Integer.MIN_VALUE).`type` must_== "Int"
+      }
+      """map 2147483648 to Long""" in {
+        ScalaAccessor(2147483648L).`type` must_== "Long"
+      }
+      s"""map Long.MaxValue=${Long.MaxValue} to Long""" in {
+        ScalaAccessor(Long.MaxValue).`type` must_== "Long"
+      }
+      s"""map Long.MinValue=${Long.MinValue} to Long""" in {
+        ScalaAccessor(Long.MinValue).`type` must_== "Long"
+      }
+      """map 3.14 to Double""" in {
+        ScalaAccessor(3.14).`type` must_== "Double"
+      }
+    }
+
   }
 }

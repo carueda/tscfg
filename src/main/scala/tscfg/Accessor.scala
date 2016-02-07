@@ -1,5 +1,6 @@
 package tscfg
 
+import com.typesafe.config.ConfigValue
 import tscfg.generator.GenOpts
 
 
@@ -17,10 +18,11 @@ object Accessor {
   /**
     * Returns accessor for the spec and target language.
     */
-  def apply(spec: String)(implicit genOpts: GenOpts): Accessor = {
+  def apply(value: ConfigValue)(implicit genOpts: GenOpts): Accessor = {
     genOpts.language match {
-      case "java" => JavaAccessor(spec)
-      case "scala" => ScalaAccessor(spec)
+      case "java" => JavaAccessor(value)
+      case "scala" => ScalaAccessor(value)
+      case lang => throw new IllegalArgumentException(s"unrecognized language: '$lang'")
     }
   }
 }

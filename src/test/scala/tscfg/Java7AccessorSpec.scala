@@ -1,9 +1,8 @@
 package tscfg
 
-import org.specs2.mutable.Specification
 import tscfg.generator.GenOpts
 
-class Java7AccessorSpec extends Specification {
+class Java7AccessorSpec extends BaseAccessorSpec {
 
   implicit val genOpts = GenOpts(language = "java", j7 = true)
 

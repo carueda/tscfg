@@ -1,20 +1,24 @@
 package tscfg
 
+import com.typesafe.config.{ConfigValueType, ConfigValue}
 import tscfg.generator.GenOpts
 
 object JavaAccessor {
 
-  def apply(spec: String)(implicit genOpts: GenOpts): Accessor = {
-    val tokens = spec.split("""\s*\|\s*""")
-    val type_ = tokens(0).toLowerCase
+  def apply(value: ConfigValue)(implicit genOpts: GenOpts): Accessor = {
+    val valueString = value.unwrapped().toString
+    val tokens = valueString.split("""\s*\|\s*""")
     val isOr = tokens.size == 2
 
-    type_ match {
+    tokens(0).toLowerCase match {
       case "string"    => if (isOr) GetStringOr(tokens(1)) else GetString()
       case "string?"   => if (isOr) GetStringOr(tokens(1)) else GetStringOrNull()
 
       case "int"       => if (isOr) GetIntOr(tokens(1))    else GetInt()
       case "int?"      => if (isOr) GetIntOr(tokens(1))    else GetIntOrNull()
+
+      case "long"      => if (isOr) GetLongOr(tokens(1))    else GetLong()
+      case "long?"     => if (isOr) GetLongOr(tokens(1))    else GetLongOrNull()
 
       case "double"    => if (isOr) GetDoubleOr(tokens(1)) else GetDouble()
       case "double?"   => if (isOr) GetDoubleOr(tokens(1)) else GetDoubleOrNull()
@@ -22,7 +26,44 @@ object JavaAccessor {
       case "boolean"   => if (isOr) GetBooleanOr(tokens(1)) else GetBoolean()
       case "boolean?"  => if (isOr) GetBooleanOr(tokens(1)) else GetBooleanOrNull()
 
-      case _           => GetString()  // TODO: examine the given value to determine more concrete accessor
+      case _           => inferType(value, valueString)
+    }
+  }
+
+  private def inferType(value: ConfigValue, valueString : String)
+                       (implicit genOpts: GenOpts): Accessor = {
+
+    def numberAccessor: Accessor = {
+      try {
+        valueString.toInt
+        GetInt()
+      }
+      catch {
+        case e:NumberFormatException =>
+          try {
+            valueString.toLong
+            GetLong()
+          }
+          catch {
+            case e:NumberFormatException =>
+              try {
+                valueString.toDouble
+                GetDouble()
+              }
+              catch {
+                case e:NumberFormatException => throw new AssertionError()
+              }
+          }
+      }
+    }
+
+    value.valueType() match {
+      case ConfigValueType.STRING  => GetString()
+      case ConfigValueType.BOOLEAN => GetBoolean()
+      case ConfigValueType.NUMBER  => numberAccessor
+      case ConfigValueType.LIST    => throw new IllegalArgumentException("list not implemented yet")
+      case ConfigValueType.OBJECT  => throw new AssertionError("object unexpected")
+      case ConfigValueType.NULL    => throw new AssertionError("null unexpected")
     }
   }
 
@@ -51,6 +92,19 @@ object JavaAccessor {
   case class GetIntOr(value: String)(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "int"
     def instance(path: String) = s"""c.$hasPath("$path") ? c.getInt("$path") : $value"""
+  }
+
+  case class GetLong()(implicit genOpts: GenOpts) extends Accessor {
+    def `type` = "long"
+    def instance(path: String) = s"""c.getLong("$path")"""
+  }
+  case class GetLongOrNull()(implicit genOpts: GenOpts) extends Accessor with HasPath {
+    def `type` = "Long"
+    def instance(path: String) = s"""c.$hasPath("$path") ? Long.valueOf(c.getLong("$path")) : null"""
+  }
+  case class GetLongOr(value: String)(implicit genOpts: GenOpts) extends Accessor with HasPath {
+    def `type` = "long"
+    def instance(path: String) = s"""c.$hasPath("$path") ? c.getLong("$path") : $value"""
   }
 
   case class GetDouble()(implicit genOpts: GenOpts) extends Accessor {

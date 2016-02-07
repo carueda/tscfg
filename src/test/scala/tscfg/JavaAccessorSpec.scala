@@ -1,8 +1,8 @@
 package tscfg
-import org.specs2.mutable.Specification
+
 import tscfg.generator.GenOpts
 
-class JavaAccessorSpec extends Specification {
+class JavaAccessorSpec extends BaseAccessorSpec {
 
   implicit val genOpts = GenOpts(language = "java")
 
@@ -75,4 +75,38 @@ class JavaAccessorSpec extends Specification {
         .instance("path") must_== """c.hasPathOrNull("path") ? Boolean.valueOf(c.getBoolean("path")) : null"""
     }
   }
+
+  """type inference""" should {
+    """map "some string" to String""" in {
+      JavaAccessor("some string").`type` must_== "String"
+    }
+    """map true to boolean""" in {
+      JavaAccessor(true).`type` must_== "boolean"
+    }
+    """map false to boolean""" in {
+      JavaAccessor(false).`type` must_== "boolean"
+    }
+    """map 123 to int""" in {
+      JavaAccessor(123).`type` must_== "int"
+    }
+    s"""map Integer.MAX_VALUE=${Integer.MAX_VALUE} to int""" in {
+      JavaAccessor(Integer.MAX_VALUE).`type` must_== "int"
+    }
+    s"""map Integer.MIN_VALUE=${Integer.MIN_VALUE} to int""" in {
+      JavaAccessor(Integer.MIN_VALUE).`type` must_== "int"
+    }
+    """map 2147483648 to long""" in {
+      JavaAccessor(2147483648L).`type` must_== "long"
+    }
+    s"""map Long.MaxValue=${Long.MaxValue} to long""" in {
+      JavaAccessor(Long.MaxValue).`type` must_== "long"
+    }
+    s"""map Long.MinValue=${Long.MinValue} to long""" in {
+      JavaAccessor(Long.MinValue).`type` must_== "long"
+    }
+    """map 3.14 to double""" in {
+      JavaAccessor(3.14).`type` must_== "double"
+    }
+  }
+
 }
