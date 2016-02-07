@@ -110,6 +110,8 @@ public class ExampleCfg {
 
 You will need a JRE 8 and the latest "fat" tscfg-x.y.z.jar from the [releases](https://github.com/carueda/tscfg/releases).
 
+> Or run `sbt assembly` under a clone of this repo. 
+
 ```shell
 $ java -jar tscfg-x.y.z.jar
 
