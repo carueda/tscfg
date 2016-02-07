@@ -68,11 +68,11 @@ while also indicating the type,
 a string with a simple syntax as follows can be used
 (illustrated below with the integer type):
 
-| field spec | meaning | java type/default | scala type/default
+| field spec | meaning | java type / default | scala type / default
 |---|---|---|---|
-| `name = "int"`  | required integer | `int`/no default | `Int`
-| `name = "int|3"`  | optional integer with default value `3` | `int/3` | `Int/3`
-| `name = "int?"` | optional integer | `Integer/null` | `Option[Int]/None`
+| `name = "int"`  | required integer | `int` / no default | `Int` / no default
+| `name = "int|3"`  | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
+| `name = "int?"` | optional integer | `Integer` / `null` | `Option[Int]` / `None`
 
 The following is a complete example exercising this mechanism.
 
