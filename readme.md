@@ -215,4 +215,4 @@ Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/scal
 
 ### Type
 
-- [TypeSpec](/carueda/tscfg/blob/master/src/test/scala/tscfg/TypeSpec.scala) 
+- [TypeSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/TypeSpec.scala) 
