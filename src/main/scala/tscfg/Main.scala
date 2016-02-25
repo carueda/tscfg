@@ -20,10 +20,11 @@ object Main {
              |  --dd destDir      ($defaultDestDir)
              |  --j7 generate code for java <= 7  (8)
              |  --scala generate scala code  (java)
-             |  --tbase filename  generate template with base configuration values
-             |  --tlocal filename  generate template for "local" configuration
+             |  --tpl type filename  generate configuration template (type: base, local, all)
              |Output is written to $$destDir/$$className.ext
     """.stripMargin
+
+  case class GenTemplate(what: templateGenerator.What, filename: String)
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
                          packageName: String = generator.defaultPackageName,
@@ -31,8 +32,7 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java",
-                         templateBaseFilename: Option[String] = None,
-                         templateReqFilename:  Option[String] = None
+                         genTemplate: Option[GenTemplate] = None
                  )
 
   def main(args: Array[String]): Unit = {
@@ -65,10 +65,15 @@ object Main {
           traverseList(rest, opts.copy(j7 = true))
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
-        case "--tbase" :: filename :: rest =>
-          traverseList(rest, opts.copy(templateBaseFilename = Some(filename)))
-        case "--tlocal" :: filename :: rest =>
-          traverseList(rest, opts.copy(templateReqFilename = Some(filename)))
+        case "--tpl" :: "base" :: filename :: rest =>
+          traverseList(rest, opts.copy(genTemplate = Some(GenTemplate(templateGenerator.genBase, filename))))
+        case "--tpl" :: "local" :: filename :: rest =>
+          traverseList(rest, opts.copy(genTemplate = Some(GenTemplate(templateGenerator.genLocal, filename))))
+        case "--tpl" :: "all" :: filename :: rest =>
+          traverseList(rest, opts.copy(genTemplate = Some(GenTemplate(templateGenerator.genAll, filename))))
+        case "--tpl" :: rest =>
+          println( s"""invalid or missing --tpl arguments""")
+          sys.exit(0)
         case opt :: nil =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
@@ -105,23 +110,14 @@ object Main {
 
     println(s"generating: ${destFile.getAbsolutePath}")
     generator.generate(root, out)
-
-    opts.templateBaseFilename foreach { filename =>
-      val destFile = new File(filename)
-      println(s"generating: ${destFile.getAbsolutePath}")
-      val out = new PrintWriter(destFile)
-      templateBaseGenerator.generate(root, out)
-      out.close()
-    }
-
-    opts.templateReqFilename foreach { filename =>
-      val destFile = new File(filename)
-      println(s"generating: ${destFile.getAbsolutePath}")
-      val out = new PrintWriter(destFile)
-      templateReqGenerator.generate(root, out)
-      out.close()
-    }
-
     out.close()
+
+    opts.genTemplate foreach { genTemplate =>
+      val destFile = new File(genTemplate.filename)
+      printf("%10s: %s\n", genTemplate.what, destFile.getAbsolutePath)
+      val out = new PrintWriter(destFile)
+      templateGenerator.generate(genTemplate.what, root, out)
+      out.close()
+    }
   }
 }

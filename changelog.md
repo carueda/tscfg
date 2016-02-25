@@ -3,14 +3,17 @@
   As part of this, some refactoring, mainly around a new Type class that the various accessors now use.
 - more complete TypeSpec (TODO simplify \*Accesor/Spec classes wrt types)
 - entry with no explicit type is now considered optional (with given value as default)
-- some preliminary annotation processing
-  - @optional for sections
-  - @local to include field in --tlocal output  (not sure yet about the "local" name)
-- running the example/def.example2.conf example: 
+- `--tpl` option with 3 possible types: base, local, all.
+  Running the example-4tpl.spec.conf: 
 
     ```
-    > runMain tscfg.Main --spec example/def.example2.conf --tbase src/main/java/tscfg/example/example2.base.conf --tlocal src/main/java/tscfg/example/example2.local.conf
+    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl base  src/main/java/tscfg/example/example-4tpl.base.conf
+    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl local src/main/java/tscfg/example/example-4tpl.local.conf
+    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl all   src/main/java/tscfg/example/example-4tpl.all.conf
     ```
+- some preliminary annotation processing
+  - @optional for sections - only generates comment in templates; no verification logic at all yet 
+  - @local to force inclusion of field in "local" template output
 
 2016-02-07 - 0.2.1
 - fix #5: incorrect reference with "config" fragment in path
