@@ -4,12 +4,11 @@
 - more complete TypeSpec (TODO simplify \*Accesor/Spec classes wrt types)
 - entry with no explicit type is now considered optional (with given value as default)
 - `--tpl` option with 3 possible types: base, local, all.
+  Can be given multiple times.
   Running the example-4tpl.spec.conf: 
 
     ```
-    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl base  src/main/java/tscfg/example/example-4tpl.base.conf
-    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl local src/main/java/tscfg/example/example-4tpl.local.conf
-    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl all   src/main/java/tscfg/example/example-4tpl.all.conf
+    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl base  src/main/java/tscfg/example/example-4tpl.base.conf --tpl local src/main/java/tscfg/example/example-4tpl.local.conf --tpl all   src/main/java/tscfg/example/example-4tpl.all.conf
     ```
 - some preliminary annotation processing
   - @optional for sections - only generates comment in templates; no verification logic at all yet 

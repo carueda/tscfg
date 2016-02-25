@@ -39,7 +39,7 @@ object templateGenerator {
           case templateGenerator.genBase =>
             if (ln.type_.value.isDefined) {
               out.println()
-              out.println(s"$indent# '$symbol': ${ln.type_.description}")
+              out.println(s"$indent# $symbol: ${ln.type_.description}")
               CommentInfo.outComments(indent, realComments, out)
               out.println(s"$indent$symbol = ${ln.type_.value.get}")
             }
@@ -47,7 +47,7 @@ object templateGenerator {
           case templateGenerator.genLocal =>
             if (ln.type_.required || ln.type_.value.isEmpty || CommentInfo.includeInLocal(annotations)) {
               out.println()
-              out.println(s"$indent# '$symbol': ${ln.type_.description}")
+              out.println(s"$indent# $symbol: ${ln.type_.description}")
               CommentInfo.outComments(indent, realComments, out)
               if (ln.type_.required)
                 out.println(s"$indent$symbol =")
@@ -57,7 +57,7 @@ object templateGenerator {
 
           case templateGenerator.genAll =>
             out.println()
-            out.println(s"$indent# '$symbol': ${ln.type_.description}")
+            out.println(s"$indent# $symbol: ${ln.type_.description}")
             CommentInfo.outComments(indent, realComments, out)
             if (ln.type_.required)
               out.println(s"$indent$symbol =")
@@ -72,7 +72,7 @@ object templateGenerator {
         val (realComments, annotations) = CommentInfo.processComments(bn.conf.origin())
         out.println()
         if (CommentInfo.optionalSection(annotations)) {
-          out.println(s"$indent# '$symbol': Optional section.")
+          out.println(s"$indent# $symbol: Optional section.")
         }
         CommentInfo.outComments(indent, realComments, out)
         out.println(s"$indent$symbol {")

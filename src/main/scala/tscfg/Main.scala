@@ -20,7 +20,7 @@ object Main {
              |  --dd destDir      ($defaultDestDir)
              |  --j7 generate code for java <= 7  (8)
              |  --scala generate scala code  (java)
-             |  --tpl type filename  generate configuration template (type: base, local, all)
+             |  --tpl type filename   generate configuration template (type: base, local, all)
              |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
@@ -32,7 +32,7 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java",
-                         genTemplate: Option[GenTemplate] = None
+                         templates: List[GenTemplate] = List()
                  )
 
   def main(args: Array[String]): Unit = {
@@ -66,11 +66,11 @@ object Main {
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
         case "--tpl" :: "base" :: filename :: rest =>
-          traverseList(rest, opts.copy(genTemplate = Some(GenTemplate(templateGenerator.genBase, filename))))
+          traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genBase, filename) :: opts.templates))
         case "--tpl" :: "local" :: filename :: rest =>
-          traverseList(rest, opts.copy(genTemplate = Some(GenTemplate(templateGenerator.genLocal, filename))))
+          traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genLocal, filename) :: opts.templates))
         case "--tpl" :: "all" :: filename :: rest =>
-          traverseList(rest, opts.copy(genTemplate = Some(GenTemplate(templateGenerator.genAll, filename))))
+          traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genAll, filename) :: opts.templates))
         case "--tpl" :: rest =>
           println( s"""invalid or missing --tpl arguments""")
           sys.exit(0)
@@ -112,7 +112,7 @@ object Main {
     generator.generate(root, out)
     out.close()
 
-    opts.genTemplate foreach { genTemplate =>
+    opts.templates foreach { genTemplate =>
       val destFile = new File(genTemplate.filename)
       printf("%10s: %s\n", genTemplate.what, destFile.getAbsolutePath)
       val out = new PrintWriter(destFile)
