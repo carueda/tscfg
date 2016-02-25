@@ -1,4 +1,5 @@
 2016-02-24 - 0.2.2
+- more complete TypeSpec (TODO simplify \*Accesor/Spec classes wrt types)
 - initial work on #6: "generate conf templates."
   As part of this, some refactoring, mainly around a new Type class that the various accessors now use.
 - entry with no explicit type is now considered optional (with given value as default)
