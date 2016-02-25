@@ -1,8 +1,7 @@
 package tscfg
 
-import com.typesafe.config.{ConfigFactory, ConfigValue}
+import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
-import tscfg.generator.GenOpts
 
 
 abstract class BaseAccessorSpec extends Specification {

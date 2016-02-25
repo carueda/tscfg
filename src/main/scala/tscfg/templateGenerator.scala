@@ -28,10 +28,11 @@ object templateBaseGenerator {
       }
 
       def genForLeaf(ln: LeafNode): Unit = {
+        val (realComments, annotations) = CommentInfo.processComments(ln.value.origin())
         if (ln.type_.value.isDefined) {
           out.println()
           out.println(s"$indent# '$symbol': ${ln.type_.description}")
-          outComments(ln.value.origin())
+          CommentInfo.outComments(indent, realComments, out)
           out.println(s"$indent$symbol = ${ln.type_.value.get}")
         }
       }
@@ -51,13 +52,6 @@ object templateBaseGenerator {
         orderedNames foreach { name => gen(bn.map(name), indent + "  ") }
 
         out.println(s"$indent}")
-      }
-
-      def outComments(bn: ConfigOrigin): Unit = {
-        val comments = bn.comments().toArray
-        if (comments.nonEmpty) {
-          out.println(s"$indent#" + comments.mkString(s"\n$indent#"))
-        }
       }
     }
   }
