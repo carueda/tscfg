@@ -62,8 +62,7 @@ object javaGenerator {
             case ln@LeafNode(k, v) =>
               val path = k.simple
               val instance = ln.accessor.instance(path)
-              val comment = v.render(ConfigRenderOptions.concise())
-              out.println(s"""$instance; // $comment""")
+              out.println(s"""$instance;""")
 
             case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
@@ -94,7 +93,7 @@ object javaGenerator {
               s"""i+ "$id {\\n" + this.$id.toString(i+"    ") +i+ "}\\n""""
           }
         }
-        out.println(s"$indent  return ${ids.mkString("\n" +indent + "        +")};")
+        out.println(s"$indent    return ${ids.mkString("\n" +indent + "        +")};")
         out.println(s"$indent  }")
         // </toString(String i)>
 
