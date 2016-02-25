@@ -1,8 +1,16 @@
-2016-02-24 - 0.2.2
-- more complete TypeSpec (TODO simplify \*Accesor/Spec classes wrt types)
+2016-02-25 - 0.3.0
 - initial work on #6: "generate conf templates."
   As part of this, some refactoring, mainly around a new Type class that the various accessors now use.
+- more complete TypeSpec (TODO simplify \*Accesor/Spec classes wrt types)
 - entry with no explicit type is now considered optional (with given value as default)
+- some preliminary annotation processing
+  - @optional for sections
+  - @local to include field in --tlocal output  (not sure yet about the "local" name)
+- running the example/def.example2.conf example: 
+
+    ```
+    > runMain tscfg.Main --spec example/def.example2.conf --tbase src/main/java/tscfg/example/example2.base.conf --tlocal src/main/java/tscfg/example/example2.local.conf
+    ```
 
 2016-02-07 - 0.2.1
 - fix #5: incorrect reference with "config" fragment in path
