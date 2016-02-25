@@ -20,6 +20,8 @@ object Main {
              |  --dd destDir      ($defaultDestDir)
              |  --j7 generate code for java <= 7  (8)
              |  --scala generate scala code  (java)
+             |  --tbase filename  generate template with base configuration values
+             |  --tlocal filename  generate template for "local" configuration
              |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
@@ -28,7 +30,9 @@ object Main {
                          className: String =   generator.defaultClassName,
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
-                         language: String = "java"
+                         language: String = "java",
+                         templateBaseFilename: Option[String] = None,
+                         templateReqFilename:  Option[String] = None
                  )
 
   def main(args: Array[String]): Unit = {
@@ -61,6 +65,10 @@ object Main {
           traverseList(rest, opts.copy(j7 = true))
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
+        case "--tbase" :: filename :: rest =>
+          traverseList(rest, opts.copy(templateBaseFilename = Some(filename)))
+        case "--tlocal" :: filename :: rest =>
+          traverseList(rest, opts.copy(templateReqFilename = Some(filename)))
         case opt :: nil =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
@@ -93,9 +101,26 @@ object Main {
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
+    val root = generator.createAllNodes(config)
 
     println(s"generating: ${destFile.getAbsolutePath}")
-    generator.generate(config, out)
+    generator.generate(root, out)
+
+    opts.templateBaseFilename foreach { filename =>
+      val destFile = new File(filename)
+      println(s"generating: ${destFile.getAbsolutePath}")
+      val out = new PrintWriter(destFile)
+      templateBaseGenerator.generate(root, out)
+      out.close()
+    }
+
+    opts.templateReqFilename foreach { filename =>
+      val destFile = new File(filename)
+      println(s"generating: ${destFile.getAbsolutePath}")
+      val out = new PrintWriter(destFile)
+      templateReqGenerator.generate(root, out)
+      out.close()
+    }
 
     out.close()
   }

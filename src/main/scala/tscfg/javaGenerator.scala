@@ -65,7 +65,7 @@ object javaGenerator {
               val comment = v.render(ConfigRenderOptions.concise())
               out.println(s"""$instance; // $comment""")
 
-            case BranchNode(k)  =>
+            case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
               out.println(s"""new $className(c.getConfig("${k.simple}"));""")
           }
@@ -90,7 +90,7 @@ object javaGenerator {
                 s"""i+ "$id = " + this.$id"""
               }) + s""" + "\\n""""
 
-            case BranchNode(k) =>
+            case BranchNode(k, _) =>
               s"""i+ "$id {\\n" + this.$id.toString(i+"    ") +i+ "}\\n""""
           }
         }

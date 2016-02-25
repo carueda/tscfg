@@ -13,15 +13,14 @@ abstract class Accessor {
   def instance(path: String): String
 }
 
-
 object Accessor {
   /**
     * Returns accessor for the spec and target language.
     */
-  def apply(value: ConfigValue)(implicit genOpts: GenOpts): Accessor = {
+  def apply(type_ : Type)(implicit genOpts: GenOpts): Accessor = {
     genOpts.language match {
-      case "java" => JavaAccessor(value)
-      case "scala" => ScalaAccessor(value)
+      case "java" => JavaAccessor(type_)
+      case "scala" => ScalaAccessor(type_)
       case lang => throw new IllegalArgumentException(s"unrecognized language: '$lang'")
     }
   }

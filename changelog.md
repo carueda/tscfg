@@ -1,3 +1,8 @@
+2016-02-24 - 0.2.2
+- initial work on #6: "generate conf templates."
+  As part of this, some refactoring, mainly around a new Type class
+  that the various accessors now use.
+
 2016-02-07 - 0.2.1
 - fix #5: incorrect reference with "config" fragment in path
 

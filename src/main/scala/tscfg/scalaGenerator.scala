@@ -48,7 +48,7 @@ object scalaGenerator {
         // <recurse>
         orderedNames foreach { name =>
           bn.map(name) match {
-            case sbn@BranchNode(k) => gen(sbn, indent + "  ")
+            case sbn@BranchNode(k, _) => gen(sbn, indent + "  ")
             case _ =>
           }
         }
@@ -65,7 +65,7 @@ object scalaGenerator {
             case ln@LeafNode(k, v) =>
               out.print(s"""      ${ln.accessor.instance(k.simple)}""")
 
-            case BranchNode(k)  =>
+            case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
               out.print(s"""      $className(c.getConfig("${k.simple}"))""")
           }
@@ -89,7 +89,7 @@ object scalaGenerator {
             case ln@LeafNode(k, v) =>
               out.print(s"""${ln.accessor.`type`}""")
 
-            case BranchNode(k)  =>
+            case BranchNode(k, _)  =>
               // use full qualified class name
               val className = genOpts.className + "." + k.parts.map(upperFirst).mkString(".")
               out.print(s"""$className""")
@@ -123,7 +123,7 @@ object scalaGenerator {
               }) +
               s""" + "\\n""""
 
-            case BranchNode(k) =>
+            case BranchNode(k, _) =>
               val className = upperFirst(k.simple)
               s"""  i+ "$className(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
           }
