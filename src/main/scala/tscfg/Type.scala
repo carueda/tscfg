@@ -31,6 +31,8 @@ object Type {
     val isOr = tokens.size == 2
     val defaultValue = if (isOr) Some(tokens(1)) else None
 
+    // TODO simplify this!
+
     tokens(0).toLowerCase match {
       case "string"    => if (isOr) OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"')) else RequiredType(cv, "string")
       case "string?"   => if (isOr) OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"')) else OptionalType(cv, "string")
@@ -54,22 +56,32 @@ object Type {
   private def inferType(cv: ConfigValue, valueString : String): Type = {
     val defaultValue = Some(valueString)
 
+    // convenience in case later on we want to allow to indicate whether to make it required or optional via some parameter
+    val required = false  // optional is what makes more sense though
+
+    def createType(base: String): Type = {
+      if (required)
+        RequiredType(cv, base)
+      else
+        OptionalType(cv, base, if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+    }
+
     def numberType: Type = {
       try {
         valueString.toInt
-        OptionalType(cv, "int", defaultValue)
+        createType("int")
       }
       catch {
         case e:NumberFormatException =>
           try {
             valueString.toLong
-            OptionalType(cv, "long", defaultValue)
+            createType("long")
           }
           catch {
             case e:NumberFormatException =>
               try {
                 valueString.toDouble
-                OptionalType(cv, "double", defaultValue)
+                createType("double")
               }
               catch {
                 case e:NumberFormatException => throw new AssertionError()
@@ -79,8 +91,8 @@ object Type {
     }
 
     cv.valueType() match {
-      case ConfigValueType.STRING  => OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"'))
-      case ConfigValueType.BOOLEAN => OptionalType(cv, "boolean", defaultValue)
+      case ConfigValueType.STRING  => createType("string")
+      case ConfigValueType.BOOLEAN => createType("boolean")
       case ConfigValueType.NUMBER  => numberType
       case ConfigValueType.LIST    => throw new IllegalArgumentException("list not implemented yet")
       case ConfigValueType.OBJECT  => throw new AssertionError("object unexpected")
