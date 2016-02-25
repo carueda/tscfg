@@ -1,8 +1,6 @@
 package tscfg
 
 import com.typesafe.config.{ConfigValueType, ConfigValue}
-import tscfg.generator.GenOpts
-
 
 abstract class Type {
   val base: String
@@ -24,7 +22,7 @@ case class OptionalType(base: String, value: Option[String] = None) extends Type
 }
 
 object Type {
-  def apply(value: ConfigValue)(implicit genOpts: GenOpts): Type = {
+  def apply(value: ConfigValue): Type = {
     val valueString = value.unwrapped().toString
     val tokens = valueString.split("""\s*\|\s*""")
     val isOr = tokens.size == 2
@@ -50,8 +48,7 @@ object Type {
     }
   }
 
-  private def inferType(value: ConfigValue, valueString : String)
-                       (implicit genOpts: GenOpts): Type = {
+  private def inferType(value: ConfigValue, valueString : String): Type = {
 
     def numberType: Type = {
       try {

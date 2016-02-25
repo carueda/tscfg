@@ -7,10 +7,10 @@ import tscfg.generator.GenOpts
 
 abstract class BaseAccessorSpec extends Specification {
 
-  protected implicit def string2configValue(s: String)(implicit genOpts: GenOpts): Type =
+  protected implicit def string2configValue(s: String): Type =
     Type(ConfigFactory.parseString(s"""k = "$s"""").getValue("k"))
 
-  protected implicit def anyVal2configValue(r: AnyVal)(implicit genOpts: GenOpts): Type =
+  protected implicit def anyVal2configValue(r: AnyVal): Type =
     Type(ConfigFactory.parseString(s"""k = $r""").getValue("k"))
 
 }
