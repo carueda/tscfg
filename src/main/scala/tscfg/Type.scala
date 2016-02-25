@@ -49,23 +49,24 @@ object Type {
   }
 
   private def inferType(value: ConfigValue, valueString : String): Type = {
+    val defaultValue = Some(valueString)
 
     def numberType: Type = {
       try {
         valueString.toInt
-        RequiredType("int")
+        OptionalType("int", defaultValue)
       }
       catch {
         case e:NumberFormatException =>
           try {
             valueString.toLong
-            RequiredType("long")
+            OptionalType("long", defaultValue)
           }
           catch {
             case e:NumberFormatException =>
               try {
                 valueString.toDouble
-                RequiredType("double")
+                OptionalType("double", defaultValue)
               }
               catch {
                 case e:NumberFormatException => throw new AssertionError()
@@ -75,8 +76,8 @@ object Type {
     }
 
     value.valueType() match {
-      case ConfigValueType.STRING  => RequiredType("string")
-      case ConfigValueType.BOOLEAN => RequiredType("boolean")
+      case ConfigValueType.STRING  => OptionalType("string", defaultValue)
+      case ConfigValueType.BOOLEAN => OptionalType("boolean", defaultValue)
       case ConfigValueType.NUMBER  => numberType
       case ConfigValueType.LIST    => throw new IllegalArgumentException("list not implemented yet")
       case ConfigValueType.OBJECT  => throw new AssertionError("object unexpected")
