@@ -5,7 +5,6 @@ import tscfg.generator.GenOpts
 object ScalaAccessor {
 
   def apply(type_ : Type)(implicit genOpts: GenOpts): Accessor = {
-
     val baseType = type_.baseType
     val required = type_.required
     val value = type_.value
@@ -16,6 +15,10 @@ object ScalaAccessor {
       case "long"      => if (required) GetLong()   else if (value.isDefined) GetLongOr(value.get) else GetOptLong()
       case "double"    => if (required) GetDouble() else if (value.isDefined) GetDoubleOr(value.get) else GetOptDouble()
       case "boolean"   => if (required) GetBoolean()else if (value.isDefined) GetBooleanOr(value.get) else GetOptBoolean()
+      case "duration"  =>
+        if (required) GetDuration(baseType)
+        else if (value.isDefined) GetDurationOr(baseType, value.get)
+        else GetOptDuration(baseType)
 
       case _ => throw new AssertionError()
     }
@@ -87,4 +90,18 @@ object ScalaAccessor {
     def `type` = "Boolean"
     def instance(path: String) = s"""if(c.$hasPath("$path")) c.getBoolean("$path") else $value"""
   }
+
+  case class GetDuration(baseType: BaseType)(implicit genOpts: GenOpts) extends DurationAccessor {
+    def `type` = "Long"
+    def instance(path: String) = durationGetter(path, baseType)
+  }
+  case class GetOptDuration(baseType: BaseType)(implicit genOpts: GenOpts) extends DurationAccessor with HasPath {
+    def `type` = "Option[Long]"
+    def instance(path: String) = s"""if(c.$hasPath("$path")) Some(${durationGetter(path, baseType)}) else None"""
+  }
+  case class GetDurationOr(baseType: BaseType, value: String)(implicit genOpts: GenOpts) extends DurationAccessor with HasPath {
+    def `type` = "Long"
+    def instance(path: String) = s"""if(c.$hasPath("$path")) ${durationGetter(path, baseType)} else ${durationValue(value, baseType)}"""
+  }
+
 }

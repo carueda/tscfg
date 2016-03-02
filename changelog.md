@@ -1,6 +1,10 @@
 2016-03-01 - 0.3.0
-- \#8: "support durations"
-  - initial implementation for java
+- implement #8: "support durations" (for both java and scala)
+- example-duration.all.conf generated with:
+
+    ```
+    > runMain tscfg.Main --spec example/example-duration.spec.conf --tpl all src/main/java/tscfg/example/example-duration.all.conf
+    ```
 
 2016-02-25 - 0.3.0
 - initial work on #6: "generate conf templates."

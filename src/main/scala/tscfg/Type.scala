@@ -48,13 +48,13 @@ abstract class Type {
 case class RequiredType(cv: ConfigValue, baseType: BaseType) extends Type {
   val required = true
   val value = None
-  val description = s"Required $baseType."
+  val description = s"Required ${baseType.base}."
 }
 
 case class OptionalType(cv: ConfigValue, baseType: BaseType, value: Option[String] = None) extends Type {
   val required = false
   val description =
-    s"Optional $baseType." + (if (value.isDefined) s" Default value ${value.get}." else "")
+    s"Optional ${baseType.base}." + (if (value.isDefined) s" Default value ${value.get}." else "")
 }
 
 object Type {
