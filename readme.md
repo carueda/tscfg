@@ -17,7 +17,7 @@ The tool is already pretty usable.
 It supports a good part of the common types as supported by Typesafe Config 
 (string, int, long, double, duration),
 can generate configuration templates for documentation purposes,
-and has an acceptable set of tests.
+and has good test coverage.
 However, it's in general still work in progress and as time permits. 
 Missing types include lists and bytes;
 command line interface can be improved;
@@ -199,7 +199,7 @@ With this [example spec](https://github.com/carueda/tscfg/blob/master/example/de
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java) 
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
 
-Using the `--scala` option
+For Scala
 the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
 
@@ -244,6 +244,73 @@ durations {
   millis = "duration:ms | 550s"
 }
 ```
+
+## template generation
+
+Configuration templates are often a means to provide end users with a description of 
+the properties that should be set (or that could be overwritten) 
+for the proper operation of an application or library. 
+Based on the template, end users will then enter the concrete settings that are appropriate.
+
+On the other hand, configuration "specs," as used for tscfg generation, 
+are mainly intended to be used by the developer of such application or library.
+
+tscfg can also generate template configuration files from the given spec so the developer 
+does not have to manually create/edit such templates.
+
+For example, from the configuration spec:
+
+```properties
+# Some description of the endpoint section
+#@optional
+endpoint {
+  # The path associated with the endpoint.
+  # For example, "/home/foo/bar"
+  path = "string"
+
+  # Port where the endpoint service is running
+  port = "int | 8080"
+
+  # Email to send notifications to. If missing, no emails are sent.
+  email = "string?"
+
+  # Link in emails
+  link = "string | http://example.net"
+
+  value = 3.14
+}
+```
+
+the generated template (with the `--tpl all` option) will look like:
+
+```properties
+# endpoint: Optional section.
+# Some description of the endpoint section
+endpoint {
+
+  # email: Optional string.
+  # Email to send notifications to. If missing, no emails are sent.
+  #email =
+
+  # link: Optional string. Default value "http://example.net".
+  # Link in emails
+  link = "http://example.net"
+
+  # path: Required string.
+  # The path associated with the endpoint.
+  # For example, "/home/foo/bar"
+  path =
+
+  # port: Optional int. Default value 8080.
+  # Port where the endpoint service is running
+  port = 8080
+
+  # value: Optional double. Default value 3.14.
+  value = 3.14
+}
+```
+
+> Annotations like `#@optional` are still preliminary.
 
 
 ## FAQ
