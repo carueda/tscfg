@@ -6,11 +6,11 @@ object ScalaAccessor {
 
   def apply(type_ : Type)(implicit genOpts: GenOpts): Accessor = {
 
-    val base = type_.base
+    val baseType = type_.baseType
     val required = type_.required
     val value = type_.value
 
-    base match {
+    baseType.base match {
       case "string"    => if (required) GetString() else if (value.isDefined) GetStringOr(value.get) else GetOptString()
       case "int"       => if (required) GetInt()    else if (value.isDefined) GetIntOr(value.get) else GetOptInt()
       case "long"      => if (required) GetLong()   else if (value.isDefined) GetLongOr(value.get) else GetOptLong()

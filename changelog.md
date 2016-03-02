@@ -1,3 +1,7 @@
+2016-03-01 - 0.3.0
+- \#8: "support durations"
+  - initial implementation for java
+
 2016-02-25 - 0.3.0
 - initial work on #6: "generate conf templates."
 - `--tpl` option with 3 possible types: base, local, all.

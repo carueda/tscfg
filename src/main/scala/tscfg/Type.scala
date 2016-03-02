@@ -2,9 +2,42 @@ package tscfg
 
 import com.typesafe.config.{ConfigValueType, ConfigValue}
 
+abstract sealed class BaseType {
+  val base: String
+  val qualification: Option[String] = None
+}
+case class UnqualifiedBaseType(base: String) extends BaseType
+case class QualifiedBaseType(base: String, q: String) extends BaseType {
+  override val qualification: Option[String] = Some(q)
+}
+
+object BaseType {
+  def apply(base: String, qualification: String) = {
+    QualifiedBaseType(base,
+      if (base == "duration")
+        canonicalDurationUnit(qualification)
+      else qualification
+    )
+  }
+
+  def apply(base: String) = UnqualifiedBaseType(base)
+
+  // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
+  private def canonicalDurationUnit(s: String): String = s match {
+    case "ns" | "nano" | "nanos" | "nanosecond" | "nanoseconds"     => "nanosecond"
+    case "us" | "micro" | "micros" | "microsecond" | "microseconds" => "microsecond"
+    case "ms" | "milli" | "millis" | "millisecond" | "milliseconds" => "millisecond"
+    case "s" | "second" | "seconds" => "second"
+    case "m" | "minute" | "minutes" => "minute"
+    case "h" | "hour" | "hours"     => "hour"
+    case "d" | "day" | "days"       => "day"
+    case _ => throw new AssertionError()
+  }
+}
+
 abstract class Type {
   val cv: ConfigValue
-  val base: String
+  val baseType: BaseType
   val required: Boolean
   val value: Option[String]
   val description: String
@@ -12,16 +45,16 @@ abstract class Type {
   def spec = cv.unwrapped().toString
 }
 
-case class RequiredType(cv: ConfigValue, base: String) extends Type {
+case class RequiredType(cv: ConfigValue, baseType: BaseType) extends Type {
   val required = true
   val value = None
-  val description = s"Required $base."
+  val description = s"Required $baseType."
 }
 
-case class OptionalType(cv: ConfigValue, base: String, value: Option[String] = None) extends Type {
+case class OptionalType(cv: ConfigValue, baseType: BaseType, value: Option[String] = None) extends Type {
   val required = false
   val description =
-    s"Optional $base." + (if (value.isDefined) s" Default value ${value.get}." else "")
+    s"Optional $baseType." + (if (value.isDefined) s" Default value ${value.get}." else "")
 }
 
 object Type {
@@ -33,25 +66,33 @@ object Type {
     val hasDefault = tokens.size == 2
     val defaultValue = if (hasDefault) Some(tokens(1)) else None
 
-    val (base, isOpt) = if (typePart.endsWith("?"))
+    val (baseString, isOpt) = if (typePart.endsWith("?"))
       (typePart.substring(0, typePart.length - 1), true)
     else
       (typePart, false)
 
-    if (recognizedBaseType(base)) {
-      if (hasDefault)
-        OptionalType(cv, base, if (typePart == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+    val baseType: BaseType = {
+      val parts = baseString.split("""\s*\:\s*""", 2)
+      if (parts.size == 1)
+        BaseType(parts(0))
       else
-        if (isOpt) OptionalType(cv, base) else RequiredType(cv, base)
+        BaseType(parts(0), parts(1))
+    }
+
+    if (recognizedBaseType(baseType)) {
+      if (hasDefault)
+        OptionalType(cv, baseType, if (typePart == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+      else
+        if (isOpt) OptionalType(cv, baseType) else RequiredType(cv, baseType)
     }
     else inferType(cv, valueString)
   }
 
   private val recognizedBaseTypes: Set[String] = Set(
-    "string", "int", "long", "double", "boolean"
+    "string", "int", "long", "double", "boolean", "duration"
   )
 
-  private def recognizedBaseType(base: String): Boolean = recognizedBaseTypes contains base
+  private def recognizedBaseType(baseType: BaseType): Boolean = recognizedBaseTypes contains baseType.base
 
   private def inferType(cv: ConfigValue, valueString : String): Type = {
     val defaultValue = Some(valueString)
@@ -61,9 +102,9 @@ object Type {
 
     def createType(base: String): Type = {
       if (required)
-        RequiredType(cv, base)
+        RequiredType(cv, BaseType(base))
       else
-        OptionalType(cv, base, if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+        OptionalType(cv, BaseType(base), if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
     }
 
     def numberType: Type = {
