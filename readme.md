@@ -15,13 +15,13 @@ and execution of the generated classes in your code.
 
 The tool is already pretty usable.
 It supports a good part of the common types as supported by Typesafe Config 
-(string, int, long, double, duration),
-can generate configuration templates for documentation purposes,
+(string, int, long, double, duration);
+can generate configuration templates for documentation purposes;
 and has good test coverage.
 However, it's in general still work in progress and as time permits. 
 Missing types include lists and bytes;
 command line interface can be improved;
-syntax for types is not stable yet).
+syntax for types is not stable yet.
 Feel free fork, enter issues, submit PRs, etc.
 
 Also, see FAQ below.
@@ -86,7 +86,7 @@ Used in this way, all fields are considered optional, with the given value as th
 
 To allow the specification of required fields, explicit types and default values, 
 a string with a simple syntax as follows can be used
-(illustrated below with the integer type):
+(illustrated with the integer type):
 
 | field spec | meaning | java type / default | scala type / default
 |---|---|---|---|
@@ -191,8 +191,8 @@ Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```
 
-An object reference will never be null if the corresponding field is required according to
-the specification. It will only be null if it is marked optional with no default value and
+An object reference will never be null (None in Scala) if the corresponding field is required according to
+the specification. It will only be null (None) if it is marked optional with no default value and
 has been omitted in the input configuration.
  
 With this [example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
@@ -203,7 +203,7 @@ For Scala
 the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
 
-## Supported types
+## supported types
 
 With explicit field typing, the following base types are currently supported:
 
@@ -216,7 +216,7 @@ With explicit field typing, the following base types are currently supported:
 | `boolean`     | boolean / Boolean   | Boolean / Option[Boolean]   
 | `duration`    | long    / Long      | Long    / Option[Long]
       
-#### Durations
+#### durations
 
 A duration type can be further qualified with a suffix consisting of a colon 
 an a desired time unit for the reported value. 
