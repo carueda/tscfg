@@ -16,7 +16,7 @@ and execution of the generated classes in your code.
 The tool is already pretty usable.
 It supports a good part of the common types as supported by Typesafe Config 
 (string, int, long, double, duration);
-can generate configuration templates for documentation purposes;
+can generate configuration templates for end users;
 and has good test coverage.
 However, it's in general still work in progress and as time permits. 
 Missing types include lists and bytes;
