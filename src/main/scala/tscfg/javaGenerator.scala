@@ -3,7 +3,6 @@ package tscfg
 import java.io.PrintWriter
 import java.util.Date
 
-import com.typesafe.config.ConfigRenderOptions
 import tscfg.generator._
 
 
