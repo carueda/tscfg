@@ -25,33 +25,33 @@ case class OptionalType(cv: ConfigValue, base: String, value: Option[String] = N
 }
 
 object Type {
+
   def apply(cv: ConfigValue): Type = {
     val valueString = cv.unwrapped().toString
     val tokens = valueString.split("""\s*\|\s*""")
-    val isOr = tokens.size == 2
-    val defaultValue = if (isOr) Some(tokens(1)) else None
+    val typePart = tokens(0).toLowerCase
+    val hasDefault = tokens.size == 2
+    val defaultValue = if (hasDefault) Some(tokens(1)) else None
 
-    // TODO simplify this!
+    val (base, isOpt) = if (typePart.endsWith("?"))
+      (typePart.substring(0, typePart.length - 1), true)
+    else
+      (typePart, false)
 
-    tokens(0).toLowerCase match {
-      case "string"    => if (isOr) OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"')) else RequiredType(cv, "string")
-      case "string?"   => if (isOr) OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"')) else OptionalType(cv, "string")
-
-      case "int"       => if (isOr) OptionalType(cv, "int", defaultValue) else RequiredType(cv, "int")
-      case "int?"      => if (isOr) OptionalType(cv, "int", defaultValue) else OptionalType(cv, "int")
-
-      case "long"      => if (isOr) OptionalType(cv, "long", defaultValue) else RequiredType(cv, "long")
-      case "long?"     => if (isOr) OptionalType(cv, "long", defaultValue) else OptionalType(cv, "long")
-
-      case "double"    => if (isOr) OptionalType(cv, "double", defaultValue) else RequiredType(cv, "double")
-      case "double?"   => if (isOr) OptionalType(cv, "double", defaultValue) else OptionalType(cv, "double")
-
-      case "boolean"   => if (isOr) OptionalType(cv, "boolean", defaultValue) else RequiredType(cv, "boolean")
-      case "boolean?"  => if (isOr) OptionalType(cv, "boolean", defaultValue) else OptionalType(cv, "boolean")
-
-      case _           => inferType(cv, valueString)
+    if (recognizedBaseType(base)) {
+      if (hasDefault)
+        OptionalType(cv, base, if (typePart == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+      else
+        if (isOpt) OptionalType(cv, base) else RequiredType(cv, base)
     }
+    else inferType(cv, valueString)
   }
+
+  private val recognizedBaseTypes: Set[String] = Set(
+    "string", "int", "long", "double", "boolean"
+  )
+
+  private def recognizedBaseType(base: String): Boolean = recognizedBaseTypes contains base
 
   private def inferType(cv: ConfigValue, valueString : String): Type = {
     val defaultValue = Some(valueString)
