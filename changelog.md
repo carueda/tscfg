@@ -1,3 +1,19 @@
+2016-02-25 - 0.3.0
+- initial work on #6: "generate conf templates."
+- `--tpl` option with 3 possible types: base, local, all.
+  Can be given multiple times.
+  Running the example-4tpl.spec.conf: 
+
+    ```
+    > runMain tscfg.Main --spec example/example-4tpl.spec.conf --tpl base  src/main/java/tscfg/example/example-4tpl.base.conf --tpl local src/main/java/tscfg/example/example-4tpl.local.conf --tpl all   src/main/java/tscfg/example/example-4tpl.all.conf
+    ```
+- As part of this, some refactoring, mainly around a new Type class that the various accessors now use.
+- more complete TypeSpec (TODO simplify \*Accesor/Spec classes wrt types)
+- entry with no explicit type is now considered optional (with given value as default)
+- some preliminary annotation processing
+  - @optional for sections - only generates comment in templates; no verification logic at all yet 
+  - @local to force inclusion of field in "local" template output
+
 2016-02-07 - 0.2.1
 - fix #5: incorrect reference with "config" fragment in path
 

@@ -31,16 +31,14 @@ object generator {
                     )
 
   /**
-    * Generates code for the given configuration spec.
+    * Generates code for the given configuration tree.
     *
-    * @param config       spec
+    * @param node         Root of the tree to process
     * @param out          code is written here
     * @param genOpts      generation options
     */
-  def generate(config: Config, out: Writer)
+  def generate(node: Node, out: Writer)
               (implicit genOpts: GenOpts): Unit = {
-
-    createAllNodes(config)
 
     val pw = out match {
       case w: PrintWriter => w
@@ -48,8 +46,8 @@ object generator {
     }
 
     genOpts.language match {
-      case "java"  => javaGenerator.generate(Node.root, pw)
-      case "scala" => scalaGenerator.generate(Node.root, pw)
+      case "java"  => javaGenerator.generate(node, pw)
+      case "scala" => scalaGenerator.generate(node, pw)
     }
   }
 
@@ -60,10 +58,11 @@ object generator {
   }
 
   case class LeafNode(key: Key, value: ConfigValue)(implicit genOpts: GenOpts) extends Node {
-    val accessor = Accessor(value)
+    val type_ = Type(value)
+    val accessor = Accessor(type_)
   }
 
-  case class BranchNode(key: Key) extends Node {
+  case class BranchNode(key: Key, conf: Config) extends Node {
     val map: mutable.Map[String,Node] = mutable.Map()
 
     def put(simpleKey: String, node: Node): Unit = {
@@ -71,15 +70,8 @@ object generator {
     }
   }
 
-  object Node {
-    val root = BranchNode(Key.root)
-  }
-
-
   object nodes {
     val nodeMap = mutable.HashMap[Key, Node]()
-
-    put(Key.root, Node.root)
 
     // creates a leaf node
     def createLeaf(key: Key, value: ConfigValue)(implicit genOpts: GenOpts): LeafNode = nodeMap.get(key) match {
@@ -92,9 +84,9 @@ object generator {
     }
 
     // creates a branch node
-    def createBranch(key: Key): BranchNode = nodeMap.get(key) match {
+    def createBranch(key: Key, parentConf: Config): BranchNode = nodeMap.get(key) match {
       case None =>
-        val node = BranchNode(key)
+        val node = BranchNode(key, parentConf)
         put(key, node)
         node
 
@@ -102,32 +94,41 @@ object generator {
       case Some(node) => throw new Error(s"LeafNode by key=$key already created")
     }
 
-    private def put(key: Key, node: Node) = {
+    def put(key: Key, node: Node) = {
       //println(s"nodeMap PUT: $key -> $node")
       require(!nodeMap.contains(key))
       nodeMap.put(key, node)
     }
   }
 
-  private def createAllNodes(conf: Config)(implicit genOpts: GenOpts): Unit = {
+  def createAllNodes(conf: Config)(implicit genOpts: GenOpts): Node = {
+    val root = BranchNode(Key.root, conf)
+    nodes.put(Key.root, root)
+
+    def createAncestorsOf(childKey: Key, childNode: Node): Unit = {
+      createParent(childKey.parent, childNode)
+
+      def createParent(parentKey: Key, child: Node): Unit = {
+        val parentConf = if (parentKey == Key.root) conf
+        else conf.getConfig(parentKey.toString)
+
+        val parentNode = nodes.createBranch(parentKey, parentConf)
+        parentNode.put(child.key.simple, child)
+
+        if (parentNode.key != Key.root) {
+          createParent(parentKey.parent, parentNode)
+        }
+      }
+    }
+
     conf.entrySet() foreach { e =>
       val key = Key(e.getKey)
       val value = e.getValue
       val leafNode = nodes.createLeaf(key, value)
       createAncestorsOf(key, leafNode)
     }
-  }
 
-  private def createAncestorsOf(childKey: Key, childNode: Node): Unit = {
-    createParent(childKey.parent, childNode)
-
-    def createParent(parentKey: Key, child: Node): Unit = {
-      val parentNode = nodes.createBranch(parentKey)
-      parentNode.put(child.key.simple, child)
-
-      if (parentNode.key != Key.root)
-        createParent(parentKey.parent, parentNode)
-    }
+    root
   }
 
   private def showNode(node: Node, indentIncr:String = "\t", simpleKey: Boolean = true): Unit = {

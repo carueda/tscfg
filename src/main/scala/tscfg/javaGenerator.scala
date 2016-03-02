@@ -3,7 +3,6 @@ package tscfg
 import java.io.PrintWriter
 import java.util.Date
 
-import com.typesafe.config.ConfigRenderOptions
 import tscfg.generator._
 
 
@@ -62,10 +61,9 @@ object javaGenerator {
             case ln@LeafNode(k, v) =>
               val path = k.simple
               val instance = ln.accessor.instance(path)
-              val comment = v.render(ConfigRenderOptions.concise())
-              out.println(s"""$instance; // $comment""")
+              out.println(s"""$instance;""")
 
-            case BranchNode(k)  =>
+            case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
               out.println(s"""new $className(c.getConfig("${k.simple}"));""")
           }
@@ -90,11 +88,11 @@ object javaGenerator {
                 s"""i+ "$id = " + this.$id"""
               }) + s""" + "\\n""""
 
-            case BranchNode(k) =>
+            case BranchNode(k, _) =>
               s"""i+ "$id {\\n" + this.$id.toString(i+"    ") +i+ "}\\n""""
           }
         }
-        out.println(s"$indent  return ${ids.mkString("\n" +indent + "        +")};")
+        out.println(s"$indent    return ${ids.mkString("\n" +indent + "        +")};")
         out.println(s"$indent  }")
         // </toString(String i)>
 

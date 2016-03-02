@@ -12,21 +12,22 @@ and execution of the generated classes in your code.
 
 ### status
 
-This tool was motivated by the lack of something similar to 
-[PureConfig](https://github.com/melrief/pureconfig)
-but for java (please point me to any that I may have missed!)
+This tool was motivated by the lack of something for this purpose
+"out there" for java (please point me to any that I may have missed),
+and also to some extent by [PureConfig](https://github.com/melrief/pureconfig).
 It's already usable but can be improved in several ways
 (for example, missing types include lists, durations).
 Feel free to play, fork, enter issues, submit PRs, etc.
 
-Avoiding boiler-plate is in general much easier in Scala than in Java!
+Avoiding boiler-plate is in general much easier in Scala than in Java.
 (PureConfig, for example, uses case classes for the configuration spec).
 
 In tscfg's approach, the configuration spec is itself also captured in a configuration file
 so the familiar syntax/format (as supported by Typesafe Config) is still used.
 With this input the tool generates corresponding POJO classes. 
 
-But, you may wonder, why the trouble if the properties can simply be accessed with Typesafe Config directly? -- see FAQ below.
+But, you may wonder, why the trouble if the properties can simply be accessed with Typesafe Config directly? 
+Glad you ask, see FAQ below.
 
 > As of v0.1.5, Scala output can also be generated.
 
@@ -45,7 +46,7 @@ service {
 ```
 
 tscfg will generate the following immutable class
-(excluding constructors and other methods):
+(constructors and other methods omitted):
 
 ```java
 public class Cfg {
@@ -61,10 +62,9 @@ public class Cfg {
 
 The tool determines the type of each field according to the given value
 in the input configuration.
-Used in this way, however, all fields are required. 
+Used in this way all fields are considered optional, with the given value as the default. 
 
-To allow the specification of optional fields and default values, 
-while also indicating the type,
+To allow the specification of required fields, explicit types and default values, 
 a string with a simple syntax as follows can be used
 (illustrated below with the integer type):
 
@@ -87,7 +87,7 @@ endpoint {
 }
 ```
 
-Again, excluding constructors and other methods, this basically becomes 
+Again, omitting constructors and other methods, this basically becomes 
 the immutable class:
 
 ```java
@@ -106,11 +106,13 @@ public class ExampleCfg {
 }
 ```
 
+> note that java keywords are appended "_".
+
 ## generation
 
 You will need a JRE 8 and the latest "fat" tscfg-x.y.z.jar from the [releases](https://github.com/carueda/tscfg/releases).
 
-> Or run `sbt assembly` under a clone of this repo. 
+> Or run `sbt assembly` under a clone of this repo to generate the fat jar. 
 
 ```shell
 $ java -jar tscfg-x.y.z.jar
@@ -145,7 +147,7 @@ File configFile = new File("my.conf");
 Config tsConfig = ConfigFactory.parseFile(configFile).resolve();
 ```
 
-Now, to access the configuration fields, instead of:
+Now, to access the configuration fields, instead of, for example:
 ```java
 Config endpoint = tsConfig.getConfig("endpoint");
 String path    = endpoint.getString("path");
@@ -167,8 +169,6 @@ Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```
 
-> note that java keywords are appended "_".
-
 An object reference will never be null if the corresponding field is required according to
 the specification. It will only be null if it is marked optional with no default value and
 has been omitted in the input configuration.
@@ -188,7 +188,7 @@ may become more apparent.
 
 **Could tscfg generate `Optional<T>` by default for optional fields?**
 
-Yes, and it would be rather straightforward to add. Feel free to contribute!
+Yes, and it should not be too difficult to add. Feel free to contribute!
  
 **What about generating for Scala?**
 
@@ -212,3 +212,7 @@ Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/scal
 - [ScalaExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ScalaExampleSpec.scala) 
 - [scalaAccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/ScalaAccessorSpec.scala)
 - [scalaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/scalaIdentifierSpec.scala)
+
+### Type
+
+- [TypeSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/TypeSpec.scala) 
