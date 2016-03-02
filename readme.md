@@ -4,37 +4,36 @@
 
 tscfg is a command line tool that takes a configuration specification 
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
-and generates all the Java boiler-plate to make the definitions 
-available in type safe, immutable objects.
+and generates all the boiler-plate to make the definitions 
+available in type safe, immutable objects 
+(POJOs for Java, case classes for Scala).
 
 Typesafe Config is used by the tool for the generation, and required for compilation 
 and execution of the generated classes in your code.
 
 ### status
 
-This tool was motivated by the lack of something for this purpose
-"out there" for java,
-and also to some extent by [PureConfig](https://github.com/melrief/pureconfig).
-It's already usable but can be improved in several ways
-(for example, missing types include lists, bytes; see issue tracker).
-Feel free to play, fork, enter issues, submit PRs, etc.
+The tool is already pretty usable.
+It supports a good part of the common types as supported by Typesafe Config 
+(string, int, long, double, duration),
+can generate configuration templates for documentation purposes,
+and has an acceptable set of tests.
+However, it's in general still work in progress and as time permits. 
+Missing types include lists and bytes;
+command line interface can be improved;
+syntax for types is not stable yet).
+Feel free fork, enter issues, submit PRs, etc.
 
-Avoiding boiler-plate is in general much easier in Scala than in Java.
-(PureConfig, for example, uses case classes for the configuration spec).
+Also, see FAQ below.
 
-In tscfg's approach, the configuration spec is itself also captured in a configuration file
-so the familiar syntax/format (as supported by Typesafe Config) is used.
-With this input the tool generates corresponding POJO classes. 
-
-But, you may wonder, why the trouble if the properties can simply be accessed with Typesafe Config directly? 
-Glad you ask, see FAQ below.
-
-> As of v0.1.5, Scala output can also be generated.
 
 ## configuration spec
 
-Any source parseable by Typesafe Config can be used as input to the tscfg generator.
-For example, from this configuration:
+In tscfg's approach, the configuration spec itself is any source parseable by Typesafe Config,
+so the familiar syntax/format and loading mechanisms are used.
+
+For example, from 
+[this configuration](https://github.com/carueda/tscfg/blob/master/example/example0.spec.conf):
 
 ```properties
 service {
@@ -45,24 +44,45 @@ service {
 }
 ```
 
-tscfg will generate the following immutable class
-(constructors and other methods omitted):
+tscfg will generate (constructors and other methods omitted):
+ 
+- Java:
 
-```java
-public class Cfg {
-  public final Service service;
-  public static class Service {
-    public final String url;
-    public final int poolSize;
-    public final boolean debug;
-    public final double factor;
-  }
-}
-```
+	```java
+	public class Cfg {
+	  public final Service service;
+	  public static class Service {
+		public final boolean debug;
+		public final double factor;
+		public final int poolSize;
+		public final String url;
+	  }
+	}
+	```
+	
+	Nesting of configuration properties is captured via inner static classes.
+
+- Scala:
+
+	```scala
+	case class Cfg(
+	  service : Cfg.Service
+	)
+	object Cfg {
+	  case class Service(
+		debug : Boolean,
+		factor : Double,
+		poolSize : Int,
+		url : String
+	  )
+	}
+	```
+	
+	Nesting of configuration properties is captured via nested companion objects.
 
 The tool determines the type of each field according to the given value
 in the input configuration.
-Used in this way all fields are considered optional, with the given value as the default. 
+Used in this way, all fields are considered optional, with the given value as the default. 
 
 To allow the specification of required fields, explicit types and default values, 
 a string with a simple syntax as follows can be used
@@ -73,6 +93,8 @@ a string with a simple syntax as follows can be used
 | `name = "int"`  | required integer | `int` / no default | `Int` / no default
 | `name = "int|3"`  | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
 | `name = "int?"` | optional integer | `Integer` / `null` | `Option[Int]` / `None`
+
+> The type syntax is still subject to change.
 
 The following is a complete example exercising this mechanism.
 
@@ -87,8 +109,7 @@ endpoint {
 }
 ```
 
-Again, omitting constructors and other methods, this basically becomes 
-the immutable class:
+For Java, this basically becomes the immutable class:
 
 ```java
 public class ExampleCfg {
@@ -108,7 +129,7 @@ public class ExampleCfg {
 
 > note that java keywords are appended "_".
 
-## generation
+## running tscfg
 
 You will need a JRE 8 and the latest "fat" tscfg-x.y.z.jar from the [releases](https://github.com/carueda/tscfg/releases).
 
@@ -129,7 +150,7 @@ Options (default):
 Output is written to $destDir/$className.ext
 ```
 
-So, to generate class `tscfg.example.ExampleCfg` with the example above 
+So, to generate the Java class `tscfg.example.ExampleCfg` with the example above 
 saved in `def.example.conf`, we can run:
 
 ```shell
@@ -178,9 +199,13 @@ With this [example spec](https://github.com/carueda/tscfg/blob/master/example/de
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java) 
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
 
+Using the `--scala` option
+the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
+and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
+
 ## Supported types
 
-With explicit field typing, the following base types are supported:
+With explicit field typing, the following base types are currently supported:
 
 | type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
 |---------------|---------------------|--------------------------
@@ -195,12 +220,30 @@ With explicit field typing, the following base types are supported:
 
 A duration type can be further qualified with a suffix consisting of a colon 
 an a desired time unit for the reported value. 
-For example, with `days = "duration:day"`, the reported long value will be in day units, 
+For example, with the type `"duration:day"`, the reported long value will be in day units, 
 with conversion automatically performed if the actual configuration value is given in 
-any other unit as supported by Typesafe Config for the 
+any other unit as supported by Typesafe Config according to the 
 [duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
 
-A more complete example is [here](https://github.com/carueda/tscfg/blob/master/example/example-duration.spec.conf).
+[A more complete example](https://github.com/carueda/tscfg/blob/master/example/example-duration.spec.conf)
+with some additional explanation:
+
+```properties
+durations {
+  # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
+  # or whatever is provided converted to days
+  days = "duration:day?"
+
+  # required duration; reported long (Long) is whatever is provided
+  # converted to hours
+  hours = "duration:hour"
+
+  # optional duration with default value;
+  # reported long (Long) is in milliseconds, either 550,000 if value is missing
+  # or whatever is provided converted to millis
+  millis = "duration:ms | 550s"
+}
+```
 
 
 ## FAQ
@@ -215,16 +258,8 @@ may become more apparent.
 
 **Could tscfg generate `Optional<T>` by default for optional fields?**
 
-Yes, and it should not be too difficult to add. Feel free to contribute!
+Not yet, but should not be too difficult to add. Feel free to contribute!
  
-**What about generating for Scala?**
-
-Yes, it's there too. Use the `--scala` option and case classes will be generated.
-Optional fields are generated with type `Option[T]`.
-With [this example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
-the generate code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
-and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
-  
 
 ## tests
 
