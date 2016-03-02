@@ -13,17 +13,17 @@ and execution of the generated classes in your code.
 ### status
 
 This tool was motivated by the lack of something for this purpose
-"out there" for java (please point me to any that I may have missed),
+"out there" for java,
 and also to some extent by [PureConfig](https://github.com/melrief/pureconfig).
 It's already usable but can be improved in several ways
-(for example, missing types include lists, durations).
+(for example, missing types include lists, bytes; see issue tracker).
 Feel free to play, fork, enter issues, submit PRs, etc.
 
 Avoiding boiler-plate is in general much easier in Scala than in Java.
 (PureConfig, for example, uses case classes for the configuration spec).
 
 In tscfg's approach, the configuration spec is itself also captured in a configuration file
-so the familiar syntax/format (as supported by Typesafe Config) is still used.
+so the familiar syntax/format (as supported by Typesafe Config) is used.
 With this input the tool generates corresponding POJO classes. 
 
 But, you may wonder, why the trouble if the properties can simply be accessed with Typesafe Config directly? 
@@ -123,8 +123,9 @@ Options (default):
   --pn packageName  (tscfg.example)
   --cn className    (ExampleCfg)
   --dd destDir      (/tmp)
-  --j7 generate code for java <= 7 (8)
+  --j7 generate code for java <= 7  (8)
   --scala generate scala code  (java)
+  --tpl type filename   generate configuration template (type: base, local, all)
 Output is written to $destDir/$className.ext
 ```
 
@@ -173,8 +174,34 @@ An object reference will never be null if the corresponding field is required ac
 the specification. It will only be null if it is marked optional with no default value and
 has been omitted in the input configuration.
  
-The generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java). 
-Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
+With this [example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
+the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java) 
+and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
+
+## Supported types
+
+With explicit field typing, the following base types are supported:
+
+| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
+|---------------|---------------------|--------------------------
+| `string`      | String  / String    | String  / Option[String]    
+| `int`         | int     / Integer   | Int     / Option[Int]   
+| `long`        | long    / Long      | Long    / Option[Long]      
+| `double`      | double  / Double    | Double  / Option[Double]    
+| `boolean`     | boolean / Boolean   | Boolean / Option[Boolean]   
+| `duration`    | long    / Long      | Long    / Option[Long]
+      
+#### Durations
+
+A duration type can be further qualified with a suffix consisting of a colon 
+an a desired time unit for the reported value. 
+For example, with `days = "duration:day"`, the reported long value will be in day units, 
+with conversion automatically performed if the actual configuration value is given in 
+any other unit as supported by Typesafe Config for the 
+[duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
+
+A more complete example is [here](https://github.com/carueda/tscfg/blob/master/example/example-duration.spec.conf).
+
 
 ## FAQ
 
@@ -194,8 +221,9 @@ Yes, and it should not be too difficult to add. Feel free to contribute!
 
 Yes, it's there too. Use the `--scala` option and case classes will be generated.
 Optional fields are generated with type `Option[T]`.
-Looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala). 
-Example of use [here](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
+With [this example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
+the generate code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
+and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
   
 
 ## tests

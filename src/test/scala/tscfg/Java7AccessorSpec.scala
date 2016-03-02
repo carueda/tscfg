@@ -28,6 +28,13 @@ class Java7AccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """c.hasPath("path") ? c.getBoolean("path") : true"""
       JavaAccessor("boolean?")
         .instance("path") must_== """c.hasPath("path") ? Boolean.valueOf(c.getBoolean("path")) : null"""
+
+      JavaAccessor("duration | 2")
+        .instance("path") must_== """c.hasPath("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : 2"""
+      JavaAccessor("duration:h | 1d")
+        .instance("path") must_== """c.hasPath("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) : 24"""
+      JavaAccessor("duration?")
+        .instance("path") must_== """c.hasPath("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : null"""
     }
   }
 }

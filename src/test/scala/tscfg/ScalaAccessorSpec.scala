@@ -26,6 +26,16 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
       ScalaAccessor("Int?").`type` must_== "Option[Int]"
       ScalaAccessor("INT?").`type` must_== "Option[Int]"
     }
+
+    """"duration" be Long""" in {
+      ScalaAccessor("duration").`type` must_== "Long"
+    }
+    """"duration | 2" be Long""" in {
+      ScalaAccessor("duration | 5.0").`type` must_== "Long"
+    }
+    """"duration?" be Option[Long]""" in {
+      ScalaAccessor("duration?").`type` must_== "Option[Long]"
+    }
   }
 
   """"field access code"""" should {
@@ -38,6 +48,8 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """c.getDouble("path")"""
       ScalaAccessor("boolean")
         .instance("path") must_== """c.getBoolean("path")"""
+      ScalaAccessor("duration")
+        .instance("path") must_== """c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)"""
     }
 
     """have hasPathOrNull condition for type with default value""" in {
@@ -60,6 +72,13 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """if(c.hasPathOrNull("path")) c.getBoolean("path") else true"""
       ScalaAccessor("boolean?")
         .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getBoolean("path")) else None"""
+
+      ScalaAccessor("duration | 2")
+        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) else 2"""
+      ScalaAccessor("duration:h | 1d")
+        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) else 24"""
+      ScalaAccessor("duration?")
+        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)) else None"""
     }
 
     """type inference""" should {

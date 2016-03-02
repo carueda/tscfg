@@ -2,9 +2,42 @@ package tscfg
 
 import com.typesafe.config.{ConfigValueType, ConfigValue}
 
+abstract sealed class BaseType {
+  val base: String
+  val qualification: Option[String] = None
+}
+case class UnqualifiedBaseType(base: String) extends BaseType
+case class QualifiedBaseType(base: String, q: String) extends BaseType {
+  override val qualification: Option[String] = Some(q)
+}
+
+object BaseType {
+  def apply(base: String, qualification: String) = {
+    QualifiedBaseType(base,
+      if (base == "duration")
+        canonicalDurationUnit(qualification)
+      else qualification
+    )
+  }
+
+  def apply(base: String) = UnqualifiedBaseType(base)
+
+  // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
+  private def canonicalDurationUnit(s: String): String = s match {
+    case "ns" | "nano" | "nanos" | "nanosecond" | "nanoseconds"     => "nanosecond"
+    case "us" | "micro" | "micros" | "microsecond" | "microseconds" => "microsecond"
+    case "ms" | "milli" | "millis" | "millisecond" | "milliseconds" => "millisecond"
+    case "s" | "second" | "seconds" => "second"
+    case "m" | "minute" | "minutes" => "minute"
+    case "h" | "hour" | "hours"     => "hour"
+    case "d" | "day" | "days"       => "day"
+    case _ => throw new AssertionError()
+  }
+}
+
 abstract class Type {
   val cv: ConfigValue
-  val base: String
+  val baseType: BaseType
   val required: Boolean
   val value: Option[String]
   val description: String
@@ -12,46 +45,54 @@ abstract class Type {
   def spec = cv.unwrapped().toString
 }
 
-case class RequiredType(cv: ConfigValue, base: String) extends Type {
+case class RequiredType(cv: ConfigValue, baseType: BaseType) extends Type {
   val required = true
   val value = None
-  val description = s"Required $base."
+  val description = s"Required ${baseType.base}."
 }
 
-case class OptionalType(cv: ConfigValue, base: String, value: Option[String] = None) extends Type {
+case class OptionalType(cv: ConfigValue, baseType: BaseType, value: Option[String] = None) extends Type {
   val required = false
   val description =
-    s"Optional $base." + (if (value.isDefined) s" Default value ${value.get}." else "")
+    s"Optional ${baseType.base}." + (if (value.isDefined) s" Default value ${value.get}." else "")
 }
 
 object Type {
+
   def apply(cv: ConfigValue): Type = {
     val valueString = cv.unwrapped().toString
     val tokens = valueString.split("""\s*\|\s*""")
-    val isOr = tokens.size == 2
-    val defaultValue = if (isOr) Some(tokens(1)) else None
+    val typePart = tokens(0).toLowerCase
+    val hasDefault = tokens.size == 2
+    val defaultValue = if (hasDefault) Some(tokens(1)) else None
 
-    // TODO simplify this!
+    val (baseString, isOpt) = if (typePart.endsWith("?"))
+      (typePart.substring(0, typePart.length - 1), true)
+    else
+      (typePart, false)
 
-    tokens(0).toLowerCase match {
-      case "string"    => if (isOr) OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"')) else RequiredType(cv, "string")
-      case "string?"   => if (isOr) OptionalType(cv, "string", defaultValue.map(s => '"' +s+ '"')) else OptionalType(cv, "string")
-
-      case "int"       => if (isOr) OptionalType(cv, "int", defaultValue) else RequiredType(cv, "int")
-      case "int?"      => if (isOr) OptionalType(cv, "int", defaultValue) else OptionalType(cv, "int")
-
-      case "long"      => if (isOr) OptionalType(cv, "long", defaultValue) else RequiredType(cv, "long")
-      case "long?"     => if (isOr) OptionalType(cv, "long", defaultValue) else OptionalType(cv, "long")
-
-      case "double"    => if (isOr) OptionalType(cv, "double", defaultValue) else RequiredType(cv, "double")
-      case "double?"   => if (isOr) OptionalType(cv, "double", defaultValue) else OptionalType(cv, "double")
-
-      case "boolean"   => if (isOr) OptionalType(cv, "boolean", defaultValue) else RequiredType(cv, "boolean")
-      case "boolean?"  => if (isOr) OptionalType(cv, "boolean", defaultValue) else OptionalType(cv, "boolean")
-
-      case _           => inferType(cv, valueString)
+    val baseType: BaseType = {
+      val parts = baseString.split("""\s*\:\s*""", 2)
+      if (parts.size == 1)
+        BaseType(parts(0))
+      else
+        BaseType(parts(0), parts(1))
     }
+
+    if (recognizedBaseType(baseType)) {
+      if (hasDefault)
+        OptionalType(cv, baseType, if (typePart == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+      else
+        if (isOpt) OptionalType(cv, baseType) else RequiredType(cv, baseType)
+    }
+    else inferType(cv, valueString)
   }
+
+  private val recognizedBaseTypes: Set[String] = Set(
+    "string", "int", "long", "double", "boolean", "duration"
+  )
+
+  private def recognizedBaseType(baseType: BaseType): Boolean = recognizedBaseTypes contains baseType.base
 
   private def inferType(cv: ConfigValue, valueString : String): Type = {
     val defaultValue = Some(valueString)
@@ -61,9 +102,9 @@ object Type {
 
     def createType(base: String): Type = {
       if (required)
-        RequiredType(cv, base)
+        RequiredType(cv, BaseType(base))
       else
-        OptionalType(cv, base, if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+        OptionalType(cv, BaseType(base), if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
     }
 
     def numberType: Type = {

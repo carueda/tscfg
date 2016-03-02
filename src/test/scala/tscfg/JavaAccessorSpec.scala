@@ -40,6 +40,16 @@ class JavaAccessorSpec extends BaseAccessorSpec {
     """"boolean?" be Boolean""" in {
       JavaAccessor("boolean?").`type` must_== "Boolean"
     }
+
+    """"duration" be long""" in {
+      JavaAccessor("duration").`type` must_== "long"
+    }
+    """"duration | 2" be long""" in {
+      JavaAccessor("duration | 5.0").`type` must_== "long"
+    }
+    """"duration?" be Long""" in {
+      JavaAccessor("duration?").`type` must_== "Long"
+    }
   }
 
   """"field access code"""" should {
@@ -52,6 +62,8 @@ class JavaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """c.getDouble("path")"""
       JavaAccessor("boolean")
         .instance("path") must_== """c.getBoolean("path")"""
+      JavaAccessor("duration")
+        .instance("path") must_== """c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)"""
     }
     """have hasPathOrNull condition for type with default value"""" in {
       JavaAccessor("string | hello world")
@@ -73,6 +85,13 @@ class JavaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """c.hasPathOrNull("path") ? c.getBoolean("path") : true"""
       JavaAccessor("boolean?")
         .instance("path") must_== """c.hasPathOrNull("path") ? Boolean.valueOf(c.getBoolean("path")) : null"""
+
+      JavaAccessor("duration | 2")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : 2"""
+      JavaAccessor("duration:h | 1d")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) : 24"""
+      JavaAccessor("duration?")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : null"""
     }
   }
 
