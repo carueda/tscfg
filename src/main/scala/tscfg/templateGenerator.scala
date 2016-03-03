@@ -16,8 +16,8 @@ object templateGenerator {
 
     node match {
       case bn: BranchNode =>
-        val orderedNames = bn.map.keys.toList.sorted
-        orderedNames foreach { name => gen(bn.map(name)) }
+        val orderedNames = bn.keys.toList.sorted
+        orderedNames foreach { name => gen(bn(name)) }
 
       case _ => throw new AssertionError()
     }
@@ -77,10 +77,10 @@ object templateGenerator {
         CommentInfo.outComments(indent, realComments, out)
         out.println(s"$indent$symbol {")
 
-        val orderedNames = bn.map.keys.toList.sorted
+        val orderedNames = bn.keys.toList.sorted
 
         // generate for members:
-        orderedNames foreach { name => gen(bn.map(name), indent + "  ") }
+        orderedNames foreach { name => gen(bn(name), indent + "  ") }
 
         out.println(s"$indent}")
       }

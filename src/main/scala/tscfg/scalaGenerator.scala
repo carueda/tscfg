@@ -41,14 +41,14 @@ object scalaGenerator {
 
         val className = upperFirst(symbol)
 
-        val orderedNames = bn.map.keys.toList.sorted
+        val orderedNames = bn.keys.toList.sorted
 
         // <object>
         out.println(s"${indent}object $className {")
 
         // <recurse>
         orderedNames foreach { name =>
-          bn.map(name) match {
+          bn(name) match {
             case sbn@BranchNode(k, _) => gen(sbn, indent + "  ")
             case _ =>
           }
@@ -62,7 +62,7 @@ object scalaGenerator {
         comma = indent
         orderedNames foreach { name =>
           out.print(comma)
-          bn.map(name) match {
+          bn(name) match {
             case ln@LeafNode(k, v) =>
               out.print(s"""      ${ln.accessor.instance(k.simple)}""")
 
@@ -86,7 +86,7 @@ object scalaGenerator {
         orderedNames foreach { name =>
           out.print(comma)
           out.print(s"${indent}  ${scalaIdentifier(name)} : ")  // note, space before : for proper tokenization
-          bn.map(name) match {
+          bn(name) match {
             case ln@LeafNode(k, v) =>
               out.print(s"""${ln.accessor.`type`}""")
 
@@ -110,7 +110,7 @@ object scalaGenerator {
         val ids = orderedNames map { name =>
           val id = scalaIdentifier(name)
 
-          bn.map(name) match {
+          bn(name) match {
             case ln@LeafNode(k, v) =>
               (if(ln.accessor.`type` == "String") {
                 s"""  i+ "$name = " + '"' + this.$id + '"'"""

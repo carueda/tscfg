@@ -8,7 +8,6 @@ class nodesSpec extends Specification {
 
   implicit val genOpts = GenOpts()
 
-  def getNode(key: Key): Option[nodes.Node] = nodes.nodeMap.get(key)
 
   val config = ConfigFactory.parseString(
     """
@@ -21,14 +20,13 @@ class nodesSpec extends Specification {
   ).resolve()
   val root = nodes.createAllNodes(config)
 
-  val fooOpt = getNode(Key("foo"))
-  val barOpt = getNode(Key("foo.bar"))
-  val bazOpt = getNode(Key("foo.bar.baz"))
+  val fooOpt = root.get(Key("foo"))
+  val barOpt = root.get(Key("foo.bar"))
+  val bazOpt = root.get(Key("foo.bar.baz"))
 
   "nodes" should {
     "satisfy various conditions" in {
       root.key must_== Key.root
-      Some(root) === nodes.nodeMap.get(Key.root)
       root must beAnInstanceOf[nodes.BranchNode]
 
       fooOpt must beSome
@@ -50,8 +48,8 @@ class nodesSpec extends Specification {
       val fooBn = foo.asInstanceOf[nodes.BranchNode]
       val barBn = bar.asInstanceOf[nodes.BranchNode]
 
-      fooBn.map must beDefinedAt("bar")
-      barBn.map must beDefinedAt("baz")
+      fooBn.get("bar") must beSome
+      barBn.get("baz") must beSome
     }
   }
 }

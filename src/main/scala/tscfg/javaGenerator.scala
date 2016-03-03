@@ -49,16 +49,16 @@ object javaGenerator {
         val classDecl = if (isRoot) "class" else "static class"
         out.println(s"${indent}public $classDecl $className {")
 
-        val orderedNames = bn.map.keys.toList.sorted
+        val orderedNames = bn.keys.toList.sorted
 
         // generate for members:
-        orderedNames foreach { name => gen(bn.map(name), indent + "  ") }
+        orderedNames foreach { name => gen(bn(name), indent + "  ") }
 
         // <constructor>
         out.println(s"$indent  public $className($TypesafeConfigClassName c) {")
         orderedNames foreach { name =>
           out.print(s"$indent    this.${javaIdentifier(name)} = ")
-          bn.map(name) match {
+          bn(name) match {
             case ln@LeafNode(k, v) =>
               val path = k.simple
               val instance = ln.accessor.instance(path)
@@ -80,7 +80,7 @@ object javaGenerator {
         val ids = orderedNames map { name =>
           val id = javaIdentifier(name)
 
-          bn.map(name) match {
+          bn(name) match {
             case ln@LeafNode(k, v) =>
               (if(ln.accessor.`type` == "String") {
                 s"""i+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
