@@ -81,23 +81,4 @@ object nodes {
 
     root
   }
-
-  private def showNode(node: Node, indentIncr:String = "\t", simpleKey: Boolean = true): Unit = {
-    show(node)
-
-    def show(n: Node, indent: String = ""): Unit = {
-      val label = if (simpleKey) n.key.simple else n.key.toString
-
-      n match {
-        case LeafNode(key, value) =>
-          println(s"$indent$label = ${value.render()}")
-
-        case n: BranchNode =>
-          println(s"$indent$label")
-          n.map.keys.toList.sorted foreach { key =>
-            show(n.map(key), indent + indentIncr)
-          }
-      }
-    }
-  }
 }
