@@ -4,6 +4,7 @@ import java.io.PrintWriter
 import java.util.Date
 
 import tscfg.generator._
+import tscfg.nodes._
 
 object scalaGenerator {
 

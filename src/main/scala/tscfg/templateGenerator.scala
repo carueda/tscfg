@@ -2,7 +2,7 @@ package tscfg
 
 import java.io.PrintWriter
 import com.typesafe.config.ConfigOrigin
-import tscfg.generator._
+import tscfg.nodes._
 import scala.collection.JavaConversions._
 
 object templateGenerator {

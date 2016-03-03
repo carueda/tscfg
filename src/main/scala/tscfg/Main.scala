@@ -106,7 +106,7 @@ object Main {
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
-    val root = generator.createAllNodes(config)
+    val root = nodes.createAllNodes(config)
 
     println(s"generating: ${destFile.getAbsolutePath}")
     generator.generate(root, out)
