@@ -37,7 +37,7 @@ class templateGeneratorSpec extends BaseGeneratorSpec {
         |  bar = "string?"
         |  baz = "int | 1"
         |}
-      """.stripMargin, true)
+      """.stripMargin)
 
     "generate expected fields" in {
       result.fieldNames must contain("foo", "baz")
@@ -53,7 +53,7 @@ class templateGeneratorSpec extends BaseGeneratorSpec {
         |  bar = "string?"
         |  baz = "int | 1"
         |}
-      """.stripMargin, true)
+      """.stripMargin)
 
     "generate expected fields" in {
       result.fieldNames must contain("foo", "bar")

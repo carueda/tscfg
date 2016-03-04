@@ -27,6 +27,17 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
       ScalaAccessor("INT?").`type` must_== "Option[Int]"
     }
 
+    """"long" and all non-optional variations be Long""" in {
+      ScalaAccessor("long").`type` must_== "Long"
+      ScalaAccessor("Long|2").`type` must_== "Long"
+      ScalaAccessor("LONG").`type` must_== "Long"
+    }
+    """"long?" and variations be Option[Long]""" in {
+      ScalaAccessor("long?").`type` must_== "Option[Long]"
+      ScalaAccessor("Long?").`type` must_== "Option[Long]"
+      ScalaAccessor("LONG?").`type` must_== "Option[Long]"
+    }
+
     """"duration" be Long""" in {
       ScalaAccessor("duration").`type` must_== "Long"
     }
@@ -62,6 +73,11 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """if(c.hasPathOrNull("path")) c.getInt("path") else 1"""
       ScalaAccessor("int?")
         .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getInt("path")) else None"""
+
+      ScalaAccessor("long | 1")
+        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getLong("path") else 1"""
+      ScalaAccessor("long?")
+        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getLong("path")) else None"""
 
       ScalaAccessor("double | 1")
         .instance("path") must_== """if(c.hasPathOrNull("path")) c.getDouble("path") else 1"""

@@ -58,6 +58,8 @@ class JavaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """c.getString("path")"""
       JavaAccessor("int")
         .instance("path") must_== """c.getInt("path")"""
+      JavaAccessor("long")
+        .instance("path") must_== """c.getLong("path")"""
       JavaAccessor("double")
         .instance("path") must_== """c.getDouble("path")"""
       JavaAccessor("boolean")
@@ -75,6 +77,11 @@ class JavaAccessorSpec extends BaseAccessorSpec {
         .instance("path") must_== """c.hasPathOrNull("path") ? c.getInt("path") : 1"""
       JavaAccessor("int?")
         .instance("path") must_== """c.hasPathOrNull("path") ? Integer.valueOf(c.getInt("path")) : null"""
+
+      JavaAccessor("long | 1")
+        .instance("path") must_== """c.hasPathOrNull("path") ? c.getLong("path") : 1"""
+      JavaAccessor("long?")
+        .instance("path") must_== """c.hasPathOrNull("path") ? Long.valueOf(c.getLong("path")) : null"""
 
       JavaAccessor("double | 1")
         .instance("path") must_== """c.hasPathOrNull("path") ? c.getDouble("path") : 1"""
