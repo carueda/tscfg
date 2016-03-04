@@ -1,3 +1,6 @@
+2016-03-03 - 0.3.1
+- add scoverage
+
 2016-03-01 - 0.3.0
 - implement #8: "support durations" (for both java and scala)
 - example-duration.all.conf generated with:

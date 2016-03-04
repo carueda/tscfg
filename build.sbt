@@ -1,6 +1,6 @@
 name := "tscfg"
 
-val tscfgVersion = setVersion("0.3.0")
+val tscfgVersion = setVersion("0.3.1")
 
 version := tscfgVersion
 
@@ -14,6 +14,13 @@ mainClass in assembly := Some("tscfg.Main")
 
 assemblyJarName in assembly := s"tscfg-$tscfgVersion.jar"
 
+coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
+
+coverageMinimum := 70
+
+coverageFailOnMinimum := false
+
+coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
 // saves version in application.conf (if older than this file), and returns it
 def setVersion(version: String): String = {
