@@ -28,6 +28,9 @@ object generator {
                      language: String    = "java"
                     )
 
+  case class GenResult(classNames: Set[String] = Set(),
+                       fieldNames: Set[String] = Set())
+
   /**
     * Generates code for the given configuration tree.
     *
@@ -36,7 +39,7 @@ object generator {
     * @param genOpts      generation options
     */
   def generate(node: Node, out: Writer)
-              (implicit genOpts: GenOpts): Unit = {
+              (implicit genOpts: GenOpts): GenResult = {
 
     val pw = out match {
       case w: PrintWriter => w
