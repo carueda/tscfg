@@ -2,6 +2,7 @@ package tscfg
 
 import java.io.PrintWriter
 import com.typesafe.config.ConfigOrigin
+import tscfg.generator.GenResult
 import tscfg.nodes._
 import scala.collection.JavaConversions._
 
@@ -12,7 +13,9 @@ object templateGenerator {
   case object genLocal extends What
   case object genAll extends What
 
-  def generate(what: What, node: Node, out: PrintWriter): Unit = {
+  def generate(what: What, node: Node, out: PrintWriter): GenResult = {
+
+    var results = GenResult()
 
     node match {
       case bn: BranchNode =>
@@ -20,6 +23,10 @@ object templateGenerator {
         orderedNames foreach { name => gen(bn(name)) }
 
       case _ => throw new AssertionError()
+    }
+
+    def reportSymbol(symbol: String): Unit = {
+      results = results.copy(fieldNames = results.fieldNames + symbol)
     }
 
     def gen(n: Node, indent: String = ""): Unit = {
@@ -38,6 +45,7 @@ object templateGenerator {
         what match {
           case templateGenerator.genBase =>
             if (ln.type_.value.isDefined) {
+              reportSymbol(symbol)
               out.println()
               out.println(s"$indent# $symbol: ${ln.type_.description}")
               CommentInfo.outComments(indent, realComments, out)
@@ -46,6 +54,7 @@ object templateGenerator {
 
           case templateGenerator.genLocal =>
             if (ln.type_.required || ln.type_.value.isEmpty || CommentInfo.includeInLocal(annotations)) {
+              reportSymbol(symbol)
               out.println()
               out.println(s"$indent# $symbol: ${ln.type_.description}")
               CommentInfo.outComments(indent, realComments, out)
@@ -56,6 +65,7 @@ object templateGenerator {
             }
 
           case templateGenerator.genAll =>
+            reportSymbol(symbol)
             out.println()
             out.println(s"$indent# $symbol: ${ln.type_.description}")
             CommentInfo.outComments(indent, realComments, out)
@@ -69,6 +79,7 @@ object templateGenerator {
       }
 
       def genForBranch(bn: BranchNode): Unit = {
+        reportSymbol(symbol)
         val (realComments, annotations) = CommentInfo.processComments(bn.conf.origin())
         out.println()
         if (CommentInfo.optionalSection(annotations)) {
@@ -85,6 +96,7 @@ object templateGenerator {
         out.println(s"$indent}")
       }
     }
+    results
   }
 }
 

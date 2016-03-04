@@ -15,7 +15,9 @@ abstract class BaseGeneratorSpec extends Specification {
     val sw = new StringWriter()
     val out = new PrintWriter(sw)
 
-    val results = if (genOpts.language == "java")
+    val results = if (genOpts.templateWhat.isDefined)
+      templateGenerator.generate(genOpts.templateWhat.get, root, out)
+    else if (genOpts.language == "java")
       javaGenerator.generate(root, out)
     else if (genOpts.language == "scala")
       scalaGenerator.generate(root, out)
