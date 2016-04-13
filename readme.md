@@ -13,6 +13,25 @@ available in type safe, immutable objects
 Typesafe Config is used by the tool for the generation, and required for compilation 
 and execution of the generated classes in your code.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+  - [status](#status)
+- [configuration spec](#configuration-spec)
+- [running tscfg](#running-tscfg)
+- [configuration access](#configuration-access)
+- [supported types](#supported-types)
+  - [durations](#durations)
+- [template generation](#template-generation)
+- [FAQ](#faq)
+- [tests](#tests)
+  - [java](#java)
+  - [scala](#scala)
+  - [Type](#type)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ### status
 
 The tool is already pretty usable.
@@ -218,7 +237,7 @@ With explicit field typing, the following base types are currently supported:
 | `boolean`     | boolean / Boolean   | Boolean / Option[Boolean]   
 | `duration`    | long    / Long      | Long    / Option[Long]
       
-#### durations
+### durations
 
 A duration type can be further qualified with a suffix consisting of a colon 
 an a desired time unit for the reported value. 
