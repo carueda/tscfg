@@ -348,7 +348,7 @@ may become more apparent.
 
 Not yet, but should not be too difficult to add. Feel free to contribute!
 
-## Tests
+## tests
 
 ### java
 
