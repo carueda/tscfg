@@ -17,7 +17,7 @@ and execution of the generated classes in your code.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-  - [status](#status)
+- [status](#status)
 - [configuration spec](#configuration-spec)
 - [running tscfg](#running-tscfg)
 - [configuration access](#configuration-access)
