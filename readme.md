@@ -347,9 +347,8 @@ may become more apparent.
 **Could tscfg generate `Optional<T>` by default for optional fields?**
 
 Not yet, but should not be too difficult to add. Feel free to contribute!
- 
 
-## tests
+## Tests
 
 ### java
 
