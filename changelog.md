@@ -1,3 +1,6 @@
+2016-08-16 - 0.3.2
+- fix #11 "name collision with no-arg methods in scope"
+
 2016-08-15 - 0.3.1
 - update specs2-core to 3.8.4
 - minor adj in Scala's toString

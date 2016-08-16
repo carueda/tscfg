@@ -157,11 +157,13 @@ object scalaGenerator {
     * Returns a valid scala identifier from the given symbol:
     *
     * - encloses the symbol in backticks if the symbol is a scala reserved word;
+    * - appends an underscore if the symbol corresponds to a no-arg method in scope;
     * - otherwise, returns symbol if it is a valid java identifier
     * - otherwise, returns `javaGenerator.javaIdentifier(symbol)`
     */
   def scalaIdentifier(symbol: String): String = {
     if (scalaReservedWords.contains(symbol)) "`" + symbol + "`"
+    else if (noArgMethodInScope.contains(symbol)) symbol + "_"
     else if (javaGenerator.isJavaIdentifier(symbol)) symbol
     else javaGenerator.javaIdentifier(symbol)
   }
@@ -180,6 +182,16 @@ object scalaGenerator {
     "return",   "sealed",   "super",   "this",    "throw",
     "trait",    "try",      "true",    "type",    "val",
     "var",      "while",    "with",    "yield"
+  )
+
+  val noArgMethodInScope: List[String] = List(
+      "clone",
+      "finalize",
+      "getClass",
+      "notify",
+      "notifyAll",
+      "toString",
+      "wait"
   )
 
   val TypesafeConfigClassName = classOf[com.typesafe.config.Config].getName
