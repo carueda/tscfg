@@ -8,7 +8,7 @@ scalaVersion := "2.11.7"
 
 libraryDependencies += "com.typesafe" % "config" % "1.3.0"
 
-libraryDependencies += "org.specs2" %% "specs2-core" % "3.7" % "test"
+libraryDependencies += "org.specs2" %% "specs2-core" % "3.8.4" % "test"
 
 mainClass in assembly := Some("tscfg.Main")
 

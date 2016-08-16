@@ -1,3 +1,7 @@
+2016-08-15 - 0.3.1
+- update specs2-core to 3.8.4
+- minor adj in Scala's toString
+
 2016-03-03 - 0.3.1
 - add scoverage
 

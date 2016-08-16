@@ -35,7 +35,7 @@ object scalaGenerator {
       }
 
       def genForLeaf(ln: LeafNode): Unit = {
-        out.println(s"${indent}  $scalaId: ${ln.accessor.`type`}")
+        out.println(s"$indent  $scalaId: ${ln.accessor.`type`}")
       }
 
       def genForBranch(bn: BranchNode): Unit = {
@@ -43,7 +43,7 @@ object scalaGenerator {
 
         val className = upperFirst(symbol)
 
-        val orderedNames = bn.keys.toList.sorted
+        val orderedNames = bn.keys().toList.sorted
 
         // <object>
         out.println(s"${indent}object $className {")
@@ -58,8 +58,8 @@ object scalaGenerator {
         // </recurse>
 
         // <apply>
-        out.println(s"${indent}  def apply(c: $TypesafeConfigClassName): $className = {")
-        out.println(s"${indent}    $className(")
+        out.println(s"$indent  def apply(c: $TypesafeConfigClassName): $className = {")
+        out.println(s"$indent    $className(")
 
         comma = indent
         orderedNames foreach { name =>
@@ -72,14 +72,14 @@ object scalaGenerator {
               val className = upperFirst(k.simple)
               out.print(s"""      $className(c.getConfig("${k.simple}"))""")
           }
-          comma = s",\n${indent}"
+          comma = s",\n$indent"
         }
         out.println()
-        out.println(s"${indent}    )")
-        out.println(s"${indent}  }")
+        out.println(s"$indent    )")
+        out.println(s"$indent  }")
         // </apply>
 
-        out.println(s"${indent}}")
+        out.println(s"$indent}")
         // </object>
 
         // <class>
@@ -90,7 +90,7 @@ object scalaGenerator {
           val scalaId = scalaIdentifier(name)
           results = results.copy(fieldNames = results.fieldNames + scalaId)
           out.print(comma)
-          out.print(s"${indent}  $scalaId : ")  // note, space before : for proper tokenization
+          out.print(s"$indent  $scalaId : ")  // note, space before : for proper tokenization
           bn(name) match {
             case ln@LeafNode(k, v) =>
               out.print(s"""${ln.accessor.`type`}""")
@@ -104,41 +104,44 @@ object scalaGenerator {
         }
 
         // <class-body>
-        out.println(s"\n${indent}) {")
+        out.println(s"\n$indent) {")
 
 
         // toString():
-        out.println(s"""${indent}  override def toString: String = toString("")""")
+        out.println(s"""$indent  override def toString: String = toString("")""")
+
+        val padLength = if (orderedNames.nonEmpty) orderedNames.maxBy(_.length).length else 0
+        def padString(str: String) = str + (" " * (padLength - str.length))
 
         // <toString(i:String)>
-        out.println(s"""${indent}  def toString(i:String): String = {""")
+        out.println(s"""$indent  def toString(i:String): String = {""")
         val ids = orderedNames map { name =>
           val id = scalaIdentifier(name)
 
+          s"""  i+ "${padString(name)} = """ + (
           bn(name) match {
             case ln@LeafNode(k, v) =>
               (if(ln.accessor.`type` == "String") {
-                s"""  i+ "$name = " + '"' + this.$id + '"'"""
+                s"""" + '"' + this.$id + '"'"""
               }
               else if(ln.accessor.`type` == "Option[String]") {
                 val value = s"""if(this.$id.isDefined) "Some(" +'"' +this.$id.get+ '"' + ")" else "None""""
-                s"""  i+ "$name = " + (""" + value + ")"
+                s"""" + (""" + value + ")"
               }
               else {
-                s"""  i+ "$name = " + this.$id"""
+                s"""" + this.$id"""
               }) +
               s""" + "\\n""""
 
             case BranchNode(k, _) =>
-              val className = upperFirst(k.simple)
-              s"""  i+ "$className(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
-          }
+              s"""(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
+          })
         }
-        out.println(s"${indent}  ${ids.mkString(s"+\n${indent}  ")}")
-        out.println(s"${indent}  }")
+        out.println(s"$indent  ${ids.mkString(s"+\n$indent  ")}")
+        out.println(s"$indent  }")
         // <toString(i:String)>
 
-        out.println(s"${indent}}")
+        out.println(s"$indent}")
         // </class-body>
         // </class>
       }
