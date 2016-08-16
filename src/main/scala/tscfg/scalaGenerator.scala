@@ -45,6 +45,10 @@ object scalaGenerator {
 
         val orderedNames = bn.keys().toList.sorted
 
+        val padScalaIdLength = if (orderedNames.nonEmpty)
+          orderedNames.map(scalaIdentifier).maxBy(_.length).length else 0
+        def padScalaId(id: String) = id + (" " * (padScalaIdLength - id.length))
+
         // <object>
         out.println(s"${indent}object $className {")
 
@@ -90,7 +94,7 @@ object scalaGenerator {
           val scalaId = scalaIdentifier(name)
           results = results.copy(fieldNames = results.fieldNames + scalaId)
           out.print(comma)
-          out.print(s"$indent  $scalaId : ")  // note, space before : for proper tokenization
+          out.print(s"$indent  ${padScalaId(scalaId)} : ")  // note, space before : for proper tokenization
           bn(name) match {
             case ln@LeafNode(k, v) =>
               out.print(s"""${ln.accessor.`type`}""")
@@ -110,17 +114,17 @@ object scalaGenerator {
         // toString():
         out.println(s"""$indent  override def toString: String = toString("")""")
 
-        val padLength = if (orderedNames.nonEmpty) orderedNames.maxBy(_.length).length else 0
-        def padString(str: String) = str + (" " * (padLength - str.length))
+        val padNameLength = if (orderedNames.nonEmpty) orderedNames.maxBy(_.length).length else 0
+        def padName(str: String) = str + (" " * (padNameLength - str.length))
 
         // <toString(i:String)>
         out.println(s"""$indent  def toString(i:String): String = {""")
         val ids = orderedNames map { name =>
           val id = scalaIdentifier(name)
 
-          s"""  i+ "${padString(name)} = """ + (
           bn(name) match {
             case ln@LeafNode(k, v) =>
+              s"""  i+ "${padName(name)} = """ +
               (if(ln.accessor.`type` == "String") {
                 s"""" + '"' + this.$id + '"'"""
               }
@@ -134,8 +138,8 @@ object scalaGenerator {
               s""" + "\\n""""
 
             case BranchNode(k, _) =>
-              s"""(\\n" + this.$id.toString(i+"    ") +i+ ")\\n""""
-          })
+              s"""  i+ "$name:\\n" + this.$id.toString(i+"    ")"""
+          }
         }
         out.println(s"$indent  ${ids.mkString(s"+\n$indent  ")}")
         out.println(s"$indent  }")
