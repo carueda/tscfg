@@ -71,7 +71,7 @@ object javaGenerator {
 
             case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
-              out.println(s"""new $className(c != null && c.hasPath("${k.simple}") ? c.getConfig("${k.simple}") : null);""")
+              out.println(s"""new $className(__$$config(c, "${k.simple}"));""")
           }
         }
         out.println(s"$indent  }")
@@ -104,6 +104,13 @@ object javaGenerator {
         out.println(s"$indent    return ${ids.mkString("\n" +indent + "        +")};")
         out.println(s"$indent  }")
         // </toString(String i)>
+
+        if (isRoot && results.classNames.size > 1) {
+          // declare symbol:
+          out.println(s"$indent  private static $TypesafeConfigClassName __$$config($TypesafeConfigClassName c, String path) {")
+          out.println(s"$indent    return c != null && c.hasPath(path) ? c.getConfig(path) : null;")
+          out.println(s"$indent  }")
+        }
 
         out.println(s"$indent}")
         // </class>
