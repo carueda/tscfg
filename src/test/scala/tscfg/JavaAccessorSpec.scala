@@ -69,36 +69,36 @@ class JavaAccessorSpec extends BaseAccessorSpec {
     }
     """have hasPathOrNull condition for type with default value"""" in {
       JavaAccessor("string | hello world")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getString("path") : "hello world""""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getString("path") : "hello world""""
       JavaAccessor("string?")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getString("path") : null"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getString("path") : null"""
 
       JavaAccessor("int | 1")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getInt("path") : 1"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getInt("path") : 1"""
       JavaAccessor("int?")
-        .instance("path") must_== """c.hasPathOrNull("path") ? Integer.valueOf(c.getInt("path")) : null"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? Integer.valueOf(c.getInt("path")) : null"""
 
       JavaAccessor("long | 1")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getLong("path") : 1"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getLong("path") : 1"""
       JavaAccessor("long?")
-        .instance("path") must_== """c.hasPathOrNull("path") ? Long.valueOf(c.getLong("path")) : null"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? Long.valueOf(c.getLong("path")) : null"""
 
       JavaAccessor("double | 1")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDouble("path") : 1"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getDouble("path") : 1"""
       JavaAccessor("double?")
-        .instance("path") must_== """c.hasPathOrNull("path") ? Double.valueOf(c.getDouble("path")) : null"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? Double.valueOf(c.getDouble("path")) : null"""
 
       JavaAccessor("boolean | true")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getBoolean("path") : true"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getBoolean("path") : true"""
       JavaAccessor("boolean?")
-        .instance("path") must_== """c.hasPathOrNull("path") ? Boolean.valueOf(c.getBoolean("path")) : null"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? Boolean.valueOf(c.getBoolean("path")) : null"""
 
       JavaAccessor("duration | 2")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : 2"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : 2"""
       JavaAccessor("duration:h | 1d")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) : 24"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) : 24"""
       JavaAccessor("duration?")
-        .instance("path") must_== """c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : null"""
+        .instance("path") must_== """c != null && c.hasPathOrNull("path") ? c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) : null"""
     }
   }
 

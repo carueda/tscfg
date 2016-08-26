@@ -24,7 +24,7 @@ object scalaUse {
     val `type`: Option[String] = if (endpoint.hasPathOrNull("type")) Some(endpoint.getString("type")) else None
 
     // you can:
-    val cfg: ScalaExampleCfg = ScalaExampleCfg(tsConfig)
+    val cfg: ScalaExampleCfg = ScalaExampleCfg(Some(tsConfig))
     val path2: String = cfg.endpoint.path
     val url2: String = cfg.endpoint.url
     val serial2: Option[Int] = cfg.endpoint.serial

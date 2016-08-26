@@ -1,3 +1,10 @@
+2016-08-25 - 0.3.3
+- allow missing sections in given input configuration.
+  This helps with sections whose all members are optional.
+  Still to be done is proper handling of optional sections in general. Besides an explicit annotation
+  to indicate that a section is optional, note that a section can also be implicitly optional
+  if all its members are optional.
+
 2016-08-16 - 0.3.2
 - fix #11 "name collision with no-arg methods in scope"
 

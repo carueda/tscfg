@@ -71,7 +71,7 @@ object javaGenerator {
 
             case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
-              out.println(s"""new $className(c.getConfig("${k.simple}"));""")
+              out.println(s"""new $className(c != null && c.hasPath("${k.simple}") ? c.getConfig("${k.simple}") : null);""")
           }
         }
         out.println(s"$indent  }")

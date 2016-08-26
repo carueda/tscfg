@@ -33,10 +33,10 @@ object JavaAccessor {
     def instance(path: String) = s"""c.getString("$path")"""
   }
   case class GetStringOrNull()(implicit genOpts: GenOpts) extends StringAccessor with HasPath {
-    def instance(path: String) = s"""c.$hasPath("$path") ? c.getString("$path") : null"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? c.getString("$path") : null"""
   }
   case class GetStringOr(value: String)(implicit genOpts: GenOpts) extends StringAccessor with HasPath {
-    def instance(path: String) = s"""c.$hasPath("$path") ? c.getString("$path") : $value"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? c.getString("$path") : $value"""
   }
 
   case class GetInt()(implicit genOpts: GenOpts) extends Accessor {
@@ -45,11 +45,11 @@ object JavaAccessor {
   }
   case class GetIntOrNull()(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "Integer"
-    def instance(path: String) = s"""c.$hasPath("$path") ? Integer.valueOf(c.getInt("$path")) : null"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? Integer.valueOf(c.getInt("$path")) : null"""
   }
   case class GetIntOr(value: String)(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "int"
-    def instance(path: String) = s"""c.$hasPath("$path") ? c.getInt("$path") : $value"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? c.getInt("$path") : $value"""
   }
 
   case class GetLong()(implicit genOpts: GenOpts) extends Accessor {
@@ -58,11 +58,11 @@ object JavaAccessor {
   }
   case class GetLongOrNull()(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "Long"
-    def instance(path: String) = s"""c.$hasPath("$path") ? Long.valueOf(c.getLong("$path")) : null"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? Long.valueOf(c.getLong("$path")) : null"""
   }
   case class GetLongOr(value: String)(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "long"
-    def instance(path: String) = s"""c.$hasPath("$path") ? c.getLong("$path") : $value"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? c.getLong("$path") : $value"""
   }
 
   case class GetDouble()(implicit genOpts: GenOpts) extends Accessor {
@@ -71,11 +71,11 @@ object JavaAccessor {
   }
   case class GetDoubleOrNull()(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "Double"
-    def instance(path: String) = s"""c.$hasPath("$path") ? Double.valueOf(c.getDouble("$path")) : null"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? Double.valueOf(c.getDouble("$path")) : null"""
   }
   case class GetDoubleOr(value: String)(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "double"
-    def instance(path: String) = s"""c.$hasPath("$path") ? c.getDouble("$path") : $value"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? c.getDouble("$path") : $value"""
   }
 
   case class GetBoolean()(implicit genOpts: GenOpts) extends Accessor {
@@ -84,11 +84,11 @@ object JavaAccessor {
   }
   case class GetBooleanOrNull()(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "Boolean"
-    def instance(path: String) = s"""c.$hasPath("$path") ? Boolean.valueOf(c.getBoolean("$path")) : null"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? Boolean.valueOf(c.getBoolean("$path")) : null"""
   }
   case class GetBooleanOr(value: String)(implicit genOpts: GenOpts) extends Accessor with HasPath {
     def `type` = "boolean"
-    def instance(path: String) = s"""c.$hasPath("$path") ? c.getBoolean("$path") : $value"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? c.getBoolean("$path") : $value"""
   }
 
   case class GetDuration(baseType: BaseType)(implicit genOpts: GenOpts) extends DurationAccessor {
@@ -97,11 +97,11 @@ object JavaAccessor {
   }
   case class GetDurationOrNull(baseType: BaseType)(implicit genOpts: GenOpts) extends DurationAccessor with HasPath {
     def `type` = "Long"
-    def instance(path: String) = s"""c.$hasPath("$path") ? ${durationGetter(path, baseType)} : null"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? ${durationGetter(path, baseType)} : null"""
   }
   case class GetDurationOr(baseType: BaseType, value: String)(implicit genOpts: GenOpts) extends DurationAccessor with HasPath {
     def `type` = "long"
-    def instance(path: String) = s"""c.$hasPath("$path") ? ${durationGetter(path, baseType)} : ${durationValue(value, baseType)}"""
+    def instance(path: String) = s"""c != null && c.$hasPath("$path") ? ${durationGetter(path, baseType)} : ${durationValue(value, baseType)}"""
   }
 
 }

@@ -62,7 +62,7 @@ object scalaGenerator {
         // </recurse>
 
         // <apply>
-        out.println(s"$indent  def apply(c: $TypesafeConfigClassName): $className = {")
+        out.println(s"$indent  def apply(c: scala.Option[$TypesafeConfigClassName]): $className = {")
         out.println(s"$indent    $className(")
 
         comma = indent
@@ -74,7 +74,7 @@ object scalaGenerator {
 
             case BranchNode(k, _)  =>
               val className = upperFirst(k.simple)
-              out.print(s"""      $className(c.getConfig("${k.simple}"))""")
+              out.print(s"""      $className(c.map(c => if (c.hasPath("${k.simple}")) Some(c.getConfig("${k.simple}")) else None).get)""")
           }
           comma = s",\n$indent"
         }

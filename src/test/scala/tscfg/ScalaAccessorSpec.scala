@@ -52,49 +52,49 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
   """"field access code"""" should {
     """have direct get* call for for type with required value""" in {
       ScalaAccessor("string")
-        .instance("path") must_== """c.getString("path")"""
+        .instance("path") must_== """c.get.getString("path")"""
       ScalaAccessor("int")
-        .instance("path") must_== """c.getInt("path")"""
+        .instance("path") must_== """c.get.getInt("path")"""
       ScalaAccessor("double")
-        .instance("path") must_== """c.getDouble("path")"""
+        .instance("path") must_== """c.get.getDouble("path")"""
       ScalaAccessor("boolean")
-        .instance("path") must_== """c.getBoolean("path")"""
+        .instance("path") must_== """c.get.getBoolean("path")"""
       ScalaAccessor("duration")
-        .instance("path") must_== """c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)"""
+        .instance("path") must_== """c.map(c => c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)).get"""
     }
 
     """have hasPathOrNull condition for type with default value""" in {
       ScalaAccessor("string | hello world")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getString("path") else "hello world""""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getString("path") else "hello world").get"""
       ScalaAccessor("string?")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getString("path")) else None"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) Some(c.getString("path")) else None).get"""
 
       ScalaAccessor("int | 1")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getInt("path") else 1"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getInt("path") else 1).get"""
       ScalaAccessor("int?")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getInt("path")) else None"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) Some(c.getInt("path")) else None).get"""
 
       ScalaAccessor("long | 1")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getLong("path") else 1"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getLong("path") else 1).get"""
       ScalaAccessor("long?")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getLong("path")) else None"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) Some(c.getLong("path")) else None).get"""
 
       ScalaAccessor("double | 1")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getDouble("path") else 1"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getDouble("path") else 1).get"""
       ScalaAccessor("double?")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getDouble("path")) else None"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) Some(c.getDouble("path")) else None).get"""
 
       ScalaAccessor("boolean | true")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getBoolean("path") else true"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getBoolean("path") else true).get"""
       ScalaAccessor("boolean?")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getBoolean("path")) else None"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) Some(c.getBoolean("path")) else None).get"""
 
       ScalaAccessor("duration | 2")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) else 2"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS) else 2).get"""
       ScalaAccessor("duration:h | 1d")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) else 24"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) c.getDuration("path", java.util.concurrent.TimeUnit.HOURS) else 24).get"""
       ScalaAccessor("duration?")
-        .instance("path") must_== """if(c.hasPathOrNull("path")) Some(c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)) else None"""
+        .instance("path") must_== """c.map(c => if(c.hasPathOrNull("path")) Some(c.getDuration("path", java.util.concurrent.TimeUnit.MILLISECONDS)) else None).get"""
     }
 
     """type inference""" should {

@@ -14,7 +14,7 @@ class ScalaExampleSpec extends Specification {
       |  interface.type = "foo"
       |}
       |""".stripMargin)
-    val cfg = ScalaExampleCfg(config)
+    val cfg = ScalaExampleCfg(Some(config))
 
     "capture given required values" in {
       cfg.endpoint.path must_== "/var/www"
@@ -37,7 +37,7 @@ class ScalaExampleSpec extends Specification {
 
     "throw exception in constructor" in {
       def a: Unit = {
-        ScalaExampleCfg(config)
+        ScalaExampleCfg(Some(config))
       }
       a must throwA[Exception]
     }
@@ -54,7 +54,7 @@ class ScalaExampleSpec extends Specification {
 
     "throw exception in constructor" in {
       def a: Unit = {
-        ScalaExampleCfg(config)
+        ScalaExampleCfg(Some(config))
       }
       a must throwA[Exception]
     }
