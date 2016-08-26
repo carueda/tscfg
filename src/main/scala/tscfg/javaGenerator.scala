@@ -78,10 +78,10 @@ object javaGenerator {
         // </constructor>
 
         // toString():
-        out.println(s"""$indent  public String toString() { return toString(""); }""")
+        out.println(s"""$indent  public java.lang.String toString() { return toString(""); }""")
 
         // <toString(String i)>
-        out.println(s"$indent  public String toString(String i) {")
+        out.println(s"$indent  public java.lang.String toString(java.lang.String i) {")
         val ids = orderedNames map { name =>
           val id = javaIdentifier(name)
 
@@ -107,7 +107,7 @@ object javaGenerator {
 
         if (isRoot && results.classNames.size > 1) {
           // declare symbol:
-          out.println(s"$indent  private static $TypesafeConfigClassName __$$config($TypesafeConfigClassName c, String path) {")
+          out.println(s"$indent  private static $TypesafeConfigClassName __$$config($TypesafeConfigClassName c, java.lang.String path) {")
           out.println(s"$indent    return c != null && c.hasPath(path) ? c.getConfig(path) : null;")
           out.println(s"$indent  }")
         }

@@ -28,5 +28,7 @@ object GenExamples {
     ("issue5.conf",                "ScalaIssue5Cfg"),
     ("issue11.conf",               "JavaIssue11Cfg"),
     ("issue11.conf",               "ScalaIssue11Cfg")
+    ,("issue12.conf",              "JavaIssue12Cfg")
+    ,("issue12.conf",              "ScalaIssue12Cfg")
   )
 }

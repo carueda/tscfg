@@ -8,44 +8,44 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
 
   """type correspondences to scala""" should {
     """"string" and all non-optional variations be String""" in {
-      ScalaAccessor("string").`type` must_== "String"
-      ScalaAccessor("string|foo").`type` must_== "String"
-      ScalaAccessor("STRING").`type` must_== "String"
+      ScalaAccessor("string").`type` must_== "java.lang.String"
+      ScalaAccessor("string|foo").`type` must_== "java.lang.String"
+      ScalaAccessor("STRING").`type` must_== "java.lang.String"
     }
-    """"string?" be Option[String]""" in {
-      ScalaAccessor("string?").`type` must_== "Option[String]"
+    """"string?" be scala.Option[String]""" in {
+      ScalaAccessor("string?").`type` must_== "scala.Option[java.lang.String]"
     }
 
     """"int" and all non-optional variations be Int""" in {
-      ScalaAccessor("int").`type` must_== "Int"
-      ScalaAccessor("Int|2").`type` must_== "Int"
-      ScalaAccessor("INT").`type` must_== "Int"
+      ScalaAccessor("int").`type` must_== "scala.Int"
+      ScalaAccessor("Int|2").`type` must_== "scala.Int"
+      ScalaAccessor("INT").`type` must_== "scala.Int"
     }
-    """"int?" and variations be Option[Int]""" in {
-      ScalaAccessor("int?").`type` must_== "Option[Int]"
-      ScalaAccessor("Int?").`type` must_== "Option[Int]"
-      ScalaAccessor("INT?").`type` must_== "Option[Int]"
+    """"int?" and variations be scala.Option[Int]""" in {
+      ScalaAccessor("int?").`type` must_== "scala.Option[scala.Int]"
+      ScalaAccessor("Int?").`type` must_== "scala.Option[scala.Int]"
+      ScalaAccessor("INT?").`type` must_== "scala.Option[scala.Int]"
     }
 
     """"long" and all non-optional variations be Long""" in {
-      ScalaAccessor("long").`type` must_== "Long"
-      ScalaAccessor("Long|2").`type` must_== "Long"
-      ScalaAccessor("LONG").`type` must_== "Long"
+      ScalaAccessor("long").`type` must_== "scala.Long"
+      ScalaAccessor("Long|2").`type` must_== "scala.Long"
+      ScalaAccessor("LONG").`type` must_== "scala.Long"
     }
-    """"long?" and variations be Option[Long]""" in {
-      ScalaAccessor("long?").`type` must_== "Option[Long]"
-      ScalaAccessor("Long?").`type` must_== "Option[Long]"
-      ScalaAccessor("LONG?").`type` must_== "Option[Long]"
+    """"long?" and variations be scala.Option[Long]""" in {
+      ScalaAccessor("long?").`type` must_== "scala.Option[scala.Long]"
+      ScalaAccessor("Long?").`type` must_== "scala.Option[scala.Long]"
+      ScalaAccessor("LONG?").`type` must_== "scala.Option[scala.Long]"
     }
 
     """"duration" be Long""" in {
-      ScalaAccessor("duration").`type` must_== "Long"
+      ScalaAccessor("duration").`type` must_== "scala.Long"
     }
     """"duration | 2" be Long""" in {
-      ScalaAccessor("duration | 5.0").`type` must_== "Long"
+      ScalaAccessor("duration | 5.0").`type` must_== "scala.Long"
     }
-    """"duration?" be Option[Long]""" in {
-      ScalaAccessor("duration?").`type` must_== "Option[Long]"
+    """"duration?" be scala.Option[Long]""" in {
+      ScalaAccessor("duration?").`type` must_== "scala.Option[scala.Long]"
     }
   }
 
@@ -99,34 +99,34 @@ class ScalaAccessorSpec extends BaseAccessorSpec {
 
     """type inference""" should {
       """map "some string" to String""" in {
-        ScalaAccessor("some string").`type` must_== "String"
+        ScalaAccessor("some string").`type` must_== "java.lang.String"
       }
       """map true to Boolean""" in {
-        ScalaAccessor(true).`type` must_== "Boolean"
+        ScalaAccessor(true).`type` must_== "scala.Boolean"
       }
       """map false to Boolean""" in {
-        ScalaAccessor(false).`type` must_== "Boolean"
+        ScalaAccessor(false).`type` must_== "scala.Boolean"
       }
       """map 123 to Int""" in {
-        ScalaAccessor(123).`type` must_== "Int"
+        ScalaAccessor(123).`type` must_== "scala.Int"
       }
       s"""map Integer.MAX_VALUE=${Integer.MAX_VALUE} to Int""" in {
-        ScalaAccessor(Integer.MAX_VALUE).`type` must_== "Int"
+        ScalaAccessor(Integer.MAX_VALUE).`type` must_== "scala.Int"
       }
       s"""map Integer.MIN_VALUE=${Integer.MIN_VALUE} to Int""" in {
-        ScalaAccessor(Integer.MIN_VALUE).`type` must_== "Int"
+        ScalaAccessor(Integer.MIN_VALUE).`type` must_== "scala.Int"
       }
       """map 2147483648 to Long""" in {
-        ScalaAccessor(2147483648L).`type` must_== "Long"
+        ScalaAccessor(2147483648L).`type` must_== "scala.Long"
       }
       s"""map Long.MaxValue=${Long.MaxValue} to Long""" in {
-        ScalaAccessor(Long.MaxValue).`type` must_== "Long"
+        ScalaAccessor(Long.MaxValue).`type` must_== "scala.Long"
       }
       s"""map Long.MinValue=${Long.MinValue} to Long""" in {
-        ScalaAccessor(Long.MinValue).`type` must_== "Long"
+        ScalaAccessor(Long.MinValue).`type` must_== "scala.Long"
       }
       """map 3.14 to Double""" in {
-        ScalaAccessor(3.14).`type` must_== "Double"
+        ScalaAccessor(3.14).`type` must_== "scala.Double"
       }
     }
 

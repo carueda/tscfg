@@ -1,4 +1,5 @@
 2016-08-25 - 0.3.3
+- fix #12 "incorrect reference with standard types in path fragments"
 - add tscfg.GenExamples for convenience
 - java: factor out access to Config parameter for sub-section in static method __$config at the root class
 - in java's toString, no need for conditional for string field if required or with default (non-null) value

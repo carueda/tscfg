@@ -8,10 +8,10 @@ class JavaAccessorSpec extends BaseAccessorSpec {
 
   """type correspondences to java""" should {
     """"string" (and all variations) be String""" in {
-      JavaAccessor("string").`type` must_== "String"
-      JavaAccessor("string?").`type` must_== "String"
-      JavaAccessor("string|foo").`type` must_== "String"
-      JavaAccessor("STRING").`type` must_== "String"
+      JavaAccessor("string").`type` must_== "java.lang.String"
+      JavaAccessor("string?").`type` must_== "java.lang.String"
+      JavaAccessor("string|foo").`type` must_== "java.lang.String"
+      JavaAccessor("STRING").`type` must_== "java.lang.String"
     }
     """"int" be int""" in {
       JavaAccessor("int").`type` must_== "int"
@@ -104,7 +104,7 @@ class JavaAccessorSpec extends BaseAccessorSpec {
 
   """type inference""" should {
     """map "some string" to String""" in {
-      JavaAccessor("some string").`type` must_== "String"
+      JavaAccessor("some string").`type` must_== "java.lang.String"
     }
     """map true to boolean""" in {
       JavaAccessor(true).`type` must_== "boolean"

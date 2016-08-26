@@ -112,13 +112,13 @@ object scalaGenerator {
 
 
         // toString():
-        out.println(s"""$indent  override def toString: String = toString("")""")
+        out.println(s"""$indent  override def toString: java.lang.String = toString("")""")
 
         val padNameLength = if (orderedNames.nonEmpty) orderedNames.maxBy(_.length).length else 0
         def padName(str: String) = str + (" " * (padNameLength - str.length))
 
-        // <toString(i:String)>
-        out.println(s"""$indent  def toString(i:String): String = {""")
+        // <toString(i:java.lang.String)>
+        out.println(s"""$indent  def toString(i:java.lang.String): java.lang.String = {""")
         val ids = orderedNames map { name =>
           val id = scalaIdentifier(name)
 
@@ -143,7 +143,7 @@ object scalaGenerator {
         }
         out.println(s"$indent  ${ids.mkString(s"+\n$indent  ")}")
         out.println(s"$indent  }")
-        // <toString(i:String)>
+        // <toString(i:java.lang.String)>
 
         out.println(s"$indent}")
         // </class-body>

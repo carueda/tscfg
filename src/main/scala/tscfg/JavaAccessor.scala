@@ -26,7 +26,7 @@ object JavaAccessor {
   }
 
   abstract class StringAccessor()(implicit genOpts: GenOpts) extends Accessor {
-    def `type` = "String"
+    def `type` = "java.lang.String"
   }
 
   case class GetString()(implicit genOpts: GenOpts) extends StringAccessor {
