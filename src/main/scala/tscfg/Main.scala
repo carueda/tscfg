@@ -15,13 +15,15 @@ object Main {
              |tscfg ${generator.version}
              |Usage:  tscfg.Main --spec inputFile [options]
              |Options (default):
-             |  --pn packageName  (${generator.defaultPackageName})
-             |  --cn className    (${generator.defaultClassName})
-             |  --dd destDir      ($defaultDestDir)
-             |  --j7 generate code for java <= 7  (8)
-             |  --scala generate scala code  (java)
-             |  --java generate java code
-             |  --tpl type filename   generate configuration template (type: base, local, all)
+             |  --pn <packageName>                                     (${generator.defaultPackageName})
+             |  --cn <className>                                       (${generator.defaultClassName})
+             |  --dd <destDir>                                         ($defaultDestDir)
+             |  --j7                  generate code for java <= 7      (8)
+             |  --scala               generate scala code              (java)
+             |  --java                generate java code               (the default)
+             |  --noToString          do not generate toString method  (generated)
+             |  --toPropString        generate toPropString method     (not generated)
+             |  --tpl <type> <filename>  generate configuration template;  <type> = base, local, all
              |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
@@ -33,7 +35,9 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java",
-                         templates: List[GenTemplate] = List()
+                         templates: List[GenTemplate] = List(),
+                         genToString: Boolean = true,
+                         genToPropString: Boolean = false
                  )
 
   def main(args: Array[String]): Unit = {
@@ -64,6 +68,10 @@ object Main {
           traverseList(rest, opts.copy(destDir = chkVal(destDir)))
         case "--j7" :: rest =>
           traverseList(rest, opts.copy(j7 = true))
+        case "--noToString" :: rest =>
+          traverseList(rest, opts.copy(genToString = false))
+        case "--toPropString" :: rest =>
+          traverseList(rest, opts.copy(genToPropString = true))
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
         case "--java" :: rest =>
@@ -104,7 +112,9 @@ object Main {
     val out = new PrintWriter(destFile)
     implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
       preamble = Some(s"source: $inputFilename"),
-      language = opts.language)
+      language = opts.language,
+      genToString = opts.genToString,
+      genToPropString = opts.genToPropString)
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()

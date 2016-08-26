@@ -162,12 +162,15 @@ $ java -jar tscfg-x.y.z.jar
 tscfg x.y.z
 Usage:  tscfg.Main --spec inputFile [options]
 Options (default):
-  --pn packageName  (tscfg.example)
-  --cn className    (ExampleCfg)
-  --dd destDir      (/tmp)
-  --j7 generate code for java <= 7  (8)
-  --scala generate scala code  (java)
-  --tpl type filename   generate configuration template (type: base, local, all)
+  --pn <packageName>                                     (tscfg.example)
+  --cn <className>                                       (ExampleCfg)
+  --dd <destDir>                                         (/tmp)
+  --j7                  generate code for java <= 7      (8)
+  --scala               generate scala code              (java)
+  --java                generate java code               (the default)
+  --noToString          do not generate toString method  (generated)
+  --toPropString        generate toPropString method     (not generated)
+  --tpl <type> <filename>  generate configuration template;  <type> = base, local, all
 Output is written to $destDir/$className.ext
 ```
 

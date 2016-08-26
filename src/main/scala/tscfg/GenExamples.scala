@@ -9,7 +9,8 @@ object GenExamples {
           "--pn",   "tscfg.example",
           "--cn",   className,
           "--dd",   s"src/main/$javaOrScala/tscfg/example/",
-          s"--$javaOrScala"
+          s"--$javaOrScala",
+          "--toPropString"
       ))
       println()
     }

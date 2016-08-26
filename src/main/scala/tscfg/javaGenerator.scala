@@ -77,33 +77,65 @@ object javaGenerator {
         out.println(s"$indent  }")
         // </constructor>
 
-        // toString():
-        out.println(s"""$indent  public java.lang.String toString() { return toString(""); }""")
+        if (genOpts.genToString) {
+          // toString():
+          out.println(s"""$indent  public java.lang.String toString() { return toString(""); }""")
 
-        // <toString(String i)>
-        out.println(s"$indent  public java.lang.String toString(java.lang.String i) {")
-        val ids = orderedNames map { name =>
-          val id = javaIdentifier(name)
+          // <toString(String i)>
+          out.println(s"$indent  public java.lang.String toString(java.lang.String i) {")
+          val ids = orderedNames map { name =>
+            val id = javaIdentifier(name)
 
-          bn(name) match {
-            case ln@LeafNode(k, v) =>
-              (if(ln.accessor.`type` == "String") {
-                if (ln.type_.required || ln.type_.value.isDefined)
-                  s"""i+ "$id = " + '"' + this.$id + '"'"""
-                else
-                  s"""i+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
-              }
-              else {
-                s"""i+ "$id = " + this.$id"""
-              }) + s""" + "\\n""""
+            bn(name) match {
+              case ln@LeafNode(k, v) =>
+                (if(ln.accessor.`type` == "String") {
+                  if (ln.type_.required || ln.type_.value.isDefined)
+                    s"""i+ "$id = " + '"' + this.$id + '"'"""
+                  else
+                    s"""i+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
+                }
+                else {
+                  s"""i+ "$id = " + this.$id"""
+                }) + s""" + "\\n""""
 
-            case BranchNode(k, _) =>
-              s"""i+ "$id {\\n" + this.$id.toString(i+"    ") +i+ "}\\n""""
+              case BranchNode(k, _) =>
+                s"""i+ "$id {\\n" + this.$id.toString(i+"    ") +i+ "}\\n""""
+            }
           }
+          out.println(s"$indent    return ${ids.mkString("\n" +indent + "        +")};")
+          out.println(s"$indent  }")
+          // </toString(String i)>
         }
-        out.println(s"$indent    return ${ids.mkString("\n" +indent + "        +")};")
-        out.println(s"$indent  }")
-        // </toString(String i)>
+
+        if (genOpts.genToPropString) {
+          // toPropString():
+          out.println(s"""$indent  public java.lang.String toPropString() { return toPropString(""); }""")
+
+          // <toPropString(String p)>
+          out.println(s"$indent  public java.lang.String toPropString(java.lang.String p) {")
+          val ids3 = orderedNames map { name =>
+            val id = javaIdentifier(name)
+
+            bn(name) match {
+              case ln@LeafNode(k, v) =>
+                (if(ln.accessor.`type` == "String") {
+                  if (ln.type_.required || ln.type_.value.isDefined)
+                    s"""p+ "$id = " + '"' + this.$id + '"'"""
+                  else
+                    s"""p+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
+                }
+                else {
+                  s"""p+ "$id = " + this.$id"""
+                }) + s""" + "\\n""""
+
+              case BranchNode(k, _) =>
+                s"""this.$id.toPropString(p+"$id.")"""
+            }
+          }
+          out.println(s"$indent    return ${ids3.mkString("\n" +indent + "        +")};")
+          out.println(s"$indent  }")
+          // </toPropString(String p)>
+        }
 
         if (isRoot && results.classNames.size > 1) {
           // declare symbol:

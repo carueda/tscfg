@@ -26,7 +26,9 @@ object generator {
                      j7: Boolean         = false,
                      preamble: Option[String] = None,
                      language: String    = "java",
-                     templateWhat: Option[templateGenerator.What] = None
+                     templateWhat: Option[templateGenerator.What] = None,
+                     genToString: Boolean = true,
+                     genToPropString: Boolean = false
                     )
 
   case class GenResult(classNames: Set[String] = Set(),
