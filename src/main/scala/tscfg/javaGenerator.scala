@@ -88,7 +88,10 @@ object javaGenerator {
           bn(name) match {
             case ln@LeafNode(k, v) =>
               (if(ln.accessor.`type` == "String") {
-                s"""i+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
+                if (ln.type_.required || ln.type_.value.isDefined)
+                  s"""i+ "$id = " + '"' + this.$id + '"'"""
+                else
+                  s"""i+ "$id = " + (this.$id == null ? null : '"' + this.$id + '"')"""
               }
               else {
                 s"""i+ "$id = " + this.$id"""

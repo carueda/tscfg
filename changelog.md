@@ -1,4 +1,5 @@
 2016-08-25 - 0.3.3
+- in java's toString, no need for conditional for string field if required or with default (non-null) value
 - allow missing sections in given input configuration.
   This helps with sections whose all members are optional.
   Still to be done is proper handling of optional sections in general. Besides an explicit annotation
