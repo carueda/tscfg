@@ -5,8 +5,8 @@ import com.typesafe.config.ConfigFactory;
 
 /**
  * <pre>
-    > runMain tscfg.example.ExampleDurationCfgUse
-    [info] Running tscfg.example.ExampleDurationCfgUse
+    > runMain tscfg.example.JavaExampleDurationCfgUse
+    [info] Running tscfg.example.JavaExampleDurationCfgUse
     Input:
       durations {
         days = "48hour"
@@ -21,7 +21,7 @@ import com.typesafe.config.ConfigFactory;
       }
  * </pre>
  */
-public class ExampleDurationCfgUse {
+public class JavaExampleDurationCfgUse {
   public static void main(String[] args) {
     String input =
         "durations {\n" +
@@ -32,7 +32,7 @@ public class ExampleDurationCfgUse {
     System.out.println("Input:\n  " + input.replace("\n", "\n  "));
 
     Config tsConfig = ConfigFactory.parseString(input).resolve();
-    ExampleDurationCfg cfg = new ExampleDurationCfg(tsConfig);
+    JavaExampleDurationCfg cfg = new JavaExampleDurationCfg(tsConfig);
     Long days = cfg.durations.days;
     long hours = cfg.durations.hours;
     long millis = cfg.durations.millis;

@@ -3,9 +3,9 @@ package tscfg.example
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 
-class ExampleSpec extends Specification {
+class JavaExampleSpec extends Specification {
 
-  """ExampleCfg with good input""" should {
+  """JavaExampleCfg with good input""" should {
     val config = ConfigFactory.parseString("""
       |endpoint {
       |  path = "/var/www"
@@ -15,7 +15,7 @@ class ExampleSpec extends Specification {
       |  interface.type = "foo"
       |}
       |""".stripMargin)
-    val cfg: ExampleCfg = new ExampleCfg(config)
+    val cfg: JavaExampleCfg = new JavaExampleCfg(config)
 
     "capture given required values" in {
       cfg.endpoint.path must_== "/var/www"
@@ -33,18 +33,18 @@ class ExampleSpec extends Specification {
     }
   }
 
-  """ExampleCfg with input having missing required entries""" should {
+  """JavaExampleCfg with input having missing required entries""" should {
     val config = ConfigFactory.parseString("")
 
     "throw exception in constructor" in {
       def a: Unit = {
-        new ExampleCfg(config)
+        new JavaExampleCfg(config)
       }
       a must throwA[Exception]
     }
   }
 
-  """ExampleCfg with null given to a field""" should {
+  """JavaExampleCfg with null given to a field""" should {
     val config = ConfigFactory.parseString("""
       |endpoint {
       |  path = "/var/www"
@@ -55,7 +55,7 @@ class ExampleSpec extends Specification {
 
     "throw exception in constructor" in {
       def a: Unit = {
-        new ExampleCfg(config)
+        new JavaExampleCfg(config)
       }
       a must throwA[Exception]
     }

@@ -20,6 +20,7 @@ object Main {
              |  --dd destDir      ($defaultDestDir)
              |  --j7 generate code for java <= 7  (8)
              |  --scala generate scala code  (java)
+             |  --java generate java code
              |  --tpl type filename   generate configuration template (type: base, local, all)
              |Output is written to $$destDir/$$className.ext
     """.stripMargin
@@ -65,6 +66,8 @@ object Main {
           traverseList(rest, opts.copy(j7 = true))
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
+        case "--java" :: rest =>
+          traverseList(rest, opts.copy(language = "java"))
         case "--tpl" :: "base" :: filename :: rest =>
           traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genBase, filename) :: opts.templates))
         case "--tpl" :: "local" :: filename :: rest =>
@@ -92,7 +95,6 @@ object Main {
 
   def generate(opts: CmdLineOpts): Unit = {
     require(opts.inputFilename.isDefined)
-    println(s"CmdLineOpts: $opts")
 
     val ext = opts.language
 
@@ -108,7 +110,7 @@ object Main {
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
     val root = nodes.createAllNodes(config)
 
-    println(s"generating: ${destFile.getAbsolutePath}")
+    println(s"generating: $destFile")
     generator.generate(root, out)
     out.close()
 

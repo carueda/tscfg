@@ -171,7 +171,7 @@ Options (default):
 Output is written to $destDir/$className.ext
 ```
 
-So, to generate the Java class `tscfg.example.ExampleCfg` with the example above 
+So, to generate the Java class `tscfg.example.ExampleCfg` with the example above
 saved in `def.example.conf`, we can run:
 
 ```shell
@@ -217,8 +217,8 @@ the specification. It will only be null (None) if it is marked optional with no 
 has been omitted in the input configuration.
  
 With this [example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
-the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/ExampleCfg.java) 
-and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/Use.java).
+the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaExampleCfg.java)
+and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java).
 
 For Scala
 the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
@@ -352,7 +352,7 @@ Not yet, but should not be too difficult to add. Feel free to contribute!
 
 ### java
 
-- [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ExampleSpec.scala) 
+- [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/JavaExampleSpec.scala)
 - [JavaAccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaAccessorSpec.scala)
 - [Java7AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/Java7AccessorSpec.scala)
 - [javaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaIdentifierSpec.scala)

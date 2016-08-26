@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigRenderOptions;
 
 import java.io.File;
 
-public class Use {
+public class JavaUse {
   public static void main(String[] args) {
     File configFile = new File(args[0]);
 
@@ -22,7 +22,7 @@ public class Use {
     String type    = endpoint.hasPathOrNull("type")   ? endpoint.getString("interface.type") : null;
 
     // you can:
-    ExampleCfg cfg = new ExampleCfg(tsConfig);
+    JavaExampleCfg cfg = new JavaExampleCfg(tsConfig);
     String path2    = cfg.endpoint.path;
     String url2     = cfg.endpoint.url;
     Integer serial2 = cfg.endpoint.serial;
