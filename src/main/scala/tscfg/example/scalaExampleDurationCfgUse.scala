@@ -31,7 +31,7 @@ object scalaExampleDurationCfgUse {
     println("Input:\n  " + input.replace("\n", "\n  "))
 
     val tsConfig: Config = ConfigFactory.parseString(input).resolve
-    val cfg = ScalaExampleDurationCfg(Some(tsConfig))
+    val cfg = ScalaExampleDurationCfg(tsConfig)
 
     val days: Option[Long] = cfg.durations.days
     val hours: Long = cfg.durations.hours

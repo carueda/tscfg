@@ -1,4 +1,6 @@
 2016-09-01 - 0.3.3
+- fix #13 "scala: double definition"
+  add `build` auxiliary method to avoid type erasure issue in case of optional member
 - `--noToString` now processed for scala
 
 2016-08-25 - 0.3.3
