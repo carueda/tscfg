@@ -107,46 +107,52 @@ object scalaGenerator {
           comma = ",\n"
         }
 
-        // <class-body>
-        out.println(s"\n$indent) {")
+        out.print(s"\n$indent)")
 
+        if (genOpts.genToString || genOpts.genToPropString) {
+          // <class-body>
+          out.println(s" {")
 
-        // toString():
-        out.println(s"""$indent  override def toString: java.lang.String = toString("")""")
+          if (genOpts.genToString) {
+            // toString():
+            out.println(s"""$indent  override def toString: java.lang.String = toString("")""")
 
-        val padNameLength = if (orderedNames.nonEmpty) orderedNames.maxBy(_.length).length else 0
-        def padName(str: String) = str + (" " * (padNameLength - str.length))
+            val padNameLength = if (orderedNames.nonEmpty) orderedNames.maxBy(_.length).length else 0
+            def padName(str: String) = str + (" " * (padNameLength - str.length))
 
-        // <toString(i:java.lang.String)>
-        out.println(s"""$indent  def toString(i:java.lang.String): java.lang.String = {""")
-        val ids = orderedNames map { name =>
-          val id = scalaIdentifier(name)
+            // <toString(i:java.lang.String)>
+            out.println(s"""$indent  def toString(i:java.lang.String): java.lang.String = {""")
+            val ids = orderedNames map { name =>
+              val id = scalaIdentifier(name)
 
-          bn(name) match {
-            case ln@LeafNode(k, v) =>
-              s"""  i+ "${padName(name)} = """ +
-              (if(ln.accessor.`type` == "String") {
-                s"""" + '"' + this.$id + '"'"""
+              bn(name) match {
+                case ln@LeafNode(k, v) =>
+                  s"""  i+ "${padName(name)} = """ +
+                    (if (ln.accessor.`type` == "String") {
+                      s"""" + '"' + this.$id + '"'"""
+                    }
+                    else if (ln.accessor.`type` == "Option[String]") {
+                      val value = s"""if(this.$id.isDefined) "Some(" +'"' +this.$id.get+ '"' + ")" else "None""""
+                      s"""" + (""" + value + ")"
+                    }
+                    else {
+                      s"""" + this.$id"""
+                    }) +
+                    s""" + "\\n""""
+
+                case BranchNode(k, _) =>
+                  s"""  i+ "$name:\\n" + this.$id.toString(i+"    ")"""
               }
-              else if(ln.accessor.`type` == "Option[String]") {
-                val value = s"""if(this.$id.isDefined) "Some(" +'"' +this.$id.get+ '"' + ")" else "None""""
-                s"""" + (""" + value + ")"
-              }
-              else {
-                s"""" + this.$id"""
-              }) +
-              s""" + "\\n""""
-
-            case BranchNode(k, _) =>
-              s"""  i+ "$name:\\n" + this.$id.toString(i+"    ")"""
+            }
+            out.println(s"$indent  ${ids.mkString(s"+\n$indent  ")}")
+            out.println(s"$indent  }")
+            // <toString(i:java.lang.String)>
           }
-        }
-        out.println(s"$indent  ${ids.mkString(s"+\n$indent  ")}")
-        out.println(s"$indent  }")
-        // <toString(i:java.lang.String)>
 
-        out.println(s"$indent}")
-        // </class-body>
+          out.println(s"$indent}")
+          // </class-body>
+        }
+        else out.println()
         // </class>
       }
     }
