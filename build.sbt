@@ -14,7 +14,7 @@ mainClass in assembly := Some("tscfg.Main")
 
 assemblyJarName in assembly := s"tscfg-$tscfgVersion.jar"
 
-coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
+coverageExcludedPackages := "tscfg.example.*;tscfg.Main;tscfg.GenExamples"
 
 coverageMinimum := 70
 
