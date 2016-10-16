@@ -26,9 +26,6 @@ and execution of the generated classes in your code.
 - [template generation](#template-generation)
 - [FAQ](#faq)
 - [tests](#tests)
-  - [java](#java)
-  - [scala](#scala)
-  - [Type](#type)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -105,7 +102,11 @@ The tool determines the type of each field according to the given value
 in the input configuration.
 Used in this way, all fields are considered optional, with the given value as the default. 
 
-To allow the specification of required fields, explicit types and default values, 
+But this wouldn't be flexible enough.
+To allow the specification of
+**required** fields**,
+**explicit types**,
+and **default values**,
 a string with a simple syntax as follows can be used
 (illustrated with the integer type):
 
@@ -186,11 +187,18 @@ generating: /tmp/ExampleCfg.java
 
 ## configuration access
 
-Usual Typesafe Config mechanism to load the file, for example:
+Access to a configuration instance is via usual Typesafe Config mechanism
+as appropriate for your application, for example, to load the default configuration:
+
+```java
+Config tsConfig = ConfigFactory.load().resolve()
+```
+
+or from a given file:
 
 ```java
 File configFile = new File("my.conf");
-Config tsConfig = ConfigFactory.parseFile(configFile).resolve();
+Config tsConfig = ConfigFactory.parseFile(new File("my.conf")).resolve();
 ```
 
 Now, to access the configuration fields, instead of, for example:
@@ -206,7 +214,7 @@ you can:
 ExampleCfg cfg = new ExampleCfg(tsConfig);
 ```
 which will make all verifications about required settings and associated types. 
-In particular, as is typical with Config use, an exception will be thrown is this verification fails.
+In particular, as is typical with Config use, an exception will be thrown if this verification fails.
 
 Then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
 ```java
@@ -349,7 +357,7 @@ may become more apparent.
 
 **Could tscfg generate `Optional<T>` by default for optional fields?**
 
-Not yet, but should not be too difficult to add. Feel free to contribute!
+Yes, but it's not implemented yet. Feel free to contribute!
 
 ## tests
 
