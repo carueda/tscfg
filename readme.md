@@ -104,7 +104,7 @@ Used in this way, all fields are considered optional, with the given value as th
 
 But this wouldn't be flexible enough.
 To allow the specification of
-**required** fields**,
+**required fields**,
 **explicit types**,
 and **default values**,
 a string with a simple syntax as follows can be used
