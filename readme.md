@@ -197,7 +197,6 @@ Config tsConfig = ConfigFactory.load().resolve()
 or from a given file:
 
 ```java
-File configFile = new File("my.conf");
 Config tsConfig = ConfigFactory.parseFile(new File("my.conf")).resolve();
 ```
 
