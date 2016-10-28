@@ -40,7 +40,7 @@ However, it's in general still work in progress and as time permits.
 Missing types include lists and bytes;
 command line interface can be improved;
 syntax for types is not stable yet.
-Feel free fork, enter issues, submit PRs, etc.
+Feel free to fork, enter issues, submit PRs, etc.
 
 Also, see FAQ below.
 
