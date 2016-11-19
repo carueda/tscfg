@@ -97,14 +97,8 @@ object Type {
   private def inferType(cv: ConfigValue, valueString : String): Type = {
     val defaultValue = Some(valueString)
 
-    // convenience in case later on we want to allow to indicate whether to make it required or optional via some parameter
-    val required = false  // optional is what makes more sense though
-
     def createType(base: String): Type = {
-      if (required)
-        RequiredType(cv, BaseType(base))
-      else
-        OptionalType(cv, BaseType(base), if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
+      OptionalType(cv, BaseType(base), if (base == "string") defaultValue.map(s => '"' +s+ '"') else defaultValue)
     }
 
     def numberType: Type = {
