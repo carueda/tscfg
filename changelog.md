@@ -1,3 +1,6 @@
+2016-11-19 - 0.3.4
+- fix #14 "section with numerical id generates invalid code"
+
 2016-09-01 - 0.3.3
 - fix #13 "scala: double definition"
   add `build` auxiliary method to avoid type erasure issue in case of optional member

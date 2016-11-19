@@ -41,7 +41,7 @@ object scalaGenerator {
       def genForBranch(bn: BranchNode): Unit = {
         var comma = ""
 
-        val className = upperFirst(symbol)
+        val className = getClassName(symbol)
 
         val orderedNames = bn.keys().toList.sorted
 
@@ -76,7 +76,7 @@ object scalaGenerator {
               out.print(s"""      ${ln.accessor.instance(k.simple)}""")
 
             case BranchNode(k, _)  =>
-              val className = upperFirst(k.simple)
+              val className = getClassName(k.simple)
               out.print(s"""      $className.build(c.map(c => if (c.hasPath("${k.simple}")) Some(c.getConfig("${k.simple}")) else None).get)""")
           }
           comma = s",\n$indent"
@@ -104,7 +104,7 @@ object scalaGenerator {
 
             case BranchNode(k, _)  =>
               // use full qualified class name
-              val className = genOpts.className + "." + k.parts.map(upperFirst).mkString(".")
+              val className = genOpts.className + "." + k.parts.map(getClassName).mkString(".")
               out.print(s"""$className""")
           }
           comma = ",\n"
@@ -176,6 +176,8 @@ object scalaGenerator {
     else if (javaGenerator.isJavaIdentifier(symbol)) symbol
     else javaGenerator.javaIdentifier(symbol)
   }
+
+  private def getClassName(symbol:String) = upperFirst(scalaIdentifier(symbol))
 
   private def upperFirst(symbol:String) = symbol.charAt(0).toUpper + symbol.substring(1)
 

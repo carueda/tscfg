@@ -38,4 +38,24 @@ class javaGeneratorSpec extends BaseGeneratorSpec {
       results.fieldNames must beEmpty
     }
   }
+
+  "handle issue14" should {
+    val result = generate(
+      """
+        |0 = {
+        |  1 = bar
+        |}
+        |2 = foo
+      """.stripMargin)
+
+    "generate expected class " in {
+      result.classNames must contain("CFG", "_0")
+      result.classNames.size must beEqualTo(2)
+    }
+
+    "generate expected fields" in {
+      result.fieldNames must contain("_0", "_1", "_2")
+      result.fieldNames.size must beEqualTo(3)
+    }
+  }
 }
