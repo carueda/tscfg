@@ -6,13 +6,23 @@ import scala.collection.JavaConversions._
 import scala.collection.{Iterable, mutable}
 
 object nodes {
+
+  object implicits {
+    import scala.language.implicitConversions
+
+    class LnWithAccessor(ln: LeafNode)(implicit genOpts: GenOpts) {
+      val accessor = Accessor(ln.type_)
+    }
+
+    @inline implicit def lnWithAccessor(ln: LeafNode)(implicit genOpts: GenOpts): LnWithAccessor = new LnWithAccessor(ln)
+  }
+
   sealed abstract class Node {
     val key: Key
   }
 
-  case class LeafNode(key: Key, value: ConfigValue)(implicit genOpts: GenOpts) extends Node {
+  case class LeafNode(key: Key, value: ConfigValue) extends Node {
     val type_ = Type(value)
-    val accessor = Accessor(type_)
   }
 
   case class BranchNode(key: Key, conf: Config) extends Node {
@@ -36,7 +46,7 @@ object nodes {
     private val byKey = mutable.HashMap[Key, Node]()
   }
 
-  def createAllNodes(conf: Config)(implicit genOpts: GenOpts): BranchNode = {
+  def createAllNodes(conf: Config): BranchNode = {
     val root = BranchNode(Key.root, conf)
     root.putByKey(Key.root, root)
 

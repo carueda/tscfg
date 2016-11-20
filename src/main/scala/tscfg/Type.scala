@@ -1,39 +1,6 @@
 package tscfg
 
-import com.typesafe.config.{ConfigValueType, ConfigValue}
-
-abstract sealed class BaseType {
-  val base: String
-  val qualification: Option[String] = None
-}
-case class UnqualifiedBaseType(base: String) extends BaseType
-case class QualifiedBaseType(base: String, q: String) extends BaseType {
-  override val qualification: Option[String] = Some(q)
-}
-
-object BaseType {
-  def apply(base: String, qualification: String) = {
-    QualifiedBaseType(base,
-      if (base == "duration")
-        canonicalDurationUnit(qualification)
-      else qualification
-    )
-  }
-
-  def apply(base: String) = UnqualifiedBaseType(base)
-
-  // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
-  private def canonicalDurationUnit(s: String): String = s match {
-    case "ns" | "nano" | "nanos" | "nanosecond" | "nanoseconds"     => "nanosecond"
-    case "us" | "micro" | "micros" | "microsecond" | "microseconds" => "microsecond"
-    case "ms" | "milli" | "millis" | "millisecond" | "milliseconds" => "millisecond"
-    case "s" | "second" | "seconds" => "second"
-    case "m" | "minute" | "minutes" => "minute"
-    case "h" | "hour" | "hours"     => "hour"
-    case "d" | "day" | "days"       => "day"
-    case _ => throw new AssertionError()
-  }
-}
+import com.typesafe.config.{ConfigList, ConfigObject, ConfigValue, ConfigValueType}
 
 abstract class Type {
   val cv: ConfigValue
@@ -125,12 +92,37 @@ object Type {
       }
     }
 
+    def listType: Type = {
+      val configList = cv.asInstanceOf[ConfigList]
+
+      if (configList.isEmpty)
+        throw new IllegalArgumentException("list with one element expected")
+
+      if (configList.size() > 1)
+        println(s"WARNING: only first element in given list will be considered")
+
+      val cv0: ConfigValue = configList.get(0)
+
+      val elemType = Type(cv0)
+
+      println(s"elemType: $elemType")
+      throw new IllegalArgumentException("list not implemented yet")
+    }
+
+    def objType: Type = {
+      val configObj = cv.asInstanceOf[ConfigObject]
+      val conf = configObj.toConfig
+      val objNode = nodes.createAllNodes(conf)
+      println(s"objNode: $objNode")
+      throw new AssertionError("object unexpected")
+    }
+
     cv.valueType() match {
       case ConfigValueType.STRING  => createType("string")
       case ConfigValueType.BOOLEAN => createType("boolean")
       case ConfigValueType.NUMBER  => numberType
-      case ConfigValueType.LIST    => throw new IllegalArgumentException("list not implemented yet")
-      case ConfigValueType.OBJECT  => throw new AssertionError("object unexpected")
+      case ConfigValueType.LIST    => listType
+      case ConfigValueType.OBJECT  => objType
       case ConfigValueType.NULL    => throw new AssertionError("null unexpected")
     }
   }

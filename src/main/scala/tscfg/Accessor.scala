@@ -18,12 +18,19 @@ object Accessor {
     * Returns accessor for the spec and target language.
     */
   def apply(type_ : Type)(implicit genOpts: GenOpts): Accessor = {
-    genOpts.language match {
-      case "java" => JavaAccessor(type_)
-      case "scala" => ScalaAccessor(type_)
-      case lang => throw new IllegalArgumentException(s"unrecognized language: '$lang'")
-    }
+    val lang = genOpts.language
+    accessors.getOrElse((type_, lang), {
+      val accessor = lang match {
+        case "java"    => JavaAccessor(type_)
+        case "scala"   => ScalaAccessor(type_)
+        case _         => throw new IllegalArgumentException(s"unrecognized language: '$lang'")
+      }
+      accessors.put((type_, lang), accessor)
+      accessor
+    })
   }
+
+  private[this] val accessors = collection.mutable.HashMap[(Type, String), Accessor]()
 }
 
 abstract class DurationAccessor extends Accessor {

@@ -5,6 +5,7 @@ import java.util.Date
 
 import tscfg.generator._
 import tscfg.nodes._
+import tscfg.nodes.implicits._
 
 
 object javaGenerator {

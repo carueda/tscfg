@@ -1,4 +1,6 @@
 2016-11-19 - 0.3.4
+- re #15 "support list"
+    - allow use of nodes.createAllNodes in object defining element of list
 - fix #14 "section with numerical id generates invalid code"
 
 2016-09-01 - 0.3.3
