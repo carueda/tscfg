@@ -31,12 +31,6 @@ object specs {
     }
   }
 
-  case class OptionalSpec(spec: Spec) extends Spec {
-    override def format(indent: String): String = {
-      s"Optional(${spec.format(indent)})"
-    }
-  }
-
   object atomics {
     val stringSpec    = AtomicSpec("string")
     val integerSpec   = AtomicSpec("integer")

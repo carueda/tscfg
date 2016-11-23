@@ -134,7 +134,8 @@ object SpecBuilder {
   }
 
   def main(args: Array[String]): Unit = {
-    val file = new File("example/issue15.conf")
+    val filename = if (args.isEmpty) "example/issue15.conf" else args(0)
+    val file = new File(filename)
     val src = io.Source.fromFile(file).mkString.trim
     println("src:\n  |" + src.replaceAll("\n", "\n  |"))
     val config = ConfigFactory.parseString(src).resolve()
@@ -142,11 +143,12 @@ object SpecBuilder {
     val objSpec = fromConfig(config)
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
-    implicit val genOpts = GenOpts("pkg", "Clase",
+    implicit val genOpts = GenOpts("pkg", "issue15",
       preamble = Some(s"source: (a test)")
     )
 
-    val out = new PrintWriter(System.out, true)
-    generators.javaGenerator.generate(objSpec, out)
+    val results = generators.javaGenerator.generate(objSpec)
+
+    println("\n" + results.code)
   }
 }

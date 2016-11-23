@@ -40,6 +40,26 @@ object javaUtil {
 
   private def upperFirst(symbol:String) = symbol.charAt(0).toUpper + symbol.substring(1)
 
+  def getJavaType(specType: String): String = specType match {
+    case "string"   ⇒ "java.lang.String"
+    case "integer"  ⇒ "int"
+    case "long"     ⇒ "long"
+    case "double"   ⇒ "double"
+    case "boolean"  ⇒ "boolean"
+    case "duration" ⇒ "long"
+    case _ ⇒ throw new AssertionError("unexpected specType: " + specType)
+  }
+
+  def toObjectType(specType: String): String = specType match {
+    case "integer"  ⇒ "java.lang.Integer"
+    case "int"      ⇒ "java.lang.Integer"
+    case "long"     ⇒ "java.lang.Long"
+    case "double"   ⇒ "java.lang.Double"
+    case "boolean"  ⇒ "java.lang.Boolean"
+    case "duration" ⇒ "java.lang.Long"
+    case _          ⇒ specType  // unchanged
+  }
+
   /**
     * Set of java keywords plus the literals "null", "true", "false".
     * (from Sect 3.9 of the Java Language Spec, Java SE 8 Edition)

@@ -31,7 +31,8 @@ object generator {
                      genToPropString: Boolean = false
                     )
 
-  case class GenResult(classNames: Set[String] = Set(),
+  case class GenResult(code: String = "?",
+                       classNames: Set[String] = Set(),
                        fieldNames: Set[String] = Set())
 
   /**
