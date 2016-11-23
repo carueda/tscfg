@@ -1,5 +1,8 @@
 package tscfg
 
+import tscfg.specs.types.{AtomicType, SpecType}
+import tscfg.specs.types._
+
 object javaUtil {
 
   /**
@@ -40,24 +43,43 @@ object javaUtil {
 
   private def upperFirst(symbol:String) = symbol.charAt(0).toUpper + symbol.substring(1)
 
-  def getJavaType(specType: String): String = specType match {
-    case "string"   ⇒ "java.lang.String"
-    case "integer"  ⇒ "int"
-    case "long"     ⇒ "long"
-    case "double"   ⇒ "double"
-    case "boolean"  ⇒ "boolean"
-    case "duration" ⇒ "long"
-    case _ ⇒ throw new AssertionError("unexpected specType: " + specType)
+  def getJavaType(specType: SpecType): String = specType match {
+    case atomicType: AtomicType ⇒ atomicType match {
+      case STRING   ⇒ "java.lang.String"
+      case INTEGER  ⇒ "int"
+      case LONG     ⇒ "long"
+      case DOUBLE   ⇒ "double"
+      case BOOLEAN  ⇒ "boolean"
+      case DURATION ⇒ "long"
+    }
+    case ObjectType  ⇒ "SomeCLASS"  // TODO
+    case ListType    ⇒ "SomeCLASS"
   }
 
-  def toObjectType(specType: String): String = specType match {
-    case "integer"  ⇒ "java.lang.Integer"
-    case "int"      ⇒ "java.lang.Integer"
-    case "long"     ⇒ "java.lang.Long"
-    case "double"   ⇒ "java.lang.Double"
-    case "boolean"  ⇒ "java.lang.Boolean"
-    case "duration" ⇒ "java.lang.Long"
-    case _          ⇒ specType  // unchanged
+  def toObjectType(specType: SpecType): String = specType match {
+    case atomicType: AtomicType ⇒ atomicType match {
+      case STRING   ⇒ "java.lang.String"
+      case INTEGER  ⇒ "java.lang.Integer"
+      case LONG     ⇒ "java.lang.Long"
+      case DOUBLE   ⇒ "java.lang.Double"
+      case BOOLEAN  ⇒ "java.lang.Boolean"
+      case DURATION ⇒ "java.lang.Long"
+    }
+    case ObjectType  ⇒ "SomeCLASS"  // TODO
+    case ListType    ⇒ "java.util.List<SomeCLASS>"  // TODO
+  }
+
+  def instance(specType: SpecType, path: String): String = specType match {
+    case atomicType: AtomicType ⇒ atomicType match {
+      case STRING   ⇒ s"""c.getString("$path")"""
+      case INTEGER  ⇒ s"""c.getInt("$path")"""
+      case LONG     ⇒ s"""c.getLong("$path")"""
+      case DOUBLE   ⇒ s"""c.getDouble("$path")"""
+      case BOOLEAN  ⇒ s"""c.getBoolean("$path")"""
+      case DURATION ⇒ "TODO_getDuration"
+    }
+    case ObjectType  ⇒ s"""TODO_getObjectType($path)"""
+    case ListType    ⇒ s"""TODO_getListType($path)"""
   }
 
   /**

@@ -1,14 +1,14 @@
 package tscfg
 
-import java.io.{File, PrintWriter}
+import java.io.File
 
 import com.typesafe.config._
-
-import scala.collection.JavaConversions._
-import specs._
 import tscfg.generator.GenOpts
+import tscfg.generators.{Generator, JavaGenerator}
+import tscfg.specs._
 
 import scala.annotation.tailrec
+import scala.collection.JavaConversions._
 
 object SpecBuilder {
   import collection._
@@ -20,7 +20,7 @@ object SpecBuilder {
     case class Leaf(key: Key, spec: Spec) extends Struct
     case class Group(members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) extends Struct
 
-    def getRootGroup(): Group = {
+    def getRootGroup: Group = {
 
       val groups = mutable.HashMap[Key, Group](Key.root → Group())
 
@@ -53,7 +53,7 @@ object SpecBuilder {
     }
 
     // 2- now build and return the corresponding root Spec:
-    val root = getRootGroup()
+    val root = getRootGroup
     //println("root group:"); pprint.log(root)
     def getSpec(struct: Struct): Spec = struct match {
       case Leaf(_, spec) ⇒ spec
@@ -147,7 +147,9 @@ object SpecBuilder {
       preamble = Some(s"source: (a test)")
     )
 
-    val results = generators.javaGenerator.generate(objSpec)
+    val generator: Generator = new JavaGenerator
+
+    val results = generator.generate(objSpec)
 
     println("\n" + results.code)
   }
