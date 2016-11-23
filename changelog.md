@@ -1,3 +1,6 @@
+2016-11-22 - 0.5.0
+    - advancing a rewrite... 
+    
 2016-11-19 - 0.3.4
 - re #15 "support list"
     - allow use of nodes.createAllNodes in object defining element of list

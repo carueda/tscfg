@@ -174,8 +174,8 @@ object scalaGenerator {
   def scalaIdentifier(symbol: String): String = {
     if (scalaReservedWords.contains(symbol)) "`" + symbol + "`"
     else if (noArgMethodInScope.contains(symbol)) symbol + "_"
-    else if (javaGenerator.isJavaIdentifier(symbol)) symbol
-    else javaGenerator.javaIdentifier(symbol)
+    else if (javaUtil.isJavaIdentifier(symbol)) symbol
+    else javaUtil.javaIdentifier(symbol)
   }
 
   private def getClassName(symbol:String) = upperFirst(scalaIdentifier(symbol))
