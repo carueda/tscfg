@@ -1,10 +1,6 @@
 package tscfg
 
-import java.io.File
-
 import com.typesafe.config._
-import tscfg.generator.GenOpts
-import tscfg.generators.{Generator, JavaGenerator}
 import tscfg.specs._
 import tscfg.specs.types.AtomicType
 
@@ -154,32 +150,5 @@ object SpecBuilder {
             }
         }
     }
-  }
-
-  def main(args: Array[String]): Unit = {
-    val filename = if (args.isEmpty) "example/issue15.conf" else args(0)
-    val file = new File(filename)
-    val src = io.Source.fromFile(file).mkString.trim
-    println("src:\n  |" + src.replaceAll("\n", "\n  |"))
-    val config = ConfigFactory.parseString(src).resolve()
-
-    val objSpec = fromConfig(config)
-    println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
-
-    val className = "Java" + {
-      val noPath = filename.substring(filename.lastIndexOf('/') + 1)
-      val noDef = noPath.replaceAll("""^def\.""", "")
-      val symbol = noDef.substring(0, noDef.indexOf('.'))
-      symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
-    }
-    implicit val genOpts = GenOpts("tscfg.example", className,
-      preamble = Some(s"source: (a test)")
-    )
-
-    val generator: Generator = new JavaGenerator
-
-    val results = generator.generate(objSpec)
-
-    println("\n" + results.code)
   }
 }

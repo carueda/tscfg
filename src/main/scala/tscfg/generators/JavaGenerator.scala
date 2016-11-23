@@ -66,7 +66,6 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       code.println(indent + "}")
       // </class>
 
-      code.newClass = true
       code
     }
 
@@ -87,8 +86,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val javaId = javaIdentifier(name)
       val code = Code(name, listSpec, javaType, javaId)
 
-      if (elemCode.newClass)
-        code.println(elemCode.definition)
+      if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
       code.declaration = indent + "public final " + javaType + " " + javaId + ";"
       code
@@ -127,8 +125,6 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
     def definition = defn.toString
 
-    var newClass: Boolean = false
-
     private val defn = new StringBuilder()
   }
 
@@ -149,7 +145,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
   }
 
-  private def toObjectType(spec: Spec, javaId: String): String = {
+  private def toObjectType(spec: Spec, className: String): String = {
     spec.typ match {
       case atomicType: AtomicType ⇒ atomicType match {
         case STRING   ⇒ "java.lang.String"
@@ -159,8 +155,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         case BOOLEAN  ⇒ "java.lang.Boolean"
         case DURATION ⇒ "java.lang.Long"
       }
-      case ObjectType  ⇒ javaId
-      case ListType    ⇒ "java.util.List<SomeCLASS>"  // TODO
+      case ObjectType  ⇒ className
+      case ListType    ⇒ s"java.util.List<$className>"
     }
   }
 
@@ -227,5 +223,38 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       case ListType    ⇒
         s"""TODO_getListType("$path")"""
     }
+  }
+}
+
+object JavaGenerator {
+  import java.io.File
+  import com.typesafe.config.ConfigFactory
+  import tscfg.SpecBuilder
+
+  def main(args: Array[String]): Unit = {
+    val filename = args(0)
+    val file = new File(filename)
+    val src = io.Source.fromFile(file).mkString.trim
+    println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+    val config = ConfigFactory.parseString(src).resolve()
+
+    val objSpec = SpecBuilder.fromConfig(config)
+    println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
+
+    val className = "Java" + {
+      val noPath = filename.substring(filename.lastIndexOf('/') + 1)
+      val noDef = noPath.replaceAll("""^def\.""", "")
+      val symbol = noDef.substring(0, noDef.indexOf('.'))
+      symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
+    }
+    implicit val genOpts = GenOpts("tscfg.example", className,
+      preamble = Some(s"source: (a test)")
+    )
+
+    val generator: Generator = new JavaGenerator
+
+    val results = generator.generate(objSpec)
+
+    println("\n" + results.code)
   }
 }
