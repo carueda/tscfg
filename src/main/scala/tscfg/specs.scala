@@ -14,8 +14,8 @@ object specs {
     case object BOOLEAN   extends AtomicType
     case object DURATION  extends AtomicType
 
-    case object ObjectType  extends SpecType
-    case object ListType    extends SpecType
+    case class ObjectType(name: String)     extends SpecType
+    case class ListType(elemType: SpecType) extends SpecType
 
     val recognizedAtomic: Map[String, AtomicType] = Map(
       "string"    → STRING,
@@ -52,13 +52,14 @@ object specs {
     }
   }
 
-  case class ObjSpec(children: Map[String, Spec],
+  case class ObjSpec(name: String,
+                     children: Map[String, Spec],
                      isOptional: Boolean = false,         // TODO
                      defaultValue: Option[String] = None,
                      qualification: Option[String] = None
                     ) extends Spec {
 
-    def typ: SpecType = ObjectType
+    def typ: SpecType = ObjectType(name)
     override def format(indent: String): String = {
       val symbols = children.keys.toList.sorted
       val childrenStr = symbols.map { symbol ⇒
@@ -78,7 +79,7 @@ object specs {
                       qualification: Option[String] = None
                      ) extends Spec {
 
-    def typ: SpecType = ListType
+    def typ: SpecType = ListType(elemSpec.typ)
     override def format(indent: String): String = {
       s"ListOf(${elemSpec.format(indent)})"
     }

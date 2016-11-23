@@ -7,6 +7,8 @@ import tscfg.generator._
 import tscfg.specs._
 import tscfg.specs.types._
 
+import scala.annotation.tailrec
+
 class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
   def generate(objSpec: ObjSpec): GenResult = {
@@ -55,14 +57,9 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       code.println(indent + IND + "}")
       // </constructor>
 
-      if (isRoot && results.classNames.size > 1) {
-        // define __$config:
-        val configGetter = s"""
-          |private static $TypesafeConfigClassName __$$config($TypesafeConfigClassName c, java.lang.String path) {
-          |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
-          |}""".stripMargin
-        code.println(configGetter.replaceAll("\n", "\n" + indent + IND))
-      }
+      // auxiliary methods:
+      accessors.insertAuxMethods(code, isRoot, indent + IND, results)
+
       code.println(indent + "}")
       // </class>
 
@@ -80,9 +77,18 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
     def genListSpec(name: String, listSpec: ListSpec, indent: String): Code = {
       val elemName = getClassName(name+ "Element_")
-      val elemCode = gen(elemName, listSpec.elemSpec, indent)
-      val objType = toObjectType(elemCode.spec, elemName)
-      val javaType = s"java.util.List<$objType>"
+
+      @tailrec
+      def listNesting(ls: ListSpec, levels: Int): (Spec, Int) = ls.elemSpec match {
+        case subListSpec: ListSpec ⇒ listNesting(subListSpec, levels + 1)
+        case nonListSpec ⇒ (nonListSpec, levels)
+      }
+
+      val (elemSpec, levels) = listNesting(listSpec, 1)
+
+      val elemCode = gen(elemName, elemSpec, indent)
+      val elemObjType = toObjectType(elemCode.spec)
+      val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
       val javaId = javaIdentifier(name)
       val code = Code(name, listSpec, javaType, javaId)
 
@@ -140,13 +146,22 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         case BOOLEAN  ⇒ if (spec.isOptional) "java.lang.Boolean" else "boolean"
         case DURATION ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
       }
-      case ObjectType  ⇒ javaId
-      case ListType    ⇒ "SomeList"
+
+      case ObjectType(name)  ⇒ getClassName(name)  // javaId
+
+      case ListType(elemType)    ⇒
+        val elemSpec = spec.asInstanceOf[ListSpec].elemSpec
+        val elemJavaType = toObjectType(elemSpec)
+        s"java.util.List<$elemJavaType>"
     }
   }
 
-  private def toObjectType(spec: Spec, className: String): String = {
-    spec.typ match {
+  private def toObjectType(spec: Spec): String = {
+    toObjectType(spec.typ)
+  }
+
+  private def toObjectType(specType: SpecType): String = {
+    specType match {
       case atomicType: AtomicType ⇒ atomicType match {
         case STRING   ⇒ "java.lang.String"
         case INTEGER  ⇒ "java.lang.Integer"
@@ -155,8 +170,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         case BOOLEAN  ⇒ "java.lang.Boolean"
         case DURATION ⇒ "java.lang.Long"
       }
-      case ObjectType  ⇒ className
-      case ListType    ⇒ s"java.util.List<$className>"
+      case ObjectType(name)    ⇒ getClassName(name)
+      case ListType(specType2)  ⇒ s"java.util.List<${toObjectType(specType2)}>"
     }
   }
 
@@ -217,11 +232,90 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         case DURATION ⇒ s"""TODO_getDuration("$path")"""
       }
 
-      case ObjectType  ⇒
-        s"""new ${getClassName(path)}(__$$config(c, "$path"))"""
+      case ObjectType(name)  ⇒
+        s"""new ${getClassName(name)}(_$$config(c, "$path"))"""
 
-      case ListType    ⇒
-        s"""TODO_getListType("$path")"""
+      case ListType(specType)    ⇒
+        val listSpec = spec.asInstanceOf[ListSpec]
+        accessors._listName(listSpec.elemSpec) + s"""(c.getList("$path"))"""
+    }
+  }
+
+  object accessors {
+    // defined in terms of corresponding elemAccessor:
+    type JavaElemTypeAndAccessor = (String,String)
+    val definedListElemAccessors = collection.mutable.ListBuffer[JavaElemTypeAndAccessor]()
+
+    def _listName(spec: Spec): String = {
+      val typ = spec.typ
+      val elemAccessor = typ match {
+        case atomicType: AtomicType ⇒ atomicType match {
+          case STRING   ⇒ "_$str"
+          case INTEGER  ⇒ "_$int"
+          case LONG     ⇒ "_$lng"
+          case DOUBLE   ⇒ "_$dbl"
+          case BOOLEAN  ⇒ "_$bol"
+          case DURATION ⇒ "_$dur"
+        }
+        case ObjectType(name) ⇒
+          "_" + name
+
+        case ListType(specType) ⇒
+          _listName(spec.asInstanceOf[ListSpec].elemSpec)
+      }
+      val javaType = toObjectType(spec)
+      definedListElemAccessors += ((javaType, elemAccessor))
+      "_$list" + elemAccessor
+    }
+
+    def _list(elemJavaType: String, elemAccessor: String): String = {
+      val castCv = if (elemAccessor.startsWith("_$list")) "(com.typesafe.config.ConfigList)" else ""
+      s"""
+         |private static java.util.List<$elemJavaType> _$$list$elemAccessor(com.typesafe.config.ConfigList cl) {
+         |  java.util.ArrayList<$elemJavaType> al = new java.util.ArrayList<$elemJavaType>();
+         |  for (com.typesafe.config.ConfigValue cv: cl) {
+         |    al.add($elemAccessor(${castCv}cv));
+         |  }
+         |  return java.util.Collections.unmodifiableList(al);
+         |}""".stripMargin
+    }
+
+    def _int(): String = {
+      """
+        |private static java.lang.Integer _$int(com.typesafe.config.ConfigValue cv) {
+        |  java.lang.Object u = cv.unwrapped();
+        |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER
+        |      || !(u instanceof java.lang.Integer)) {
+        |    _$exc(u, "integer");
+        |  }
+        |  return (java.lang.Integer) u;
+        |}""".stripMargin
+    }
+
+    def _exc(): String = {
+      """
+        |private static void _$exc(java.lang.Object u, java.lang.String expected) {
+        |  throw new java.lang.RuntimeException(
+        |      "expecting: " +expected + " got: " +
+        |          (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
+        |}""".stripMargin
+    }
+
+    val configGetter = s"""
+      |private static $TypesafeConfigClassName _$$config($TypesafeConfigClassName c, java.lang.String path) {
+      |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
+      |}""".stripMargin
+
+    def insertAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
+      definedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
+        println(s" --- $javaType  :  $elemAccessor")
+        code.println(accessors._list(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
+      }
+      code.println(accessors._int().replaceAll("\n", "\n" + indent))
+      code.println(accessors._exc().replaceAll("\n", "\n" + indent))
+      if (isRoot && results.classNames.size > 1) {
+        code.println(accessors.configGetter.replaceAll("\n", "\n" + indent))
+      }
     }
   }
 }

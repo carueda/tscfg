@@ -52,17 +52,18 @@ object SpecBuilder {
     // 2- now build and return the corresponding root Spec:
     val root = getRootGroup
     //println("root group:"); pprint.log(root)
-    def getSpec(struct: Struct): Spec = struct match {
+    def getSpec(name: String, struct: Struct): Spec = struct match {
       case Leaf(_, spec) ⇒ spec
 
       case Group(members) ⇒
         val children: immutable.Map[String, Spec] = members.map { case (childSimple, childStruct) ⇒
-            childSimple -> getSpec(childStruct)
+            childSimple -> getSpec(childSimple, childStruct)
         }.toMap
-        ObjSpec(children)
+        ObjSpec(name, children)
     }
 
-    getSpec(root).asInstanceOf[ObjSpec]
+    // TODO root's name??
+    getSpec("rootsName?", root).asInstanceOf[ObjSpec]
   }
 
   private def fromConfigValue(cv: ConfigValue): Spec = {
