@@ -12,13 +12,13 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
     var results = GenResult()
 
-    def genObjSpec(name: String, objSpec: ObjSpec, indent: String, root: Boolean = false): Code = {
+    def genObjSpec(name: String, objSpec: ObjSpec, indent: String, isRoot: Boolean = false): Code = {
       // <class>
       val className = getClassName(name)
       results = results.copy(classNames = results.classNames + className)
 
-      val staticStr = if (root) "" else " static"
-      val code = Code(objSpec,
+      val staticStr = if (isRoot) "" else " static"
+      val code = Code(name, objSpec,
         javaType = className,
         javaId = javaIdentifier(name),
         declaration = indent + "public final " + className + " " + javaIdentifier(name) + ";"
@@ -48,12 +48,20 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
-            " = " + instance(memberCode.spec.typ, "PATH_TODO")
+            " = " + instance(memberCode.spec.typ, memberCode.name) + ";"
         )
       }
       code.println(indent + IND + "}")
       // </constructor>
 
+      if (isRoot && results.classNames.size > 1) {
+        // define __$config:
+        val configGetter = s"""
+          |private static $TypesafeConfigClassName __$$config($TypesafeConfigClassName c, java.lang.String path) {
+          |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
+          |}""".stripMargin
+        code.println(configGetter.replaceAll("\n", "\n" + indent + IND))
+      }
       code.println(indent + "}")
       // </class>
 
@@ -64,7 +72,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     def genAtomicSpec(name: String, spec: AtomicSpec, indent: String): Code = {
       val javaType = getJavaType(spec.typ)
       val javaId = javaIdentifier(name)
-      Code(spec,
+      Code(name, spec,
         javaType,
         javaId = javaId,
         declaration = indent + "public final " + javaType + " " + javaId + ";")
@@ -75,7 +83,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val objType = toObjectType(elemCode.spec.typ)
       val javaType = s"java.util.List<$objType>"
       val javaId = javaIdentifier(name)
-      val code = Code(listSpec, javaType, javaId)
+      val code = Code(name, listSpec, javaType, javaId)
 
       if (elemCode.newClass)
         code.println(elemCode.definition)
@@ -98,14 +106,15 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     header.append(s"package ${genOpts.packageName};\n\n")
 
     // main class:
-    val elemSpec = genObjSpec(genOpts.className, objSpec, "", root = true)
+    val elemSpec = genObjSpec(genOpts.className, objSpec, "", isRoot = true)
 
     results = results.copy(code = header.toString() + elemSpec.definition)
 
     results
   }
 
-  case class Code(spec: Spec,
+  case class Code(name: String,
+                  spec: Spec,
                   javaType: String,
                   javaId: String,
                   var declaration: String = ""

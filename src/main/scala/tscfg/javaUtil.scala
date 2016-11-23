@@ -76,10 +76,10 @@ object javaUtil {
       case LONG     ⇒ s"""c.getLong("$path")"""
       case DOUBLE   ⇒ s"""c.getDouble("$path")"""
       case BOOLEAN  ⇒ s"""c.getBoolean("$path")"""
-      case DURATION ⇒ "TODO_getDuration"
+      case DURATION ⇒ s"""TODO_getDuration("$path")"""
     }
-    case ObjectType  ⇒ s"""TODO_getObjectType($path)"""
-    case ListType    ⇒ s"""TODO_getListType($path)"""
+    case ObjectType  ⇒ s"""new ${getClassName(path)}(__$$config(c, "$path"))"""
+    case ListType    ⇒ s"""TODO_getListType("$path")"""
   }
 
   /**

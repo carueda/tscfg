@@ -143,7 +143,13 @@ object SpecBuilder {
     val objSpec = fromConfig(config)
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
-    implicit val genOpts = GenOpts("pkg", "issue15",
+    val className = "Java" + {
+      val noPath = filename.substring(filename.lastIndexOf('/') + 1)
+      val noDef = noPath.replaceAll("""^def\.""", "")
+      val symbol = noDef.substring(0, noDef.indexOf('.'))
+      symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
+    }
+    implicit val genOpts = GenOpts("tscfg.example", className,
       preamble = Some(s"source: (a test)")
     )
 
