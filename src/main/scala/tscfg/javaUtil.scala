@@ -43,45 +43,6 @@ object javaUtil {
 
   private def upperFirst(symbol:String) = symbol.charAt(0).toUpper + symbol.substring(1)
 
-  def getJavaType(specType: SpecType): String = specType match {
-    case atomicType: AtomicType ⇒ atomicType match {
-      case STRING   ⇒ "java.lang.String"
-      case INTEGER  ⇒ "int"
-      case LONG     ⇒ "long"
-      case DOUBLE   ⇒ "double"
-      case BOOLEAN  ⇒ "boolean"
-      case DURATION ⇒ "long"
-    }
-    case ObjectType  ⇒ "SomeCLASS"  // TODO
-    case ListType    ⇒ "SomeCLASS"
-  }
-
-  def toObjectType(specType: SpecType): String = specType match {
-    case atomicType: AtomicType ⇒ atomicType match {
-      case STRING   ⇒ "java.lang.String"
-      case INTEGER  ⇒ "java.lang.Integer"
-      case LONG     ⇒ "java.lang.Long"
-      case DOUBLE   ⇒ "java.lang.Double"
-      case BOOLEAN  ⇒ "java.lang.Boolean"
-      case DURATION ⇒ "java.lang.Long"
-    }
-    case ObjectType  ⇒ "SomeCLASS"  // TODO
-    case ListType    ⇒ "java.util.List<SomeCLASS>"  // TODO
-  }
-
-  def instance(specType: SpecType, path: String): String = specType match {
-    case atomicType: AtomicType ⇒ atomicType match {
-      case STRING   ⇒ s"""c.getString("$path")"""
-      case INTEGER  ⇒ s"""c.getInt("$path")"""
-      case LONG     ⇒ s"""c.getLong("$path")"""
-      case DOUBLE   ⇒ s"""c.getDouble("$path")"""
-      case BOOLEAN  ⇒ s"""c.getBoolean("$path")"""
-      case DURATION ⇒ s"""TODO_getDuration("$path")"""
-    }
-    case ObjectType  ⇒ s"""new ${getClassName(path)}(__$$config(c, "$path"))"""
-    case ListType    ⇒ s"""TODO_getListType("$path")"""
-  }
-
   /**
     * Set of java keywords plus the literals "null", "true", "false".
     * (from Sect 3.9 of the Java Language Spec, Java SE 8 Edition)

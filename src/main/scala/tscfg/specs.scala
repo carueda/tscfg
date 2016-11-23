@@ -16,19 +16,48 @@ object specs {
 
     case object ObjectType  extends SpecType
     case object ListType    extends SpecType
+
+    val recognizedAtomic: Map[String, AtomicType] = Map(
+      "string"    → STRING,
+      "int"       → INTEGER,
+      "integer"   → INTEGER,
+      "long"      → LONG,
+      "double"    → DOUBLE,
+      "boolean"   → BOOLEAN,
+      "duration"  → DURATION
+    )
   }
   import types._
 
   sealed abstract class Spec {
     def typ: SpecType
+    def isOptional: Boolean
+    def defaultValue: Option[String]
+    def qualification: Option[String]
     def format(indent: String = ""): String
   }
 
-  case class AtomicSpec(typ: AtomicType) extends Spec {
-    override def format(indent: String): String = typ.toString
+  case class AtomicSpec(typ: AtomicType,
+                        isOptional: Boolean = false,
+                        defaultValue: Option[String] = None,
+                        qualification: Option[String] = None
+                       ) extends Spec {
+
+    override def format(indent: String): String = {
+      typ.toString + {
+        (if (isOptional) " optional" else "") +
+        (if (defaultValue.isDefined) s" default=${defaultValue.get}" else "") +
+        (if (qualification.isDefined) s" qualification=${qualification.get}" else "")
+      }
+    }
   }
 
-  case class ObjSpec(children: Map[String, Spec]) extends Spec {
+  case class ObjSpec(children: Map[String, Spec],
+                     isOptional: Boolean = false,         // TODO
+                     defaultValue: Option[String] = None,
+                     qualification: Option[String] = None
+                    ) extends Spec {
+
     def typ: SpecType = ObjectType
     override def format(indent: String): String = {
       val symbols = children.keys.toList.sorted
@@ -43,29 +72,15 @@ object specs {
     }
   }
 
-  case class ListSpec(elemSpec: Spec) extends Spec {
+  case class ListSpec(elemSpec: Spec,
+                      isOptional: Boolean = false,           // TODO
+                      defaultValue: Option[String] = None,
+                      qualification: Option[String] = None
+                     ) extends Spec {
+
     def typ: SpecType = ListType
     override def format(indent: String): String = {
       s"ListOf(${elemSpec.format(indent)})"
     }
-  }
-
-  object atomics {
-    val stringSpec    = AtomicSpec(STRING)
-    val integerSpec   = AtomicSpec(INTEGER)
-    val longSpec      = AtomicSpec(LONG)
-    val doubleSpec    = AtomicSpec(DOUBLE)
-    val booleanSpec   = AtomicSpec(BOOLEAN)
-    val durationSpec  = AtomicSpec(DURATION)
-
-    val recognized: Map[String, AtomicSpec] = Map(
-      "string"    → stringSpec,
-      "int"       → integerSpec,
-      "integer"   → integerSpec,
-      "long"      → longSpec,
-      "double"    → doubleSpec,
-      "boolean"   → booleanSpec,
-      "duration"  → durationSpec
-    )
   }
 }

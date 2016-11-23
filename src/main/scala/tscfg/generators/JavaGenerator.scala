@@ -5,6 +5,7 @@ import java.util.Date
 import tscfg.javaUtil._
 import tscfg.generator._
 import tscfg.specs._
+import tscfg.specs.types._
 
 class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
@@ -48,7 +49,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
-            " = " + instance(memberCode.spec.typ, memberCode.name) + ";"
+            " = " + instance(memberCode.spec, memberCode.name) + ";"
         )
       }
       code.println(indent + IND + "}")
@@ -70,8 +71,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
 
     def genAtomicSpec(name: String, spec: AtomicSpec, indent: String): Code = {
-      val javaType = getJavaType(spec.typ)
       val javaId = javaIdentifier(name)
+      val javaType = getJavaType(spec, javaId)
       Code(name, spec,
         javaType,
         javaId = javaId,
@@ -79,8 +80,9 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
 
     def genListSpec(name: String, listSpec: ListSpec, indent: String): Code = {
-      val elemCode = gen(name+ "Element_", listSpec.elemSpec, indent)
-      val objType = toObjectType(elemCode.spec.typ)
+      val elemName = getClassName(name+ "Element_")
+      val elemCode = gen(elemName, listSpec.elemSpec, indent)
+      val objType = toObjectType(elemCode.spec, elemName)
       val javaType = s"java.util.List<$objType>"
       val javaId = javaIdentifier(name)
       val code = Code(name, listSpec, javaType, javaId)
@@ -131,4 +133,99 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
   }
 
   private val IND = "    "
+
+  private def getJavaType(spec: Spec, javaId: String): String = {
+    spec.typ match {
+      case atomicType: AtomicType ⇒ atomicType match {
+        case STRING   ⇒ "java.lang.String"
+        case INTEGER  ⇒ if (spec.isOptional) "java.lang.Integer" else "int"
+        case LONG     ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
+        case DOUBLE   ⇒ if (spec.isOptional) "java.lang.Double"  else "double"
+        case BOOLEAN  ⇒ if (spec.isOptional) "java.lang.Boolean" else "boolean"
+        case DURATION ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
+      }
+      case ObjectType  ⇒ javaId
+      case ListType    ⇒ "SomeList"
+    }
+  }
+
+  private def toObjectType(spec: Spec, javaId: String): String = {
+    spec.typ match {
+      case atomicType: AtomicType ⇒ atomicType match {
+        case STRING   ⇒ "java.lang.String"
+        case INTEGER  ⇒ "java.lang.Integer"
+        case LONG     ⇒ "java.lang.Long"
+        case DOUBLE   ⇒ "java.lang.Double"
+        case BOOLEAN  ⇒ "java.lang.Boolean"
+        case DURATION ⇒ "java.lang.Long"
+      }
+      case ObjectType  ⇒ javaId
+      case ListType    ⇒ "java.util.List<SomeCLASS>"  // TODO
+    }
+  }
+
+  private def instance(spec: Spec, path: String): String = {
+    spec.typ match {
+      case atomicType: AtomicType ⇒ atomicType match {
+        case STRING   ⇒
+          if (spec.defaultValue.isDefined) {
+            val value = spec.defaultValue.get
+            s"""c != null && c.hasPath("$path") ? c.getString("$path") : "$value""""
+          }
+          else if (spec.isOptional) {
+            s"""c != null && c.hasPath("$path") ? c.getString("$path") : null"""
+          }
+          else s"""c.getString("$path")"""
+
+        case INTEGER  ⇒
+          if (spec.defaultValue.isDefined) {
+            val value = spec.defaultValue.get
+            s"""c != null && c.hasPath("$path") ? c.getInt("$path") : $value"""
+          }
+          else if (spec.isOptional) {
+            s"""c != null && c.hasPath("$path") ? c.getInt("$path") : null"""
+          }
+          else s"""c.getInt("$path")"""
+
+        case LONG     ⇒
+          if (spec.defaultValue.isDefined) {
+            val value = spec.defaultValue.get
+            s"""c != null && c.hasPath("$path") ? c.getLong("$path") : $value"""
+          }
+          else if (spec.isOptional) {
+            s"""c != null && c.hasPath("$path") ? c.getLong("$path") : null"""
+          }
+          else s"""c.getLong("$path")"""
+
+        case DOUBLE   ⇒
+          if (spec.defaultValue.isDefined) {
+            val value = spec.defaultValue.get
+            s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : $value"""
+          }
+          else if (spec.isOptional) {
+            s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : null"""
+          }
+          else s"""c.getDouble("$path")"""
+
+        case BOOLEAN  ⇒
+          if (spec.defaultValue.isDefined) {
+            val value = spec.defaultValue.get
+            s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : $value"""
+          }
+          else if (spec.isOptional) {
+            s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : null"""
+          }
+          else s"""c.getBoolean("$path")"""
+
+
+        case DURATION ⇒ s"""TODO_getDuration("$path")"""
+      }
+
+      case ObjectType  ⇒
+        s"""new ${getClassName(path)}(__$$config(c, "$path"))"""
+
+      case ListType    ⇒
+        s"""TODO_getListType("$path")"""
+    }
+  }
 }

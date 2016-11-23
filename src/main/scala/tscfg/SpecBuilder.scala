@@ -6,6 +6,7 @@ import com.typesafe.config._
 import tscfg.generator.GenOpts
 import tscfg.generators.{Generator, JavaGenerator}
 import tscfg.specs._
+import tscfg.specs.types.AtomicType
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
@@ -71,26 +72,48 @@ object SpecBuilder {
   private def fromConfigValue(cv: ConfigValue): Spec = {
     import ConfigValueType._
     cv.valueType() match {
-      case STRING | BOOLEAN => atomicSpec(cv)
-      case NUMBER  => numberSpec(cv)
+      case STRING  => atomicSpec(cv)
+      case BOOLEAN => AtomicSpec(types.BOOLEAN)
+      case NUMBER  => AtomicSpec(numberType(cv))
       case LIST    => listSpec(cv.asInstanceOf[ConfigList])
       case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject])
       case NULL    => throw new AssertionError("null unexpected")
     }
   }
 
-  private def atomicSpec(cv: ConfigValue): Spec = {
+  private def atomicSpec(cv: ConfigValue): AtomicSpec = {
     val valueString = cv.unwrapped().toString.toLowerCase
-    //println(s"atomicSpec: valueString=$valueString")
-    atomics.recognized.getOrElse(valueString, {
+    println(s"atomicSpec: valueString=$valueString")
+
+    val tokens = valueString.split("""\s*\|\s*""")
+    val typePart = tokens(0).toLowerCase
+    val hasDefault = tokens.size == 2
+    val defaultValue = if (hasDefault) Some(tokens(1)) else None
+
+    val (baseString, isOpt) = if (typePart.endsWith("?"))
+      (typePart.substring(0, typePart.length - 1), true)
+    else
+      (typePart, false)
+
+    val (baseForAtomicType, qualification) = {
+      val parts = baseString.split("""\s*\:\s*""", 2)
+      if (parts.length == 1)
+        (parts(0), None)
+      else
+        (parts(0), Some(parts(1)))
+    }
+
+    val atomicType = types.recognizedAtomic.getOrElse(baseForAtomicType, {
       import ConfigValueType._
       cv.valueType() match {
-        case STRING  => atomics.stringSpec
-        case BOOLEAN => atomics.booleanSpec
-        case NUMBER  => numberSpec(cv)
+        case STRING  => types.STRING
+        case BOOLEAN => types.BOOLEAN
+        case NUMBER  => numberType(cv)
         case _  => throw new AssertionError()
       }
     })
+
+    AtomicSpec(atomicType, isOpt, defaultValue, qualification)
   }
 
   private def listSpec(cv: ConfigList): ListSpec = {
@@ -108,23 +131,23 @@ object SpecBuilder {
 
   private def objSpec(cv: ConfigObject): Spec = fromConfig(cv.toConfig)
 
-  private def numberSpec(cv: ConfigValue): Spec = {
+  private def numberType(cv: ConfigValue): AtomicType = {
     val valueString = cv.unwrapped().toString
     try {
       valueString.toInt
-      atomics.integerSpec
+      types.INTEGER
     }
     catch {
       case e:NumberFormatException =>
         try {
           valueString.toLong
-          atomics.longSpec
+          types.LONG
         }
         catch {
           case e:NumberFormatException =>
             try {
               valueString.toDouble
-              atomics.doubleSpec
+              types.DOUBLE
             }
             catch {
               case e:NumberFormatException => throw new AssertionError()
