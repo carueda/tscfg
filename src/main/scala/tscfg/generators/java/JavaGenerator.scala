@@ -1,7 +1,6 @@
 package tscfg.generators.java
 
 import java.io.{FileWriter, PrintWriter}
-import java.util.Date
 
 import tscfg.generator._
 import tscfg.generators.Generator
@@ -23,7 +22,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       results = results.copy(classNames = results.classNames + className)
 
       val staticStr = if (isRoot) "" else " static"
-      val code = Code(objSpec.name, objSpec,
+      val code = Code(objSpec,
         javaType = className,
         javaId = javaIdentifier(objSpec.name),
         declaration = indent + "public final " + className + " " + javaIdentifier(objSpec.name) + ";"
@@ -53,7 +52,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
-            " = " + instance(memberCode.spec, memberCode.name) + ";"
+            " = " + instance(memberCode.spec, memberCode.spec.name) + ";"
         )
       }
       code.println(indent + IND + "}")
@@ -71,7 +70,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     def genForAtomicSpec(spec: AtomicSpec, indent: String): Code = {
       val javaId = javaIdentifier(spec.name)
       val javaType = getJavaType(spec)
-      Code(spec.name, spec,
+      Code(spec,
         javaType,
         javaId = javaId,
         declaration = indent + "public final " + javaType + " " + javaId + ";")
@@ -91,7 +90,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val elemObjType = toObjectType(elemCode.spec)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
       val javaId = javaIdentifier(listSpec.name)
-      val code = Code(listSpec.name, listSpec, javaType, javaId)
+      val code = Code(listSpec, javaType, javaId)
 
       if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
@@ -120,7 +119,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     results
   }
 
-  case class Code(name: String,
+  private case class Code(
                   spec: Spec,
                   javaType: String,
                   javaId: String,
@@ -249,7 +248,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
   }
 
-  object accessors {
+  private object accessors {
     // defined in terms of corresponding elemAccessor:
     type JavaElemTypeAndAccessor = (String,String)
     val definedListElemAccessors = collection.mutable.HashSet[JavaElemTypeAndAccessor]()
