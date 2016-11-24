@@ -3,9 +3,7 @@ package tscfg
 object specs {
 
   object types {
-    sealed abstract class SpecType
-
-    sealed abstract class AtomicType extends SpecType
+    sealed abstract class AtomicType
 
     case object STRING    extends AtomicType
     case object INTEGER   extends AtomicType
@@ -13,9 +11,6 @@ object specs {
     case object DOUBLE    extends AtomicType
     case object BOOLEAN   extends AtomicType
     case object DURATION  extends AtomicType
-
-    case class ObjectType(name: String)     extends SpecType
-    case class ListType(elemType: SpecType) extends SpecType
 
     val recognizedAtomic: Map[String, AtomicType] = Map(
       "string"    → STRING,
@@ -30,7 +25,6 @@ object specs {
   import types._
 
   sealed abstract class Spec {
-    def typ: SpecType
     def isOptional: Boolean
     def defaultValue: Option[String]
     def qualification: Option[String]
@@ -59,14 +53,13 @@ object specs {
                      qualification: Option[String] = None
                     ) extends Spec {
 
-    def typ: SpecType = ObjectType(name)
     override def format(indent: String): String = {
       val symbols = children.keys.toList.sorted
       val childrenStr = symbols.map { symbol ⇒
         symbol + ": " + children(symbol).format(indent + "  ")
       }.mkString("\n" + indent + "  ")
       s"""
-        |{
+        |$name{
         |$indent  $childrenStr
         |$indent}
       """.stripMargin.trim
@@ -79,7 +72,6 @@ object specs {
                       qualification: Option[String] = None
                      ) extends Spec {
 
-    def typ: SpecType = ListType(elemSpec.typ)
     override def format(indent: String): String = {
       s"ListOf(${elemSpec.format(indent)})"
     }

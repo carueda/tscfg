@@ -1,5 +1,6 @@
 package tscfg.generators
 
+import java.io.{FileWriter, PrintWriter}
 import java.util.Date
 
 import tscfg.javaUtil._
@@ -15,7 +16,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
     var results = GenResult()
 
-    def genObjSpec(name: String, objSpec: ObjSpec, indent: String, isRoot: Boolean = false): Code = {
+    def genForObjSpec(name: String, objSpec: ObjSpec, indent: String, isRoot: Boolean = false): Code = {
       // <class>
       val className = getClassName(name)
       results = results.copy(classNames = results.classNames + className)
@@ -32,7 +33,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       // generate for members:
       val orderedNames = objSpec.children.keys.toList.sorted
       val codes = orderedNames map { name =>
-        gen(name, objSpec.children(name), indent + IND)
+        genCode(name, objSpec.children(name), indent + IND)
       }
 
       // member declarations:
@@ -66,7 +67,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       code
     }
 
-    def genAtomicSpec(name: String, spec: AtomicSpec, indent: String): Code = {
+    def genForAtomicSpec(name: String, spec: AtomicSpec, indent: String): Code = {
       val javaId = javaIdentifier(name)
       val javaType = getJavaType(spec, javaId)
       Code(name, spec,
@@ -75,18 +76,19 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         declaration = indent + "public final " + javaType + " " + javaId + ";")
     }
 
-    def genListSpec(name: String, listSpec: ListSpec, indent: String): Code = {
-      val elemName = getClassName(name+ "Element_")
-
+    def genForListSpec(name: String, listSpec: ListSpec, indent: String): Code = {
       @tailrec
       def listNesting(ls: ListSpec, levels: Int): (Spec, Int) = ls.elemSpec match {
         case subListSpec: ListSpec ⇒ listNesting(subListSpec, levels + 1)
-        case nonListSpec ⇒ (nonListSpec, levels)
+        case nonListSpec           ⇒ (nonListSpec, levels)
       }
 
       val (elemSpec, levels) = listNesting(listSpec, 1)
 
-      val elemCode = gen(elemName, elemSpec, indent)
+      val elemName = getClassName(name+ "$Element")  // TODO remove as each Spec captures its name
+
+      val elemCode = genCode(elemName, elemSpec, indent)
+      println(s"\n\nelemCode:$elemCode\n\n")
       val elemObjType = toObjectType(elemCode.spec, elemName)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
       val javaId = javaIdentifier(name)
@@ -98,10 +100,10 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       code
     }
 
-    def gen(name: String, spec: Spec, indent: String = ""): Code = spec match {
-      case spec: AtomicSpec    ⇒ genAtomicSpec(name, spec, indent)
-      case spec: ObjSpec       ⇒ genObjSpec(name, spec, indent)
-      case spec: ListSpec      ⇒ genListSpec(name, spec, indent)
+    def genCode(name: String, spec: Spec, indent: String = ""): Code = spec match {
+      case spec: AtomicSpec    ⇒ genForAtomicSpec(name, spec, indent)
+      case spec: ObjSpec       ⇒ genForObjSpec(name, spec, indent)
+      case spec: ListSpec      ⇒ genForListSpec(name, spec, indent)
     }
 
     val header = new StringBuilder()
@@ -112,7 +114,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     header.append(s"package ${genOpts.packageName};\n\n")
 
     // main class:
-    val elemSpec = genObjSpec(genOpts.className, objSpec, "", isRoot = true)
+    val elemSpec = genForObjSpec(genOpts.className, objSpec, "", isRoot = true)
 
     results = results.copy(code = header.toString() + elemSpec.definition)
 
@@ -137,107 +139,116 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
   private val IND = "    "
 
   private def getJavaType(spec: Spec, javaId: String): String = {
-    spec.typ match {
-      case atomicType: AtomicType ⇒ atomicType match {
-        case STRING   ⇒ "java.lang.String"
-        case INTEGER  ⇒ if (spec.isOptional) "java.lang.Integer" else "int"
-        case LONG     ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
-        case DOUBLE   ⇒ if (spec.isOptional) "java.lang.Double"  else "double"
-        case BOOLEAN  ⇒ if (spec.isOptional) "java.lang.Boolean" else "boolean"
-        case DURATION ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
+    spec match {
+      case a: AtomicSpec ⇒
+        a.typ match {
+            case STRING   ⇒ "java.lang.String"
+            case INTEGER  ⇒ if (spec.isOptional) "java.lang.Integer" else "int"
+            case LONG     ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
+            case DOUBLE   ⇒ if (spec.isOptional) "java.lang.Double"  else "double"
+            case BOOLEAN  ⇒ if (spec.isOptional) "java.lang.Boolean" else "boolean"
+            case DURATION ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
+        }
+
+      case o: ObjSpec  ⇒ getClassName(o.name)  // javaId
+
+      case l: ListSpec  ⇒
+        val elemJavaType = toObjectType(l.elemSpec, javaId)
+        s"java.util.List<$elemJavaType>"
       }
+  }
 
-      case ObjectType(name)  ⇒ getClassName(name)  // javaId
+  private def toObjectType(spec: Spec, elemName: String): String = {
+    spec match {
+      case a: AtomicSpec ⇒
+        a.typ match {
+          case STRING   ⇒ "java.lang.String"
+          case INTEGER  ⇒ "java.lang.Integer"
+          case LONG     ⇒ "java.lang.Long"
+          case DOUBLE   ⇒ "java.lang.Double"
+          case BOOLEAN  ⇒ "java.lang.Boolean"
+          case DURATION ⇒ "java.lang.Long"
+        }
 
-      case ListType(elemType)    ⇒
-        val elemSpec = spec.asInstanceOf[ListSpec].elemSpec
-        val elemJavaType = toObjectType(elemSpec, javaId)
+      case o: ObjSpec  ⇒
+        println(s" *** o.name=${o.name}  elemName=$elemName")
+        getClassName(o.name)
+//        getClassName(elemName)
+
+      case l: ListSpec  ⇒
+        val elemJavaType = toObjectType(l.elemSpec, elemName)
         s"java.util.List<$elemJavaType>"
     }
   }
 
-  private def toObjectType(spec: Spec, elemName: String): String = {
-    toObjectType(spec.typ, elemName)
-  }
-
-  private def toObjectType(specType: SpecType, elemName: String): String = {
-    specType match {
-      case atomicType: AtomicType ⇒ atomicType match {
-        case STRING   ⇒ "java.lang.String"
-        case INTEGER  ⇒ "java.lang.Integer"
-        case LONG     ⇒ "java.lang.Long"
-        case DOUBLE   ⇒ "java.lang.Double"
-        case BOOLEAN  ⇒ "java.lang.Boolean"
-        case DURATION ⇒ "java.lang.Long"
-      }
-      case ObjectType(name)    ⇒ getClassName(elemName)
-      case ListType(specType2)  ⇒ s"java.util.List<${toObjectType(specType2, elemName)}>"
-    }
-  }
-
   private def instance(spec: Spec, path: String): String = {
-    spec.typ match {
-      case atomicType: AtomicType ⇒ atomicType match {
-        case STRING   ⇒
-          if (spec.defaultValue.isDefined) {
-            val value = spec.defaultValue.get
-            s"""c != null && c.hasPath("$path") ? c.getString("$path") : "$value""""
-          }
-          else if (spec.isOptional) {
-            s"""c != null && c.hasPath("$path") ? c.getString("$path") : null"""
-          }
-          else s"""c.getString("$path")"""
+    spec match {
+      case a: AtomicSpec ⇒
+        a.typ match {
+          case STRING ⇒
+            if (spec.defaultValue.isDefined) {
+              val value = spec.defaultValue.get
+              s"""c != null && c.hasPath("$path") ? c.getString("$path") : "$value""""
+            }
+            else if (spec.isOptional) {
+              s"""c != null && c.hasPath("$path") ? c.getString("$path") : null"""
+            }
+            else
+              s"""c.getString("$path")"""
 
-        case INTEGER  ⇒
-          if (spec.defaultValue.isDefined) {
-            val value = spec.defaultValue.get
-            s"""c != null && c.hasPath("$path") ? c.getInt("$path") : $value"""
-          }
-          else if (spec.isOptional) {
-            s"""c != null && c.hasPath("$path") ? c.getInt("$path") : null"""
-          }
-          else s"""c.getInt("$path")"""
+          case INTEGER ⇒
+            if (spec.defaultValue.isDefined) {
+              val value = spec.defaultValue.get
+              s"""c != null && c.hasPath("$path") ? c.getInt("$path") : $value"""
+            }
+            else if (spec.isOptional) {
+              s"""c != null && c.hasPath("$path") ? c.getInt("$path") : null"""
+            }
+            else
+              s"""c.getInt("$path")"""
 
-        case LONG     ⇒
-          if (spec.defaultValue.isDefined) {
-            val value = spec.defaultValue.get
-            s"""c != null && c.hasPath("$path") ? c.getLong("$path") : $value"""
-          }
-          else if (spec.isOptional) {
-            s"""c != null && c.hasPath("$path") ? c.getLong("$path") : null"""
-          }
-          else s"""c.getLong("$path")"""
+          case LONG ⇒
+            if (spec.defaultValue.isDefined) {
+              val value = spec.defaultValue.get
+              s"""c != null && c.hasPath("$path") ? c.getLong("$path") : $value"""
+            }
+            else if (spec.isOptional) {
+              s"""c != null && c.hasPath("$path") ? c.getLong("$path") : null"""
+            }
+            else
+              s"""c.getLong("$path")"""
 
-        case DOUBLE   ⇒
-          if (spec.defaultValue.isDefined) {
-            val value = spec.defaultValue.get
-            s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : $value"""
-          }
-          else if (spec.isOptional) {
-            s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : null"""
-          }
-          else s"""c.getDouble("$path")"""
+          case DOUBLE ⇒
+            if (spec.defaultValue.isDefined) {
+              val value = spec.defaultValue.get
+              s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : $value"""
+            }
+            else if (spec.isOptional) {
+              s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : null"""
+            }
+            else
+              s"""c.getDouble("$path")"""
 
-        case BOOLEAN  ⇒
-          if (spec.defaultValue.isDefined) {
-            val value = spec.defaultValue.get
-            s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : $value"""
-          }
-          else if (spec.isOptional) {
-            s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : null"""
-          }
-          else s"""c.getBoolean("$path")"""
+          case BOOLEAN ⇒
+            if (spec.defaultValue.isDefined) {
+              val value = spec.defaultValue.get
+              s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : $value"""
+            }
+            else if (spec.isOptional) {
+              s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : null"""
+            }
+            else
+              s"""c.getBoolean("$path")"""
 
 
-        case DURATION ⇒ s"""TODO_getDuration("$path")"""
-      }
+          case DURATION ⇒ s"""TODO_getDuration("$path")"""
+        }
 
-      case ObjectType(name)  ⇒
-        s"""new ${getClassName(name)}(_$$config(c, "$path"))"""
+      case o: ObjSpec  ⇒
+        s"""new ${getClassName(o.name)}(_$$config(c, "$path"))"""
 
-      case ListType(specType)    ⇒
-        val listSpec = spec.asInstanceOf[ListSpec]
-        accessors._listName(listSpec.elemSpec) + s"""(c.getList("$path"))"""
+      case l: ListSpec  ⇒
+        accessors._listName(l.elemSpec) + s"""(c.getList("$path"))"""
     }
   }
 
@@ -247,34 +258,39 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     val definedListElemAccessors = collection.mutable.ListBuffer[JavaElemTypeAndAccessor]()
 
     def _listName(spec: Spec): String = {
-      val typ = spec.typ
-      val elemAccessor = typ match {
-        case atomicType: AtomicType ⇒ atomicType match {
-          case STRING   ⇒ "_$str"
-          case INTEGER  ⇒ "_$int"
-          case LONG     ⇒ "_$lng"
-          case DOUBLE   ⇒ "_$dbl"
-          case BOOLEAN  ⇒ "_$bol"
-          case DURATION ⇒ "_$dur"
-        }
-        case ObjectType(name) ⇒
-          "_" + name
+      val elemAccessor = spec match {
+        case a: AtomicSpec ⇒
+          a.typ match {
+            case STRING   ⇒ "$str"
+            case INTEGER  ⇒ "$int"
+            case LONG     ⇒ "$lng"
+            case DOUBLE   ⇒ "$dbl"
+            case BOOLEAN  ⇒ "$bol"
+            case DURATION ⇒ "$dur"
+          }
 
-        case ListType(specType) ⇒
-          _listName(spec.asInstanceOf[ListSpec].elemSpec)
+        case o: ObjSpec  ⇒ getClassName(o.name)
+
+        case l: ListSpec ⇒ _listName(l.elemSpec)
       }
-      val javaType = toObjectType(spec, "obtTypeListName??")
+      val javaType = toObjectType(spec, "obtTypeListName??")  // TODO remove 2nd param
       definedListElemAccessors += ((javaType, elemAccessor))
-      "_$list" + elemAccessor
+      "$list" + elemAccessor
     }
 
     def _list(elemJavaType: String, elemAccessor: String): String = {
-      val castCv = if (elemAccessor.startsWith("_$list")) "(com.typesafe.config.ConfigList)" else ""
+      val elem = if (elemAccessor.startsWith("$list"))
+        s"$elemAccessor((com.typesafe.config.ConfigList)cv)"
+      else if (elemAccessor.startsWith("$"))
+          s"$elemAccessor(cv)"
+      else
+          s"new $elemAccessor(((com.typesafe.config.ConfigObject)cv).toConfig())"
+
       s"""
-         |private static java.util.List<$elemJavaType> _$$list$elemAccessor(com.typesafe.config.ConfigList cl) {
+         |private static java.util.List<$elemJavaType> $$list$elemAccessor(com.typesafe.config.ConfigList cl) {
          |  java.util.ArrayList<$elemJavaType> al = new java.util.ArrayList<$elemJavaType>();
          |  for (com.typesafe.config.ConfigValue cv: cl) {
-         |    al.add($elemAccessor(${castCv}cv));
+         |    al.add($elem);
          |  }
          |  return java.util.Collections.unmodifiableList(al);
          |}""".stripMargin
@@ -282,7 +298,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
     def _int(): String = {
       """
-        |private static java.lang.Integer _$int(com.typesafe.config.ConfigValue cv) {
+        |private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
         |  java.lang.Object u = cv.unwrapped();
         |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER
         |      || !(u instanceof java.lang.Integer)) {
@@ -332,15 +348,16 @@ object JavaGenerator {
     println("src:\n  |" + src.replaceAll("\n", "\n  |"))
     val config = ConfigFactory.parseString(src).resolve()
 
-    val objSpec = SpecBuilder.fromConfig(config)
-    println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
-
     val className = "Java" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
       val noDef = noPath.replaceAll("""^def\.""", "")
       val symbol = noDef.substring(0, noDef.indexOf('.'))
       symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
     }
+
+    val objSpec = SpecBuilder.fromConfig(config, className)
+    println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
+
     implicit val genOpts = GenOpts("tscfg.example", className,
       preamble = Some(s"source: (a test)")
     )
@@ -350,5 +367,10 @@ object JavaGenerator {
     val results = generator.generate(objSpec)
 
     println("\n" + results.code)
+
+    val destFilename  = s"src/main/java/tscfg/example/$className.java"
+    val destFile = new File(destFilename)
+    val out = new PrintWriter(new FileWriter(destFile), true)
+    out.println("\n" + results.code)
   }
 }

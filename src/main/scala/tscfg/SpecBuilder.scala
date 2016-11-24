@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 object SpecBuilder {
   import collection._
 
-  def fromConfig(conf: Config): ObjSpec = {
+  def fromConfig(conf: Config, pushedName: String): ObjSpec = {
 
     // 1- get a struct representation from conf.entrySet()
     abstract class Struct
@@ -29,7 +29,7 @@ object SpecBuilder {
       conf.entrySet() foreach { e ⇒
         val (path, value) = (e.getKey, e.getValue)
         val key = Key(path)
-        val leaf = Leaf(key, fromConfigValue(value))
+        val leaf = Leaf(key, fromConfigValue(value, key.simple))
         doAncestorsOf(key, leaf)
 
         def doAncestorsOf(childKey: Key, childStruct: Struct): Unit = {
@@ -63,18 +63,17 @@ object SpecBuilder {
     val root = getRootGroup
     //println("root group:"); pprint.log(root)
 
-    // TODO root's name??
-    getSpec(null, root).asInstanceOf[ObjSpec]
+    getSpec(pushedName, root).asInstanceOf[ObjSpec]
   }
 
-  private def fromConfigValue(cv: ConfigValue): Spec = {
+  private def fromConfigValue(cv: ConfigValue, pushedName: String): Spec = {
     import ConfigValueType._
     cv.valueType() match {
       case STRING  => atomicSpec(cv)
       case BOOLEAN => AtomicSpec(types.BOOLEAN)
       case NUMBER  => AtomicSpec(numberType(cv))
-      case LIST    => listSpec(cv.asInstanceOf[ConfigList])
-      case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject])
+      case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedName + "$Element")
+      case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject], pushedName)
       case NULL    => throw new AssertionError("null unexpected")
     }
   }
@@ -114,7 +113,7 @@ object SpecBuilder {
     AtomicSpec(atomicType, isOpt, defaultValue, qualification)
   }
 
-  private def listSpec(cv: ConfigList): ListSpec = {
+  private def listSpec(cv: ConfigList, pushedName: String): ListSpec = {
     if (cv.isEmpty) throw new IllegalArgumentException("list with one element expected")
 
     if (cv.size() > 1) {
@@ -124,10 +123,10 @@ object SpecBuilder {
       println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
     }
 
-    ListSpec(fromConfigValue(cv.get(0)))
+    ListSpec(fromConfigValue(cv.get(0), pushedName))
   }
 
-  private def objSpec(cv: ConfigObject): Spec = fromConfig(cv.toConfig)
+  private def objSpec(cv: ConfigObject, pushedName: String): Spec = fromConfig(cv.toConfig, pushedName)
 
   private def numberType(cv: ConfigValue): AtomicType = {
     val valueString = cv.unwrapped().toString

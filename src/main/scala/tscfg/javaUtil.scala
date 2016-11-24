@@ -1,8 +1,5 @@
 package tscfg
 
-import tscfg.specs.types.{AtomicType, SpecType}
-import tscfg.specs.types._
-
 object javaUtil {
 
   /**

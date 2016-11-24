@@ -1,11 +1,23 @@
 package tscfg.example;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+    
 public class JavaIssue15Main {
   public static void main(String[] args) {
-    String src = "numbers: [[1, 2, 3], [4, 5]]";
-    com.typesafe.config.Config c = com.typesafe.config.ConfigFactory.parseString(src);
-    JavaIssue15bCfg j = new JavaIssue15bCfg(c);
-    System.out.println("j.numbers = " + j.numbers);
+    JavaIssue15bCfg b = new JavaIssue15bCfg(
+        ConfigFactory.parseString(
+            "numbers: [[1, 2, 3], [4, 5]]"
+        )
+    );
+    System.out.println("b.numbers = " + b.numbers);
+
+    JavaIssue15cCfg c = new JavaIssue15cCfg(
+        ConfigFactory.parseString(
+            "positions: [{lat: 1, lon: 2}, {lat:3, lon:4}]"
+        )
+    );
+    System.out.println("c.positions = " + c.positions);
   }
   
 }
