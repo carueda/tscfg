@@ -1,10 +1,11 @@
-package tscfg.generators
+package tscfg.generators.java
 
 import java.io.{FileWriter, PrintWriter}
 import java.util.Date
 
-import tscfg.javaUtil._
 import tscfg.generator._
+import tscfg.generators.Generator
+import tscfg.javaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
 
@@ -333,9 +334,9 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 }
 
 object JavaGenerator {
-  import java.io.File
   import com.typesafe.config.ConfigFactory
   import tscfg.SpecBuilder
+  import java.io.File
 
   def main(args: Array[String]): Unit = {
     val filename = args(0)
