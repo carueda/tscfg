@@ -123,8 +123,11 @@ object SpecBuilder {
       println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
     }
 
+    // add $Element suffix if not already:
+    val elemPushedName = if (pushedName.endsWith("$Element")) pushedName else pushedName + "$Element"
+
     ListSpec(pushedName,
-      fromConfigValue(cv.get(0), pushedName + "$Element"))
+      fromConfigValue(cv.get(0), elemPushedName))
   }
 
   private def objSpec(cv: ConfigObject, pushedName: String): Spec = fromConfig(cv.toConfig, pushedName)
