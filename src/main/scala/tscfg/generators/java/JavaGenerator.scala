@@ -23,7 +23,6 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
       val staticStr = if (isRoot) "" else " static"
       val code = Code(objSpec,
-        javaType = className,
         declaration = indent + "public final " + className + " " + javaIdentifier(objSpec.name) + ";"
       )
 
@@ -70,7 +69,6 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val javaId = javaIdentifier(spec.name)
       val javaType = getJavaType(spec)
       Code(spec,
-        javaType,
         declaration = indent + "public final " + javaType + " " + javaId + ";")
     }
 
@@ -88,7 +86,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val elemObjType = toObjectType(elemCode.spec)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
       val javaId = javaIdentifier(listSpec.name)
-      val code = Code(listSpec, javaType, javaId)
+      val code = Code(listSpec,
+        declaration = javaId)
 
       if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
@@ -119,7 +118,6 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
   private case class Code(
                   spec: Spec,
-                  javaType: String,
                   var declaration: String = ""
                  ) {
     lazy val javaId = javaIdentifier(spec.name)
