@@ -87,7 +87,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val (elemSpec, levels) = listNesting(listSpec, 1)
 
       val elemCode = gen(elemName, elemSpec, indent)
-      val elemObjType = toObjectType(elemCode.spec)
+      val elemObjType = toObjectType(elemCode.spec, elemName)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
       val javaId = javaIdentifier(name)
       val code = Code(name, listSpec, javaType, javaId)
@@ -151,16 +151,16 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
       case ListType(elemType)    ⇒
         val elemSpec = spec.asInstanceOf[ListSpec].elemSpec
-        val elemJavaType = toObjectType(elemSpec)
+        val elemJavaType = toObjectType(elemSpec, javaId)
         s"java.util.List<$elemJavaType>"
     }
   }
 
-  private def toObjectType(spec: Spec): String = {
-    toObjectType(spec.typ)
+  private def toObjectType(spec: Spec, elemName: String): String = {
+    toObjectType(spec.typ, elemName)
   }
 
-  private def toObjectType(specType: SpecType): String = {
+  private def toObjectType(specType: SpecType, elemName: String): String = {
     specType match {
       case atomicType: AtomicType ⇒ atomicType match {
         case STRING   ⇒ "java.lang.String"
@@ -170,8 +170,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         case BOOLEAN  ⇒ "java.lang.Boolean"
         case DURATION ⇒ "java.lang.Long"
       }
-      case ObjectType(name)    ⇒ getClassName(name)
-      case ListType(specType2)  ⇒ s"java.util.List<${toObjectType(specType2)}>"
+      case ObjectType(name)    ⇒ getClassName(elemName)
+      case ListType(specType2)  ⇒ s"java.util.List<${toObjectType(specType2, elemName)}>"
     }
   }
 
@@ -263,7 +263,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         case ListType(specType) ⇒
           _listName(spec.asInstanceOf[ListSpec].elemSpec)
       }
-      val javaType = toObjectType(spec)
+      val javaType = toObjectType(spec, "obtTypeListName??")
       definedListElemAccessors += ((javaType, elemAccessor))
       "_$list" + elemAccessor
     }

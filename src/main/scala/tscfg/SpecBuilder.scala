@@ -50,8 +50,6 @@ object SpecBuilder {
     }
 
     // 2- now build and return the corresponding root Spec:
-    val root = getRootGroup
-    //println("root group:"); pprint.log(root)
     def getSpec(name: String, struct: Struct): Spec = struct match {
       case Leaf(_, spec) ⇒ spec
 
@@ -62,8 +60,11 @@ object SpecBuilder {
         ObjSpec(name, children)
     }
 
+    val root = getRootGroup
+    //println("root group:"); pprint.log(root)
+
     // TODO root's name??
-    getSpec("rootsName?", root).asInstanceOf[ObjSpec]
+    getSpec(null, root).asInstanceOf[ObjSpec]
   }
 
   private def fromConfigValue(cv: ConfigValue): Spec = {
