@@ -69,16 +69,16 @@ object SpecBuilder {
   private def fromConfigValue(cv: ConfigValue, pushedName: String): Spec = {
     import ConfigValueType._
     cv.valueType() match {
-      case STRING  => atomicSpec(cv)
-      case BOOLEAN => AtomicSpec(types.BOOLEAN)
-      case NUMBER  => AtomicSpec(numberType(cv))
-      case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedName + "$Element")
+      case STRING  => atomicSpec(cv, pushedName)
+      case BOOLEAN => AtomicSpec(pushedName, types.BOOLEAN)
+      case NUMBER  => AtomicSpec(pushedName, numberType(cv))
+      case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedName)
       case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject], pushedName)
       case NULL    => throw new AssertionError("null unexpected")
     }
   }
 
-  private def atomicSpec(cv: ConfigValue): AtomicSpec = {
+  private def atomicSpec(cv: ConfigValue, pushedName: String): AtomicSpec = {
     val valueString = cv.unwrapped().toString.toLowerCase
     println(s"atomicSpec: valueString=$valueString")
 
@@ -110,7 +110,7 @@ object SpecBuilder {
       }
     })
 
-    AtomicSpec(atomicType, isOpt, defaultValue, qualification)
+    AtomicSpec(pushedName, atomicType, isOpt, defaultValue, qualification)
   }
 
   private def listSpec(cv: ConfigList, pushedName: String): ListSpec = {
@@ -123,7 +123,8 @@ object SpecBuilder {
       println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
     }
 
-    ListSpec(fromConfigValue(cv.get(0), pushedName))
+    ListSpec(pushedName,
+      fromConfigValue(cv.get(0), pushedName + "$Element"))
   }
 
   private def objSpec(cv: ConfigObject, pushedName: String): Spec = fromConfig(cv.toConfig, pushedName)

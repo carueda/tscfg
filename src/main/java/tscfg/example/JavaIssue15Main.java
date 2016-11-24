@@ -1,6 +1,5 @@
 package tscfg.example;
 
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
     
 public class JavaIssue15Main {

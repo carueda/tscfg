@@ -25,13 +25,15 @@ object specs {
   import types._
 
   sealed abstract class Spec {
+    def name: String
     def isOptional: Boolean
     def defaultValue: Option[String]
     def qualification: Option[String]
     def format(indent: String = ""): String
   }
 
-  case class AtomicSpec(typ: AtomicType,
+  case class AtomicSpec(name: String,
+                        typ: AtomicType,
                         isOptional: Boolean = false,
                         defaultValue: Option[String] = None,
                         qualification: Option[String] = None
@@ -66,7 +68,8 @@ object specs {
     }
   }
 
-  case class ListSpec(elemSpec: Spec,
+  case class ListSpec(name: String,
+                      elemSpec: Spec,
                       isOptional: Boolean = false,           // TODO
                       defaultValue: Option[String] = None,
                       qualification: Option[String] = None
