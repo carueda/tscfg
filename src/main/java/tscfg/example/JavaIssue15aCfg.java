@@ -1,15 +1,15 @@
 package tscfg.example;
 
-public class JavaIssue15cCfg {
-    public final java.util.List<Positions$Element> positions;
+public class JavaIssue15aCfg {
+    public final double dd;
+    public final Foo foo;
+    public final int ii;
 
-    public static class Positions$Element {
-        public final double lat;
-        public final double lon;
+    public static class Foo {
+        public final java.lang.String bar;
 
-        public Positions$Element(com.typesafe.config.Config c) {
-            this.lat = c.getDouble("lat");
-            this.lon = c.getDouble("lon");
+        public Foo(com.typesafe.config.Config c) {
+            this.bar = c.getString("bar");
         }
 
         private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
@@ -28,17 +28,10 @@ public class JavaIssue15cCfg {
         }
     }
 
-
-    public JavaIssue15cCfg(com.typesafe.config.Config c) {
-        this.positions = $listPositions$Element(c.getList("positions"));
-    }
-
-    private static java.util.List<Positions$Element> $listPositions$Element(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<Positions$Element> al = new java.util.ArrayList<Positions$Element>();
-      for (com.typesafe.config.ConfigValue cv: cl) {
-        al.add(new Positions$Element(((com.typesafe.config.ConfigObject)cv).toConfig()));
-      }
-      return java.util.Collections.unmodifiableList(al);
+    public JavaIssue15aCfg(com.typesafe.config.Config c) {
+        this.dd = c.getDouble("dd");
+        this.foo = new Foo(_$config(c, "foo"));
+        this.ii = c.getInt("ii");
     }
 
     private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
