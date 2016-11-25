@@ -268,7 +268,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
         case o: ObjSpec  ⇒ getClassName(o.name)
 
-        case l: ListSpec ⇒ _listMethodName(l.elemSpec)
+        case l: ListSpec ⇒ _listMethodName(l.elemSpec, objCodeOpt)
       }
       val javaType = toObjectType(spec)
 

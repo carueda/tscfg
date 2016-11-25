@@ -122,12 +122,22 @@ object SpecBuilder {
       println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
     }
 
-    // add $Element suffix if not already:
-    val elemPushedName = if (pushedName.endsWith("$Element")) pushedName else pushedName + "$Element"
+    // push list element class name (a new one unless one is already being pushed):
+    val elemPushedName = if (pushedName.endsWith("$Elm_")) pushedName else newListElementClassName
 
     ListSpec(pushedName,
       fromConfigValue(cv.get(0), elemPushedName))
   }
+
+  /**
+    * New name makes easier to distinguish multiple list element classes
+    */
+  private def newListElementClassName: String = {
+    val name = "_$" + nextElementCounter + "$Elm_"
+    nextElementCounter += 1
+    name
+  }
+  var nextElementCounter: Int = 0
 
   private def objSpec(cv: ConfigObject, pushedName: String): Spec = fromConfig(cv.toConfig, pushedName)
 

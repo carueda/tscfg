@@ -1,13 +1,13 @@
 package tscfg.example;
 
 public class JavaIssue15dCfg {
-    public final java.util.List<java.util.List<Baz$Element>> baz;
+    public final java.util.List<java.util.List<_$0$Elm_>> baz;
 
-    public static class Baz$Element {
+    public static class _$0$Elm_ {
         public final java.lang.Boolean aa;
         public final double dd;
 
-        public Baz$Element(com.typesafe.config.Config c) {
+        public _$0$Elm_(com.typesafe.config.Config c) {
             this.aa = c != null && c.hasPath("aa") ? c.getBoolean("aa") : null;
             this.dd = c.getDouble("dd");
         }
@@ -15,21 +15,21 @@ public class JavaIssue15dCfg {
 
 
     public JavaIssue15dCfg(com.typesafe.config.Config c) {
-        this.baz = $list$listBaz$Element(c.getList("baz"));
+        this.baz = $list$list_$0$Elm_(c.getList("baz"));
     }
 
-    private static java.util.List<java.util.List<Baz$Element>> $list$listBaz$Element(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.util.List<Baz$Element>> al = new java.util.ArrayList<java.util.List<Baz$Element>>();
+    private static java.util.List<_$0$Elm_> $list_$0$Elm_(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<_$0$Elm_>();
       for (com.typesafe.config.ConfigValue cv: cl) {
-        al.add($listBaz$Element((com.typesafe.config.ConfigList)cv));
+        al.add(new _$0$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }
       return java.util.Collections.unmodifiableList(al);
     }
 
-    private static java.util.List<Baz$Element> $listBaz$Element(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<Baz$Element> al = new java.util.ArrayList<Baz$Element>();
+    private static java.util.List<java.util.List<_$0$Elm_>> $list$list_$0$Elm_(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<java.util.List<_$0$Elm_>> al = new java.util.ArrayList<java.util.List<_$0$Elm_>>();
       for (com.typesafe.config.ConfigValue cv: cl) {
-        al.add(new Baz$Element(((com.typesafe.config.ConfigObject)cv).toConfig()));
+        al.add($list_$0$Elm_((com.typesafe.config.ConfigList)cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }

@@ -1,14 +1,14 @@
 package tscfg.example;
 
 public class JavaIssue15cCfg {
-    public final java.util.List<Positions$Element> positions;
+    public final java.util.List<_$0$Elm_> positions;
 
-    public static class Positions$Element {
+    public static class _$0$Elm_ {
         public final java.util.List<java.lang.Double> attrs;
         public final double lat;
         public final double lon;
 
-        public Positions$Element(com.typesafe.config.Config c) {
+        public _$0$Elm_(com.typesafe.config.Config c) {
             this.attrs = $list$dbl(c.getList("attrs"));
             this.lat = c.getDouble("lat");
             this.lon = c.getDouble("lon");
@@ -17,13 +17,13 @@ public class JavaIssue15cCfg {
 
 
     public JavaIssue15cCfg(com.typesafe.config.Config c) {
-        this.positions = $listPositions$Element(c.getList("positions"));
+        this.positions = $list_$0$Elm_(c.getList("positions"));
     }
 
-    private static java.util.List<Positions$Element> $listPositions$Element(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<Positions$Element> al = new java.util.ArrayList<Positions$Element>();
+    private static java.util.List<_$0$Elm_> $list_$0$Elm_(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<_$0$Elm_>();
       for (com.typesafe.config.ConfigValue cv: cl) {
-        al.add(new Positions$Element(((com.typesafe.config.ConfigObject)cv).toConfig()));
+        al.add(new _$0$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }
       return java.util.Collections.unmodifiableList(al);
     }

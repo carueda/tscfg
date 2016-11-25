@@ -5,6 +5,21 @@ import com.typesafe.config.ConfigFactory;
 public class JavaIssue15Main {
   public static void main(String[] args) {
     {
+      System.out.println("\nJavaIssue15aCfg:");
+      JavaIssue15aCfg c = new JavaIssue15aCfg(
+          ConfigFactory.parseString(
+              "ii: 20\n" +
+              "dd: 3.14\n" +
+              "foo: { bar: baz }"
+          )
+      );
+      System.out.println("c.ii  = " + c.ii);
+      System.out.println("c.dd  = " + c.dd);
+      System.out.println("c.foo.bar = " + c.foo.bar);
+    }
+  
+    {
+      System.out.println("\nJavaIssue15bCfg:");
       JavaIssue15bCfg c = new JavaIssue15bCfg(
           ConfigFactory.parseString(
               "strings:  [hello, world, true]        \n" +
@@ -22,7 +37,7 @@ public class JavaIssue15Main {
     }
   
     {
-      System.out.println();
+      System.out.println("\nJavaIssue15cCfg:");
       JavaIssue15cCfg c = new JavaIssue15cCfg(
           ConfigFactory.parseString(
               "positions: [\n" +
@@ -35,7 +50,7 @@ public class JavaIssue15Main {
     }
   
     {
-      System.out.println();
+      System.out.println("\nJavaIssue15dCfg:");
       JavaIssue15dCfg c = new JavaIssue15dCfg(
           ConfigFactory.parseString(
               "baz: [ [ {dd: 1, aa: true}, {dd: 2} ] ]"
@@ -45,19 +60,20 @@ public class JavaIssue15Main {
     }
 
     {
-      System.out.println();
+      System.out.println("\nJavaIssue15Cfg:");
       JavaIssue15Cfg c = new JavaIssue15Cfg(
           ConfigFactory.parseString(
               "positions: [\n" +
               "  {\n" +
               "    numbers: [ 1, 2, 3 ]\n" +
-                  "positionsXX: [ { other: 33, stuff: baz } ]" +
+                  "positions: [ [ { other: 33, stuff: baz } ] ]" +
               "  }\n" +
               "]"
           )
       );
       System.out.println("c.positions = " + c.positions);
-      System.out.println("c.positions.get(0).positionsXX.get(0).stuff = " + c.positions.get(0).positionsXX.get(0).stuff);
+      System.out.println("c.positions.get(0).positions.get(0).get(0).stuff = " +
+                          c.positions.get(0).positions.get(0).get(0).stuff);
     }
 
   }
