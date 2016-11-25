@@ -67,7 +67,7 @@ object scalaGenerator {
         // #13: add `build` auxiliary method to avoid type erasure issue in case of optional member
         out.println(s"$indent  def apply(c: com.typesafe.config.Config) = build(Some(c))")
         out.println(s"$indent  def apply() = build(None)")
-        out.println(s"$indent  def build(c: scala.Option[$util.TypesafeConfigClassName]): $className = {")
+        out.println(s"$indent  def build(c: scala.Option[${util.TypesafeConfigClassName}]): $className = {")
         out.println(s"$indent    $className(")
 
         comma = indent
