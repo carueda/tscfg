@@ -32,14 +32,14 @@ public class JavaIssue15cCfg {
         + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
     }
     private static java.util.List<java.lang.Double> $list$dbl(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.Double> al = new java.util.ArrayList<java.lang.Double>();
+      java.util.ArrayList<java.lang.Double> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($dbl(cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<_$0$Elm_> $list_$0$Elm_(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<_$0$Elm_>();
+      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add(new _$0$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }

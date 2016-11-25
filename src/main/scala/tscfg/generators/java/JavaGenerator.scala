@@ -300,7 +300,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val methodDef =
       s"""
          |private static java.util.List<$elemJavaType> $methodName(com.typesafe.config.ConfigList cl) {
-         |  java.util.ArrayList<$elemJavaType> al = new java.util.ArrayList<$elemJavaType>();
+         |  java.util.ArrayList<$elemJavaType> al = new java.util.ArrayList<>();
          |  for (com.typesafe.config.ConfigValue cv: cl) {
          |    al.add($elem);
          |  }

@@ -24,14 +24,14 @@ public class JavaIssue15Cfg {
         }
 
         private static java.util.List<java.util.List<_$1$Elm_>> $list$list_$1$Elm_(com.typesafe.config.ConfigList cl) {
-          java.util.ArrayList<java.util.List<_$1$Elm_>> al = new java.util.ArrayList<java.util.List<_$1$Elm_>>();
+          java.util.ArrayList<java.util.List<_$1$Elm_>> al = new java.util.ArrayList<>();
           for (com.typesafe.config.ConfigValue cv: cl) {
             al.add($list_$1$Elm_((com.typesafe.config.ConfigList)cv));
           }
           return java.util.Collections.unmodifiableList(al);
         }
         private static java.util.List<_$1$Elm_> $list_$1$Elm_(com.typesafe.config.ConfigList cl) {
-          java.util.ArrayList<_$1$Elm_> al = new java.util.ArrayList<_$1$Elm_>();
+          java.util.ArrayList<_$1$Elm_> al = new java.util.ArrayList<>();
           for (com.typesafe.config.ConfigValue cv: cl) {
             al.add(new _$1$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
           }
@@ -56,14 +56,14 @@ public class JavaIssue15Cfg {
       return (java.lang.Integer) u;
     }
     private static java.util.List<java.lang.Integer> $list$int(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.Integer> al = new java.util.ArrayList<java.lang.Integer>();
+      java.util.ArrayList<java.lang.Integer> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($int(cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<_$0$Elm_> $list_$0$Elm_(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<_$0$Elm_>();
+      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add(new _$0$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }

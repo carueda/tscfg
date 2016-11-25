@@ -19,14 +19,14 @@ public class JavaIssue15dCfg {
     }
 
     private static java.util.List<java.util.List<_$0$Elm_>> $list$list_$0$Elm_(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.util.List<_$0$Elm_>> al = new java.util.ArrayList<java.util.List<_$0$Elm_>>();
+      java.util.ArrayList<java.util.List<_$0$Elm_>> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($list_$0$Elm_((com.typesafe.config.ConfigList)cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<_$0$Elm_> $list_$0$Elm_(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<_$0$Elm_>();
+      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add(new _$0$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }

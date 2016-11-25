@@ -39,42 +39,42 @@ public class JavaIssue15bCfg {
       return (java.lang.Integer) u;
     }
     private static java.util.List<java.lang.Boolean> $list$bln(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.Boolean> al = new java.util.ArrayList<java.lang.Boolean>();
+      java.util.ArrayList<java.lang.Boolean> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($bln(cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<java.lang.Double> $list$dbl(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.Double> al = new java.util.ArrayList<java.lang.Double>();
+      java.util.ArrayList<java.lang.Double> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($dbl(cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<java.lang.Integer> $list$int(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.Integer> al = new java.util.ArrayList<java.lang.Integer>();
+      java.util.ArrayList<java.lang.Integer> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($int(cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<java.util.List<java.lang.Integer>> $list$list$int(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.util.List<java.lang.Integer>> al = new java.util.ArrayList<java.util.List<java.lang.Integer>>();
+      java.util.ArrayList<java.util.List<java.lang.Integer>> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($list$int((com.typesafe.config.ConfigList)cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<java.lang.Long> $list$lng(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.Long> al = new java.util.ArrayList<java.lang.Long>();
+      java.util.ArrayList<java.lang.Long> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($lng(cv));
       }
       return java.util.Collections.unmodifiableList(al);
     }
     private static java.util.List<java.lang.String> $list$str(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<java.lang.String> al = new java.util.ArrayList<java.lang.String>();
+      java.util.ArrayList<java.lang.String> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($str(cv));
       }
