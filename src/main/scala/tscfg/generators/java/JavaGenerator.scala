@@ -7,6 +7,7 @@ import tscfg.generators.Generator
 import tscfg.javaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
+import tscfg.util
 
 import scala.annotation.tailrec
 
@@ -27,8 +28,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       code.println(indent + s"public$staticStr class $className {")
 
       // generate for members:
-      val orderedNames = objSpec.children.keys.toList.sorted
-      val codes = orderedNames map { name =>
+      val codes = objSpec.orderedNames map { name =>
         genCode(objSpec.children(name), indent + IND)
       }
 
@@ -44,7 +44,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
       // <constructor>
       code.println("")
-      code.println(indent + IND + s"public $className($TypesafeConfigClassName c) {")
+      code.println(indent + IND + s"public $className(${util.TypesafeConfigClassName} c) {")
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
@@ -107,10 +107,12 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     results
   }
 
-  private case class Code(
-                  spec: Spec,
-                  javaType: String
-                 ) {
+  /**
+    * Captures code associated with a spec.
+    * @param spec       the spec
+    * @param javaType   for declaration
+    */
+  private case class Code(spec: Spec, javaType: String) {
 
     val javaId = javaIdentifier(spec.name)
 
@@ -304,14 +306,16 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         |}""".stripMargin
     }
 
-    val configGetter = s"""
-      |private static $TypesafeConfigClassName _$$config($TypesafeConfigClassName c, java.lang.String path) {
-      |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
-      |}""".stripMargin
+    val configGetter = {
+      val tscc = util.TypesafeConfigClassName
+      s"""
+         |private static $tscc _$$config($tscc c, java.lang.String path) {
+         |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
+         |}""".stripMargin
+    }
 
     def insertAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
       definedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
-        println(s" --- $javaType  :  $elemAccessor")
         code.println(accessors._list(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
       }
       code.println(accessors._int().replaceAll("\n", "\n" + indent))
@@ -353,7 +357,7 @@ object JavaGenerator {
 
     val results = generator.generate(objSpec)
 
-    println("\n" + results.code)
+    //println("\n" + results.code)
 
     val destFilename  = s"src/main/java/tscfg/example/$className.java"
     val destFile = new File(destFilename)

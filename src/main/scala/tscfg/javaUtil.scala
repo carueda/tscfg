@@ -36,9 +36,7 @@ object javaUtil {
       symbol.substring(1).forall(Character.isJavaIdentifierPart)
   }
 
-  def getClassName(symbol:String) = upperFirst(javaIdentifier(symbol))
-
-  private def upperFirst(symbol:String) = symbol.charAt(0).toUpper + symbol.substring(1)
+  def getClassName(symbol:String) = util.upperFirst(javaIdentifier(symbol))
 
   /**
     * Set of java keywords plus the literals "null", "true", "false".
@@ -58,6 +56,4 @@ object javaUtil {
 
     "null",     "true",     "false"
   )
-
-  val TypesafeConfigClassName = classOf[com.typesafe.config.Config].getName
 }

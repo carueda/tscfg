@@ -55,8 +55,10 @@ object specs {
                      qualification: Option[String] = None
                     ) extends Spec {
 
+    val orderedNames = children.keys.toList.sorted
+
     override def format(indent: String): String = {
-      val symbols = children.keys.toList.sorted
+      val symbols = orderedNames
       val childrenStr = symbols.map { symbol ⇒
         symbol + ": " + children(symbol).format(indent + "  ")
       }.mkString("\n" + indent + "  ")

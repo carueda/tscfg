@@ -60,7 +60,7 @@ object javaGenerator {
         orderedNames foreach { name => gen(bn(name), indent + "  ") }
 
         // <constructor>
-        out.println(s"$indent  public $className($TypesafeConfigClassName c) {")
+        out.println(s"$indent  public $className(${util.TypesafeConfigClassName} c) {")
         orderedNames foreach { name =>
           val javaId = javaIdentifier(name)
           results = results.copy(fieldNames = results.fieldNames + javaId)
@@ -141,7 +141,8 @@ object javaGenerator {
 
         if (isRoot && results.classNames.size > 1) {
           // declare symbol:
-          out.println(s"$indent  private static $TypesafeConfigClassName __$$config($TypesafeConfigClassName c, java.lang.String path) {")
+          val tscc = util.TypesafeConfigClassName
+          out.println(s"$indent  private static $tscc __$$config($tscc c, java.lang.String path) {")
           out.println(s"$indent    return c != null && c.hasPath(path) ? c.getConfig(path) : null;")
           out.println(s"$indent  }")
         }
