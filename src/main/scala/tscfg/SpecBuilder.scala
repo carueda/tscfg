@@ -80,7 +80,6 @@ object SpecBuilder {
 
   private def atomicSpec(cv: ConfigValue, pushedName: String): AtomicSpec = {
     val valueString = cv.unwrapped().toString.toLowerCase
-    println(s"atomicSpec: valueString=$valueString")
 
     val tokens = valueString.split("""\s*\|\s*""")
     val typePart = tokens(0).toLowerCase

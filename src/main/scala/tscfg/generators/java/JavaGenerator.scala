@@ -254,7 +254,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
             case INTEGER  ⇒ "$int"
             case LONG     ⇒ "$lng"
             case DOUBLE   ⇒ "$dbl"
-            case BOOLEAN  ⇒ "$bol"
+            case BOOLEAN  ⇒ "$bln"
             case DURATION ⇒ "$dur"
           }
 
@@ -285,25 +285,58 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
          |}""".stripMargin
     }
 
-    def _int(): String = {
-      """
-        |private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
-        |  java.lang.Object u = cv.unwrapped();
-        |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER
-        |      || !(u instanceof java.lang.Integer)) {
-        |    _$exc(u, "integer");
-        |  }
-        |  return (java.lang.Integer) u;
-        |}""".stripMargin
-    }
+    // definition of methods used to access list's elements of basic type
+    val atomicElemAccessDefinition: Map[String, String] = Map(
+      "$str" → """
+                 |private static java.lang.String $str(com.typesafe.config.ConfigValue cv) {
+                 |  return java.lang.String.valueOf(cv.unwrapped());
+                 |}""".stripMargin.trim,
+
+      "$int" → """
+                 |private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
+                 |  java.lang.Object u = cv.unwrapped();
+                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+                 |    !(u instanceof java.lang.Integer)) throw $exc(cv, "integer");
+                 |  return (java.lang.Integer) u;
+                 |}
+                 |""".stripMargin.trim,
+
+      "$lng" → """
+                 |private static java.lang.Long $lng(com.typesafe.config.ConfigValue cv) {
+                 |  java.lang.Object u = cv.unwrapped();
+                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+                 |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $exc(cv, "long");
+                 |  return ((java.lang.Number) u).longValue();
+                 |}
+                 |""".stripMargin.trim,
+
+      "$dbl" → """
+                 |private static java.lang.Double $dbl(com.typesafe.config.ConfigValue cv) {
+                 |  java.lang.Object u = cv.unwrapped();
+                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+                 |    !(u instanceof java.lang.Number)) throw $exc(cv, "double");
+                 |  return ((java.lang.Number) u).doubleValue();
+                 |}
+                 |""".stripMargin.trim,
+
+      "$bln" → """
+                 |private static java.lang.Boolean $bln(com.typesafe.config.ConfigValue cv) {
+                 |  java.lang.Object u = cv.unwrapped();
+                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
+                 |    !(u instanceof java.lang.Boolean)) throw $exc(cv, "boolean");
+                 |  return (java.lang.Boolean) u;
+                 |}
+                 |""".stripMargin.trim
+    )
 
     def _exc(): String = {
       """
-        |private static void _$exc(java.lang.Object u, java.lang.String expected) {
-        |  throw new java.lang.RuntimeException(
-        |      "expecting: " +expected + " got: " +
-        |          (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
-        |}""".stripMargin
+        |private static java.lang.RuntimeException $exc(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
+        |  java.lang.Object u = cv.unwrapped();
+        |  return new java.lang.RuntimeException(cv.origin().lineNumber()
+        |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
+        |}
+        |""".stripMargin.trim
     }
 
     val configGetter = {
@@ -311,17 +344,27 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       s"""
          |private static $tscc _$$config($tscc c, java.lang.String path) {
          |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
-         |}""".stripMargin
+         |}""".stripMargin.trim
     }
 
     def insertAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
       definedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
-        code.println(accessors._list(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
+        code.println(_list(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
       }
-      code.println(accessors._int().replaceAll("\n", "\n" + indent))
-      code.println(accessors._exc().replaceAll("\n", "\n" + indent))
-      if (isRoot && results.classNames.size > 1) {
-        code.println(accessors.configGetter.replaceAll("\n", "\n" + indent))
+      if (isRoot) {
+        var insertExc = false
+        definedListElemAccessors foreach { case (_, elemAccessor) ⇒
+          atomicElemAccessDefinition.get(elemAccessor) foreach { defn ⇒
+            code.println(indent + defn.replaceAll("\n", "\n" + indent))
+            if (elemAccessor != "$str") insertExc = true
+          }
+        }
+        if (insertExc) {
+          code.println(indent + _exc().replaceAll("\n", "\n" + indent))
+        }
+        if (results.classNames.size > 1) {
+          code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
+        }
       }
     }
   }
