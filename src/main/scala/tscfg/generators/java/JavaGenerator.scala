@@ -11,7 +11,7 @@ import tscfg.util
 
 import scala.annotation.tailrec
 
-class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
+class JavaGenerator(genOpts: GenOpts) extends Generator {
 
   // defined in terms of corresponding elemAccessor:
   type JavaElemTypeAndAccessor = (String,String)
@@ -452,11 +452,11 @@ object JavaGenerator {
     val objSpec = SpecBuilder.fromConfig(config, className)
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
-    implicit val genOpts = GenOpts("tscfg.example", className,
+    val genOpts = GenOpts("tscfg.example", className,
       preamble = Some(s"source: (a test)")
     )
 
-    val generator: Generator = new JavaGenerator
+    val generator: Generator = new JavaGenerator(genOpts)
 
     val results = generator.generate(objSpec)
 
