@@ -24,14 +24,6 @@ public class JavaIssue15Cfg {
             this.lon = c.getDouble("lon");
             this.numbers = $list$int(c.getList("numbers"));
         }
-
-        private static java.util.List<java.lang.Integer> $list$int(com.typesafe.config.ConfigList cl) {
-          java.util.ArrayList<java.lang.Integer> al = new java.util.ArrayList<java.lang.Integer>();
-          for (com.typesafe.config.ConfigValue cv: cl) {
-            al.add($int(cv));
-          }
-          return java.util.Collections.unmodifiableList(al);
-        }
     }
 
 

@@ -55,7 +55,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       // </constructor>
 
       // auxiliary methods:
-      accessors.insertAuxMethods(code, isRoot, indent + IND, results)
+      if (isRoot)
+        accessors.insertStaticAuxMethods(code, indent + IND, results)
 
       code.println(indent + "}")
       // </class>
@@ -347,24 +348,25 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
          |}""".stripMargin.trim
     }
 
-    def insertAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
+    def insertStaticAuxMethods(code:Code, indent: String, results: GenResult): Unit = {
+      // list accessors first:
       definedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
         code.println(_list(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
       }
-      if (isRoot) {
-        var insertExc = false
-        definedListElemAccessors foreach { case (_, elemAccessor) ⇒
-          atomicElemAccessDefinition.get(elemAccessor) foreach { defn ⇒
-            code.println(indent + defn.replaceAll("\n", "\n" + indent))
-            if (elemAccessor != "$str") insertExc = true
-          }
+
+      // corresponding element accessors:
+      var insertExc = false
+      definedListElemAccessors foreach { case (_, elemAccessor) ⇒
+        atomicElemAccessDefinition.get(elemAccessor) foreach { defn ⇒
+          code.println(indent + defn.replaceAll("\n", "\n" + indent))
+          if (elemAccessor != "$str") insertExc = true
         }
-        if (insertExc) {
-          code.println(indent + _exc().replaceAll("\n", "\n" + indent))
-        }
-        if (results.classNames.size > 1) {
-          code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
-        }
+      }
+      if (insertExc) {
+        code.println(indent + _exc().replaceAll("\n", "\n" + indent))
+      }
+      if (results.classNames.size > 1) {
+        code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
       }
     }
   }
