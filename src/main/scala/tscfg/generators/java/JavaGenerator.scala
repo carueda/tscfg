@@ -22,7 +22,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       results = results.copy(classNames = results.classNames + className)
 
       val staticStr = if (isRoot) "" else " static"
-      val code = Code(objSpec, indent, className)
+      val code = Code(objSpec, className)
 
       code.println(indent + s"public$staticStr class $className {")
 
@@ -33,7 +33,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       }
 
       // member declarations:
-      codes.map(_.declaration).filter(_.nonEmpty).foreach(code.println)
+      codes.map(_.declaration).filter(_.nonEmpty).map(indent + IND + _).foreach(code.println)
 
       // member definitions:
       val definitions = codes.map(_.definition).filter(_.nonEmpty)
@@ -63,8 +63,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       code
     }
 
-    def genForAtomicSpec(spec: AtomicSpec, indent: String): Code = {
-      Code(spec, indent, getJavaType(spec))
+    def genForAtomicSpec(spec: AtomicSpec): Code = {
+      Code(spec, getJavaType(spec))
     }
 
     def genForListSpec(listSpec: ListSpec, indent: String): Code = {
@@ -79,7 +79,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val elemCode = genCode(elemSpec, indent)
       val elemObjType = toObjectType(elemCode.spec)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
-      val code = Code(listSpec, indent, javaType)
+      val code = Code(listSpec, javaType)
 
       if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
@@ -87,7 +87,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
 
     def genCode(spec: Spec, indent: String = ""): Code = spec match {
-      case spec: AtomicSpec    ⇒ genForAtomicSpec(spec, indent)
+      case spec: AtomicSpec    ⇒ genForAtomicSpec(spec)
       case spec: ObjSpec       ⇒ genForObjSpec(spec, indent)
       case spec: ListSpec      ⇒ genForListSpec(spec, indent)
     }
@@ -109,13 +109,12 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
   private case class Code(
                   spec: Spec,
-                  indent: String,
                   javaType: String
                  ) {
 
     val javaId = javaIdentifier(spec.name)
 
-    val declaration = indent + "public final " + javaType + " " + javaId + ";"
+    val declaration = "public final " + javaType + " " + javaId + ";"
 
     def println(str: String): Unit = defn.append(str).append('\n')
 
