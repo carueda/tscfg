@@ -6,6 +6,7 @@ import java.util.Date
 import tscfg.generator._
 import tscfg.nodes._
 import tscfg.nodes.implicits._
+import tscfg.scalaUtil._
 
 object scalaGenerator {
 
@@ -66,7 +67,7 @@ object scalaGenerator {
         // #13: add `build` auxiliary method to avoid type erasure issue in case of optional member
         out.println(s"$indent  def apply(c: com.typesafe.config.Config) = build(Some(c))")
         out.println(s"$indent  def apply() = build(None)")
-        out.println(s"$indent  def build(c: scala.Option[$TypesafeConfigClassName]): $className = {")
+        out.println(s"$indent  def build(c: scala.Option[$util.TypesafeConfigClassName]): $className = {")
         out.println(s"$indent    $className(")
 
         comma = indent
@@ -162,49 +163,4 @@ object scalaGenerator {
     }
     results
   }
-
-  /**
-    * Returns a valid scala identifier from the given symbol:
-    *
-    * - encloses the symbol in backticks if the symbol is a scala reserved word;
-    * - appends an underscore if the symbol corresponds to a no-arg method in scope;
-    * - otherwise, returns symbol if it is a valid java identifier
-    * - otherwise, returns `javaGenerator.javaIdentifier(symbol)`
-    */
-  def scalaIdentifier(symbol: String): String = {
-    if (scalaReservedWords.contains(symbol)) "`" + symbol + "`"
-    else if (noArgMethodInScope.contains(symbol)) symbol + "_"
-    else if (javaUtil.isJavaIdentifier(symbol)) symbol
-    else javaUtil.javaIdentifier(symbol)
-  }
-
-  private def getClassName(symbol:String) = upperFirst(scalaIdentifier(symbol))
-
-  private def upperFirst(symbol:String) = symbol.charAt(0).toUpper + symbol.substring(1)
-
-  /**
-    * from Sect 1.1 of the Scala Language Spec, v2.9
-    */
-  val scalaReservedWords: List[String] = List(
-    "abstract", "case",     "catch",   "class",   "def",
-    "do",       "else",     "extends", "false",   "final",
-    "finally",  "for",      "forSome", "if",      "implicit",
-    "import",   "lazy",     "match",   "new",     "null",
-    "object",   "override", "package", "private", "protected",
-    "return",   "sealed",   "super",   "this",    "throw",
-    "trait",    "try",      "true",    "type",    "val",
-    "var",      "while",    "with",    "yield"
-  )
-
-  val noArgMethodInScope: List[String] = List(
-      "clone",
-      "finalize",
-      "getClass",
-      "notify",
-      "notifyAll",
-      "toString",
-      "wait"
-  )
-
-  val TypesafeConfigClassName = classOf[com.typesafe.config.Config].getName
 }
