@@ -33,8 +33,5 @@ public class JavaIssue15dCfg {
       }
       return java.util.Collections.unmodifiableList(al);
     }
-    private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-      return c != null && c.hasPath(path) ? c.getConfig(path) : null;
-    }
 }
 

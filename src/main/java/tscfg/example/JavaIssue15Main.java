@@ -25,10 +25,13 @@ public class JavaIssue15Main {
       System.out.println();
       JavaIssue15cCfg c = new JavaIssue15cCfg(
           ConfigFactory.parseString(
-              "positions: [{lat: 1, lon: 2}, {lat:3, lon:4}]"
+              "positions: [\n" +
+                  "{ lat: 1, lon: 2, attrs = [] },\n" +
+                  "{ lat: 3, lon: 4, attrs = [3.14, 0] }]"
           )
       );
       System.out.println("c.positions = " + c.positions);
+      System.out.println("c.positions.get(1).attrs = " + c.positions.get(1).attrs);
     }
   
     {

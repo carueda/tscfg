@@ -13,9 +13,12 @@ import scala.annotation.tailrec
 
 class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
+  private var staticConfigUsed: Boolean = _
+
   def generate(objSpec: ObjSpec): GenResult = {
 
     var results = GenResult()
+    staticConfigUsed = false
 
     def genForObjSpec(objSpec: ObjSpec, indent: String, isRoot: Boolean = false): Code = {
       // <class>
@@ -235,6 +238,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         }
 
       case o: ObjSpec  ⇒
+        staticConfigUsed = true
         s"""new ${getClassName(o.name)}(_$$config(c, "$path"))"""
 
       case l: ListSpec  ⇒
@@ -365,7 +369,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       if (insertExc) {
         code.println(indent + _exc().replaceAll("\n", "\n" + indent))
       }
-      if (results.classNames.size > 1) {
+      if (staticConfigUsed) {
         code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
       }
     }

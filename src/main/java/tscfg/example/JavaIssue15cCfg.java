@@ -46,8 +46,5 @@ public class JavaIssue15cCfg {
       return new java.lang.RuntimeException(cv.origin().lineNumber()
         + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
     }
-    private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-      return c != null && c.hasPath(path) ? c.getConfig(path) : null;
-    }
 }
 
