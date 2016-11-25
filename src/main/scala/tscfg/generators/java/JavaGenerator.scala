@@ -22,9 +22,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       results = results.copy(classNames = results.classNames + className)
 
       val staticStr = if (isRoot) "" else " static"
-      val code = Code(objSpec,
-        declaration = indent + "public final " + className + " " + javaIdentifier(objSpec.name) + ";"
-      )
+      val code = Code(objSpec, indent, className)
 
       code.println(indent + s"public$staticStr class $className {")
 
@@ -66,10 +64,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
 
     def genForAtomicSpec(spec: AtomicSpec, indent: String): Code = {
-      val javaId = javaIdentifier(spec.name)
-      val javaType = getJavaType(spec)
-      Code(spec,
-        declaration = indent + "public final " + javaType + " " + javaId + ";")
+      Code(spec, indent, getJavaType(spec))
     }
 
     def genForListSpec(listSpec: ListSpec, indent: String): Code = {
@@ -82,16 +77,12 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val (elemSpec, levels) = listNesting(listSpec, 1)
 
       val elemCode = genCode(elemSpec, indent)
-      println(s"\n\nelemCode:$elemCode\n\n")
       val elemObjType = toObjectType(elemCode.spec)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
-      val javaId = javaIdentifier(listSpec.name)
-      val code = Code(listSpec,
-        declaration = javaId)
+      val code = Code(listSpec, indent, javaType)
 
       if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
-      code.declaration = indent + "public final " + javaType + " " + javaId + ";"
       code
     }
 
@@ -118,9 +109,13 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
   private case class Code(
                   spec: Spec,
-                  var declaration: String = ""
+                  indent: String,
+                  javaType: String
                  ) {
-    lazy val javaId = javaIdentifier(spec.name)
+
+    val javaId = javaIdentifier(spec.name)
+
+    val declaration = indent + "public final " + javaType + " " + javaId + ";"
 
     def println(str: String): Unit = defn.append(str).append('\n')
 
