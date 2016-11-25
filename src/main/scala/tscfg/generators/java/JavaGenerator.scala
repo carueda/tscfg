@@ -246,7 +246,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
       case o: ObjSpec  ⇒
         staticConfigUsed = true
-        s"""new ${getClassName(o.name)}(_$$config(c, "$path"))"""
+        s"""new ${getClassName(o.name)}(${methodNames.configAccess}(c, "$path"))"""
 
       case l: ListSpec  ⇒
         accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
@@ -258,12 +258,12 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       val elemAccessor = spec match {
         case a: AtomicSpec ⇒
           a.typ match {
-            case STRING   ⇒ "$str"
-            case INTEGER  ⇒ "$int"
-            case LONG     ⇒ "$lng"
-            case DOUBLE   ⇒ "$dbl"
-            case BOOLEAN  ⇒ "$bln"
-            case DURATION ⇒ "$dur"
+            case STRING   ⇒ methodNames.strA
+            case INTEGER  ⇒ methodNames.intA
+            case LONG     ⇒ methodNames.lngA
+            case DOUBLE   ⇒ methodNames.dblA
+            case BOOLEAN  ⇒ methodNames.blnA
+            case DURATION ⇒ methodNames.durA
           }
 
         case o: ObjSpec  ⇒ getClassName(o.name)
@@ -288,7 +288,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       "$list" + elemAccessor
     }
 
-    def _listMethodDefinition(elemJavaType: String, elemAccessor: String): String = {
+    def _listMethodDefinition(elemJavaType: String, elemAccessor: String): (String, String) = {
       val elem = if (elemAccessor.startsWith("$list"))
         s"$elemAccessor((com.typesafe.config.ConfigList)cv)"
       else if (elemAccessor.startsWith("$"))
@@ -296,66 +296,74 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       else
           s"new $elemAccessor(((com.typesafe.config.ConfigObject)cv).toConfig())"
 
+      val methodName = s"$$list$elemAccessor"
+      val methodDef =
       s"""
-         |private static java.util.List<$elemJavaType> $$list$elemAccessor(com.typesafe.config.ConfigList cl) {
+         |private static java.util.List<$elemJavaType> $methodName(com.typesafe.config.ConfigList cl) {
          |  java.util.ArrayList<$elemJavaType> al = new java.util.ArrayList<$elemJavaType>();
          |  for (com.typesafe.config.ConfigValue cv: cl) {
          |    al.add($elem);
          |  }
          |  return java.util.Collections.unmodifiableList(al);
-         |}""".stripMargin
+         |}""".stripMargin.trim
+
+      (methodName, methodDef)
     }
 
     // definition of methods used to access list's elements of basic type
-    val atomicElemAccessDefinition: Map[String, String] = Map(
-      "$str" → """
-                 |private static java.lang.String $str(com.typesafe.config.ConfigValue cv) {
-                 |  return java.lang.String.valueOf(cv.unwrapped());
-                 |}""".stripMargin.trim,
+    val atomicElemAccessDefinition: Map[String, String] = {
+      import methodNames._
+      Map(
+        strA → s"""
+          |private static java.lang.String $strA(com.typesafe.config.ConfigValue cv) {
+          |  return java.lang.String.valueOf(cv.unwrapped());
+          |}""".stripMargin.trim,
 
-      "$int" → """
-                 |private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
-                 |  java.lang.Object u = cv.unwrapped();
-                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                 |    !(u instanceof java.lang.Integer)) throw $exc(cv, "integer");
-                 |  return (java.lang.Integer) u;
-                 |}
-                 |""".stripMargin.trim,
+        intA → s"""
+          |private static java.lang.Integer $intA(com.typesafe.config.ConfigValue cv) {
+          |  java.lang.Object u = cv.unwrapped();
+          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+          |    !(u instanceof java.lang.Integer)) throw $expE(cv, "integer");
+          |  return (java.lang.Integer) u;
+          |}
+          |""".stripMargin.trim,
 
-      "$lng" → """
-                 |private static java.lang.Long $lng(com.typesafe.config.ConfigValue cv) {
-                 |  java.lang.Object u = cv.unwrapped();
-                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                 |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $exc(cv, "long");
-                 |  return ((java.lang.Number) u).longValue();
-                 |}
-                 |""".stripMargin.trim,
+        lngA → s"""
+          |private static java.lang.Long $lngA(com.typesafe.config.ConfigValue cv) {
+          |  java.lang.Object u = cv.unwrapped();
+          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+          |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $expE(cv, "long");
+          |  return ((java.lang.Number) u).longValue();
+          |}
+          |""".stripMargin.trim,
 
-      "$dbl" → """
-                 |private static java.lang.Double $dbl(com.typesafe.config.ConfigValue cv) {
-                 |  java.lang.Object u = cv.unwrapped();
-                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                 |    !(u instanceof java.lang.Number)) throw $exc(cv, "double");
-                 |  return ((java.lang.Number) u).doubleValue();
-                 |}
-                 |""".stripMargin.trim,
+        dblA → s"""
+          |private static java.lang.Double $dblA(com.typesafe.config.ConfigValue cv) {
+          |  java.lang.Object u = cv.unwrapped();
+          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+          |    !(u instanceof java.lang.Number)) throw $expE(cv, "double");
+          |  return ((java.lang.Number) u).doubleValue();
+          |}
+          |""".stripMargin.trim,
 
-      "$bln" → """
-                 |private static java.lang.Boolean $bln(com.typesafe.config.ConfigValue cv) {
-                 |  java.lang.Object u = cv.unwrapped();
-                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
-                 |    !(u instanceof java.lang.Boolean)) throw $exc(cv, "boolean");
-                 |  return (java.lang.Boolean) u;
-                 |}
-                 |""".stripMargin.trim
-    )
+        blnA → s"""
+          |private static java.lang.Boolean $blnA(com.typesafe.config.ConfigValue cv) {
+          |  java.lang.Object u = cv.unwrapped();
+          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
+          |    !(u instanceof java.lang.Boolean)) throw $expE(cv, "boolean");
+          |  return (java.lang.Boolean) u;
+          |}
+          |""".stripMargin.trim
+      )
+    }
 
-    def _exc(): String = {
-      """
-        |private static java.lang.RuntimeException $exc(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
+    def _expE: String = {
+      val expE = methodNames.expE
+      s"""
+        |private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
         |  java.lang.Object u = cv.unwrapped();
         |  return new java.lang.RuntimeException(cv.origin().lineNumber()
-        |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
+        |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\\"" +u+ "\\"" : u));
         |}
         |""".stripMargin.trim
     }
@@ -363,37 +371,62 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     val configGetter = {
       val tscc = util.TypesafeConfigClassName
       s"""
-         |private static $tscc _$$config($tscc c, java.lang.String path) {
+         |private static $tscc ${methodNames.configAccess}($tscc c, java.lang.String path) {
          |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
          |}""".stripMargin.trim
     }
 
     def insertStaticAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
 
+      val methods = collection.mutable.HashMap[String, String]()
+
       code.objectDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
-        code.println(_listMethodDefinition(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
+        val (methodName, methodDef) = _listMethodDefinition(javaType, elemAccessor)
+        methods += methodName → methodDef
+      }
+
+      var insertExpE = false
+      if (isRoot) {
+        rootDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
+          val (methodName, methodDef) = _listMethodDefinition(javaType, elemAccessor)
+          methods += methodName → methodDef
+        }
+
+        rootDefinedListElemAccessors foreach { case (_, elemAccessor) ⇒
+          atomicElemAccessDefinition.get(elemAccessor) foreach { methodDef ⇒
+            methods += elemAccessor → methodDef
+            if (elemAccessor != methodNames.strA) insertExpE = true
+          }
+        }
       }
 
       if (isRoot) {
-        rootDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
-          code.println(_listMethodDefinition(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
-        }
-
-        var insertExc = false
-        rootDefinedListElemAccessors foreach { case (_, elemAccessor) ⇒
-          atomicElemAccessDefinition.get(elemAccessor) foreach { defn ⇒
-            code.println(indent + defn.replaceAll("\n", "\n" + indent))
-            if (elemAccessor != "$str") insertExc = true
-          }
-        }
-        if (insertExc) {
-          code.println(indent + _exc().replaceAll("\n", "\n" + indent))
-        }
         if (staticConfigUsed) {
-          code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
+          methods += methodNames.configAccess → configGetter
+        }
+        if (insertExpE) {
+          methods += methodNames.expE → _expE
+        }
+      }
+
+      if (methods.nonEmpty) {
+        code.println("")
+        methods.keys.toList.sorted foreach { methodName ⇒
+          code.println(indent + methods(methodName).replaceAll("\n", "\n" + indent))
         }
       }
     }
+  }
+
+  object methodNames {
+    val strA      = "$str"
+    val intA      = "$int"
+    val lngA      = "$lng"
+    val dblA      = "$dbl"
+    val blnA      = "$bln"
+    val durA      = "$dur"
+    val configAccess   = "_$config"
+    val expE    = "$expE"
   }
 }
 
