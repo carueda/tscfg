@@ -48,22 +48,16 @@ public class JavaIssue15Main {
       System.out.println();
       JavaIssue15Cfg c = new JavaIssue15Cfg(
           ConfigFactory.parseString(
-              "names: [ hi there ]\n" +
               "positions: [\n" +
               "  {\n" +
-              "    lon: -121.0\n" +
-              "    lat: 34.0\n" +
-              "    foo: {\n" +
-              "      bar: hello world\n" +
-              "    }\n" +
               "    numbers: [ 1, 2, 3 ]\n" +
+                  "positionsXX: [ { other: 33, stuff: baz } ]" +
               "  }\n" +
               "]"
           )
       );
-      System.out.println("c.names = " + c.names);
       System.out.println("c.positions = " + c.positions);
-      System.out.println("c.positions.get(0).foo.bar = " + c.positions.get(0).foo.bar);
+      System.out.println("c.positions.get(0).positionsXX.get(0).stuff = " + c.positions.get(0).positionsXX.get(0).stuff);
     }
 
   }

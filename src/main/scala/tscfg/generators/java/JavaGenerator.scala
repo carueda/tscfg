@@ -13,9 +13,15 @@ import scala.annotation.tailrec
 
 class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
+  // defined in terms of corresponding elemAccessor:
+  type JavaElemTypeAndAccessor = (String,String)
+  val rootDefinedListElemAccessors = collection.mutable.LinkedHashSet[JavaElemTypeAndAccessor]()
+
   private var staticConfigUsed: Boolean = _
 
   def generate(objSpec: ObjSpec): GenResult = {
+
+    rootDefinedListElemAccessors.clear()
 
     var results = GenResult()
     staticConfigUsed = false
@@ -51,15 +57,14 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
-            " = " + instance(memberCode.spec, memberCode.spec.name) + ";"
+            " = " + instance(code, memberCode.spec, memberCode.spec.name) + ";"
         )
       }
       code.println(indent + IND + "}")
       // </constructor>
 
       // auxiliary methods:
-      if (isRoot)
-        accessors.insertStaticAuxMethods(code, indent + IND, results)
+      accessors.insertStaticAuxMethods(code, isRoot, indent + IND, results)
 
       code.println(indent + "}")
       // </class>
@@ -128,6 +133,8 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
     def definition = defn.toString
 
+    val objectDefinedListElemAccessors = collection.mutable.LinkedHashSet[JavaElemTypeAndAccessor]()
+
     private val defn = new StringBuilder()
   }
 
@@ -174,7 +181,7 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
     }
   }
 
-  private def instance(spec: Spec, path: String): String = {
+  private def instance(objCode: Code, spec: Spec, path: String): String = {
     spec match {
       case a: AtomicSpec ⇒
         a.typ match {
@@ -242,16 +249,12 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
         s"""new ${getClassName(o.name)}(_$$config(c, "$path"))"""
 
       case l: ListSpec  ⇒
-        accessors._listName(l.elemSpec) + s"""(c.getList("$path"))"""
+        accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
     }
   }
 
   private object accessors {
-    // defined in terms of corresponding elemAccessor:
-    type JavaElemTypeAndAccessor = (String,String)
-    val definedListElemAccessors = collection.mutable.HashSet[JavaElemTypeAndAccessor]()
-
-    def _listName(spec: Spec): String = {
+    def _listMethodName(spec: Spec, objCodeOpt: Option[Code] = None): String = {
       val elemAccessor = spec match {
         case a: AtomicSpec ⇒
           a.typ match {
@@ -265,14 +268,27 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
 
         case o: ObjSpec  ⇒ getClassName(o.name)
 
-        case l: ListSpec ⇒ _listName(l.elemSpec)
+        case l: ListSpec ⇒ _listMethodName(l.elemSpec)
       }
       val javaType = toObjectType(spec)
+
+      val definedListElemAccessors = objCodeOpt match {
+        case None ⇒
+          rootDefinedListElemAccessors
+
+        case Some(objCode) ⇒
+          if (atomicElemAccessDefinition.contains(elemAccessor))
+            rootDefinedListElemAccessors
+          else
+            objCode.objectDefinedListElemAccessors
+      }
+
       definedListElemAccessors += ((javaType, elemAccessor))
+
       "$list" + elemAccessor
     }
 
-    def _list(elemJavaType: String, elemAccessor: String): String = {
+    def _listMethodDefinition(elemJavaType: String, elemAccessor: String): String = {
       val elem = if (elemAccessor.startsWith("$list"))
         s"$elemAccessor((com.typesafe.config.ConfigList)cv)"
       else if (elemAccessor.startsWith("$"))
@@ -352,25 +368,30 @@ class JavaGenerator(implicit genOpts: GenOpts) extends Generator {
          |}""".stripMargin.trim
     }
 
-    def insertStaticAuxMethods(code:Code, indent: String, results: GenResult): Unit = {
-      // list accessors first:
-      definedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
-        code.println(_list(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
+    def insertStaticAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
+
+      code.objectDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
+        code.println(_listMethodDefinition(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
       }
 
-      // corresponding element accessors:
-      var insertExc = false
-      definedListElemAccessors foreach { case (_, elemAccessor) ⇒
-        atomicElemAccessDefinition.get(elemAccessor) foreach { defn ⇒
-          code.println(indent + defn.replaceAll("\n", "\n" + indent))
-          if (elemAccessor != "$str") insertExc = true
+      if (isRoot) {
+        rootDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
+          code.println(_listMethodDefinition(javaType, elemAccessor).replaceAll("\n", "\n" + indent))
         }
-      }
-      if (insertExc) {
-        code.println(indent + _exc().replaceAll("\n", "\n" + indent))
-      }
-      if (staticConfigUsed) {
-        code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
+
+        var insertExc = false
+        rootDefinedListElemAccessors foreach { case (_, elemAccessor) ⇒
+          atomicElemAccessDefinition.get(elemAccessor) foreach { defn ⇒
+            code.println(indent + defn.replaceAll("\n", "\n" + indent))
+            if (elemAccessor != "$str") insertExc = true
+          }
+        }
+        if (insertExc) {
+          code.println(indent + _exc().replaceAll("\n", "\n" + indent))
+        }
+        if (staticConfigUsed) {
+          code.println(indent + configGetter.replaceAll("\n", "\n" + indent))
+        }
       }
     }
   }

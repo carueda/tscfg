@@ -18,18 +18,18 @@ public class JavaIssue15dCfg {
         this.baz = $list$listBaz$Element(c.getList("baz"));
     }
 
-    private static java.util.List<Baz$Element> $listBaz$Element(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<Baz$Element> al = new java.util.ArrayList<Baz$Element>();
-      for (com.typesafe.config.ConfigValue cv: cl) {
-        al.add(new Baz$Element(((com.typesafe.config.ConfigObject)cv).toConfig()));
-      }
-      return java.util.Collections.unmodifiableList(al);
-    }
-
     private static java.util.List<java.util.List<Baz$Element>> $list$listBaz$Element(com.typesafe.config.ConfigList cl) {
       java.util.ArrayList<java.util.List<Baz$Element>> al = new java.util.ArrayList<java.util.List<Baz$Element>>();
       for (com.typesafe.config.ConfigValue cv: cl) {
         al.add($listBaz$Element((com.typesafe.config.ConfigList)cv));
+      }
+      return java.util.Collections.unmodifiableList(al);
+    }
+
+    private static java.util.List<Baz$Element> $listBaz$Element(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<Baz$Element> al = new java.util.ArrayList<Baz$Element>();
+      for (com.typesafe.config.ConfigValue cv: cl) {
+        al.add(new Baz$Element(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }
       return java.util.Collections.unmodifiableList(al);
     }
