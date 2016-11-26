@@ -7,7 +7,7 @@ import tscfg.generators.Generator
 import tscfg.scalaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
-import tscfg.util
+import tscfg.{Key, util}
 
 import scala.annotation.tailrec
 
@@ -22,7 +22,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
     def genForObjSpec(objSpec: ObjSpec, indent: String, isRoot: Boolean = false): Code = {
       var comma = ""
 
-      val className = getClassName(objSpec.name)
+      val className = getClassName(objSpec.key.simple)
 
       val orderedNames = objSpec.orderedNames
       val padScalaIdLength = if (orderedNames.nonEmpty)
@@ -54,22 +54,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       code.println(s"$indent  def build(c: scala.Option[${util.TypesafeConfigClassName}]): $className = {")
       code.println(s"$indent    $className(")
 
-
       comma = indent
       orderedNames foreach { name =>
         code.print(comma)
-        objSpec.children(name) match {
-          case a:AtomicSpec ⇒
-            code.print(s"""      ${instance(code, a, a.name)}""")
-
-          case o:ObjSpec ⇒
-            val className = getClassName(o.name)
-            code.print(s"""      $className.build(c.map(c => if (c.hasPath("${o.name}")) Some(c.getConfig("${o.name}")) else None).get)""")
-
-          case l:ListSpec ⇒
-            val className = getClassName(l.name)
-            code.print(s"""      TODO_access_list_$className.build(c.map(c => if (c.hasPath("${l.name}")) Some(c.getConfig("${l.name}")) else None).get)""")
-        }
+        instance(code, objSpec.children(name))
         comma = s",\n$indent"
       }
       code.println("")
@@ -80,9 +68,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       code.println(s"$indent}")
       // </object>
 
-
-
-      // <class>
+      // <case class>
       results = results.copy(classNames = results.classNames + className)
       code.println(s"${indent}case class $className(")
       comma = ""
@@ -96,8 +82,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
             code.print(getScalaType(a))
 
           case o:ObjSpec ⇒
-            // TODO use full qualified class name
-            val className = genOpts.className + "..." + o.name
+            val className = o.key.parts.map(getClassName).mkString(".")
             code.print(s"""$className""")
 
           case l:ListSpec ⇒
@@ -110,7 +95,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
       // toString...
       code.println("")
-      // </class>
+      // </case class>
 
       code
     }
@@ -187,82 +172,90 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
             case DURATION ⇒ if (spec.isOptional) "scala.Option[scala.Long]"    else "scala.Long"
         }
 
-      case o: ObjSpec  ⇒ getClassName(o.name)
+      case o: ObjSpec  ⇒ getClassName(o.key.simple)
 
       case l: ListSpec  ⇒
         s"scala.collection.immutable.List[${getScalaType(l.elemSpec)}]"
       }
   }
 
-  private def instance(objCode: Code, spec: Spec, path: String): String = {
+  private def instance(code: Code, spec: Spec): Unit = {
     spec match {
-      case a: AtomicSpec ⇒
-        a.typ match {
-          case STRING ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c.map(c => if(c.$hasPath("$path")) c.getString("$path") else $value).get"""
-            }
-            else if (spec.isOptional) {
-              s"""c.map(c => if(c.$hasPath("$path")) Some(c.getString("$path")) else None).get"""
-            }
-            else
-              s"""c.get.getString("$path")"""
+      case a:AtomicSpec ⇒
+        code.print(s"""      ${atomicInstance(a)}""")
 
-          case INTEGER ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c.map(c => if(c.$hasPath("$path")) c.getInt("$path") else $value).get"""
-            }
-            else if (spec.isOptional) {
-              s"""c.map(c => if(c.$hasPath("$path")) Some(c.getInt("$path")) else None).get"""
-            }
-            else
-              s"""c.get.getInt("$path")"""
+      case o:ObjSpec ⇒
+        val path = o.key.simple
+        val className = getClassName(path)
+        code.print(s"""      $className.build(c.map(c => if (c.hasPath("$path")) Some(c.getConfig("$path")) else None).get)""")
 
-          case LONG ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c.map(c => if(c.$hasPath("$path")) c.getLong("$path") else $value).get"""
-            }
-            else if (spec.isOptional) {
-              s"""c.map(c => if(c.$hasPath("$path")) Some(c.getLong("$path")) else None).get"""
-            }
-            else
-              s"""c.get.getLong("$path")"""
+      case l:ListSpec ⇒
+        val path = l.key.simple
+        val className = getClassName(l.key.simple)
+        code.print(s"""      TODO_access_list_$className.build(c.map(c => if (c.hasPath("$path")) Some(c.getConfig("$path")) else None).get)""")
+    }
+  }
 
-          case DOUBLE ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c.map(c => if(c.$hasPath("$path")) c.getDouble("$path") else $value).get"""
-            }
-            else if (spec.isOptional) {
-              s"""c.map(c => if(c.$hasPath("$path")) Some(c.getDouble("$path")) else None).get"""
-            }
-            else
-              s"""c.get.getDouble("$path")"""
-
-          case BOOLEAN ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c.map(c => if(c.$hasPath("$path")) c.getBoolean("$path") else $value).get"""
-            }
-            else if (spec.isOptional) {
-              s"""c.map(c => if(c.$hasPath("$path")) Some(c.getBoolean("$path")) else None).get"""
-            }
-            else
-              s"""c.get.getBoolean("$path")"""
-
-
-          case DURATION ⇒ s"""TODO_getDuration("$path")"""
+  private def atomicInstance(spec: AtomicSpec): String = {
+    val path = spec.key.simple
+    spec.typ match {
+      case STRING ⇒
+        if (spec.defaultValue.isDefined) {
+          val value = spec.defaultValue.get
+          s"""c.map(c => if(c.$hasPath("$path")) c.getString("$path") else $value).get"""
         }
+        else if (spec.isOptional) {
+          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getString("$path")) else None).get"""
+        }
+        else
+          s"""c.get.getString("$path")"""
 
-      case o: ObjSpec  ⇒
-        val className = getClassName(o.name)
-        s"""      $className.build(c.map(c => if (c.hasPath("${o.name}")) Some(c.getConfig("${o.name}")) else None).get)"""
+      case INTEGER ⇒
+        if (spec.defaultValue.isDefined) {
+          val value = spec.defaultValue.get
+          s"""c.map(c => if(c.$hasPath("$path")) c.getInt("$path") else $value).get"""
+        }
+        else if (spec.isOptional) {
+          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getInt("$path")) else None).get"""
+        }
+        else
+          s"""c.get.getInt("$path")"""
 
-      case l: ListSpec  ⇒
-        s"""TODO_instance_list(c.getList("$path"))"""
+      case LONG ⇒
+        if (spec.defaultValue.isDefined) {
+          val value = spec.defaultValue.get
+          s"""c.map(c => if(c.$hasPath("$path")) c.getLong("$path") else $value).get"""
+        }
+        else if (spec.isOptional) {
+          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getLong("$path")) else None).get"""
+        }
+        else
+          s"""c.get.getLong("$path")"""
+
+      case DOUBLE ⇒
+        if (spec.defaultValue.isDefined) {
+          val value = spec.defaultValue.get
+          s"""c.map(c => if(c.$hasPath("$path")) c.getDouble("$path") else $value).get"""
+        }
+        else if (spec.isOptional) {
+          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getDouble("$path")) else None).get"""
+        }
+        else
+          s"""c.get.getDouble("$path")"""
+
+      case BOOLEAN ⇒
+        if (spec.defaultValue.isDefined) {
+          val value = spec.defaultValue.get
+          s"""c.map(c => if(c.$hasPath("$path")) c.getBoolean("$path") else $value).get"""
+        }
+        else if (spec.isOptional) {
+          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getBoolean("$path")) else None).get"""
+        }
+        else
+          s"""c.get.getBoolean("$path")"""
+
+
+      case DURATION ⇒ s"""TODO_getDuration("$path")"""
     }
   }
 }
@@ -287,7 +280,7 @@ object ScalaGenerator {
       symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
     }
 
-    val objSpec = SpecBuilder.fromConfig(config, className)
+    val objSpec = SpecBuilder.fromConfig(config, Key(className))
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className,

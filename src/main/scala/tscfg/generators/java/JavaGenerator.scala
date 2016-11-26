@@ -7,7 +7,7 @@ import tscfg.generators.Generator
 import tscfg.javaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
-import tscfg.util
+import tscfg.{Key, util}
 
 import scala.annotation.tailrec
 
@@ -28,7 +28,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
     def genForObjSpec(objSpec: ObjSpec, indent: String, isRoot: Boolean = false): Code = {
       // <class>
-      val className = getClassName(objSpec.name)
+      val className = getClassName(objSpec.key.simple)
       results = results.copy(classNames = results.classNames + className)
 
       val staticStr = if (isRoot) "" else " static"
@@ -57,7 +57,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
-            " = " + instance(code, memberCode.spec, memberCode.spec.name) + ";"
+            " = " + instance(code, memberCode.spec, memberCode.spec.key.simple) + ";"
         )
       }
       code.println(indent + IND + "}")
@@ -123,7 +123,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
     */
   private case class Code(spec: Spec, javaType: String) {
 
-    val javaId = javaIdentifier(spec.name)
+    val javaId = javaIdentifier(spec.key.simple)
 
     val declaration = "public final " + javaType + " " + javaId + ";"
 
@@ -152,7 +152,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
             case DURATION ⇒ if (spec.isOptional) "java.lang.Long"    else "long"
         }
 
-      case o: ObjSpec  ⇒ getClassName(o.name)  // javaId
+      case o: ObjSpec  ⇒ getClassName(o.key.simple)
 
       case l: ListSpec  ⇒
         val elemJavaType = toObjectType(l.elemSpec)
@@ -173,7 +173,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
         }
 
       case o: ObjSpec  ⇒
-        getClassName(o.name)
+        getClassName(o.key.simple)
 
       case l: ListSpec  ⇒
         val elemJavaType = toObjectType(l.elemSpec)
@@ -246,7 +246,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
       case o: ObjSpec  ⇒
         staticConfigUsed = true
-        s"""new ${getClassName(o.name)}(${methodNames.configAccess}(c, "$path"))"""
+        s"""new ${getClassName(o.key.simple)}(${methodNames.configAccess}(c, "$path"))"""
 
       case l: ListSpec  ⇒
         accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
@@ -266,7 +266,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
             case DURATION ⇒ methodNames.durA
           }
 
-        case o: ObjSpec  ⇒ getClassName(o.name)
+        case o: ObjSpec  ⇒ getClassName(o.key.simple)
 
         case l: ListSpec ⇒ _listMethodName(l.elemSpec, objCodeOpt)
       }
@@ -449,7 +449,7 @@ object JavaGenerator {
       symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
     }
 
-    val objSpec = SpecBuilder.fromConfig(config, className)
+    val objSpec = SpecBuilder.fromConfig(config, Key(className))
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className,

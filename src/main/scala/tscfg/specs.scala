@@ -25,14 +25,14 @@ object specs {
   import types._
 
   sealed abstract class Spec {
-    def name: String
+    def key: Key
     def isOptional: Boolean
     def defaultValue: Option[String]
     def qualification: Option[String]
     def format(indent: String = ""): String
   }
 
-  case class AtomicSpec(name: String,
+  case class AtomicSpec(key: Key,
                         typ: AtomicType,
                         isOptional: Boolean = false,
                         defaultValue: Option[String] = None,
@@ -48,9 +48,9 @@ object specs {
     }
   }
 
-  case class ObjSpec(name: String,
+  case class ObjSpec(key: Key,
                      children: Map[String, Spec],
-                     isOptional: Boolean = false,         // TODO
+                     isOptional: Boolean = false, // TODO
                      defaultValue: Option[String] = None,
                      qualification: Option[String] = None
                     ) extends Spec {
@@ -63,16 +63,16 @@ object specs {
         symbol + ": " + children(symbol).format(indent + "  ")
       }.mkString("\n" + indent + "  ")
       s"""
-        |$name{
+        |${key.simple}{
         |$indent  $childrenStr
         |$indent}
       """.stripMargin.trim
     }
   }
 
-  case class ListSpec(name: String,
+  case class ListSpec(key: Key,
                       elemSpec: Spec,
-                      isOptional: Boolean = false,           // TODO
+                      isOptional: Boolean = false, // TODO
                       defaultValue: Option[String] = None,
                       qualification: Option[String] = None
                      ) extends Spec {

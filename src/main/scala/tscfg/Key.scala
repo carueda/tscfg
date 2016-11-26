@@ -1,22 +1,26 @@
 package tscfg
 
-abstract class Key extends Ordered[Key] {
+abstract sealed class Key extends Ordered[Key] {
   val parent: Key
   val simple: String
 
   def compare(that: Key): Int = toString.compare(that.toString)
 
+  def +(s: String) = CompositeKey(this, s)
+
   def parts: List[String]
 }
 
 case class SimpleKey(simple: String) extends Key {
+  require(! simple.contains('.'))
   val parent: Key = Key.root
   override val toString = simple
   def parts: List[String] = List(simple)
 }
 
 case class CompositeKey(parent: Key, simple: String) extends Key {
-  override val toString = parent + "." + simple
+  require(! simple.contains('.'))
+  override val toString = parent.toString + "." + simple
   def parts: List[String] = parent.parts :+ simple
 }
 

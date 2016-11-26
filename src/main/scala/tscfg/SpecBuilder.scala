@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 object SpecBuilder {
   import collection._
 
-  def fromConfig(conf: Config, pushedName: String): ObjSpec = {
+  def fromConfig(conf: Config, pushedKey: Key): ObjSpec = {
 
     // 1- get a struct representation from conf.entrySet()
     abstract class Struct
@@ -29,7 +29,7 @@ object SpecBuilder {
       conf.entrySet() foreach { e ⇒
         val (path, value) = (e.getKey, e.getValue)
         val key = Key(path)
-        val leaf = Leaf(key, fromConfigValue(value, key.simple))
+        val leaf = Leaf(key, fromConfigValue(value, key))
         doAncestorsOf(key, leaf)
 
         def doAncestorsOf(childKey: Key, childStruct: Struct): Unit = {
@@ -50,12 +50,12 @@ object SpecBuilder {
     }
 
     // 2- now build and return the corresponding root Spec:
-    def getSpec(name: String, struct: Struct): Spec = struct match {
+    def getSpec(name: Key, struct: Struct): Spec = struct match {
       case Leaf(_, spec) ⇒ spec
 
       case Group(members) ⇒
         val children: immutable.Map[String, Spec] = members.map { case (childSimple, childStruct) ⇒
-            childSimple -> getSpec(childSimple, childStruct)
+            childSimple -> getSpec(name + childSimple, childStruct)
         }.toMap
         ObjSpec(name, children)
     }
@@ -63,22 +63,22 @@ object SpecBuilder {
     val root = getRootGroup
     //println("root group:"); pprint.log(root)
 
-    getSpec(pushedName, root).asInstanceOf[ObjSpec]
+    getSpec(pushedKey, root).asInstanceOf[ObjSpec]
   }
 
-  private def fromConfigValue(cv: ConfigValue, pushedName: String): Spec = {
+  private def fromConfigValue(cv: ConfigValue, pushedKey: Key): Spec = {
     import ConfigValueType._
     cv.valueType() match {
-      case STRING  => atomicSpec(cv, pushedName)
-      case BOOLEAN => AtomicSpec(pushedName, types.BOOLEAN)
-      case NUMBER  => AtomicSpec(pushedName, numberType(cv))
-      case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedName)
-      case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject], pushedName)
+      case STRING  => atomicSpec(cv, pushedKey)
+      case BOOLEAN => AtomicSpec(pushedKey, types.BOOLEAN)
+      case NUMBER  => AtomicSpec(pushedKey, numberType(cv))
+      case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedKey)
+      case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject], pushedKey)
       case NULL    => throw new AssertionError("null unexpected")
     }
   }
 
-  private def atomicSpec(cv: ConfigValue, pushedName: String): AtomicSpec = {
+  private def atomicSpec(cv: ConfigValue, pushedKey: Key): AtomicSpec = {
     val valueString = cv.unwrapped().toString.toLowerCase
 
     val tokens = valueString.split("""\s*\|\s*""")
@@ -109,10 +109,10 @@ object SpecBuilder {
       }
     })
 
-    AtomicSpec(pushedName, atomicType, isOpt, defaultValue, qualification)
+    AtomicSpec(pushedKey, atomicType, isOpt, defaultValue, qualification)
   }
 
-  private def listSpec(cv: ConfigList, pushedName: String): ListSpec = {
+  private def listSpec(cv: ConfigList, pushedKey: Key): ListSpec = {
     if (cv.isEmpty) throw new IllegalArgumentException("list with one element expected")
 
     if (cv.size() > 1) {
@@ -123,9 +123,11 @@ object SpecBuilder {
     }
 
     // push list element class name (a new one unless one is already being pushed):
-    val elemPushedName = if (pushedName.endsWith("$Elm_")) pushedName else newListElementClassName
+    val elemPushedName = if (pushedKey.simple.endsWith("$Elm_")) pushedKey else {
+      Key(pushedKey.parent.toString+ "." + newListElementClassName)
+    }
 
-    ListSpec(pushedName,
+    ListSpec(pushedKey,
       fromConfigValue(cv.get(0), elemPushedName))
   }
 
@@ -139,7 +141,7 @@ object SpecBuilder {
   }
   var nextElementCounter: Int = 0
 
-  private def objSpec(cv: ConfigObject, pushedName: String): Spec = fromConfig(cv.toConfig, pushedName)
+  private def objSpec(cv: ConfigObject, pushedKey: Key): Spec = fromConfig(cv.toConfig, pushedKey)
 
   private def numberType(cv: ConfigValue): AtomicType = {
     val valueString = cv.unwrapped().toString
