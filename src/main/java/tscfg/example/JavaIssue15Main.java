@@ -8,16 +8,10 @@ public class JavaIssue15Main {
       System.out.println("\nJavaIssue15aCfg:");
       JavaIssue15aCfg c = new JavaIssue15aCfg(
           ConfigFactory.parseString(
-              "ii: 20\n" +
-              "dd: 3.14\n" +
-              "foo: { bar: baz }"
+              "ii: [1,2 ,3]"
           )
       );
       System.out.println("c.ii  = " + c.ii);
-      System.out.println("c.dd  = " + c.dd);
-      System.out.println("c.foo.bar = " + c.foo.bar);
-      System.out.println("c.foo.aho.val = " + c.foo.aho.val);
-      System.out.println("c.foo.aho.yes = " + c.foo.aho.yes);
     }
   
     {

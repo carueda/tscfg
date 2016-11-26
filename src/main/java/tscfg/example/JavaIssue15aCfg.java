@@ -1,38 +1,29 @@
 package tscfg.example;
 
 public class JavaIssue15aCfg {
-    public final double dd;
-    public final Foo foo;
-    public final int ii;
-
-    public static class Foo {
-        public final Aho aho;
-        public final java.lang.String bar;
-
-        public static class Aho {
-            public final int val;
-            public final java.lang.Boolean yes;
-
-            public Aho(com.typesafe.config.Config c) {
-                this.val = c != null && c.hasPath("val") ? c.getInt("val") : 31;
-                this.yes = c != null && c.hasPath("yes") ? c.getBoolean("yes") : null;
-            }
-        }
-
-        public Foo(com.typesafe.config.Config c) {
-            this.aho = new Aho(_$config(c, "aho"));
-            this.bar = c.getString("bar");
-        }
-    }
+    public final java.util.List<java.lang.Integer> ii;
 
     public JavaIssue15aCfg(com.typesafe.config.Config c) {
-        this.dd = c.getDouble("dd");
-        this.foo = new Foo(_$config(c, "foo"));
-        this.ii = c.getInt("ii");
+        this.ii = $list$int(c.getList("ii"));
     }
 
-    private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-      return c != null && c.hasPath(path) ? c.getConfig(path) : null;
+    private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
+      java.lang.Object u = cv.unwrapped();
+      return new java.lang.RuntimeException(cv.origin().lineNumber()
+        + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
+    }
+    private static java.lang.Integer $int(com.typesafe.config.ConfigValue cv) {
+      java.lang.Object u = cv.unwrapped();
+      if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+        !(u instanceof java.lang.Integer)) throw $expE(cv, "integer");
+      return (java.lang.Integer) u;
+    }
+    private static java.util.List<java.lang.Integer> $list$int(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<java.lang.Integer> al = new java.util.ArrayList<>();
+      for (com.typesafe.config.ConfigValue cv: cl) {
+        al.add($int(cv));
+      }
+      return java.util.Collections.unmodifiableList(al);
     }
 }
 
