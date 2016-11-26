@@ -63,7 +63,7 @@ object specs {
         symbol + ": " + children(symbol).format(indent + "  ")
       }.mkString("\n" + indent + "  ")
       s"""
-        |${key.simple}{
+        |$key{
         |$indent  $childrenStr
         |$indent}
       """.stripMargin.trim

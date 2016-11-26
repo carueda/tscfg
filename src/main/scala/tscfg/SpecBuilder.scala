@@ -7,10 +7,15 @@ import tscfg.specs.types.AtomicType
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 
-object SpecBuilder {
+class SpecBuilder(rootKey: Key) {
   import collection._
 
-  def fromConfig(conf: Config, pushedKey: Key): ObjSpec = {
+  def fromConfig(conf: Config): ObjSpec = {
+    fromConfig(conf, rootKey)
+  }
+
+  private def fromConfig(conf: Config, pushedKey: Key): ObjSpec = {
+    println(s" --- fromConfig: pushedKey=$pushedKey")
 
     // 1- get a struct representation from conf.entrySet()
     abstract class Struct
@@ -123,23 +128,27 @@ object SpecBuilder {
     }
 
     // push list element class name (a new one unless one is already being pushed):
-    val elemPushedName = if (pushedKey.simple.endsWith("$Elm_")) pushedKey else {
-      Key(pushedKey.parent.toString+ "." + newListElementClassName)
-    }
+    val elemPushedName = listElementClassName(pushedKey)
 
-    ListSpec(pushedKey,
-      fromConfigValue(cv.get(0), elemPushedName))
+    ListSpec(pushedKey, fromConfigValue(cv.get(0), elemPushedName))
   }
 
   /**
-    * New name makes easier to distinguish multiple list element classes
+    * If needed, creates a new name to distinguish multiple list element classes
     */
-  private def newListElementClassName: String = {
-    val name = "_$" + nextElementCounter + "$Elm_"
-    nextElementCounter += 1
-    name
+  private def listElementClassName(pushedKey: Key): Key = {
+    if (pushedKey.simple.endsWith("$Elm_")) pushedKey else {
+      val name = "_$" + nextElementCounter + "$Elm_"
+      nextElementCounter += 1
+
+      if (pushedKey.parent == Key.root)
+        rootKey + name
+      else
+        pushedKey.parent + name
+    }
   }
-  var nextElementCounter: Int = 0
+
+  private var nextElementCounter: Int = 0
 
   private def objSpec(cv: ConfigObject, pushedKey: Key): Spec = fromConfig(cv.toConfig, pushedKey)
 

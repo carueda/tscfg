@@ -46,6 +46,12 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
           case o: ObjSpec ⇒
             val c = genCode(o, indent + IND)
             code.println(c.definition)
+
+          case l:ListSpec ⇒
+            val c = genCode(l.elemSpec, indent + IND)
+            if (c.definition.nonEmpty)
+              code.println(c.definition)
+
           case _ ⇒
         }
       }
@@ -74,7 +80,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
       // <case class>
       results = results.copy(classNames = results.classNames + className)
-      code.println(s"${indent}case class $className(")
+      code.println(indent + s"case class $className(")
       comma = ""
       orderedNames foreach { name =>
         val scalaId = scalaIdentifier(name)
@@ -178,7 +184,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
             case DURATION ⇒ if (spec.isOptional) "scala.Option[scala.Long]"    else "scala.Long"
         }
 
-      case o: ObjSpec  ⇒ getClassName(o.key.simple)
+      case o: ObjSpec  ⇒ o.key.parts.map(getClassName).mkString(".")
 
       case l: ListSpec  ⇒
         s"scala.collection.immutable.List[${getScalaType(l.elemSpec)}]"
@@ -213,7 +219,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
           s"""c.map(c => if(c.$hasPath("$path")) Some(c.getString("$path")) else None).get"""
         }
         else
-          s"""c.get.getString("$path")"""
+          s"""c.getString("$path")"""
 
       case INTEGER ⇒
         if (spec.defaultValue.isDefined) {
@@ -224,7 +230,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
           s"""c.map(c => if(c.$hasPath("$path")) Some(c.getInt("$path")) else None).get"""
         }
         else
-          s"""c.get.getInt("$path")"""
+          s"""c.getInt("$path")"""
 
       case LONG ⇒
         if (spec.defaultValue.isDefined) {
@@ -235,7 +241,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
           s"""c.map(c => if(c.$hasPath("$path")) Some(c.getLong("$path")) else None).get"""
         }
         else
-          s"""c.get.getLong("$path")"""
+          s"""c.getLong("$path")"""
 
       case DOUBLE ⇒
         if (spec.defaultValue.isDefined) {
@@ -246,7 +252,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
           s"""c.map(c => if(c.$hasPath("$path")) Some(c.getDouble("$path")) else None).get"""
         }
         else
-          s"""c.get.getDouble("$path")"""
+          s"""c.getDouble("$path")"""
 
       case BOOLEAN ⇒
         if (spec.defaultValue.isDefined) {
@@ -257,7 +263,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
           s"""c.map(c => if(c.$hasPath("$path")) Some(c.getBoolean("$path")) else None).get"""
         }
         else
-          s"""c.get.getBoolean("$path")"""
+          s"""c.getBoolean("$path")"""
 
 
       case DURATION ⇒ s"""TODO_getDuration("$path")"""
@@ -305,7 +311,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       else if (elemAccessor.startsWith("$"))
         s"$elemAccessor(cv)"
       else
-        s"new $elemAccessor(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig())"
+        s"$elemAccessor(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)"
 
       val methodName = s"$$list$elemAccessor"
       val methodDef =
@@ -443,7 +449,7 @@ object ScalaGenerator {
       symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
     }
 
-    val objSpec = SpecBuilder.fromConfig(config, Key(className))
+    val objSpec = new SpecBuilder(Key(className)).fromConfig(config)
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className,

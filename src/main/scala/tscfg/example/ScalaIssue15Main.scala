@@ -31,5 +31,18 @@ object ScalaIssue15Main {
       println("c.longs      = " + c.longs)
       println("c.booleans   = " + c.booleans)
     }
+
+    {
+      println("\nissue15c:")
+      val c = ScalaIssue15cCfg(ConfigFactory.parseString(
+        """
+          |positions: [
+          |  { lat: 1, lon: 2, attrs = [] },
+          |  { lat: 3, lon: 4, attrs = [3.14, 0] }
+          |]
+          |""".stripMargin
+      ))
+      println("c.positions    = " + c.positions)
+    }
   }
 }

@@ -449,7 +449,7 @@ object JavaGenerator {
       symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
     }
 
-    val objSpec = SpecBuilder.fromConfig(config, Key(className))
+    val objSpec = new SpecBuilder(Key(className)).fromConfig(config)
     println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className,
