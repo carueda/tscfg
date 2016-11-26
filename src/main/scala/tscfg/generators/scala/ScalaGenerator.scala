@@ -83,10 +83,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
           case o:ObjSpec ⇒
             val className = o.key.parts.map(getClassName).mkString(".")
-            code.print(s"""$className""")
+            code.print(className)
 
           case l:ListSpec ⇒
-            code.print(s"""      ${getScalaType(l)}""")
+            code.print(getScalaType(l))
         }
         comma = ",\n"
       }

@@ -11,7 +11,7 @@ object ScalaAccessor {
 
     baseType.base match {
       case "string"    => if (required) GetString() else if (value.isDefined) GetStringOr(value.get) else GetOptString()
-      case "int"       => if (required) GetInt()    else if (value.isDefined) GetIntOr(value.get) else GetOptInt()
+      case "int" | "integer"      => if (required) GetInt()    else if (value.isDefined) GetIntOr(value.get) else GetOptInt()
       case "long"      => if (required) GetLong()   else if (value.isDefined) GetLongOr(value.get) else GetOptLong()
       case "double"    => if (required) GetDouble() else if (value.isDefined) GetDoubleOr(value.get) else GetOptDouble()
       case "boolean"   => if (required) GetBoolean()else if (value.isDefined) GetBooleanOr(value.get) else GetOptBoolean()

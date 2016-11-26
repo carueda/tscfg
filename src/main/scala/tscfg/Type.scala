@@ -56,7 +56,7 @@ object Type {
   }
 
   private val recognizedBaseTypes: Set[String] = Set(
-    "string", "int", "long", "double", "boolean", "duration"
+    "string", "int", "integer", "long", "double", "boolean", "duration"
   )
 
   private def recognizedBaseType(baseType: BaseType): Boolean = recognizedBaseTypes contains baseType.base
