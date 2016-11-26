@@ -213,10 +213,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       case STRING ⇒
         if (spec.defaultValue.isDefined) {
           val value = spec.defaultValue.get
-          s"""c.map(c => if(c.$hasPath("$path")) c.getString("$path") else $value).get"""
+          s"""if(c.$hasPath("$path")) c.getString("$path") else $value"""
         }
         else if (spec.isOptional) {
-          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getString("$path")) else None).get"""
+          s"""if(c.$hasPath("$path")) Some(c.getString("$path")) else None"""
         }
         else
           s"""c.getString("$path")"""
@@ -224,10 +224,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       case INTEGER ⇒
         if (spec.defaultValue.isDefined) {
           val value = spec.defaultValue.get
-          s"""c.map(c => if(c.$hasPath("$path")) c.getInt("$path") else $value).get"""
+          s"""if(c.$hasPath("$path")) c.getInt("$path") else $value"""
         }
         else if (spec.isOptional) {
-          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getInt("$path")) else None).get"""
+          s"""c => if(c.$hasPath("$path")) Some(c.getInt("$path")) else None"""
         }
         else
           s"""c.getInt("$path")"""
@@ -235,10 +235,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       case LONG ⇒
         if (spec.defaultValue.isDefined) {
           val value = spec.defaultValue.get
-          s"""c.map(c => if(c.$hasPath("$path")) c.getLong("$path") else $value).get"""
+          s"""if(c.$hasPath("$path")) c.getLong("$path") else $value"""
         }
         else if (spec.isOptional) {
-          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getLong("$path")) else None).get"""
+          s"""if(c.$hasPath("$path")) Some(c.getLong("$path")) else None"""
         }
         else
           s"""c.getLong("$path")"""
@@ -246,10 +246,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       case DOUBLE ⇒
         if (spec.defaultValue.isDefined) {
           val value = spec.defaultValue.get
-          s"""c.map(c => if(c.$hasPath("$path")) c.getDouble("$path") else $value).get"""
+          s"""if(c.$hasPath("$path")) c.getDouble("$path") else $value"""
         }
         else if (spec.isOptional) {
-          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getDouble("$path")) else None).get"""
+          s"""if(c.$hasPath("$path")) Some(c.getDouble("$path")) else None"""
         }
         else
           s"""c.getDouble("$path")"""
@@ -257,10 +257,10 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       case BOOLEAN ⇒
         if (spec.defaultValue.isDefined) {
           val value = spec.defaultValue.get
-          s"""c.map(c => if(c.$hasPath("$path")) c.getBoolean("$path") else $value).get"""
+          s"""if(c.$hasPath("$path")) c.getBoolean("$path") else $value"""
         }
         else if (spec.isOptional) {
-          s"""c.map(c => if(c.$hasPath("$path")) Some(c.getBoolean("$path")) else None).get"""
+          s"""if (c.$hasPath("$path")) Some(c.getBoolean("$path")) else None"""
         }
         else
           s"""c.getBoolean("$path")"""

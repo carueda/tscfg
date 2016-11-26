@@ -44,5 +44,15 @@ object ScalaIssue15Main {
       ))
       println("c.positions    = " + c.positions)
     }
+
+    {
+      println("\nissue15d:")
+      val c = ScalaIssue15dCfg(ConfigFactory.parseString(
+        """
+          |baz: [ [ {dd: 1, aa: true}, {dd: 2} ] ]
+          |""".stripMargin
+      ))
+      println("c.baz    = " + c.baz)
+    }
   }
 }
