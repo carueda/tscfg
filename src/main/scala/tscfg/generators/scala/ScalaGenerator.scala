@@ -15,7 +15,11 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
   val hasPath = if (genOpts.j7) "hasPath" else "hasPathOrNull"
 
+  val rootDefinedListElemAccessors = collection.mutable.LinkedHashSet[(String,String)]()
+
   def generate(objSpec: ObjSpec): GenResult = {
+
+    rootDefinedListElemAccessors.clear()
 
     var results = GenResult()
 
@@ -48,10 +52,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       // </recurse>
 
       // <apply>
-      // #13: add `build` auxiliary method to avoid type erasure issue in case of optional member
-      code.println(s"$indent  def apply(c: com.typesafe.config.Config) = build(Some(c))")
-      code.println(s"$indent  def apply() = build(None)")
-      code.println(s"$indent  def build(c: scala.Option[${util.TypesafeConfigClassName}]): $className = {")
+      code.println(s"$indent  def apply(c: com.typesafe.config.Config): $className = {")
       code.println(s"$indent    $className(")
 
       comma = indent
@@ -64,6 +65,9 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       code.println(s"$indent    )")
       code.println(s"$indent  }")
       // </apply>
+
+      // auxiliary methods:
+      accessors.insertStaticAuxMethods(code, isRoot, indent + IND, results)
 
       code.println(s"$indent}")
       // </object>
@@ -155,6 +159,8 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
     def definition = defn.toString
 
+    val objectDefinedListElemAccessors = collection.mutable.LinkedHashSet[(String,String)]()
+
     private val defn = new StringBuilder()
   }
 
@@ -191,8 +197,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
       case l:ListSpec ⇒
         val path = l.key.simple
-        val className = getClassName(l.key.simple)
-        code.print(s"""      TODO_access_list_$className.build(c.map(c => if (c.hasPath("$path")) Some(c.getConfig("$path")) else None).get)""")
+        code.print("      " + accessors._listMethodName(l.elemSpec, Some(code)) + s"""(c.getList("$path"))""")
     }
   }
 
@@ -257,6 +262,164 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
       case DURATION ⇒ s"""TODO_getDuration("$path")"""
     }
+  }
+
+  private object accessors {
+    def _listMethodName(spec: Spec, objCodeOpt: Option[Code] = None): String = {
+      val elemAccessor = spec match {
+        case a: AtomicSpec ⇒
+          a.typ match {
+            case STRING   ⇒ methodNames.strA
+            case INTEGER  ⇒ methodNames.intA
+            case LONG     ⇒ methodNames.lngA
+            case DOUBLE   ⇒ methodNames.dblA
+            case BOOLEAN  ⇒ methodNames.blnA
+            case DURATION ⇒ methodNames.durA
+          }
+
+        case o: ObjSpec  ⇒ getClassName(o.key.simple)
+
+        case l: ListSpec ⇒ _listMethodName(l.elemSpec, objCodeOpt)
+      }
+      val scalaType = getScalaType(spec)
+
+      val definedListElemAccessors = objCodeOpt match {
+        case None ⇒
+          rootDefinedListElemAccessors
+
+        case Some(objCode) ⇒
+          if (atomicElemAccessDefinition.contains(elemAccessor))
+            rootDefinedListElemAccessors
+          else
+            objCode.objectDefinedListElemAccessors
+      }
+
+      definedListElemAccessors += ((scalaType, elemAccessor))
+
+      "$list" + elemAccessor
+    }
+
+    def _listMethodDefinition(elemJavaType: String, elemAccessor: String): (String, String) = {
+      val elem = if (elemAccessor.startsWith("$list"))
+        s"$elemAccessor(cv.asInstanceOf[com.typesafe.config.ConfigList])"
+      else if (elemAccessor.startsWith("$"))
+        s"$elemAccessor(cv)"
+      else
+        s"new $elemAccessor(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig())"
+
+      val methodName = s"$$list$elemAccessor"
+      val methodDef =
+        s"""
+           |private def $methodName(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[$elemJavaType] = {
+           |  import scala.collection.JavaConversions._
+           |  cl.map(cv => $elem).toList
+           |}""".stripMargin.trim
+
+      (methodName, methodDef)
+    }
+
+    // definition of methods used to access list's elements of basic type
+    val atomicElemAccessDefinition: Map[String, String] = {
+      import methodNames._
+      Map(
+        strA → s"""
+                  |private def $strA(cv:com.typesafe.config.ConfigValue) =
+                  |  java.lang.String.valueOf(cv.unwrapped())
+                  |""".stripMargin.trim,
+
+        intA → s"""
+                  |private def $intA(cv:com.typesafe.config.ConfigValue): scala.Int = {
+                  |  val u: Any = cv.unwrapped
+                  |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
+                  |    || !u.isInstanceOf[Integer]) throw $expE(cv, "integer")
+                  |  u.asInstanceOf[Integer]
+                  |}""".stripMargin.trim,
+
+        lngA → s"""
+                  |private def $lngA(cv:com.typesafe.config.ConfigValue): scala.Long = {
+                  |  val u: Any = cv.unwrapped
+                  |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
+                  |    || !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
+                  |  u.asInstanceOf[java.lang.Number].longValue()
+                  |}""".stripMargin.trim,
+
+        dblA → s"""
+                  |private def $dblA(cv:com.typesafe.config.ConfigValue): scala.Double = {
+                  |  val u: Any = cv.unwrapped
+                  |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
+                  |    || !u.isInstanceOf[java.lang.Number]) throw $expE(cv, "double")
+                  |  u.asInstanceOf[java.lang.Number].doubleValue()
+                  |}""".stripMargin.trim,
+
+        blnA → s"""
+                  |private def $blnA(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
+                  |  val u: Any = cv.unwrapped
+                  |  if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN)
+                  |    || !u.isInstanceOf[java.lang.Boolean]) throw $expE(cv, "boolean")
+                  |  u.asInstanceOf[java.lang.Boolean].booleanValue()
+                  |}""".stripMargin.trim
+      )
+    }
+
+    def _expE: String = {
+      val expE = methodNames.expE
+      s"""
+         |private def $expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
+         |  val u: Any = cv.unwrapped
+         |  new java.lang.RuntimeException(cv.origin.lineNumber +
+         |    ": expecting: " + exp + " got: " +
+         |    (if (u.isInstanceOf[java.lang.String]) "\\"" + u + "\\"" else u))
+         |}""".stripMargin.trim
+    }
+
+    def insertStaticAuxMethods(code:Code, isRoot: Boolean, indent: String, results: GenResult): Unit = {
+
+      val methods = collection.mutable.HashMap[String, String]()
+
+      code.objectDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
+        val (methodName, methodDef) = _listMethodDefinition(javaType, elemAccessor)
+        methods += methodName → methodDef
+      }
+
+      var insertExpE = false
+      if (isRoot) {
+        rootDefinedListElemAccessors foreach { case (javaType, elemAccessor) ⇒
+          val (methodName, methodDef) = _listMethodDefinition(javaType, elemAccessor)
+          methods += methodName → methodDef
+        }
+
+        rootDefinedListElemAccessors foreach { case (_, elemAccessor) ⇒
+          atomicElemAccessDefinition.get(elemAccessor) foreach { methodDef ⇒
+            methods += elemAccessor → methodDef
+            if (elemAccessor != methodNames.strA) insertExpE = true
+          }
+        }
+      }
+
+      if (isRoot) {
+        if (insertExpE) {
+          methods += methodNames.expE → _expE
+        }
+      }
+
+      if (methods.nonEmpty) {
+        code.println("")
+        methods.keys.toList.sorted foreach { methodName ⇒
+          code.println(indent + methods(methodName).replaceAll("\n", "\n" + indent))
+        }
+      }
+    }
+  }
+
+  object methodNames {
+    val strA      = "$str"
+    val intA      = "$int"
+    val lngA      = "$lng"
+    val dblA      = "$dbl"
+    val blnA      = "$bln"
+    val durA      = "$dur"
+    val configAccess   = "_$config"
+    val expE    = "$expE"
   }
 }
 
