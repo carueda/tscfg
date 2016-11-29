@@ -57,6 +57,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       code.println("")
       code.println(indent + IND + s"public $className(${util.TypesafeConfigClassName} c) {")
       codes foreach { memberCode ⇒
+        results = results.copy(fieldNames = results.fieldNames + memberCode.javaId)
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
             " = " + instance(code, memberCode.spec, memberCode.name) + ";"

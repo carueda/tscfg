@@ -33,8 +33,6 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
         orderedNames.map(scalaIdentifier).maxBy(_.length).length else 0
       def padScalaId(id: String) = id + (" " * (padScalaIdLength - id.length))
 
-      results = results.copy(classNames = results.classNames + className)
-
       val code = Code(objSpec)
 
       // <case class>
