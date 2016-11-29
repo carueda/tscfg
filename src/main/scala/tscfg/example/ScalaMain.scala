@@ -5,6 +5,29 @@ import com.typesafe.config.ConfigFactory
 object ScalaMain {
   def main(args: Array[String]): Unit = {
     {
+      println("\nissue10:")
+      val c0 = ScalaIssue10Cfg(ConfigFactory.parseString(
+        """
+          |main = {
+          |}
+        """.stripMargin
+      ))
+      println("c0.email  = " + c0.main.email)
+
+      val c1 = ScalaIssue10Cfg(ConfigFactory.parseString(
+        """
+          |main = {
+          |  email = {
+          |    server = "foo"
+          |    password = "pw"
+          |  }
+          |}
+        """.stripMargin
+      ))
+      println("c1.email  = " + c1.main.email)
+    }
+
+    {
       println("\nissue15a:")
       val c = ScalaIssue15aCfg(ConfigFactory.parseString(
         """

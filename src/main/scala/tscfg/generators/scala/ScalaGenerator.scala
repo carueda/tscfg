@@ -49,7 +49,8 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
             code.print(getScalaType(a))
 
           case o:ObjSpec ⇒
-            val cn = className + "." + o.key.parts.map(getClassName).mkString(".")
+            val base = className + "." + o.key.parts.map(getClassName).mkString(".")
+            val cn = if (o.isOptional) s"scala.Option[$base]" else base
             code.print(cn)
 
           case l:ListSpec ⇒
@@ -198,13 +199,20 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
         code.print(s"""      ${atomicInstance(a, path)}""")
 
       case o:ObjSpec ⇒
-        val path = o.key.simple
-        val className = getClassName(path)
-        code.print(s"""      $className(c.getConfig("$path"))""")
+        code.print(s"""      ${objectInstance(o)}""")
 
       case l:ListSpec ⇒
         code.print("      " + accessors._listMethodName(l.elemSpec, Some(code)) + s"""(c.getList("$path"))""")
     }
+  }
+
+  private def objectInstance(spec: ObjSpec): String = {
+    val path = spec.key.simple
+    val className = getClassName(path)
+    if (spec.isOptional) {
+      s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path"))) else None"""
+    }
+    else s"""$className(c.getConfig("$path"))"""
   }
 
   private def atomicInstance(spec: AtomicSpec, path: String): String = {
