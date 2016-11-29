@@ -141,7 +141,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
     private val defn = new StringBuilder()
   }
 
-  private val IND = "    "
+  private val IND = "  "
 
   private def getJavaType(spec: Spec): String = {
     spec match {
