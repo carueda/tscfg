@@ -13,6 +13,8 @@ import scala.annotation.tailrec
 
 class JavaGenerator(genOpts: GenOpts) extends Generator {
 
+  val hasPath = if (genOpts.j7) "hasPath" else "hasPathOrNull"
+
   // defined in terms of corresponding elemAccessor:
   type JavaElemTypeAndAccessor = (String,String)
   val rootDefinedListElemAccessors = collection.mutable.LinkedHashSet[JavaElemTypeAndAccessor]()
@@ -188,10 +190,10 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
           case STRING ⇒
             if (spec.defaultValue.isDefined) {
               val value = spec.defaultValue.get
-              s"""c != null && c.hasPath("$path") ? c.getString("$path") : "$value""""
+              s"""c != null && c.$hasPath("$path") ? c.getString("$path") : "$value""""
             }
             else if (spec.isOptional) {
-              s"""c != null && c.hasPath("$path") ? c.getString("$path") : null"""
+              s"""c != null && c.$hasPath("$path") ? c.getString("$path") : null"""
             }
             else
               s"""c.getString("$path")"""
@@ -199,10 +201,10 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
           case INTEGER ⇒
             if (spec.defaultValue.isDefined) {
               val value = spec.defaultValue.get
-              s"""c != null && c.hasPath("$path") ? c.getInt("$path") : $value"""
+              s"""c != null && c.$hasPath("$path") ? c.getInt("$path") : $value"""
             }
             else if (spec.isOptional) {
-              s"""c != null && c.hasPath("$path") ? c.getInt("$path") : null"""
+              s"""c != null && c.$hasPath("$path") ? c.getInt("$path") : null"""
             }
             else
               s"""c.getInt("$path")"""
@@ -210,10 +212,10 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
           case LONG ⇒
             if (spec.defaultValue.isDefined) {
               val value = spec.defaultValue.get
-              s"""c != null && c.hasPath("$path") ? c.getLong("$path") : $value"""
+              s"""c != null && c.$hasPath("$path") ? c.getLong("$path") : $value"""
             }
             else if (spec.isOptional) {
-              s"""c != null && c.hasPath("$path") ? c.getLong("$path") : null"""
+              s"""c != null && c.$hasPath("$path") ? c.getLong("$path") : null"""
             }
             else
               s"""c.getLong("$path")"""
@@ -221,10 +223,10 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
           case DOUBLE ⇒
             if (spec.defaultValue.isDefined) {
               val value = spec.defaultValue.get
-              s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : $value"""
+              s"""c != null && c.$hasPath("$path") ? c.getDouble("$path") : $value"""
             }
             else if (spec.isOptional) {
-              s"""c != null && c.hasPath("$path") ? c.getDouble("$path") : null"""
+              s"""c != null && c.$hasPath("$path") ? c.getDouble("$path") : null"""
             }
             else
               s"""c.getDouble("$path")"""
@@ -232,10 +234,10 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
           case BOOLEAN ⇒
             if (spec.defaultValue.isDefined) {
               val value = spec.defaultValue.get
-              s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : $value"""
+              s"""c != null && c.$hasPath("$path") ? c.getBoolean("$path") : $value"""
             }
             else if (spec.isOptional) {
-              s"""c != null && c.hasPath("$path") ? c.getBoolean("$path") : null"""
+              s"""c != null && c.$hasPath("$path") ? c.getBoolean("$path") : null"""
             }
             else
               s"""c.getBoolean("$path")"""
@@ -373,7 +375,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       val tscc = util.TypesafeConfigClassName
       s"""
          |private static $tscc ${methodNames.configAccess}($tscc c, java.lang.String path) {
-         |  return c != null && c.hasPath(path) ? c.getConfig(path) : null;
+         |  return c != null && c.$hasPath(path) ? c.getConfig(path) : null;
          |}""".stripMargin.trim
     }
 
