@@ -27,7 +27,7 @@ object generator {
                      preamble: Option[String] = None,
                      language: String    = "java",
                      templateWhat: Option[templateGenerator.What] = None,
-                     genToString: Boolean = true,
+                     genToString: Boolean = false,
                      genToPropString: Boolean = false
                     )
 
