@@ -1,5 +1,9 @@
 package tscfg.example
 
+case class ScalaIssue15aCfg(
+  ii : scala.collection.immutable.List[scala.Int]
+)
+
 object ScalaIssue15aCfg {
   def apply(c: com.typesafe.config.Config): ScalaIssue15aCfg = {
     ScalaIssue15aCfg(
@@ -24,7 +28,3 @@ object ScalaIssue15aCfg {
     cl.map(cv => $int(cv)).toList
   }
 }
-case class ScalaIssue15aCfg(
-  ii : scala.collection.immutable.List[scala.Int]
-)
-

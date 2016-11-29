@@ -1,6 +1,15 @@
 package tscfg.example
 
+case class ScalaIssue15dCfg(
+  baz : scala.collection.immutable.List[scala.collection.immutable.List[ScalaIssue15dCfg.Baz$Elm]]
+)
+
 object ScalaIssue15dCfg {
+  case class Baz$Elm(
+    aa : scala.Option[scala.Boolean],
+    dd : scala.Double
+  )
+
   object Baz$Elm {
     def apply(c: com.typesafe.config.Config): Baz$Elm = {
       Baz$Elm(
@@ -9,11 +18,6 @@ object ScalaIssue15dCfg {
       )
     }
   }
-  case class Baz$Elm(
-    aa : scala.Option[scala.Boolean],
-    dd : scala.Double
-  )
-
 
   def apply(c: com.typesafe.config.Config): ScalaIssue15dCfg = {
     ScalaIssue15dCfg(
@@ -30,7 +34,3 @@ object ScalaIssue15dCfg {
     cl.map(cv => Baz$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
   }
 }
-case class ScalaIssue15dCfg(
-  baz : scala.collection.immutable.List[scala.collection.immutable.List[ScalaIssue15dCfg.Baz$Elm]]
-)
-

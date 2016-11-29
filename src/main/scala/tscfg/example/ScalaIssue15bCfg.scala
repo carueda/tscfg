@@ -1,5 +1,13 @@
 package tscfg.example
 
+case class ScalaIssue15bCfg(
+  booleans : scala.collection.immutable.List[scala.Boolean],
+  doubles  : scala.collection.immutable.List[scala.Double],
+  integers : scala.collection.immutable.List[scala.collection.immutable.List[scala.Int]],
+  longs    : scala.collection.immutable.List[scala.Long],
+  strings  : scala.collection.immutable.List[java.lang.String]
+)
+
 object ScalaIssue15bCfg {
   def apply(c: com.typesafe.config.Config): ScalaIssue15bCfg = {
     ScalaIssue15bCfg(
@@ -68,11 +76,3 @@ object ScalaIssue15bCfg {
   private def $str(cv:com.typesafe.config.ConfigValue) =
     java.lang.String.valueOf(cv.unwrapped())
 }
-case class ScalaIssue15bCfg(
-  booleans : scala.collection.immutable.List[scala.Boolean],
-  doubles  : scala.collection.immutable.List[scala.Double],
-  integers : scala.collection.immutable.List[scala.collection.immutable.List[scala.Int]],
-  longs    : scala.collection.immutable.List[scala.Long],
-  strings  : scala.collection.immutable.List[java.lang.String]
-)
-

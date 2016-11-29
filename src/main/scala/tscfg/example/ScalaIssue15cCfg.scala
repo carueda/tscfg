@@ -1,7 +1,22 @@
 package tscfg.example
 
+case class ScalaIssue15cCfg(
+  positions : scala.collection.immutable.List[ScalaIssue15cCfg.Positions$1$Elm],
+  qaz       : ScalaIssue15cCfg.Qaz
+)
+
 object ScalaIssue15cCfg {
+  case class Positions$1$Elm(
+    attrs : scala.collection.immutable.List[scala.collection.immutable.List[Positions$1$Elm.Attrs$2$Elm]],
+    lat   : scala.Double,
+    lon   : scala.Double
+  )
+
   object Positions$1$Elm {
+    case class Attrs$2$Elm(
+      foo : scala.Long
+    )
+
     object Attrs$2$Elm {
       def apply(c: com.typesafe.config.Config): Attrs$2$Elm = {
         Attrs$2$Elm(
@@ -9,10 +24,6 @@ object ScalaIssue15cCfg {
         )
       }
     }
-    case class Attrs$2$Elm(
-      foo : scala.Long
-    )
-
 
     def apply(c: com.typesafe.config.Config): Positions$1$Elm = {
       Positions$1$Elm(
@@ -31,14 +42,20 @@ object ScalaIssue15cCfg {
       cl.map(cv => Attrs$2$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
     }
   }
-  case class Positions$1$Elm(
-    attrs : scala.collection.immutable.List[scala.collection.immutable.List[Positions$1$Elm.Attrs$2$Elm]],
-    lat   : scala.Double,
-    lon   : scala.Double
+  case class Qaz(
+    aa : Qaz.Aa
   )
 
   object Qaz {
+    case class Aa(
+      bb : scala.collection.immutable.List[Aa.Bb$Elm]
+    )
+
     object Aa {
+      case class Bb$Elm(
+        cc : java.lang.String
+      )
+
       object Bb$Elm {
         def apply(c: com.typesafe.config.Config): Bb$Elm = {
           Bb$Elm(
@@ -46,10 +63,6 @@ object ScalaIssue15cCfg {
           )
         }
       }
-      case class Bb$Elm(
-        cc : java.lang.String
-      )
-
       def apply(c: com.typesafe.config.Config): Aa = {
         Aa(
           $listBb$Elm(c.getList("bb"))
@@ -61,20 +74,12 @@ object ScalaIssue15cCfg {
         cl.map(cv => Bb$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
       }
     }
-    case class Aa(
-      bb : scala.collection.immutable.List[Aa.Bb$Elm]
-    )
-
     def apply(c: com.typesafe.config.Config): Qaz = {
       Qaz(
         Aa(c.getConfig("aa"))
       )
     }
   }
-  case class Qaz(
-    aa : Qaz.Aa
-  )
-
   def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg = {
     ScalaIssue15cCfg(
       $listPositions$1$Elm(c.getList("positions")),
@@ -87,8 +92,3 @@ object ScalaIssue15cCfg {
     cl.map(cv => Positions$1$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
   }
 }
-case class ScalaIssue15cCfg(
-  positions : scala.collection.immutable.List[ScalaIssue15cCfg.Positions$1$Elm],
-  qaz       : ScalaIssue15cCfg.Qaz
-)
-

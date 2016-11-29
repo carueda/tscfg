@@ -1,7 +1,21 @@
 package tscfg.example
 
+case class ScalaIssue15Cfg(
+  positions : scala.collection.immutable.List[ScalaIssue15Cfg.Positions$Elm]
+)
+
 object ScalaIssue15Cfg {
+  case class Positions$Elm(
+    numbers   : scala.collection.immutable.List[scala.Int],
+    positions : scala.collection.immutable.List[scala.collection.immutable.List[Positions$Elm.Positions$2$Elm]]
+  )
+
   object Positions$Elm {
+    case class Positions$2$Elm(
+      other : scala.Int,
+      stuff : java.lang.String
+    )
+
     object Positions$2$Elm {
       def apply(c: com.typesafe.config.Config): Positions$2$Elm = {
         Positions$2$Elm(
@@ -10,10 +24,6 @@ object ScalaIssue15Cfg {
         )
       }
     }
-    case class Positions$2$Elm(
-      other : scala.Int,
-      stuff : java.lang.String
-    )
 
 
     def apply(c: com.typesafe.config.Config): Positions$Elm = {
@@ -32,10 +42,6 @@ object ScalaIssue15Cfg {
       cl.map(cv => Positions$2$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
     }
   }
-  case class Positions$Elm(
-    numbers   : scala.collection.immutable.List[scala.Int],
-    positions : scala.collection.immutable.List[scala.collection.immutable.List[Positions$Elm.Positions$2$Elm]]
-  )
 
   def apply(c: com.typesafe.config.Config): ScalaIssue15Cfg = {
     ScalaIssue15Cfg(
@@ -64,7 +70,4 @@ object ScalaIssue15Cfg {
     cl.map(cv => Positions$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
   }
 }
-case class ScalaIssue15Cfg(
-  positions : scala.collection.immutable.List[ScalaIssue15Cfg.Positions$Elm]
-)
 

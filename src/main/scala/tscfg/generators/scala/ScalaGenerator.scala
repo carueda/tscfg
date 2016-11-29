@@ -7,7 +7,7 @@ import tscfg.generators.Generator
 import tscfg.scalaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
-import tscfg.{Key, util}
+import tscfg.Key
 
 import scala.annotation.tailrec
 
@@ -36,6 +36,35 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       results = results.copy(classNames = results.classNames + className)
 
       val code = Code(objSpec)
+
+      // <case class>
+      results = results.copy(classNames = results.classNames + className)
+      code.println(indent + s"case class $className(")
+      comma = ""
+      orderedNames foreach { name =>
+        val scalaId = scalaIdentifier(name)
+        results = results.copy(fieldNames = results.fieldNames + scalaId)
+        code.print(comma)
+        code.print(s"$indent  ${padScalaId(scalaId)} : ")  // note, space before : for proper tokenization
+        objSpec.children(name) match {
+          case a:AtomicSpec ⇒
+            code.print(getScalaType(a))
+
+          case o:ObjSpec ⇒
+            val cn = className + "." + o.key.parts.map(getClassName).mkString(".")
+            code.print(cn)
+
+          case l:ListSpec ⇒
+            code.print(getScalaType(l, Some(className)))
+        }
+        comma = ",\n"
+      }
+
+      code.println(s"\n$indent)")
+
+      // toString...
+      code.println("")
+      // </case class>
 
       // <object>
       code.println(indent + s"object $className {")
@@ -75,37 +104,8 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       // auxiliary methods:
       accessors.insertStaticAuxMethods(code, isRoot, indent + IND, results)
 
-      code.println(s"$indent}")
+      code.print(s"$indent}")
       // </object>
-
-      // <case class>
-      results = results.copy(classNames = results.classNames + className)
-      code.println(indent + s"case class $className(")
-      comma = ""
-      orderedNames foreach { name =>
-        val scalaId = scalaIdentifier(name)
-        results = results.copy(fieldNames = results.fieldNames + scalaId)
-        code.print(comma)
-        code.print(s"$indent  ${padScalaId(scalaId)} : ")  // note, space before : for proper tokenization
-        objSpec.children(name) match {
-          case a:AtomicSpec ⇒
-            code.print(getScalaType(a))
-
-          case o:ObjSpec ⇒
-            val cn = className + "." + o.key.parts.map(getClassName).mkString(".")
-            code.print(cn)
-
-          case l:ListSpec ⇒
-            code.print(getScalaType(l, Some(className)))
-        }
-        comma = ",\n"
-      }
-
-      code.print(s"\n$indent)")
-
-      // toString...
-      code.println("")
-      // </case class>
 
       code
     }
