@@ -5,6 +5,7 @@ public class JavaIssue10Cfg {
 
   public static class Main {
     public final Email email;
+    public final java.util.List<Reals$Elm> reals;
 
     public static class Email {
       public final java.lang.String password;
@@ -15,9 +16,26 @@ public class JavaIssue10Cfg {
         this.server = c.getString("server");
       }
     }
+    public static class Reals$Elm {
+      public final double foo;
+
+      public Reals$Elm(com.typesafe.config.Config c) {
+        this.foo = c.getDouble("foo");
+      }
+    }
+
 
     public Main(com.typesafe.config.Config c) {
       this.email = c.hasPathOrNull("email") ? new Email(_$config(c, "email")) : null;
+      this.reals = c.hasPathOrNull("reals") ? $listReals$Elm(c.getList("reals")) : null;
+    }
+
+    private static java.util.List<Reals$Elm> $listReals$Elm(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<Reals$Elm> al = new java.util.ArrayList<>();
+      for (com.typesafe.config.ConfigValue cv: cl) {
+        al.add(new Reals$Elm(((com.typesafe.config.ConfigObject)cv).toConfig()));
+      }
+      return java.util.Collections.unmodifiableList(al);
     }
   }
 

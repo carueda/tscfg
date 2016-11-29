@@ -193,13 +193,21 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
         objectInstance(o, path)
 
       case l: ListSpec  ⇒
-        accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
+        listInstance(objCode, l, path)
     }
   }
 
   private def objectInstance(spec: ObjSpec, path: String): String = {
     val className = getClassName(spec.key.simple)
     val base = s"""new $className(${methodNames.configAccess}(c, "$path"))"""
+    if (spec.isOptional) {
+      s"""c.$hasPath("$path") ? $base : null"""
+    }
+    else base
+  }
+
+  private def listInstance(objCode: Code, spec: ListSpec, path: String): String = {
+    val base = accessors._listMethodName(spec.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
     if (spec.isOptional) {
       s"""c.$hasPath("$path") ? $base : null"""
     }

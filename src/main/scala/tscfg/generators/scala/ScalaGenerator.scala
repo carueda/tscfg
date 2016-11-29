@@ -189,7 +189,9 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
         }
 
       case l: ListSpec  ⇒
-        s"scala.collection.immutable.List[${getScalaType(l.elemSpec, classNameOpt)}]"
+        val elemType = getScalaType(l.elemSpec, classNameOpt)
+        val base = s"scala.collection.immutable.List[$elemType]"
+        if (l.isOptional) s"scala.Option[$base]" else base
       }
   }
 
@@ -202,7 +204,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
         code.print(s"""      ${objectInstance(o)}""")
 
       case l:ListSpec ⇒
-        code.print("      " + accessors._listMethodName(l.elemSpec, Some(code)) + s"""(c.getList("$path"))""")
+        code.print(s"""      ${listInstance(code, l, path)}""")
     }
   }
 
@@ -213,6 +215,14 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path"))) else None"""
     }
     else s"""$className(c.getConfig("$path"))"""
+  }
+
+  private def listInstance(code: Code, spec: ListSpec, path: String): String = {
+    val base = accessors._listMethodName(spec.elemSpec, Some(code)) + s"""(c.getList("$path"))"""
+    if (spec.isOptional) {
+      s"""if(c.$hasPath("$path")) scala.Some($base) else None"""
+    }
+    else base
   }
 
   private def atomicInstance(spec: AtomicSpec, path: String): String = {

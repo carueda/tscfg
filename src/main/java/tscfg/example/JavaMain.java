@@ -8,10 +8,13 @@ public class JavaMain {
       System.out.println("\nissue10:");
       JavaIssue10Cfg c0 = new JavaIssue10Cfg(
           ConfigFactory.parseString(
-              "main = {}"
+              "main = {              \n" +
+              "  reals = [ { foo: 3.14 } ]   \n" +
+              "}"
           )
       );
       System.out.println("c0.main.email  = " + c0.main.email);
+      System.out.println("c0.main.reals  = " + c0.main.reals);
 
       JavaIssue10Cfg c1 = new JavaIssue10Cfg(
           ConfigFactory.parseString(
@@ -24,6 +27,7 @@ public class JavaMain {
           )
       );
       System.out.println("c1.main.email  = " + c1.main.email);
+      System.out.println("c1.main.reals  = " + c1.main.reals);
     }
   
     {

@@ -9,10 +9,12 @@ object ScalaMain {
       val c0 = ScalaIssue10Cfg(ConfigFactory.parseString(
         """
           |main = {
+          |  reals = [ { foo: 3.14 } ]
           |}
         """.stripMargin
       ))
-      println("c0.email  = " + c0.main.email)
+      println("c0.main.email  = " + c0.main.email)
+      println("c0.main.reals  = " + c0.main.reals)
 
       val c1 = ScalaIssue10Cfg(ConfigFactory.parseString(
         """
@@ -24,7 +26,8 @@ object ScalaMain {
           |}
         """.stripMargin
       ))
-      println("c1.email  = " + c1.main.email)
+      println("c1.main.email  = " + c1.main.email)
+      println("c1.main.reals  = " + c1.main.reals)
     }
 
     {

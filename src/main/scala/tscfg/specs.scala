@@ -82,6 +82,7 @@ object specs {
         symbol + ": " + children(symbol).format(indent + "  ")
       }.mkString("\n" + indent + "  ")
 
+      (if (isOptional) "optional " else "") +
       key.toString + "{\n" +
         commentsString +
         indent + "  " + childrenStr + "\n" +
@@ -94,6 +95,7 @@ object specs {
                      ) extends Spec {
 
     override def format(indent: String): String = {
+      (if (isOptional) "optional " else "") +
       s"ListOf(${elemSpec.format(indent)})" + commentsString(indent + "    ")
     }
   }
