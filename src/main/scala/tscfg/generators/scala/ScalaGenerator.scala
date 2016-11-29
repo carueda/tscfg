@@ -219,10 +219,13 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
     spec.defaultValue match {
       case Some(v) ⇒
-        val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec) else v
+        val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec)
+        else if (spec.typ == STRING) "\"" + v + "\"" else v
         s"""if(c.$hasPath("$path")) c.$getter else $value"""
+
       case None if spec.isOptional ⇒
         s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
+
       case _ ⇒
         s"""c.$getter"""
     }
