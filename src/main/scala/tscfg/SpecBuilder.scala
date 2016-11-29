@@ -24,7 +24,7 @@ class SpecBuilder(rootKey: Key) {
       val childSpec = getSpec(conf, childStruct)
       childStruct.key.simple -> childSpec
     }.toMap
-    ObjSpec(Key(key), children)
+    ObjSpec(Key(key), children, asScalaBuffer(conf.origin().comments()).toList)
   }
 
   private def getSpec(conf: Config, struct: Struct): Spec = {
@@ -84,11 +84,12 @@ class SpecBuilder(rootKey: Key) {
   }
 
   private def fromConfigValue(cv: ConfigValue, pushedKey: String): Spec = {
+    val comments = asScalaBuffer(cv.origin().comments()).toList
     import ConfigValueType._
     cv.valueType() match {
       case STRING  => atomicSpec(cv)
-      case BOOLEAN => AtomicSpec(types.BOOLEAN)
-      case NUMBER  => AtomicSpec(numberType(cv))
+      case BOOLEAN => AtomicSpec(types.BOOLEAN, comments)
+      case NUMBER  => AtomicSpec(numberType(cv), comments)
       case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedKey)
       case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject], pushedKey)
       case NULL    => throw new AssertionError("null unexpected")
@@ -96,6 +97,7 @@ class SpecBuilder(rootKey: Key) {
   }
 
   private def atomicSpec(cv: ConfigValue): AtomicSpec = {
+    val comments = asScalaBuffer(cv.origin().comments()).toList
     val valueString = cv.unwrapped().toString.toLowerCase
 
     val tokens = valueString.split("""\s*\|\s*""")
@@ -126,7 +128,7 @@ class SpecBuilder(rootKey: Key) {
       }
     })
 
-    AtomicSpec(atomicType, isOpt, defaultValue, qualification)
+    AtomicSpec(atomicType, comments, isOpt, defaultValue, qualification)
   }
 
   private def listSpec(cv: ConfigList, pushedKey: String): ListSpec = {
@@ -139,9 +141,10 @@ class SpecBuilder(rootKey: Key) {
       println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
     }
 
+    val comments = asScalaBuffer(cv.origin().comments()).toList
     val elemPushedName = listElementClassName(pushedKey)
 
-    ListSpec(fromConfigValue(cv.get(0), elemPushedName))
+    ListSpec(fromConfigValue(cv.get(0), elemPushedName), comments)
   }
 
   // if needed, creates a new name to distinguish multiple list element classes
