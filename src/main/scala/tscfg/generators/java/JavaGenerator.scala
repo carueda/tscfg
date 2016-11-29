@@ -32,13 +32,13 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       results = results.copy(classNames = results.classNames + className)
 
       val staticStr = if (isRoot) "" else " static"
-      val code = Code(objSpec, className)
+      val code = Code(objSpec.key.simple, objSpec, className)
 
       code.println(indent + s"public$staticStr class $className {")
 
       // generate for members:
       val codes = objSpec.orderedNames map { name =>
-        genCode(objSpec.children(name), indent + IND)
+        genCode(name, objSpec.children(name), indent + IND)
       }
 
       // member declarations:
@@ -57,7 +57,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       codes foreach { memberCode ⇒
         code.println(
           indent + IND + IND + "this." + memberCode.javaId +
-            " = " + instance(code, memberCode.spec, memberCode.spec.key.simple) + ";"
+            " = " + instance(code, memberCode.spec, memberCode.name) + ";"
         )
       }
       code.println(indent + IND + "}")
@@ -72,11 +72,11 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       code
     }
 
-    def genForAtomicSpec(spec: AtomicSpec): Code = {
-      Code(spec, getJavaType(spec))
+    def genForAtomicSpec(name: String, spec: AtomicSpec): Code = {
+      Code(name, spec, getJavaType(spec))
     }
 
-    def genForListSpec(listSpec: ListSpec, indent: String): Code = {
+    def genForListSpec(name: String, listSpec: ListSpec, indent: String): Code = {
       @tailrec
       def listNesting(ls: ListSpec, levels: Int): (Spec, Int) = ls.elemSpec match {
         case subListSpec: ListSpec ⇒ listNesting(subListSpec, levels + 1)
@@ -85,20 +85,20 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
       val (elemSpec, levels) = listNesting(listSpec, 1)
 
-      val elemCode = genCode(elemSpec, indent)
+      val elemCode = genCode(name, elemSpec, indent)
       val elemObjType = toObjectType(elemCode.spec)
       val javaType = ("java.util.List<" * levels) + elemObjType + (">" * levels)
-      val code = Code(listSpec, javaType)
+      val code = Code(name, listSpec, javaType)
 
       if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
       code
     }
 
-    def genCode(spec: Spec, indent: String = ""): Code = spec match {
-      case spec: AtomicSpec    ⇒ genForAtomicSpec(spec)
+    def genCode(name: String, spec: Spec, indent: String = ""): Code = spec match {
+      case spec: AtomicSpec    ⇒ genForAtomicSpec(name, spec)
       case spec: ObjSpec       ⇒ genForObjSpec(spec, indent)
-      case spec: ListSpec      ⇒ genForListSpec(spec, indent)
+      case spec: ListSpec      ⇒ genForListSpec(name, spec, indent)
     }
 
     val header = new StringBuilder()
@@ -121,9 +121,9 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
     * @param spec       the spec
     * @param javaType   for declaration
     */
-  private case class Code(spec: Spec, javaType: String) {
+  private case class Code(name: String, spec: Spec, javaType: String) {
 
-    val javaId = javaIdentifier(spec.key.simple)
+    val javaId = javaIdentifier(name) //spec.key.simple)
 
     val declaration = "public final " + javaType + " " + javaId + ";"
 
@@ -246,7 +246,8 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
       case o: ObjSpec  ⇒
         staticConfigUsed = true
-        s"""new ${getClassName(o.key.simple)}(${methodNames.configAccess}(c, "$path"))"""
+        val className = getClassName(o.key.simple)
+        s"""new $className(${methodNames.configAccess}(c, "$path"))"""
 
       case l: ListSpec  ⇒
         accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""

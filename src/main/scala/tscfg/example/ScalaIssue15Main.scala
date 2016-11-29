@@ -37,12 +37,16 @@ object ScalaIssue15Main {
       val c = ScalaIssue15cCfg(ConfigFactory.parseString(
         """
           |positions: [
-          |  { lat: 1, lon: 2, attrs = [] },
-          |  { lat: 3, lon: 4, attrs = [3.14, 0] }
+          |  { lat: 1, lon: 2, attrs = [ [ {foo: 99}             ] ] },
+          |  { lat: 3, lon: 4, attrs = [ [ {foo: 3.14}, {foo: 0} ] ] }
           |]
+          |qaz = {
+          |  aa = { bb = [ { cc: hoho } ]  }
+          |}
           |""".stripMargin
       ))
-      println("c.positions    = " + c.positions)
+      println("c.positions  = " + c.positions)
+      println("c.qaz        = " + c.qaz)
     }
 
     {
@@ -53,6 +57,22 @@ object ScalaIssue15Main {
           |""".stripMargin
       ))
       println("c.baz    = " + c.baz)
+    }
+
+    {
+      println("\nissue15:")
+      val c = ScalaIssue15Cfg(ConfigFactory.parseString(
+        """
+          |positions: [
+          |  {
+          |    numbers: [ 1, 2, 3 ]
+          |    positions: [ [ { other: 33, stuff: baz } ] ]
+          |  }
+          |]
+          |""".stripMargin
+      ))
+      println("c.positions.head.numbers   = " + c.positions.head.numbers)
+      println("c.positions.head.positions = " + c.positions.head.positions)
     }
   }
 }

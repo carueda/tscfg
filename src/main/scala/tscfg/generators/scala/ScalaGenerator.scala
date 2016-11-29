@@ -35,7 +35,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
       results = results.copy(classNames = results.classNames + className)
 
-      val code = Code(objSpec, className)
+      val code = Code(objSpec)
 
       // <object>
       code.println(indent + s"object $className {")
@@ -64,7 +64,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
       comma = indent
       orderedNames foreach { name =>
         code.print(comma)
-        instance(code, objSpec.children(name))
+        instance(code, objSpec.children(name), name)
         comma = s",\n$indent"
       }
       code.println("")
@@ -92,11 +92,11 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
             code.print(getScalaType(a))
 
           case o:ObjSpec ⇒
-            val className = o.key.parts.map(getClassName).mkString(".")
-            code.print(className)
+            val cn = className + "." + o.key.parts.map(getClassName).mkString(".")
+            code.print(cn)
 
           case l:ListSpec ⇒
-            code.print(getScalaType(l))
+            code.print(getScalaType(l, Some(className)))
         }
         comma = ",\n"
       }
@@ -111,22 +111,20 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
     }
 
     def genForAtomicSpec(spec: AtomicSpec): Code = {
-      Code(spec, getScalaType(spec))
+      Code(spec)
     }
 
     def genForListSpec(listSpec: ListSpec, indent: String): Code = {
       @tailrec
-      def listNesting(ls: ListSpec, levels: Int): (Spec, Int) = ls.elemSpec match {
-        case subListSpec: ListSpec ⇒ listNesting(subListSpec, levels + 1)
-        case nonListSpec           ⇒ (nonListSpec, levels)
+      def getElementSpec(ls: ListSpec): Spec = ls.elemSpec match {
+        case subListSpec: ListSpec ⇒ getElementSpec(subListSpec)
+        case nonListSpec           ⇒ nonListSpec
       }
 
-      val (elemSpec, levels) = listNesting(listSpec, 1)
+      val elemSpec = getElementSpec(listSpec)
 
       val elemCode = genCode(elemSpec, indent)
-      val elemObjType = getScalaType(elemCode.spec)
-      val scalaType = ("scala.collection.immutable.List[" * levels) + elemObjType + ("]" * levels)
-      val code = Code(listSpec, scalaType)
+      val code = Code(listSpec)
 
       if (elemCode.definition.nonEmpty) code.println(elemCode.definition)
 
@@ -157,7 +155,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
   /**
     * Captures code associated with a spec.
     */
-  private case class Code(spec: Spec, scalaType: String) {
+  private case class Code(spec: Spec) {
 
     def println(str: String): Unit = defn.append(str).append('\n')
 
@@ -172,7 +170,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
   private val IND = "  "
 
-  private def getScalaType(spec: Spec): String = {
+  private def getScalaType(spec: Spec, classNameOpt: Option[String] = None): String = {
     spec match {
       case a: AtomicSpec ⇒
         a.typ match {
@@ -184,31 +182,34 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
             case DURATION ⇒ if (spec.isOptional) "scala.Option[scala.Long]"    else "scala.Long"
         }
 
-      case o: ObjSpec  ⇒ o.key.parts.map(getClassName).mkString(".")
+      case o: ObjSpec  ⇒
+        val xx = o.key.parts.map(getClassName).mkString(".")
+        classNameOpt match {
+          case None ⇒ xx
+          case Some(cn) ⇒ cn + "." + xx
+        }
 
       case l: ListSpec  ⇒
-        s"scala.collection.immutable.List[${getScalaType(l.elemSpec)}]"
+        s"scala.collection.immutable.List[${getScalaType(l.elemSpec, classNameOpt)}]"
       }
   }
 
-  private def instance(code: Code, spec: Spec): Unit = {
+  private def instance(code: Code, spec: Spec, path: String): Unit = {
     spec match {
       case a:AtomicSpec ⇒
-        code.print(s"""      ${atomicInstance(a)}""")
+        code.print(s"""      ${atomicInstance(a, path)}""")
 
       case o:ObjSpec ⇒
         val path = o.key.simple
         val className = getClassName(path)
-        code.print(s"""      $className.build(c.map(c => if (c.hasPath("$path")) Some(c.getConfig("$path")) else None).get)""")
+        code.print(s"""      $className(c.getConfig("$path"))""")
 
       case l:ListSpec ⇒
-        val path = l.key.simple
         code.print("      " + accessors._listMethodName(l.elemSpec, Some(code)) + s"""(c.getList("$path"))""")
     }
   }
 
-  private def atomicInstance(spec: AtomicSpec): String = {
-    val path = spec.key.simple
+  private def atomicInstance(spec: AtomicSpec, path: String): String = {
     spec.typ match {
       case STRING ⇒
         if (spec.defaultValue.isDefined) {

@@ -11,79 +11,91 @@ class SpecBuilder(rootKey: Key) {
   import collection._
 
   def fromConfig(conf: Config): ObjSpec = {
-    fromConfig(conf, rootKey)
+    fromConfig(conf, rootKey.simple)
   }
 
-  private def fromConfig(conf: Config, pushedKey: Key): ObjSpec = {
-    println(s" --- fromConfig: pushedKey=$pushedKey")
+  private def fromConfig(conf: Config, pushedKey: String): ObjSpec = {
+    val memberStructs = getMemberStructs(conf)
+    getObjSpec(pushedKey, conf, memberStructs)
+  }
 
-    // 1- get a struct representation from conf.entrySet()
-    abstract class Struct
-    case class Leaf(key: Key, spec: Spec) extends Struct
-    case class Group(members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) extends Struct
+  private def getObjSpec(key: String, conf: Config, memberStructs: List[Struct]): ObjSpec = {
+    val children: immutable.Map[String, Spec] = memberStructs.map { childStruct ⇒
+      val childSpec = getSpec(conf, childStruct)
+      childStruct.key.simple -> childSpec
+    }.toMap
+    ObjSpec(Key(key), children)
+  }
 
-    def getRootGroup: Group = {
+  private def getSpec(conf: Config, struct: Struct): Spec = {
+    val cv = conf.getValue(struct.key.simple)
+    val members = struct.members
+    if (members.isEmpty) {
+      fromConfigValue(cv, struct.key.simple)
+    }
+    else {
+      val c = cv.asInstanceOf[ConfigObject].toConfig
+      getObjSpec(struct.key.simple, c, struct.members.values.toList)
+    }
+  }
 
-      val groups = mutable.HashMap[Key, Group](Key.root → Group())
-
-      def getGroup(key: Key): Group = {
-        if (!groups.contains(key)) groups.put(key, Group())
-        groups(key)
+  private case class Struct(key: Key, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
+    def format(indent: String = ""): String = {
+      if (members.isEmpty) s"$key"
+      else {
+        s"$key:\n" +
+          members.map(e ⇒ indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
       }
+    }
+  }
 
-      conf.entrySet() foreach { e ⇒
-        val (path, value) = (e.getKey, e.getValue)
-        val key = Key(path)
-        val leaf = Leaf(key, fromConfigValue(value, key))
-        doAncestorsOf(key, leaf)
+  private def getMemberStructs(conf: Config): List[Struct] = {
+    val structs = mutable.HashMap[Key, Struct](Key.root → Struct(Key.root))
+    def resolve(key: Key): Struct = {
+      if (!structs.contains(key)) structs.put(key, Struct(key))
+      structs(key)
+    }
 
-        def doAncestorsOf(childKey: Key, childStruct: Struct): Unit = {
-          createParent(childKey.parent, childKey.simple, childStruct)
+    conf.entrySet() foreach { e ⇒
+      val path = e.getKey
+      //println(s" === path=$path")
+      val key = Key(path)
+      val leaf = Struct(key)
+      doAncestorsOf(key, leaf)
 
-          @tailrec
-          def createParent(parentKey: Key, simple: String, child: Struct): Unit = {
-            val parentGroup = getGroup(parentKey)
-            parentGroup.members.put(simple, child)
+      def doAncestorsOf(childKey: Key, childStruct: Struct): Unit = {
+        //println(s"doAncestorsOf: childKey=$childKey")
+        createParent(childKey.parent, childKey.simple, childStruct)
 
-            if (parentKey != Key.root) {
-              createParent(parentKey.parent, parentKey.simple, parentGroup)
-            }
+        @tailrec
+        def createParent(parentKey: Key, simple: String, child: Struct): Unit = {
+          //println(s"createParent: parentKey=$parentKey")
+
+          val parentGroup = resolve(parentKey)
+          parentGroup.members.put(simple, child)
+
+          if (parentKey != Key.root) {
+            createParent(parentKey.parent, parentKey.simple, parentGroup)
           }
         }
       }
-      groups(Key.root)
     }
-
-    // 2- now build and return the corresponding root Spec:
-    def getSpec(name: Key, struct: Struct): Spec = struct match {
-      case Leaf(_, spec) ⇒ spec
-
-      case Group(members) ⇒
-        val children: immutable.Map[String, Spec] = members.map { case (childSimple, childStruct) ⇒
-            childSimple -> getSpec(name + childSimple, childStruct)
-        }.toMap
-        ObjSpec(name, children)
-    }
-
-    val root = getRootGroup
-    //println("root group:"); pprint.log(root)
-
-    getSpec(pushedKey, root).asInstanceOf[ObjSpec]
+    structs(Key.root).members.values.toList
   }
 
-  private def fromConfigValue(cv: ConfigValue, pushedKey: Key): Spec = {
+  private def fromConfigValue(cv: ConfigValue, pushedKey: String): Spec = {
     import ConfigValueType._
     cv.valueType() match {
-      case STRING  => atomicSpec(cv, pushedKey)
-      case BOOLEAN => AtomicSpec(pushedKey, types.BOOLEAN)
-      case NUMBER  => AtomicSpec(pushedKey, numberType(cv))
+      case STRING  => atomicSpec(cv)
+      case BOOLEAN => AtomicSpec(types.BOOLEAN)
+      case NUMBER  => AtomicSpec(numberType(cv))
       case LIST    => listSpec(cv.asInstanceOf[ConfigList], pushedKey)
       case OBJECT  => objSpec(cv.asInstanceOf[ConfigObject], pushedKey)
       case NULL    => throw new AssertionError("null unexpected")
     }
   }
 
-  private def atomicSpec(cv: ConfigValue, pushedKey: Key): AtomicSpec = {
+  private def atomicSpec(cv: ConfigValue): AtomicSpec = {
     val valueString = cv.unwrapped().toString.toLowerCase
 
     val tokens = valueString.split("""\s*\|\s*""")
@@ -114,10 +126,10 @@ class SpecBuilder(rootKey: Key) {
       }
     })
 
-    AtomicSpec(pushedKey, atomicType, isOpt, defaultValue, qualification)
+    AtomicSpec(atomicType, isOpt, defaultValue, qualification)
   }
 
-  private def listSpec(cv: ConfigList, pushedKey: Key): ListSpec = {
+  private def listSpec(cv: ConfigList, pushedKey: String): ListSpec = {
     if (cv.isEmpty) throw new IllegalArgumentException("list with one element expected")
 
     if (cv.size() > 1) {
@@ -127,30 +139,24 @@ class SpecBuilder(rootKey: Key) {
       println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
     }
 
-    // push list element class name (a new one unless one is already being pushed):
     val elemPushedName = listElementClassName(pushedKey)
 
-    ListSpec(pushedKey, fromConfigValue(cv.get(0), elemPushedName))
+    ListSpec(fromConfigValue(cv.get(0), elemPushedName))
   }
 
-  /**
-    * If needed, creates a new name to distinguish multiple list element classes
-    */
-  private def listElementClassName(pushedKey: Key): Key = {
-    if (pushedKey.simple.endsWith("$Elm_")) pushedKey else {
-      val name = "_$" + nextElementCounter + "$Elm_"
+  // if needed, creates a new name to distinguish multiple list element classes
+  private def listElementClassName(pushedKey: String): String = {
+    if (pushedKey.endsWith("$Elm")) pushedKey else {
+      val name = if (nextElementCounter > 0) "$" + nextElementCounter + "$Elm" else "$Elm"
       nextElementCounter += 1
-
-      if (pushedKey.parent == Key.root)
-        rootKey + name
-      else
-        pushedKey.parent + name
+      pushedKey + name
     }
   }
 
   private var nextElementCounter: Int = 0
 
-  private def objSpec(cv: ConfigObject, pushedKey: Key): Spec = fromConfig(cv.toConfig, pushedKey)
+  private def objSpec(cv: ConfigObject, pushedKey: String): Spec =
+    fromConfig(cv.toConfig, pushedKey)
 
   private def numberType(cv: ConfigValue): AtomicType = {
     val valueString = cv.unwrapped().toString
@@ -175,5 +181,28 @@ class SpecBuilder(rootKey: Key) {
             }
         }
     }
+  }
+}
+
+object SpecBuilder {
+  import java.io.File
+  import com.typesafe.config.ConfigFactory
+
+  def main(args: Array[String]): Unit = {
+    val filename = args(0)
+    val file = new File(filename)
+    val src = io.Source.fromFile(file).mkString.trim
+    println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+    val config = ConfigFactory.parseString(src).resolve()
+
+    val className = "Scala" + {
+      val noPath = filename.substring(filename.lastIndexOf('/') + 1)
+      val noDef = noPath.replaceAll("""^def\.""", "")
+      val symbol = noDef.substring(0, noDef.indexOf('.'))
+      symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
+    }
+
+    val objSpec = new SpecBuilder(Key(className)).fromConfig(config, className)
+    println(s"objSpec: ${objSpec.format()}")
   }
 }

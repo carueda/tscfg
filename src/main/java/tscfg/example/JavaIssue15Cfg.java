@@ -1,39 +1,39 @@
 package tscfg.example;
 
 public class JavaIssue15Cfg {
-    public final java.util.List<_$0$Elm_> positions;
+    public final java.util.List<Positions$Elm> positions;
 
-    public static class _$0$Elm_ {
+    public static class Positions$Elm {
         public final java.util.List<java.lang.Integer> numbers;
-        public final java.util.List<java.util.List<_$1$Elm_>> positions;
+        public final java.util.List<java.util.List<Positions$2$Elm>> positions;
 
-        public static class _$1$Elm_ {
+        public static class Positions$2$Elm {
             public final int other;
             public final java.lang.String stuff;
 
-            public _$1$Elm_(com.typesafe.config.Config c) {
+            public Positions$2$Elm(com.typesafe.config.Config c) {
                 this.other = c.getInt("other");
                 this.stuff = c.getString("stuff");
             }
         }
 
 
-        public _$0$Elm_(com.typesafe.config.Config c) {
+        public Positions$Elm(com.typesafe.config.Config c) {
             this.numbers = $list$int(c.getList("numbers"));
-            this.positions = $list$list_$1$Elm_(c.getList("positions"));
+            this.positions = $list$listPositions$2$Elm(c.getList("positions"));
         }
 
-        private static java.util.List<java.util.List<_$1$Elm_>> $list$list_$1$Elm_(com.typesafe.config.ConfigList cl) {
-          java.util.ArrayList<java.util.List<_$1$Elm_>> al = new java.util.ArrayList<>();
+        private static java.util.List<java.util.List<Positions$2$Elm>> $list$listPositions$2$Elm(com.typesafe.config.ConfigList cl) {
+          java.util.ArrayList<java.util.List<Positions$2$Elm>> al = new java.util.ArrayList<>();
           for (com.typesafe.config.ConfigValue cv: cl) {
-            al.add($list_$1$Elm_((com.typesafe.config.ConfigList)cv));
+            al.add($listPositions$2$Elm((com.typesafe.config.ConfigList)cv));
           }
           return java.util.Collections.unmodifiableList(al);
         }
-        private static java.util.List<_$1$Elm_> $list_$1$Elm_(com.typesafe.config.ConfigList cl) {
-          java.util.ArrayList<_$1$Elm_> al = new java.util.ArrayList<>();
+        private static java.util.List<Positions$2$Elm> $listPositions$2$Elm(com.typesafe.config.ConfigList cl) {
+          java.util.ArrayList<Positions$2$Elm> al = new java.util.ArrayList<>();
           for (com.typesafe.config.ConfigValue cv: cl) {
-            al.add(new _$1$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
+            al.add(new Positions$2$Elm(((com.typesafe.config.ConfigObject)cv).toConfig()));
           }
           return java.util.Collections.unmodifiableList(al);
         }
@@ -41,7 +41,7 @@ public class JavaIssue15Cfg {
 
 
     public JavaIssue15Cfg(com.typesafe.config.Config c) {
-        this.positions = $list_$0$Elm_(c.getList("positions"));
+        this.positions = $listPositions$Elm(c.getList("positions"));
     }
 
     private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
@@ -62,10 +62,10 @@ public class JavaIssue15Cfg {
       }
       return java.util.Collections.unmodifiableList(al);
     }
-    private static java.util.List<_$0$Elm_> $list_$0$Elm_(com.typesafe.config.ConfigList cl) {
-      java.util.ArrayList<_$0$Elm_> al = new java.util.ArrayList<>();
+    private static java.util.List<Positions$Elm> $listPositions$Elm(com.typesafe.config.ConfigList cl) {
+      java.util.ArrayList<Positions$Elm> al = new java.util.ArrayList<>();
       for (com.typesafe.config.ConfigValue cv: cl) {
-        al.add(new _$0$Elm_(((com.typesafe.config.ConfigObject)cv).toConfig()));
+        al.add(new Positions$Elm(((com.typesafe.config.ConfigObject)cv).toConfig()));
       }
       return java.util.Collections.unmodifiableList(al);
     }

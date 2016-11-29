@@ -37,8 +37,12 @@ public class JavaIssue15Main {
       JavaIssue15cCfg c = new JavaIssue15cCfg(
           ConfigFactory.parseString(
               "positions: [\n" +
-                  "{ lat: 1, lon: 2, attrs = [] },\n" +
-                  "{ lat: 3, lon: 4, attrs = [3.14, 0] }]"
+                  "{ lat: 1, lon: 2, attrs = [ [ {foo: 99}             ] ] },\n" +
+                  "{ lat: 3, lon: 4, attrs = [ [ {foo: 3.14}, {foo: 0} ] ] }\n" +
+              "]\n" +
+              "qaz = {\n" +
+              "  aa = { bb = [ { cc: hoho } ]  }\n" +
+              "}"
           )
       );
       System.out.println("c.positions = " + c.positions);
@@ -61,8 +65,8 @@ public class JavaIssue15Main {
           ConfigFactory.parseString(
               "positions: [\n" +
               "  {\n" +
-              "    numbers: [ 1, 2, 3 ]\n" +
-                  "positions: [ [ { other: 33, stuff: baz } ] ]" +
+              "    numbers: [ 1, 2, 3 ] \n" +
+              "    positions: [ [ { other: 33, stuff: baz } ] ] \n" +
               "  }\n" +
               "]"
           )
