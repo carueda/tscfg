@@ -1,8 +1,12 @@
 package tscfg.example;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.typesafe.config.ConfigFactory;
     
 public class JavaMain {
+  private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+  
   public static void main(String[] args) {
     {
       System.out.println("\nissue10:");
@@ -13,8 +17,7 @@ public class JavaMain {
               "}"
           )
       );
-      System.out.println("c0.main.email  = " + c0.main.email);
-      System.out.println("c0.main.reals  = " + c0.main.reals);
+      System.out.println("c0 = " + gson.toJson(c0));
 
       JavaIssue10Cfg c1 = new JavaIssue10Cfg(
           ConfigFactory.parseString(
@@ -26,8 +29,7 @@ public class JavaMain {
               "}"
           )
       );
-      System.out.println("c1.main.email  = " + c1.main.email);
-      System.out.println("c1.main.reals  = " + c1.main.reals);
+      System.out.println("c1 = " + gson.toJson(c1));
     }
   
     {
@@ -51,11 +53,7 @@ public class JavaMain {
               "booleans: [true, false]"
           )
       );
-      System.out.println("c.strings  = " + c.strings);
-      System.out.println("c.integers = " + c.integers);
-      System.out.println("c.doubles  = " + c.doubles);
-      System.out.println("c.longs    = " + c.longs);
-      System.out.println("c.booleans = " + c.booleans);
+      System.out.println("c = " + gson.toJson(c));
     }
   
     {
@@ -71,8 +69,7 @@ public class JavaMain {
               "}"
           )
       );
-      System.out.println("c.positions = " + c.positions);
-      System.out.println("c.positions.get(1).attrs = " + c.positions.get(1).attrs);
+      System.out.println("c = " + gson.toJson(c));
     }
   
     {
@@ -82,7 +79,7 @@ public class JavaMain {
               "baz: [ [ {dd: 1, aa: true}, {dd: 2} ] ]"
           )
       );
-      System.out.println("c.baz = " + c.baz);
+      System.out.println("c = " + gson.toJson(c));
     }
 
     {
@@ -97,9 +94,7 @@ public class JavaMain {
               "]"
           )
       );
-      System.out.println("c.positions = " + c.positions);
-      System.out.println("c.positions.get(0).positions.get(0).get(0).stuff = " +
-                          c.positions.get(0).positions.get(0).get(0).stuff);
+      System.out.println("c = " + gson.toJson(c));
     }
 
     {
@@ -112,10 +107,7 @@ public class JavaMain {
               "}"
           )
       );
-      System.out.println("c.durations.days   = " + c.durations.days);
-      System.out.println("c.durations.hours  = " + c.durations.hours);
-      System.out.println("c.durations.millis = " + c.durations.millis);
+      System.out.println("c = " + gson.toJson(c));
     }
-
   }
 }

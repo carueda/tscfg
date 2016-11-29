@@ -12,6 +12,8 @@ libraryDependencies += "org.specs2" %% "specs2-core" % "3.8.4" % "test"
 
 libraryDependencies += "com.lihaoyi" %% "pprint" % "0.4.3"
 
+libraryDependencies += "com.google.code.gson" % "gson" % "2.8.0"
+
 mainClass in assembly := Some("tscfg.Main")
 
 assemblyJarName in assembly := s"tscfg-$tscfgVersion.jar"
