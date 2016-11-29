@@ -15,8 +15,8 @@ public class JavaExampleCfg {
       public final java.lang.String type;
 
       public Interface_(com.typesafe.config.Config c) {
-        this.port = c != null && c.hasPathOrNull("port") ? c.getInt("port") : 8080;
-        this.type = c != null && c.hasPathOrNull("type") ? c.getString("type") : null;
+        this.port = c.hasPathOrNull("port") ? c.getInt("port") : 8080;
+        this.type = c.hasPathOrNull("type") ? c.getString("type") : null;
       }
     }
 
@@ -24,8 +24,8 @@ public class JavaExampleCfg {
       this.intReq = c.getInt("intReq");
       this.interface_ = new Interface_(_$config(c, "interface"));
       this.path = c.getString("path");
-      this.serial = c != null && c.hasPathOrNull("serial") ? c.getInt("serial") : null;
-      this.url = c != null && c.hasPathOrNull("url") ? c.getString("url") : "http://example.net";
+      this.serial = c.hasPathOrNull("serial") ? c.getInt("serial") : null;
+      this.url = c.hasPathOrNull("url") ? c.getString("url") : "http://example.net";
     }
   }
 
@@ -34,7 +34,7 @@ public class JavaExampleCfg {
   }
 
   private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-    return c != null && c.hasPathOrNull(path) ? c.getConfig(path) : null;
+    return c.hasPathOrNull(path) ? c.getConfig(path) : null;
   }
 }
 

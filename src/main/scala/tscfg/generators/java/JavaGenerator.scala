@@ -190,12 +190,20 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
       case o: ObjSpec  ⇒
         staticConfigUsed = true
-        val className = getClassName(o.key.simple)
-        s"""new $className(${methodNames.configAccess}(c, "$path"))"""
+        objectInstance(o, path)
 
       case l: ListSpec  ⇒
         accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
     }
+  }
+
+  private def objectInstance(spec: ObjSpec, path: String): String = {
+    val className = getClassName(spec.key.simple)
+    val base = s"""new $className(${methodNames.configAccess}(c, "$path"))"""
+    if (spec.isOptional) {
+      s"""c.$hasPath("$path") ? $base : null"""
+    }
+    else base
   }
 
   private def atomicInstance(spec: AtomicSpec, path: String): String = {
@@ -212,9 +220,9 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       case Some(v) ⇒
         val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec)
         else if (spec.typ == STRING) "\"" + v + "\"" else v
-        s"""c != null && c.$hasPath("$path") ? c.$getter : $value"""
+        s"""c.$hasPath("$path") ? c.$getter : $value"""
       case None if spec.isOptional ⇒
-        s"""c != null && c.$hasPath("$path") ? c.$getter : null"""
+        s"""c.$hasPath("$path") ? c.$getter : null"""
       case _ ⇒
         s"""c.$getter"""
     }
@@ -339,7 +347,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
       val tscc = util.TypesafeConfigClassName
       s"""
          |private static $tscc ${methodNames.configAccess}($tscc c, java.lang.String path) {
-         |  return c != null && c.$hasPath(path) ? c.getConfig(path) : null;
+         |  return c.$hasPath(path) ? c.getConfig(path) : null;
          |}""".stripMargin.trim
     }
 

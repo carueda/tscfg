@@ -5,6 +5,28 @@ import com.typesafe.config.ConfigFactory;
 public class JavaMain {
   public static void main(String[] args) {
     {
+      System.out.println("\nissue10:");
+      JavaIssue10Cfg c0 = new JavaIssue10Cfg(
+          ConfigFactory.parseString(
+              "main = {}"
+          )
+      );
+      System.out.println("c0.main.email  = " + c0.main.email);
+
+      JavaIssue10Cfg c1 = new JavaIssue10Cfg(
+          ConfigFactory.parseString(
+              "main = {               \n" +
+              "  email = {            \n" +
+              "    server = \"foo\"   \n" +
+              "    password = \"pw\"  \n" +
+              "  }\n" +
+              "}"
+          )
+      );
+      System.out.println("c1.main.email  = " + c1.main.email);
+    }
+  
+    {
       System.out.println("\nJavaIssue15aCfg:");
       JavaIssue15aCfg c = new JavaIssue15aCfg(
           ConfigFactory.parseString(

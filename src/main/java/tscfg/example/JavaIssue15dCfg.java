@@ -8,7 +8,7 @@ public class JavaIssue15dCfg {
     public final double dd;
 
     public Baz$Elm(com.typesafe.config.Config c) {
-      this.aa = c != null && c.hasPathOrNull("aa") ? c.getBoolean("aa") : null;
+      this.aa = c.hasPathOrNull("aa") ? c.getBoolean("aa") : null;
       this.dd = c.getDouble("dd");
     }
   }
