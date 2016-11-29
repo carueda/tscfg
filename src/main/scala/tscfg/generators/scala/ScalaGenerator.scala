@@ -3,7 +3,7 @@ package tscfg.generators.scala
 import java.io.{FileWriter, PrintWriter}
 
 import tscfg.generator._
-import tscfg.generators.Generator
+import tscfg.generators.{Generator, durationUtil}
 import tscfg.scalaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
@@ -208,64 +208,23 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
   }
 
   private def atomicInstance(spec: AtomicSpec, path: String): String = {
-    spec.typ match {
-      case STRING ⇒
-        if (spec.defaultValue.isDefined) {
-          val value = spec.defaultValue.get
-          s"""if(c.$hasPath("$path")) c.getString("$path") else $value"""
-        }
-        else if (spec.isOptional) {
-          s"""if(c.$hasPath("$path")) Some(c.getString("$path")) else None"""
-        }
-        else
-          s"""c.getString("$path")"""
+    val getter = spec.typ match {
+      case STRING    ⇒  s"""getString("$path")"""
+      case INTEGER   ⇒  s"""getInt("$path")"""
+      case LONG      ⇒  s"""getLong("$path")"""
+      case DOUBLE    ⇒  s"""getDouble("$path")"""
+      case BOOLEAN   ⇒  s"""getBoolean("$path")"""
+      case DURATION  ⇒  durationUtil.getter(path, spec)
+    }
 
-      case INTEGER ⇒
-        if (spec.defaultValue.isDefined) {
-          val value = spec.defaultValue.get
-          s"""if(c.$hasPath("$path")) c.getInt("$path") else $value"""
-        }
-        else if (spec.isOptional) {
-          s"""c => if(c.$hasPath("$path")) Some(c.getInt("$path")) else None"""
-        }
-        else
-          s"""c.getInt("$path")"""
-
-      case LONG ⇒
-        if (spec.defaultValue.isDefined) {
-          val value = spec.defaultValue.get
-          s"""if(c.$hasPath("$path")) c.getLong("$path") else $value"""
-        }
-        else if (spec.isOptional) {
-          s"""if(c.$hasPath("$path")) Some(c.getLong("$path")) else None"""
-        }
-        else
-          s"""c.getLong("$path")"""
-
-      case DOUBLE ⇒
-        if (spec.defaultValue.isDefined) {
-          val value = spec.defaultValue.get
-          s"""if(c.$hasPath("$path")) c.getDouble("$path") else $value"""
-        }
-        else if (spec.isOptional) {
-          s"""if(c.$hasPath("$path")) Some(c.getDouble("$path")) else None"""
-        }
-        else
-          s"""c.getDouble("$path")"""
-
-      case BOOLEAN ⇒
-        if (spec.defaultValue.isDefined) {
-          val value = spec.defaultValue.get
-          s"""if(c.$hasPath("$path")) c.getBoolean("$path") else $value"""
-        }
-        else if (spec.isOptional) {
-          s"""if (c.$hasPath("$path")) Some(c.getBoolean("$path")) else None"""
-        }
-        else
-          s"""c.getBoolean("$path")"""
-
-
-      case DURATION ⇒ s"""TODO_getDuration("$path")"""
+    spec.defaultValue match {
+      case Some(v) ⇒
+        val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec) else v
+        s"""if(c.$hasPath("$path")) c.$getter else $value"""
+      case None if spec.isOptional ⇒
+        s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
+      case _ ⇒
+        s"""c.$getter"""
     }
   }
 

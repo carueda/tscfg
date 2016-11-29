@@ -13,7 +13,7 @@ object ScalaIssue15dCfg {
   object Baz$Elm {
     def apply(c: com.typesafe.config.Config): Baz$Elm = {
       Baz$Elm(
-        if (c.hasPathOrNull("aa")) Some(c.getBoolean("aa")) else None,
+        if(c.hasPathOrNull("aa")) Some(c.getBoolean("aa")) else None,
         c.getDouble("dd")
       )
     }

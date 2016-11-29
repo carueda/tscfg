@@ -2,7 +2,7 @@ package tscfg.example
 
 import com.typesafe.config.ConfigFactory
 
-object ScalaIssue15Main {
+object ScalaMain {
   def main(args: Array[String]): Unit = {
     {
       println("\nissue15a:")
@@ -73,6 +73,21 @@ object ScalaIssue15Main {
       ))
       println("c.positions.head.numbers   = " + c.positions.head.numbers)
       println("c.positions.head.positions = " + c.positions.head.positions)
+    }
+
+    {
+      println("\nduration:")
+      val c = ScalaDurationCfg(ConfigFactory.parseString(
+        """
+          |durations {
+          |  days  = "10d"
+          |  hours = "24h"
+          |}
+          |""".stripMargin
+      ))
+      println("c.durations.days   = " + c.durations.days)
+      println("c.durations.hours  = " + c.durations.hours)
+      println("c.durations.millis = " + c.durations.millis)
     }
   }
 }

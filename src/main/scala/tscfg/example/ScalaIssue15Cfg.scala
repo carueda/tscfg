@@ -25,7 +25,6 @@ object ScalaIssue15Cfg {
       }
     }
 
-
     def apply(c: com.typesafe.config.Config): Positions$Elm = {
       Positions$Elm(
         $list$int(c.getList("numbers")),
@@ -42,7 +41,6 @@ object ScalaIssue15Cfg {
       cl.map(cv => Positions$2$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
     }
   }
-
   def apply(c: com.typesafe.config.Config): ScalaIssue15Cfg = {
     ScalaIssue15Cfg(
       $listPositions$Elm(c.getList("positions"))
@@ -70,4 +68,3 @@ object ScalaIssue15Cfg {
     cl.map(cv => Positions$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
   }
 }
-
