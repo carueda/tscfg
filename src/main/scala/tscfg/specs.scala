@@ -26,13 +26,17 @@ object specs {
 
   sealed abstract class Spec {
     val comments: List[String]
-    def isOptional: Boolean
-    def defaultValue: Option[String]
-    def qualification: Option[String]
+
+    lazy val (annotations, realComments) = comments.partition(_.startsWith("@"))
+
+    def isOptional: Boolean = annotations.contains("@optional")
+
+    def defaultValue: Option[String] = None
+    def qualification: Option[String] = None
 
     def format(indent: String = ""): String
 
-    def commentsString(indent: String = ""): String = {
+    protected def commentsString(indent: String = ""): String = {
       if (comments.nonEmpty) {
         val i2 = "\n" + indent + "#"
         i2 + comments.mkString(i2) + "\n"
@@ -43,10 +47,12 @@ object specs {
 
   case class AtomicSpec(typ: AtomicType,
                         comments: List[String] = List.empty,
-                        isOptional: Boolean = false,
-                        defaultValue: Option[String] = None,
-                        qualification: Option[String] = None
+                        optional: Boolean = false,
+                        override val defaultValue: Option[String] = None,
+                        override val qualification: Option[String] = None
                        ) extends Spec {
+
+    override def isOptional: Boolean = optional || super.isOptional
 
     override def format(indent: String): String = {
       typ.toString + {
@@ -60,10 +66,7 @@ object specs {
 
   case class ObjSpec(key: Key,
                      children: Map[String, Spec],
-                     comments: List[String] = List.empty,
-                     isOptional: Boolean = false, // TODO
-                     defaultValue: Option[String] = None,
-                     qualification: Option[String] = None
+                     comments: List[String] = List.empty
                     ) extends Spec {
 
     val orderedNames = children.keys.toList.sorted
@@ -87,10 +90,7 @@ object specs {
   }
 
   case class ListSpec(elemSpec: Spec,
-                      comments: List[String] = List.empty,
-                      isOptional: Boolean = false, // TODO
-                      defaultValue: Option[String] = None,
-                      qualification: Option[String] = None
+                      comments: List[String] = List.empty
                      ) extends Spec {
 
     override def format(indent: String): String = {
