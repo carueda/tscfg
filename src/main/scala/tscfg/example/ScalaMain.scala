@@ -4,6 +4,11 @@ import com.typesafe.config.ConfigFactory
 
 object ScalaMain {
   def main(args: Array[String]): Unit = {
+    import org.json4s._
+    import org.json4s.native.Serialization
+    import org.json4s.native.Serialization.writePretty
+    implicit val formats = Serialization.formats(NoTypeHints)
+
     {
       println("\nissue10:")
       val c0 = ScalaIssue10Cfg(ConfigFactory.parseString(
@@ -13,8 +18,7 @@ object ScalaMain {
           |}
         """.stripMargin
       ))
-      println("c0.main.email  = " + c0.main.email)
-      println("c0.main.reals  = " + c0.main.reals)
+      println("c0 = " + writePretty(c0))
 
       val c1 = ScalaIssue10Cfg(ConfigFactory.parseString(
         """
@@ -26,8 +30,7 @@ object ScalaMain {
           |}
         """.stripMargin
       ))
-      println("c1.main.email  = " + c1.main.email)
-      println("c1.main.reals  = " + c1.main.reals)
+      println("c1 = " + writePretty(c1))
     }
 
     {
@@ -37,7 +40,7 @@ object ScalaMain {
           |ii: [1,2 ,3 ]
         """.stripMargin
       ))
-      println("c.ii  = " + c.ii)
+      println("c = " + writePretty(c))
     }
 
     {
@@ -51,11 +54,7 @@ object ScalaMain {
           |booleans: [true, false]
           |""".stripMargin
       ))
-      println("c.strings    = " + c.strings)
-      println("c.integers   = " + c.integers)
-      println("c.doubles    = " + c.doubles)
-      println("c.longs      = " + c.longs)
-      println("c.booleans   = " + c.booleans)
+      println("c = " + writePretty(c))
     }
 
     {
@@ -71,8 +70,7 @@ object ScalaMain {
           |}
           |""".stripMargin
       ))
-      println("c.positions  = " + c.positions)
-      println("c.qaz        = " + c.qaz)
+      println("c = " + writePretty(c))
     }
 
     {
@@ -82,7 +80,7 @@ object ScalaMain {
           |baz: [ [ {dd: 1, aa: true}, {dd: 2} ] ]
           |""".stripMargin
       ))
-      println("c.baz    = " + c.baz)
+      println("c = " + writePretty(c))
     }
 
     {
@@ -97,8 +95,7 @@ object ScalaMain {
           |]
           |""".stripMargin
       ))
-      println("c.positions.head.numbers   = " + c.positions.head.numbers)
-      println("c.positions.head.positions = " + c.positions.head.positions)
+      println("c = " + writePretty(c))
     }
 
     {
@@ -111,9 +108,7 @@ object ScalaMain {
           |}
           |""".stripMargin
       ))
-      println("c.durations.days   = " + c.durations.days)
-      println("c.durations.hours  = " + c.durations.hours)
-      println("c.durations.millis = " + c.durations.millis)
+      println("c = " + writePretty(c))
     }
   }
 }
