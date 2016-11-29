@@ -210,7 +210,8 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
     spec.defaultValue match {
       case Some(v) ⇒
-        val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec) else v
+        val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec)
+        else if (spec.typ == STRING) "\"" + v + "\"" else v
         s"""c != null && c.$hasPath("$path") ? c.$getter : $value"""
       case None if spec.isOptional ⇒
         s"""c != null && c.$hasPath("$path") ? c.$getter : null"""
