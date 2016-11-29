@@ -2,7 +2,7 @@ package tscfg.example;
 
 import com.typesafe.config.ConfigFactory;
     
-public class JavaIssue15Main {
+public class JavaMain {
   public static void main(String[] args) {
     {
       System.out.println("\nJavaIssue15aCfg:");
@@ -74,6 +74,21 @@ public class JavaIssue15Main {
       System.out.println("c.positions = " + c.positions);
       System.out.println("c.positions.get(0).positions.get(0).get(0).stuff = " +
                           c.positions.get(0).positions.get(0).get(0).stuff);
+    }
+
+    {
+      System.out.println("\nduration:");
+      JavaDurationCfg c = new JavaDurationCfg(
+          ConfigFactory.parseString(
+              "durations {            \n" +
+              "  days = \"48hour\"    \n" +
+              "  hours = \"1d\"       \n" +
+              "}"
+          )
+      );
+      System.out.println("c.durations.days   = " + c.durations.days);
+      System.out.println("c.durations.hours  = " + c.durations.hours);
+      System.out.println("c.durations.millis = " + c.durations.millis);
     }
 
   }

@@ -3,7 +3,7 @@ package tscfg.generators.java
 import java.io.{FileWriter, PrintWriter}
 
 import tscfg.generator._
-import tscfg.generators.Generator
+import tscfg.generators.{Generator, durationUtil}
 import tscfg.javaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
@@ -186,66 +186,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
   private def instance(objCode: Code, spec: Spec, path: String): String = {
     spec match {
-      case a: AtomicSpec ⇒
-        a.typ match {
-          case STRING ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c != null && c.$hasPath("$path") ? c.getString("$path") : "$value""""
-            }
-            else if (spec.isOptional) {
-              s"""c != null && c.$hasPath("$path") ? c.getString("$path") : null"""
-            }
-            else
-              s"""c.getString("$path")"""
-
-          case INTEGER ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c != null && c.$hasPath("$path") ? c.getInt("$path") : $value"""
-            }
-            else if (spec.isOptional) {
-              s"""c != null && c.$hasPath("$path") ? c.getInt("$path") : null"""
-            }
-            else
-              s"""c.getInt("$path")"""
-
-          case LONG ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c != null && c.$hasPath("$path") ? c.getLong("$path") : $value"""
-            }
-            else if (spec.isOptional) {
-              s"""c != null && c.$hasPath("$path") ? c.getLong("$path") : null"""
-            }
-            else
-              s"""c.getLong("$path")"""
-
-          case DOUBLE ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c != null && c.$hasPath("$path") ? c.getDouble("$path") : $value"""
-            }
-            else if (spec.isOptional) {
-              s"""c != null && c.$hasPath("$path") ? c.getDouble("$path") : null"""
-            }
-            else
-              s"""c.getDouble("$path")"""
-
-          case BOOLEAN ⇒
-            if (spec.defaultValue.isDefined) {
-              val value = spec.defaultValue.get
-              s"""c != null && c.$hasPath("$path") ? c.getBoolean("$path") : $value"""
-            }
-            else if (spec.isOptional) {
-              s"""c != null && c.$hasPath("$path") ? c.getBoolean("$path") : null"""
-            }
-            else
-              s"""c.getBoolean("$path")"""
-
-
-          case DURATION ⇒ s"""TODO_getDuration("$path")"""
-        }
+      case a: AtomicSpec ⇒ atomicInstance(a, path)
 
       case o: ObjSpec  ⇒
         staticConfigUsed = true
@@ -254,6 +195,27 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
 
       case l: ListSpec  ⇒
         accessors._listMethodName(l.elemSpec, Some(objCode)) + s"""(c.getList("$path"))"""
+    }
+  }
+
+  private def atomicInstance(spec: AtomicSpec, path: String): String = {
+    val getter = spec.typ match {
+      case STRING    ⇒  s"""getString("$path")"""
+      case INTEGER   ⇒  s"""getInt("$path")"""
+      case LONG      ⇒  s"""getLong("$path")"""
+      case DOUBLE    ⇒  s"""getDouble("$path")"""
+      case BOOLEAN   ⇒  s"""getBoolean("$path")"""
+      case DURATION  ⇒  durationUtil.getter(path, spec)
+    }
+
+    spec.defaultValue match {
+      case Some(v) ⇒
+        val value = if (spec.typ == DURATION) durationUtil.durationValue(v, spec) else v
+        s"""c != null && c.$hasPath("$path") ? c.$getter : $value"""
+      case None if spec.isOptional ⇒
+        s"""c != null && c.$hasPath("$path") ? c.$getter : null"""
+      case _ ⇒
+        s"""c.$getter"""
     }
   }
 
