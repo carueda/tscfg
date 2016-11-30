@@ -20,14 +20,14 @@ object GenExamples {
   case class Example(spec: String, className: String, extraArgs: String*)
 
   val examples: List[Example] = List(
-     Example("def.example.conf",           "JavaExampleCfg", "--toPropString")
+     Example("def.example.conf",           "JavaExampleCfg")
     ,Example("def.example.conf",           "ScalaExampleCfg")
-    ,Example("example0.spec.conf",         "JavaExample0Cfg", "--toPropString")
+    ,Example("example0.spec.conf",         "JavaExample0Cfg")
     ,Example("example0.spec.conf",         "ScalaExample0Cfg")
     ,Example("example1.spec.conf",         "JavaExample1Cfg")
     ,Example("example1.spec.conf",         "ScalaExample1Cfg")
-    ,Example("example-duration.spec.conf", "JavaExampleDurationCfg" )
-    ,Example("example-duration.spec.conf", "ScalaExampleDurationCfg")
+    ,Example("duration.spec.conf",         "JavaExampleDurationCfg" )
+    ,Example("duration.spec.conf",         "ScalaExampleDurationCfg")
     ,Example("issue5.conf",                "JavaIssue5Cfg")
     ,Example("issue5.conf",                "ScalaIssue5Cfg")
     ,Example("issue11.conf",               "JavaIssue11Cfg")

@@ -32,9 +32,6 @@ public class JavaUse {
     System.out.println("\n*** tscfg toString: ***");
     System.out.println(cfg.toString());
 
-//    System.out.println("\n*** tscfg toPropString: ***");
-//    System.out.println(cfg.toPropString());
-
     System.out.println("\n*** Typesafe Config toString: ***");
     ConfigRenderOptions options = ConfigRenderOptions.defaults()
         .setFormatted(true).setComments(true).setOriginComments(false);

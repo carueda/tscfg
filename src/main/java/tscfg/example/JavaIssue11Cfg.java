@@ -28,7 +28,7 @@ public class JavaIssue11Cfg {
   }
 
   private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-    return c != null && c.hasPathOrNull(path) ? c.getConfig(path) : null;
+    return c.hasPathOrNull(path) ? c.getConfig(path) : null;
   }
 }
 

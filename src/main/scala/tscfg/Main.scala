@@ -9,9 +9,9 @@ import tscfg.generator.GenOpts
   * The main program. Run with no arguments to see usage.
   */
 object Main {
-  val defaultDestDir     = "/tmp"
+  val defaultDestDir: String = "/tmp"
 
-  val usage = s"""
+  val usage: String = s"""
              |tscfg ${generator.version}
              |Usage:  tscfg.Main --spec inputFile [options]
              |Options (default):
@@ -21,23 +21,15 @@ object Main {
              |  --j7                  generate code for java <= 7      (8)
              |  --scala               generate scala code              (java)
              |  --java                generate java code               (the default)
-             |  --noToString          do not generate toString method  (generated)
-             |  --toPropString        generate toPropString method     (not generated)
-             |  --tpl <type> <filename>  generate configuration template;  <type> = base, local, all
              |Output is written to $$destDir/$$className.ext
     """.stripMargin
-
-  case class GenTemplate(what: templateGenerator.What, filename: String)
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
                          packageName: String = generator.defaultPackageName,
                          className: String =   generator.defaultClassName,
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
-                         language: String = "java",
-                         templates: List[GenTemplate] = List(),
-                         genToString: Boolean = true,
-                         genToPropString: Boolean = false
+                         language: String = "java"
                  )
 
   def main(args: Array[String]): Unit = {
@@ -60,39 +52,34 @@ object Main {
       list match {
         case "--spec" :: filename :: rest =>
           traverseList(rest, opts.copy(inputFilename = Some(chkVal(filename))))
+
         case "--pn" :: packageName :: rest =>
           traverseList(rest, opts.copy(packageName = chkVal(packageName)))
+
         case "--cn" :: className :: rest =>
           traverseList(rest, opts.copy(className = chkVal(className)))
+
         case "--dd" :: destDir :: rest =>
           traverseList(rest, opts.copy(destDir = chkVal(destDir)))
+
         case "--j7" :: rest =>
           traverseList(rest, opts.copy(j7 = true))
-        case "--noToString" :: rest =>
-          traverseList(rest, opts.copy(genToString = false))
-        case "--toPropString" :: rest =>
-          traverseList(rest, opts.copy(genToPropString = true))
+
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
+
         case "--java" :: rest =>
           traverseList(rest, opts.copy(language = "java"))
-        case "--tpl" :: "base" :: filename :: rest =>
-          traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genBase, filename) :: opts.templates))
-        case "--tpl" :: "local" :: filename :: rest =>
-          traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genLocal, filename) :: opts.templates))
-        case "--tpl" :: "all" :: filename :: rest =>
-          traverseList(rest, opts.copy(templates = GenTemplate(templateGenerator.genAll, filename) :: opts.templates))
-        case "--tpl" :: rest =>
-          println( s"""invalid or missing --tpl arguments""")
-          sys.exit(0)
+
         case opt :: nil =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
+
         case nil => opts
       }
     }
 
-    val opts = traverseList(args.toList)
+    val opts = traverseList(args)
 
     opts.inputFilename.getOrElse {
       println("--spec not given")
@@ -110,20 +97,24 @@ object Main {
     val destFilename  = s"${opts.destDir}/${opts.className}.$ext"
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
+
     implicit val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
       preamble = Some(s"source: $inputFilename"),
-      language = opts.language,
-      genToString = opts.genToString,
-      genToPropString = opts.genToPropString)
+      language = opts.language
+    )
 
     println(s"parsing: $inputFilename")
     val config = ConfigFactory.parseFile(new File(inputFilename)).resolve()
-    val root = nodes.createAllNodes(config)
+
+    val className = genOpts.className
+    val objSpec = new SpecBuilder(Key(className)).fromConfig(config)
+    //println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     println(s"generating: $destFile")
-    generator.generate(root, out)
+    generator.generate(objSpec, out)
     out.close()
 
+/*
     opts.templates foreach { genTemplate =>
       val destFile = new File(genTemplate.filename)
       printf("%10s: %s\n", genTemplate.what, destFile.getAbsolutePath)
@@ -131,5 +122,6 @@ object Main {
       templateGenerator.generate(genTemplate.what, root, out)
       out.close()
     }
+*/
   }
 }

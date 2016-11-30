@@ -169,9 +169,6 @@ Options (default):
   --j7                  generate code for java <= 7      (8)
   --scala               generate scala code              (java)
   --java                generate java code               (the default)
-  --noToString          do not generate toString method  (generated)
-  --toPropString        generate toPropString method     (not generated)
-  --tpl <type> <filename>  generate configuration template;  <type> = base, local, all
 Output is written to $destDir/$className.ext
 ```
 

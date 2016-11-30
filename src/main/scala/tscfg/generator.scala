@@ -3,11 +3,14 @@ package tscfg
 import java.io.{PrintWriter, Writer}
 
 import com.typesafe.config.ConfigFactory
-import tscfg.nodes._
+import tscfg.generators.Generator
+import tscfg.generators.java.JavaGenerator
+import tscfg.generators.scala.ScalaGenerator
+import tscfg.specs.ObjSpec
 
 
 object generator {
-  val version = ConfigFactory.load().getString("tscfg.version")
+  val version: String = ConfigFactory.load().getString("tscfg.version")
 
   val defaultPackageName = "tscfg.example"
   val defaultClassName   = "ExampleCfg"
@@ -25,10 +28,7 @@ object generator {
                      className: String   = defaultClassName,
                      j7: Boolean         = false,
                      preamble: Option[String] = None,
-                     language: String    = "java",
-                     templateWhat: Option[templateGenerator.What] = None,
-                     genToString: Boolean = false,
-                     genToPropString: Boolean = false
+                     language: String    = "java"
                     )
 
   case class GenResult(code: String = "?",
@@ -36,13 +36,13 @@ object generator {
                        fieldNames: Set[String] = Set())
 
   /**
-    * Generates code for the given configuration tree.
+    * Generates code for the given configuration spec.
     *
-    * @param node         Root of the tree to process
+    * @param objSpec      specification
     * @param out          code is written here
     * @param genOpts      generation options
     */
-  def generate(node: Node, out: Writer)
+  def generate(objSpec: ObjSpec, out: Writer)
               (implicit genOpts: GenOpts): GenResult = {
 
     val pw = out match {
@@ -50,10 +50,13 @@ object generator {
       case w => new PrintWriter(w)
     }
 
-    genOpts.language match {
-      case "java"  => javaGenerator.generate(node, pw)
-      case "scala" => scalaGenerator.generate(node, pw)
+    val generator: Generator = genOpts.language match {
+      case "java"  => new JavaGenerator(genOpts)
+      case "scala" => new ScalaGenerator(genOpts)
     }
-  }
 
+    val results = generator.generate(objSpec)
+    pw.println(results.code)
+    results
+  }
 }

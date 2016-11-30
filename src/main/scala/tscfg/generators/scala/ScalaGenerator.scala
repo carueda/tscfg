@@ -61,7 +61,6 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
       code.println(s"\n$indent)")
 
-      // toString...
       code.println("")
       // </case class>
 
