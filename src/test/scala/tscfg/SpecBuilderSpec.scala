@@ -7,7 +7,7 @@ import tscfg.specs.ObjSpec
 
 class SpecBuilderSpec extends Specification {
 
-  def build(configString: String, showOutput: Boolean = true)
+  def build(configString: String, showOutput: Boolean = false)
               (implicit genOpts: GenOpts): ObjSpec = {
 
     val config = ConfigFactory.parseString(configString).resolve()
@@ -33,8 +33,30 @@ class SpecBuilderSpec extends Specification {
     val spec = build(
       """
         |foo {
-        |  bar = string
-        |  baz = int
+        |  reqStr        = string
+        |  reqInt        = 1
+        |  reqLong       = 99999999999
+        |  reqDouble     = 2.71
+        |  reqBoolean    = true
+        |  reqDuration   = duration
+        |  optStr        = "string?"
+        |  optInt        = "int?"
+        |  optLong       = "long?"
+        |  optDouble     = "double?"
+        |  optBoolean    = "boolean?"
+        |  optDuration   = "duration?"
+        |  dflStr        = "string   | hi"
+        |  dflInt        = "int      | 3"
+        |  dflLong       = "long     | 999999999"
+        |  dflDouble     = "double   | 3.14"
+        |  dflBoolean    = "boolean  | false"
+        |  dflDuration   = "duration | 21d"
+        |  listStr       = [ string ]
+        |  listInt       = [ integer ]
+        |  listLong      = [ long ]
+        |  listBoolean   = [ boolean ]
+        |  listDouble    = [ double ]
+        |  listDuration  = [ duration ]
         |}
       """.stripMargin)
 
@@ -44,7 +66,32 @@ class SpecBuilderSpec extends Specification {
       spec.children.keySet === Set("foo")
       val fooSpec = spec.children("foo")
       fooSpec must beAnInstanceOf[ObjSpec]
-      fooSpec.asInstanceOf[ObjSpec].children.keySet === Set("bar", "baz")
+      fooSpec.asInstanceOf[ObjSpec].children.keySet === Set(
+        "reqStr",
+        "reqInt",
+        "reqLong",
+        "reqDouble",
+        "reqBoolean",
+        "reqDuration",
+        "optStr",
+        "optInt",
+        "optLong",
+        "optDouble",
+        "optBoolean",
+        "optDuration",
+        "dflStr",
+        "dflInt",
+        "dflLong",
+        "dflDouble",
+        "dflBoolean",
+        "dflDuration",
+        "listStr",
+        "listInt",
+        "listLong",
+        "listBoolean",
+        "listDouble",
+        "listDuration"
+      )
     }
   }
 }

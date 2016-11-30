@@ -36,6 +36,7 @@ object specs {
 
     def format(indent: String = ""): String
 
+    // $COVERAGE-OFF$
     protected def commentsString(indent: String = ""): String = {
       if (comments.nonEmpty) {
         val i2 = "\n" + indent + "#"
@@ -43,6 +44,7 @@ object specs {
       }
       else ""
     }
+    // $COVERAGE-ON$
   }
 
   case class AtomicSpec(typ: AtomicType,
@@ -54,6 +56,7 @@ object specs {
 
     override def isOptional: Boolean = optional || super.isOptional
 
+    // $COVERAGE-OFF$
     override def format(indent: String): String = {
       typ.toString + {
         (if (isOptional) " optional" else "") +
@@ -62,6 +65,7 @@ object specs {
         commentsString(indent + "    ")
       }
     }
+    // $COVERAGE-ON$
   }
 
   case class ObjSpec(key: Key,
@@ -71,6 +75,7 @@ object specs {
 
     val orderedNames = children.keys.toList.sorted
 
+    // $COVERAGE-OFF$
     override def format(indent: String): String = {
       val commentsString = if (comments.nonEmpty) {
         indent + "  #" + comments.mkString("\n" + indent + "  #") + "\n\n"
@@ -88,15 +93,18 @@ object specs {
         indent + "  " + childrenStr + "\n" +
         indent + "}"
     }
+    // $COVERAGE-ON$
   }
 
   case class ListSpec(elemSpec: Spec,
                       comments: List[String] = List.empty
                      ) extends Spec {
 
+    // $COVERAGE-OFF$
     override def format(indent: String): String = {
       (if (isOptional) "optional " else "") +
       s"ListOf(${elemSpec.format(indent)})" + commentsString(indent + "    ")
     }
+    // $COVERAGE-ON$
   }
 }

@@ -40,6 +40,7 @@ class SpecBuilder(rootKey: Key) {
   }
 
   private case class Struct(key: Key, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
+    // $COVERAGE-OFF$
     def format(indent: String = ""): String = {
       if (members.isEmpty) s"$key"
       else {
@@ -47,6 +48,7 @@ class SpecBuilder(rootKey: Key) {
           members.map(e ⇒ indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
       }
     }
+    // $COVERAGE-ON$
   }
 
   private def getMemberStructs(conf: Config): List[Struct] = {
@@ -191,6 +193,7 @@ object SpecBuilder {
   import java.io.File
   import com.typesafe.config.ConfigFactory
 
+  // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val file = new File(filename)
@@ -208,4 +211,5 @@ object SpecBuilder {
     val objSpec = new SpecBuilder(Key(className)).fromConfig(config, className)
     println(s"objSpec: ${objSpec.format()}")
   }
+  // $COVERAGE-ON$
 }
