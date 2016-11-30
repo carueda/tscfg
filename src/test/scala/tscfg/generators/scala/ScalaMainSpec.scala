@@ -227,7 +227,15 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGenerator.generate("example/duration.spec.conf")
       r.classNames === Set("ScalaDurationCfg", "Durations")
-      r.fieldNames === Set("durations", "days", "hours", "millis")
+      r.fieldNames === Set("durations", "days", "hours", "millis",
+        "duration_ns",
+        "duration_µs",
+        "duration_ms",
+        "duration_se",
+        "duration_mi",
+        "duration_hr",
+        "duration_dy"
+      )
     }
 
     "example 1" in {
@@ -236,13 +244,27 @@ class ScalaMainSpec extends Specification {
           |durations {
           |  days  = "10d"
           |  hours = "24h"
+          |  duration_ns = "7ns"
+          |  duration_µs = "7us"
+          |  duration_ms = "7ms"
+          |  duration_se = "7s"
+          |  duration_mi = "7m"
+          |  duration_hr = "7h"
+          |  duration_dy = "7d"
           |}
           |""".stripMargin
       ))
       c.durations === ScalaDurationCfg.Durations(
         days = Some(10),
         hours = 24,
-        millis = 550000
+        millis = 550000,
+        duration_ns = 7,
+        duration_µs = 7,
+        duration_ms = 7,
+        duration_se = 7,
+        duration_mi = 7,
+        duration_hr = 7,
+        duration_dy = 7
       )
     }
   }

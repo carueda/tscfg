@@ -19,27 +19,33 @@ object durationUtil {
     config.getDuration("k", timeUnitParam(q))
   }
 
-  private def timeUnitParamString(q: String): String = "java.util.concurrent.TimeUnit." + (q match {
-    case "nanosecond"  => "NANOSECONDS"
-    case "microsecond" => "MICROSECONDS"
-    case "millisecond" | "ms" => "MILLISECONDS"
-    case "second"      => "SECONDS"
-    case "minute"      => "MINUTES"
-    case "hour"        => "HOURS"
-    case "day"         => "DAYS"
-    case _ => throw new AssertionError("unrecognized q='" + q + "'")
-  })
+  private def timeUnitParamString(q: String): String = "java.util.concurrent.TimeUnit." + unify(q)
 
   private def timeUnitParam(q: String): TimeUnit = {
-    q match {
-      case "nanosecond"  => TimeUnit.NANOSECONDS
-      case "microsecond" => TimeUnit.MICROSECONDS
-      case "millisecond" | "ms" => TimeUnit.MILLISECONDS
-      case "second"      => TimeUnit.SECONDS
-      case "minute"      => TimeUnit.MINUTES
-      case "hour"        => TimeUnit.HOURS
-      case "day"         => TimeUnit.DAYS
+    unify(q) match {
+      case "NANOSECONDS"   =>  TimeUnit.NANOSECONDS
+      case "MICROSECONDS"  =>  TimeUnit.MICROSECONDS
+      case "MILLISECONDS"  =>  TimeUnit.MILLISECONDS
+      case "SECONDS"       =>  TimeUnit.SECONDS
+      case "MINUTES"       =>  TimeUnit.MINUTES
+      case "HOURS"         =>  TimeUnit.HOURS
+      case "DAYS"          =>  TimeUnit.DAYS
+
       case _ => throw new AssertionError("unrecognized q='" + q + "'")
     }
   }
+
+  // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
+  private def unify(q: String): String = q match {
+    case "ns" | "nano"   | "nanos"  | "nanosecond"  | "nanoseconds"   => "NANOSECONDS"
+    case "us" | "micro"  | "micros" | "microsecond" | "microseconds"  => "MICROSECONDS"
+    case "ms" | "milli"  | "millis" | "millisecond" | "milliseconds"  => "MILLISECONDS"
+    case "s"  | "second" | "seconds"                                  => "SECONDS"
+    case "m"  | "minute" | "minutes"                                  => "MINUTES"
+    case "h"  | "hour"   | "hours"                                    => "HOURS"
+    case "d"  | "day"    | "days"                                     => "DAYS"
+
+    case _ => throw new AssertionError("unrecognized q='" + q + "'")
+  }
+
 }

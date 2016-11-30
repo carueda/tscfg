@@ -39,6 +39,13 @@ class SpecBuilderSpec extends Specification {
         |  reqDouble     = 2.71
         |  reqBoolean    = true
         |  reqDuration   = duration
+        |  duration_ns   = "duration : ns"
+        |  duration_µs   = "duration : us"
+        |  duration_ms   = "duration : ms"
+        |  duration_se   = "duration : s"
+        |  duration_mi   = "duration : m"
+        |  duration_hr   = "duration : h"
+        |  duration_dy   = "duration : d"
         |  optStr        = "string?"
         |  optInt        = "int?"
         |  optLong       = "long?"
@@ -73,6 +80,13 @@ class SpecBuilderSpec extends Specification {
         "reqDouble",
         "reqBoolean",
         "reqDuration",
+        "duration_ns",
+        "duration_µs",
+        "duration_ms",
+        "duration_se",
+        "duration_mi",
+        "duration_hr",
+        "duration_dy",
         "optStr",
         "optInt",
         "optLong",

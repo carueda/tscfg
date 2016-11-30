@@ -68,6 +68,14 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue13" should {
+    "generate code" in {
+      val r = JavaGenerator.generate("example/issue13.conf")
+      r.classNames === Set("JavaIssue13Cfg", "Issue")
+      r.fieldNames === Set("issue", "optionalFoo")
+    }
+  }
+
   "issue14" should {
     "generate code" in {
       val r = JavaGenerator.generate("example/issue14.conf")
@@ -216,7 +224,15 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGenerator.generate("example/duration.spec.conf")
       r.classNames === Set("JavaDurationCfg", "Durations")
-      r.fieldNames === Set("durations", "days", "hours", "millis")
+      r.fieldNames === Set("durations", "days", "hours", "millis",
+        "duration_ns",
+        "duration_µs",
+        "duration_ms",
+        "duration_se",
+        "duration_mi",
+        "duration_hr",
+        "duration_dy"
+      )
     }
 
     "example 1" in {
@@ -225,11 +241,26 @@ class JavaMainSpec extends Specification {
           |durations {
           |  days  = "10d"
           |  hours = "24h"
+          |  duration_ns = "7ns"
+          |  duration_µs = "7us"
+          |  duration_ms = "7ms"
+          |  duration_se = "7s"
+          |  duration_mi = "7m"
+          |  duration_hr = "7h"
+          |  duration_dy = "7d"
           |}
           |""".stripMargin
       ))
       c.durations.days === 10
       c.durations.hours === 24
+      c.durations.millis === 550000
+      c.durations.duration_ns === 7
+      c.durations.duration_µs === 7
+      c.durations.duration_ms === 7
+      c.durations.duration_se === 7
+      c.durations.duration_mi === 7
+      c.durations.duration_hr === 7
+      c.durations.duration_dy === 7
     }
   }
 
