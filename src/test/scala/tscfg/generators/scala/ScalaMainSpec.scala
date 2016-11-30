@@ -6,8 +6,16 @@ import tscfg.example.{ScalaDurationCfg, _}
 
 class ScalaMainSpec extends Specification {
 
+  "issue5" should {
+    "generate code" in {
+      val r = ScalaGenerator.generate("example/issue5.conf")
+      r.classNames === Set("ScalaIssue5Cfg", "Foo", "Config")
+      r.fieldNames === Set("foo", "config", "bar")
+    }
+  }
+
   "issue10" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue10.conf")
       r.classNames === Set("ScalaIssue10Cfg", "Main", "Email", "Reals$Elm")
       r.fieldNames === Set("server", "email", "main", "reals", "password", "foo")
@@ -42,23 +50,39 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue11" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue11.conf")
       r.classNames === Set("ScalaIssue11Cfg", "Foo")
       r.fieldNames === Set("notify_", "wait_", "getClass_", "clone_", "finalize_", "notifyAll_", "toString_", "foo")
     }
   }
 
+  "issue12" should {
+    "generate code" in {
+      val r = ScalaGenerator.generate("example/issue12.conf")
+      r.classNames === Set("ScalaIssue12Cfg", "String", "Option", "Boolean", "Int")
+      r.fieldNames === Set("String", "Option", "Boolean", "int", "bar")
+    }
+  }
+
   "issue13" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue13.conf")
       r.classNames === Set("ScalaIssue13Cfg", "Issue")
       r.fieldNames === Set("issue", "optionalFoo")
     }
   }
 
+  "issue14" should {
+    "generate code" in {
+      val r = ScalaGenerator.generate("example/issue14.conf")
+      r.classNames === Set("ScalaIssue14Cfg", "_0")
+      r.fieldNames === Set("_0", "_1", "_2")
+    }
+  }
+
   "issue15a" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue15a.conf")
       r.classNames === Set("ScalaIssue15aCfg")
       r.fieldNames === Set("ii")
@@ -84,7 +108,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15b" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue15b.conf")
       r.classNames === Set("ScalaIssue15bCfg")
       r.fieldNames === Set("strings", "integers", "doubles", "longs", "booleans")
@@ -109,7 +133,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15c" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue15c.conf")
       r.classNames === Set("ScalaIssue15cCfg", "Qaz", "Aa", "Positions$1$Elm", "Bb$Elm", "Attrs$2$Elm")
       r.fieldNames === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
@@ -151,7 +175,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15d" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue15d.conf")
       r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm")
       r.fieldNames === Set("baz", "aa", "dd")
@@ -171,7 +195,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/issue15.conf")
       r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm", "Positions$2$Elm")
       r.fieldNames === Set("positions", "numbers", "other", "stuff")
@@ -200,7 +224,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "duration" should {
-    "generate scala code" in {
+    "generate code" in {
       val r = ScalaGenerator.generate("example/duration.spec.conf")
       r.classNames === Set("ScalaDurationCfg", "Durations")
       r.fieldNames === Set("durations", "days", "hours", "millis")
