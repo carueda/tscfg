@@ -1,3 +1,9 @@
+2016-11-30 - 0.5.0
+	- resolve #16 "rewrite code"
+	- resolve #15 "support list"
+	- resolve #10 "annotations" -- basically only the `#@optional` one
+	- NOTE: toString not generated anymore
+	- TODO revisit template generation (info moved to a wiki page)
 2016-11-22 - 0.5.0
     - advancing a rewrite... 
     

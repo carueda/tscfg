@@ -22,8 +22,9 @@ and execution of the generated classes in your code.
 - [running tscfg](#running-tscfg)
 - [configuration access](#configuration-access)
 - [supported types](#supported-types)
+  - [basic types](#basic-types)
+  - [list type](#list-type)
   - [durations](#durations)
-- [template generation](#template-generation)
 - [FAQ](#faq)
 - [tests](#tests)
 
@@ -33,16 +34,13 @@ and execution of the generated classes in your code.
 
 The tool is already pretty usable.
 It supports a good part of the common types as supported by Typesafe Config 
-(string, int, long, double, duration);
-can generate configuration templates for end users;
+(string, int, long, double, boolean, duration, list)
 and has good test coverage.
-However, it's in general still work in progress and as time permits. 
-Missing types include lists and bytes;
+However, it's in general still work in progress. 
+A missing "type" is [size bytes](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format);
 command line interface can be improved;
 syntax for types is not stable yet.
 Feel free to fork, enter issues, submit PRs, etc.
-
-Also, see FAQ below.
 
 
 ## configuration spec
@@ -62,7 +60,7 @@ service {
 }
 ```
 
-tscfg will generate (constructors and other methods omitted):
+tscfg will generate the following (constructors and other methods omitted):
  
 - Java:
 
@@ -102,7 +100,7 @@ The tool determines the type of each field according to the given value
 in the input configuration.
 Used in this way, all fields are considered optional, with the given value as the default. 
 
-But this wouldn't be flexible enough.
+But this wouldn't be flexible enough!
 To allow the specification of
 **required fields**,
 **explicit types**,
@@ -149,11 +147,12 @@ public class ExampleCfg {
 }
 ```
 
-> note that java keywords are appended "_".
+> Note that Java keywords are appended "_". Corresponding handling also performed for Scala.
 
 ## running tscfg
 
-You will need a JRE 8 and the latest "fat" tscfg-x.y.z.jar from the [releases](https://github.com/carueda/tscfg/releases).
+You will need a JRE 8 and the latest "fat" JAR (tscfg-x.y.z.jar)
+from the [releases](https://github.com/carueda/tscfg/releases).
 
 > Or run `sbt assembly` under a clone of this repo to generate the fat jar. 
 
@@ -173,7 +172,7 @@ Output is written to $destDir/$className.ext
 ```
 
 So, to generate the Java class `tscfg.example.ExampleCfg` with the example above
-saved in `def.example.conf`, we can run:
+(which is saved in `def.example.conf`), we can run:
 
 ```shell
 $ java -jar tscfg-x.y.z.jar --spec def.example.conf
@@ -219,8 +218,8 @@ Integer serial = cfg.endpoint.serial;
 int port       = cfg.endpoint.interface_.port;
 ```
 
-An object reference will never be null (None in Scala) if the corresponding field is required according to
-the specification. It will only be null (None) if it is marked optional with no default value and
+An object reference will never be `null` (`None` in Scala) if the corresponding field is required according to
+the specification. It will only be `null` (`None`) if it is marked optional with no default value and
 has been omitted in the input configuration.
  
 With this [example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
@@ -233,6 +232,8 @@ and an example of use [like this](https://github.com/carueda/tscfg/blob/master/s
 
 ## supported types
 
+### basic types
+
 With explicit field typing, the following base types are currently supported:
 
 | type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
@@ -244,6 +245,19 @@ With explicit field typing, the following base types are currently supported:
 | `boolean`     | boolean / Boolean   | Boolean / Option[Boolean]   
 | `duration`    | long    / Long      | Long    / Option[Long]
       
+### list type
+
+With _t_ denoting a handled type, a list of elements of that type 
+is denoted `[` _t_ `]`. The corresponding types in Java and Scala are:
+
+| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
+|---------------|---------------------|--------------------------
+| `[` _t_ `]`   | List&lt;T> / List&lt;T>   | List[T] / Option[List[T]]
+
+where T is the translation of _t_ in the corresponding language, with
+`List<T>` corresponding to an unmodifiable list in Java, and
+`List[T]` corresponding to an ummutable list in Scala.
+
 ### durations
 
 A duration type can be further qualified with a suffix consisting of a colon 
@@ -253,7 +267,7 @@ with conversion automatically performed if the actual configuration value is giv
 any other unit as supported by Typesafe Config according to the 
 [duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
 
-[A more complete example](https://github.com/carueda/tscfg/blob/master/example/example-duration.spec.conf)
+[A more complete example](https://github.com/carueda/tscfg/blob/master/example/duration.spec.conf)
 with some additional explanation:
 
 ```properties
@@ -270,76 +284,10 @@ durations {
   # reported long (Long) is in milliseconds, either 550,000 if value is missing
   # or whatever is provided converted to millis
   millis = "duration:ms | 550s"
+
+  ...
 }
 ```
-
-## template generation
-
-Configuration templates are often a means to provide end users with a description of 
-the properties that should be set (or that could be overwritten) 
-for the proper operation of an application or library. 
-Based on the template, end users will then enter the concrete settings that are appropriate.
-
-On the other hand, configuration "specs," as used for tscfg generation, 
-are mainly intended to be used by the developer of such application or library.
-
-tscfg can also generate template configuration files from the given spec so the developer 
-does not have to manually create/edit such templates.
-
-For example, from the configuration spec:
-
-```properties
-# Some description of the endpoint section
-#@optional
-endpoint {
-  # The path associated with the endpoint.
-  # For example, "/home/foo/bar"
-  path = "string"
-
-  # Port where the endpoint service is running
-  port = "int | 8080"
-
-  # Email to send notifications to. If missing, no emails are sent.
-  email = "string?"
-
-  # Link in emails
-  link = "string | http://example.net"
-
-  value = 3.14
-}
-```
-
-the generated template (with the `--tpl all` option) will look like:
-
-```properties
-# endpoint: Optional section.
-# Some description of the endpoint section
-endpoint {
-
-  # email: Optional string.
-  # Email to send notifications to. If missing, no emails are sent.
-  #email =
-
-  # link: Optional string. Default value "http://example.net".
-  # Link in emails
-  link = "http://example.net"
-
-  # path: Required string.
-  # The path associated with the endpoint.
-  # For example, "/home/foo/bar"
-  path =
-
-  # port: Optional int. Default value 8080.
-  # Port where the endpoint service is running
-  port = 8080
-
-  # value: Optional double. Default value 3.14.
-  value = 3.14
-}
-```
-
-> Annotations like `#@optional` are still preliminary.
-
 
 ## FAQ
 
@@ -357,19 +305,4 @@ Yes, but it's not implemented yet. Feel free to contribute!
 
 ## tests
 
-### java
-
-- [ExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/JavaExampleSpec.scala)
-- [JavaAccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaAccessorSpec.scala)
-- [Java7AccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/Java7AccessorSpec.scala)
-- [javaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/JavaIdentifierSpec.scala)
-
-### scala
-
-- [ScalaExampleSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/example/ScalaExampleSpec.scala) 
-- [scalaAccessorSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/ScalaAccessorSpec.scala)
-- [scalaIdentifierSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/scalaIdentifierSpec.scala)
-
-### Type
-
-- [TypeSpec](https://github.com/carueda/tscfg/blob/master/src/test/scala/tscfg/TypeSpec.scala) 
+https://github.com/carueda/tscfg/tree/master/src/test/scala/tscfg
