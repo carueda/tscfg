@@ -79,8 +79,8 @@ class ScalaMainSpec extends Specification {
       val c = ScalaIssue15cCfg(ConfigFactory.parseString(
         """
           |positions: [
-          |  { lat: 1, lon: 2, attrs = [ [ {foo: 99}             ] ] },
-          |  { lat: 3, lon: 4, attrs = [ [ {foo: 3.14}, {foo: 0} ] ] }
+          |  { lat: 1, lon: 2, attrs = [ [ {foo: 99}          ] ] },
+          |  { lat: 3, lon: 4, attrs = [ [ {foo: 3}, {foo: 0} ] ] }
           |]
           |qaz = {
           |  aa = { bb = [ { cc: hoho } ]  }

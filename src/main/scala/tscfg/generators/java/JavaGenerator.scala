@@ -419,6 +419,7 @@ object JavaGenerator {
   import tscfg.SpecBuilder
   import java.io.File
 
+  // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val file = new File(filename)
@@ -451,4 +452,5 @@ object JavaGenerator {
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
   }
+  // $COVERAGE-ON$
 }

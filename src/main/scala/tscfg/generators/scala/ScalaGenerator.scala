@@ -414,6 +414,7 @@ object ScalaGenerator {
   import com.typesafe.config.ConfigFactory
   import tscfg.SpecBuilder
 
+  // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val file = new File(filename)
@@ -446,4 +447,5 @@ object ScalaGenerator {
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
   }
+  // $COVERAGE-ON$
 }
