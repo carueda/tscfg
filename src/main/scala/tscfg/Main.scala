@@ -1,22 +1,27 @@
 package tscfg
 
-import java.io.{File, PrintWriter}
+import java.io.{File, PrintWriter, Writer}
 
 import com.typesafe.config.ConfigFactory
-import tscfg.generator.GenOpts
+import tscfg.generators.java.JavaGenerator
+import tscfg.generators.scala.ScalaGenerator
+import tscfg.generators.{GenOpts, GenResult, Generator}
+import tscfg.specs.ObjSpec
 
 /**
   * The main program. Run with no arguments to see usage.
   */
 object Main {
+  val version: String = ConfigFactory.load().getString("tscfg.version")
+
   val defaultDestDir: String = "/tmp"
 
   val usage: String = s"""
-             |tscfg ${generator.version}
+             |tscfg $version
              |Usage:  tscfg.Main --spec inputFile [options]
              |Options (default):
-             |  --pn <packageName>                                     (${generator.defaultPackageName})
-             |  --cn <className>                                       (${generator.defaultClassName})
+             |  --pn <packageName>                                     (${generators.defaults.packageName})
+             |  --cn <className>                                       (${generators.defaults.className})
              |  --dd <destDir>                                         ($defaultDestDir)
              |  --j7                  generate code for java <= 7      (8)
              |  --scala               generate scala code              (java)
@@ -25,8 +30,8 @@ object Main {
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
-                         packageName: String = generator.defaultPackageName,
-                         className: String =   generator.defaultClassName,
+                         packageName: String = generators.defaults.packageName,
+                         className: String =   generators.defaults.className,
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java"
@@ -36,7 +41,7 @@ object Main {
     generate(getOpts(args.toList))
   }
 
-  def getOpts(args: List[String]): CmdLineOpts = {
+  private def getOpts(args: List[String]): CmdLineOpts = {
     if (args.isEmpty) {
       println(usage)
       sys.exit(0)
@@ -88,7 +93,7 @@ object Main {
     opts
   }
 
-  def generate(opts: CmdLineOpts): Unit = {
+  private def generate(opts: CmdLineOpts): Unit = {
     require(opts.inputFilename.isDefined)
 
     val ext = opts.language
@@ -111,7 +116,7 @@ object Main {
     //println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     println(s"generating: $destFile")
-    generator.generate(objSpec, out)
+    generate(objSpec, out)
     out.close()
 
 /*
@@ -123,5 +128,30 @@ object Main {
       out.close()
     }
 */
+  }
+
+  /**
+    * Generates code for the given configuration spec.
+    *
+    * @param objSpec      specification
+    * @param out          code is written here
+    * @param genOpts      generation options
+    */
+  private def generate(objSpec: ObjSpec, out: Writer)
+              (implicit genOpts: GenOpts): GenResult = {
+
+    val pw = out match {
+      case w: PrintWriter => w
+      case w => new PrintWriter(w)
+    }
+
+    val generator: Generator = genOpts.language match {
+      case "java"  => new JavaGenerator(genOpts)
+      case "scala" => new ScalaGenerator(genOpts)
+    }
+
+    val results = generator.generate(objSpec)
+    pw.println(results.code)
+    results
   }
 }

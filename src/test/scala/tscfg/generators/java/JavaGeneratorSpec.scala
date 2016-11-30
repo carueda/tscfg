@@ -3,8 +3,7 @@ package tscfg.generators.java
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg._
-import tscfg.generator.{GenOpts, GenResult}
-import tscfg.generators.Generator
+import tscfg.generators.{GenOpts, GenResult, Generator}
 
 
 class JavaGeneratorSpec extends Specification {

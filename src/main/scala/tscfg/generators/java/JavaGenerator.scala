@@ -1,9 +1,7 @@
 package tscfg.generators.java
 
 import java.io.{FileWriter, PrintWriter}
-
-import tscfg.generator._
-import tscfg.generators.{Generator, durationUtil}
+import tscfg.generators.{GenOpts, GenResult, Generator, durationUtil}
 import javaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
@@ -12,9 +10,7 @@ import tscfg.{Key, util}
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-class JavaGenerator(genOpts: GenOpts) extends Generator {
-
-  val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
+class JavaGenerator(genOpts: GenOpts) extends Generator(genOpts) {
 
   // defined in terms of corresponding elemAccessor:
   type JavaElemTypeAndAccessor = (String,String)

@@ -2,7 +2,7 @@ package tscfg
 
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
-import tscfg.generator.GenOpts
+import tscfg.generators.GenOpts
 import tscfg.specs.ObjSpec
 
 class SpecBuilderSpec extends Specification {

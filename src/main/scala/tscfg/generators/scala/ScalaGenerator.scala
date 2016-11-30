@@ -1,9 +1,7 @@
 package tscfg.generators.scala
 
 import java.io.{FileWriter, PrintWriter}
-
-import tscfg.generator._
-import tscfg.generators.{Generator, durationUtil}
+import tscfg.generators.{GenOpts, GenResult, Generator, durationUtil}
 import scalaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
@@ -12,9 +10,7 @@ import tscfg.{Key, util}
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-class ScalaGenerator(genOpts: GenOpts) extends Generator {
-
-  val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
+class ScalaGenerator(genOpts: GenOpts) extends Generator(genOpts) {
 
   val rootDefinedListElemAccessors: mutable.LinkedHashSet[(String, String)] = collection.mutable.LinkedHashSet[(String,String)]()
 

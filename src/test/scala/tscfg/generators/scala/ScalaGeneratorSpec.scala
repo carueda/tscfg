@@ -3,8 +3,7 @@ package tscfg.generators.scala
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.{Key, SpecBuilder}
-import tscfg.generator.{GenOpts, GenResult}
-import tscfg.generators.Generator
+import tscfg.generators.{GenOpts, GenResult, Generator}
 
 class ScalaGeneratorSpec extends Specification {
 
