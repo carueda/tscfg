@@ -7,6 +7,12 @@ import tscfg.example.{ScalaDurationCfg, _}
 class ScalaMainSpec extends Specification {
 
   "issue10" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue10.conf")
+      r.classNames === Set("ScalaIssue10Cfg", "Main", "Email", "Reals$Elm")
+      r.fieldNames === Set("server", "email", "main", "reals", "password", "foo")
+    }
+
     "example 1" in {
       val c = ScalaIssue10Cfg(ConfigFactory.parseString(
         """
@@ -35,7 +41,29 @@ class ScalaMainSpec extends Specification {
     }
   }
 
+  "issue11" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue11.conf")
+      r.classNames === Set("ScalaIssue11Cfg", "Foo")
+      r.fieldNames === Set("notify_", "wait_", "getClass_", "clone_", "finalize_", "notifyAll_", "toString_", "foo")
+    }
+  }
+
+  "issue13" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue13.conf")
+      r.classNames === Set("ScalaIssue13Cfg", "Issue")
+      r.fieldNames === Set("issue", "optionalFoo")
+    }
+  }
+
   "issue15a" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue15a.conf")
+      r.classNames === Set("ScalaIssue15aCfg")
+      r.fieldNames === Set("ii")
+    }
+
     "example 1" in {
       val c = ScalaIssue15aCfg(ConfigFactory.parseString(
         """
@@ -56,6 +84,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15b" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue15b.conf")
+      r.classNames === Set("ScalaIssue15bCfg")
+      r.fieldNames === Set("strings", "integers", "doubles", "longs", "booleans")
+    }
+
     "example 1" in {
       val c = ScalaIssue15bCfg(ConfigFactory.parseString(
         """
@@ -75,6 +109,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15c" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue15c.conf")
+      r.classNames === Set("ScalaIssue15cCfg", "Qaz", "Aa", "Positions$1$Elm", "Bb$Elm", "Attrs$2$Elm")
+      r.fieldNames === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
+    }
+
     "example 1" in {
       val c = ScalaIssue15cCfg(ConfigFactory.parseString(
         """
@@ -111,6 +151,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15d" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue15d.conf")
+      r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm")
+      r.fieldNames === Set("baz", "aa", "dd")
+    }
+
     "example 1" in {
       val c = ScalaIssue15dCfg(ConfigFactory.parseString(
         """
@@ -125,6 +171,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue15" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/issue15.conf")
+      r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm", "Positions$2$Elm")
+      r.fieldNames === Set("positions", "numbers", "other", "stuff")
+    }
+
     "example 1" in {
       val c = ScalaIssue15Cfg(ConfigFactory.parseString(
         """
@@ -148,6 +200,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "duration" should {
+    "generate scala code" in {
+      val r = ScalaGenerator.generate("example/duration.spec.conf")
+      r.classNames === Set("ScalaDurationCfg", "Durations")
+      r.fieldNames === Set("durations", "days", "hours", "millis")
+    }
+
     "example 1" in {
       val c = ScalaDurationCfg(ConfigFactory.parseString(
         """

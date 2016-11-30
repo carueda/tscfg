@@ -7,7 +7,7 @@ import tscfg.generators.{Generator, durationUtil}
 import scalaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
-import tscfg.Key
+import tscfg.{Key, util}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -414,23 +414,25 @@ object ScalaGenerator {
   import com.typesafe.config.ConfigFactory
   import tscfg.SpecBuilder
 
-  // $COVERAGE-OFF$
-  def main(args: Array[String]): Unit = {
-    val filename = args(0)
+  def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
     val src = io.Source.fromFile(file).mkString.trim
-    println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+
+    if (showOut)
+      println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+
     val config = ConfigFactory.parseString(src).resolve()
 
     val className = "Scala" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
       val noDef = noPath.replaceAll("""^def\.""", "")
       val symbol = noDef.substring(0, noDef.indexOf('.'))
-      symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
+      util.upperFirst(symbol) + "Cfg"
     }
 
     val objSpec = new SpecBuilder(Key(className)).fromConfig(config)
-    println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
+    if (showOut)
+      println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className,
       preamble = Some(s"source: (a test)")
@@ -446,6 +448,17 @@ object ScalaGenerator {
     val destFile = new File(destFilename)
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
+    results
+  }
+
+  // $COVERAGE-OFF$
+  def main(args: Array[String]): Unit = {
+    val filename = args(0)
+    val results = generate(filename, showOut = true)
+    println(
+      s"""classNames: ${results.classNames}
+         |fieldNames: ${results.fieldNames}
+      """.stripMargin)
   }
   // $COVERAGE-ON$
 }

@@ -419,23 +419,26 @@ object JavaGenerator {
   import tscfg.SpecBuilder
   import java.io.File
 
-  // $COVERAGE-OFF$
-  def main(args: Array[String]): Unit = {
-    val filename = args(0)
+  def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
     val src = io.Source.fromFile(file).mkString.trim
-    println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+
+    if (showOut)
+      println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+
     val config = ConfigFactory.parseString(src).resolve()
 
     val className = "Java" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
       val noDef = noPath.replaceAll("""^def\.""", "")
       val symbol = noDef.substring(0, noDef.indexOf('.'))
-      symbol.charAt(0).toUpper + symbol.substring(1) + "Cfg"
+      util.upperFirst(symbol) + "Cfg"
     }
 
     val objSpec = new SpecBuilder(Key(className)).fromConfig(config)
-    println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
+
+    if (showOut)
+      println("\nobjSpec:\n  |" + objSpec.format().replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className,
       preamble = Some(s"source: (a test)")
@@ -451,6 +454,13 @@ object JavaGenerator {
     val destFile = new File(destFilename)
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
+    results
+  }
+
+  // $COVERAGE-OFF$
+  def main(args: Array[String]): Unit = {
+    val filename = args(0)
+    generate(filename)
   }
   // $COVERAGE-ON$
 }

@@ -8,6 +8,12 @@ class JavaMainSpec extends Specification {
   import scala.collection.JavaConversions._
 
   "issue10" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue10.conf")
+      r.classNames === Set("JavaIssue10Cfg", "Main", "Email", "Reals$Elm")
+      r.fieldNames === Set("server", "email", "main", "reals", "password", "foo")
+    }
+
     "example 1" in {
       val c = new JavaIssue10Cfg(ConfigFactory.parseString(
         """
@@ -38,7 +44,21 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue11" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue11.conf")
+      r.classNames === Set("JavaIssue11Cfg", "Foo")
+      r.fieldNames === Set("notify", "wait", "getClass", "clone", "finalize", "notifyAll", "toString", "foo")
+    }
+  }
+
   "issue15a" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue15a.conf")
+      r.classNames === Set("JavaIssue15aCfg")
+      r.fieldNames === Set("ii")
+    }
+
     "example 1" in {
       val c = new JavaIssue15aCfg(ConfigFactory.parseString(
         """
@@ -59,6 +79,12 @@ class JavaMainSpec extends Specification {
   }
 
   "issue15b" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue15b.conf")
+      r.classNames === Set("JavaIssue15bCfg")
+      r.fieldNames === Set("strings", "integers", "doubles", "longs", "booleans")
+    }
+
     "example 1" in {
       val c = new JavaIssue15bCfg(ConfigFactory.parseString(
         """
@@ -78,6 +104,12 @@ class JavaMainSpec extends Specification {
   }
 
   "issue15c" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue15c.conf")
+      r.classNames === Set("JavaIssue15cCfg", "Qaz", "Aa", "Positions$1$Elm", "Bb$Elm", "Attrs$2$Elm")
+      r.fieldNames === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
+    }
+
     "example 1" in {
       val c = new JavaIssue15cCfg(ConfigFactory.parseString(
         """
@@ -108,6 +140,12 @@ class JavaMainSpec extends Specification {
   }
 
   "issue15d" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue15d.conf")
+      r.classNames === Set("JavaIssue15dCfg", "Baz$Elm")
+      r.fieldNames === Set("baz", "aa", "dd")
+    }
+
     "example 1" in {
       val c = new JavaIssue15dCfg(ConfigFactory.parseString(
         """
@@ -124,6 +162,12 @@ class JavaMainSpec extends Specification {
   }
 
   "issue15" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/issue15.conf")
+      r.classNames === Set("JavaIssue15Cfg", "Positions$Elm", "Positions$2$Elm")
+      r.fieldNames === Set("positions", "numbers", "other", "stuff")
+    }
+
     "example 1" in {
       val c = new JavaIssue15Cfg(ConfigFactory.parseString(
         """
@@ -145,6 +189,12 @@ class JavaMainSpec extends Specification {
   }
 
   "duration" should {
+    "generate java code" in {
+      val r = JavaGenerator.generate("example/duration.spec.conf")
+      r.classNames === Set("JavaDurationCfg", "Durations")
+      r.fieldNames === Set("durations", "days", "hours", "millis")
+    }
+
     "example 1" in {
       val c = new JavaDurationCfg(ConfigFactory.parseString(
         """

@@ -9,9 +9,9 @@ public class JavaDurationCfg {
     public final long millis;
 
     public Durations(com.typesafe.config.Config c) {
-      this.days = c != null && c.hasPathOrNull("days") ? c.getDuration("days", java.util.concurrent.TimeUnit.DAYS) : null;
+      this.days = c.hasPathOrNull("days") ? c.getDuration("days", java.util.concurrent.TimeUnit.DAYS) : null;
       this.hours = c.getDuration("hours", java.util.concurrent.TimeUnit.HOURS);
-      this.millis = c != null && c.hasPathOrNull("millis") ? c.getDuration("millis", java.util.concurrent.TimeUnit.MILLISECONDS) : 550000;
+      this.millis = c.hasPathOrNull("millis") ? c.getDuration("millis", java.util.concurrent.TimeUnit.MILLISECONDS) : 550000;
     }
   }
 
@@ -20,7 +20,7 @@ public class JavaDurationCfg {
   }
 
   private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-    return c != null && c.hasPathOrNull(path) ? c.getConfig(path) : null;
+    return c.hasPathOrNull(path) ? c.getConfig(path) : null;
   }
 }
 
