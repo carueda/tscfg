@@ -4,18 +4,19 @@ import java.io.{FileWriter, PrintWriter}
 
 import tscfg.generator._
 import tscfg.generators.{Generator, durationUtil}
-import tscfg.scalaUtil._
+import scalaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
 import tscfg.Key
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
-  val hasPath = if (genOpts.j7) "hasPath" else "hasPathOrNull"
+  val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
 
-  val rootDefinedListElemAccessors = collection.mutable.LinkedHashSet[(String,String)]()
+  val rootDefinedListElemAccessors: mutable.LinkedHashSet[(String, String)] = collection.mutable.LinkedHashSet[(String,String)]()
 
   def generate(objSpec: ObjSpec): GenResult = {
 
@@ -159,7 +160,7 @@ class ScalaGenerator(genOpts: GenOpts) extends Generator {
 
     def print(str: String): Unit = defn.append(str)
 
-    def definition = defn.toString
+    def definition: String = defn.toString
 
     val objectDefinedListElemAccessors = collection.mutable.LinkedHashSet[(String,String)]()
 

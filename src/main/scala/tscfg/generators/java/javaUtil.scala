@@ -1,4 +1,6 @@
-package tscfg
+package tscfg.generators.java
+
+import tscfg.util
 
 object javaUtil {
 

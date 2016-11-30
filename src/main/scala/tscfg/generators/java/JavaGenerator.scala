@@ -4,20 +4,21 @@ import java.io.{FileWriter, PrintWriter}
 
 import tscfg.generator._
 import tscfg.generators.{Generator, durationUtil}
-import tscfg.javaUtil._
+import javaUtil._
 import tscfg.specs._
 import tscfg.specs.types._
 import tscfg.{Key, util}
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 class JavaGenerator(genOpts: GenOpts) extends Generator {
 
-  val hasPath = if (genOpts.j7) "hasPath" else "hasPathOrNull"
+  val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
 
   // defined in terms of corresponding elemAccessor:
   type JavaElemTypeAndAccessor = (String,String)
-  val rootDefinedListElemAccessors = collection.mutable.LinkedHashSet[JavaElemTypeAndAccessor]()
+  val rootDefinedListElemAccessors: mutable.LinkedHashSet[(String, String)] = collection.mutable.LinkedHashSet[JavaElemTypeAndAccessor]()
 
   private var staticConfigUsed: Boolean = _
 
@@ -126,15 +127,15 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
     */
   private case class Code(name: String, spec: Spec, javaType: String) {
 
-    val javaId = javaIdentifier(name) //spec.key.simple)
+    val javaId: String = javaIdentifier(name)
 
-    val declaration = "public final " + javaType + " " + javaId + ";"
+    val declaration: String = "public final " + javaType + " " + javaId + ";"
 
     def println(str: String): Unit = defn.append(str).append('\n')
 
     def print(str: String): Unit = defn.append(str)
 
-    def definition = defn.toString
+    def definition: String = defn.toString
 
     val objectDefinedListElemAccessors = collection.mutable.LinkedHashSet[JavaElemTypeAndAccessor]()
 
@@ -351,7 +352,7 @@ class JavaGenerator(genOpts: GenOpts) extends Generator {
         |""".stripMargin.trim
     }
 
-    val configGetter = {
+    private val configGetter = {
       val tscc = util.TypesafeConfigClassName
       s"""
          |private static $tscc ${methodNames.configAccess}($tscc c, java.lang.String path) {

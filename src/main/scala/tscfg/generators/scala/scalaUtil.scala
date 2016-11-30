@@ -1,4 +1,7 @@
-package tscfg
+package tscfg.generators.scala
+
+import tscfg.generators.java.javaUtil
+import tscfg.util
 
 object scalaUtil {
 
