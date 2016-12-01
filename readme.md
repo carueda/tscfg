@@ -19,9 +19,11 @@ and execution of the generated classes in your code.
 - [running tscfg](#running-tscfg)
 - [configuration access](#configuration-access)
 - [supported types](#supported-types)
+  - [durations](#durations)
   - [basic types](#basic-types)
   - [list type](#list-type)
-  - [durations](#durations)
+  - [object type](#object-type)
+  - [optional object or list](#optional-object-or-list)
 - [FAQ](#faq)
 - [tests](#tests)
 
@@ -268,7 +270,39 @@ The following basic types are supported:
 | `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`    
 | `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`   
 | `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
-      
+    
+
+#### durations
+
+A duration type can be further qualified with a suffix consisting of a colon 
+an a desired time unit for the reported value. 
+For example, with the type `"duration:day"`, the reported long value will be in day units, 
+with conversion automatically performed if the actual configuration value is given in 
+any other unit as supported by Typesafe Config according to the 
+[duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
+
+[A more complete example](https://github.com/carueda/tscfg/blob/master/example/duration.spec.conf)
+with some additional explanation:
+
+```hocon
+durations {
+  # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
+  # or whatever is provided converted to days
+  days = "duration:day?"
+
+  # required duration; reported long (Long) is whatever is provided
+  # converted to hours
+  hours = "duration:hour"
+
+  # optional duration with default value;
+  # reported long (Long) is in milliseconds, either 550,000 if value is missing
+  # or whatever is provided converted to millis
+  millis = "duration:ms | 550s"
+
+  ...
+}
+```
+
 ### list type
 
 With _t_ denoting a handled type, a list of elements of that type 
@@ -323,37 +357,45 @@ object Cfg {
 }
 ```
 
+### optional object or list
 
-### durations
-
-A duration type can be further qualified with a suffix consisting of a colon 
-an a desired time unit for the reported value. 
-For example, with the type `"duration:day"`, the reported long value will be in day units, 
-with conversion automatically performed if the actual configuration value is given in 
-any other unit as supported by Typesafe Config according to the 
-[duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
-
-[A more complete example](https://github.com/carueda/tscfg/blob/master/example/duration.spec.conf)
-with some additional explanation:
+An object or a list in the input configuration can be marked optional with
+the `#@optional` annotation:
 
 ```hocon
-durations {
-  # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
-  # or whatever is provided converted to days
-  days = "duration:day?"
+#@optional
+email {
+  server: string
+  password: string
+}
 
-  # required duration; reported long (Long) is whatever is provided
-  # converted to hours
-  hours = "duration:hour"
+#@optional
+reals: [ { foo: double } ]
+```
 
-  # optional duration with default value;
-  # reported long (Long) is in milliseconds, either 550,000 if value is missing
-  # or whatever is provided converted to millis
-  millis = "duration:ms | 550s"
+In Scala this basically becomes:
 
-  ...
+```scala
+case class Cfg(
+  email : Option[Cfg.Email],
+  reals : Option[List[Cfg.$Elm]]
+)
+
+object Cfg {
+  case class Email(
+    password : String,
+    server   : String
+  )
+  case class $Elm(
+    foo : Double
+  )
 }
 ```
+
+As with basic types, the meaning of an optional object or list is that the corresponding 
+value will be `null` (`None` in Scala) when the corresponding actual entry is missing in 
+a given configuration instance.
+
 
 ## FAQ
 
