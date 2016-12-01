@@ -73,7 +73,7 @@ object specs {
                      comments: List[String] = List.empty
                     ) extends Spec {
 
-    val orderedNames = children.keys.toList.sorted
+    val orderedNames: List[String] = children.keys.toList.sorted
 
     // $COVERAGE-OFF$
     override def format(indent: String): String = {
