@@ -1,14 +1,18 @@
 name := "tscfg"
 
-val tscfgVersion = setVersion("0.3.4")
+val tscfgVersion = setVersion("0.5.0")
 
 version := tscfgVersion
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 libraryDependencies += "com.typesafe" % "config" % "1.3.0"
 
 libraryDependencies += "org.specs2" %% "specs2-core" % "3.8.4" % "test"
+
+libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.0"
+
+libraryDependencies += "com.google.code.gson" % "gson" % "2.8.0"
 
 mainClass in assembly := Some("tscfg.Main")
 

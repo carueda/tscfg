@@ -2,7 +2,7 @@ package tscfg
 
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
-import tscfg.scalaGenerator.{scalaReservedWords, scalaIdentifier}
+import tscfg.generators.scala.scalaUtil.{scalaReservedWords, scalaIdentifier}
 import scala.util.Random
 
 object scalaIdentifierSpec extends Specification {
