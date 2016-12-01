@@ -10,8 +10,7 @@ and generates all the boiler-plate to make the definitions
 available in type safe, immutable objects 
 (POJOs for Java, case classes for Scala).
 
-Typesafe Config is used by the tool for the generation, and required for compilation 
-and execution of the generated classes in your code.
+The generated code only depends on the Typesafe Config library.  
 
 
 - [status](#status)
@@ -19,8 +18,8 @@ and execution of the generated classes in your code.
 - [running tscfg](#running-tscfg)
 - [configuration access](#configuration-access)
 - [supported types](#supported-types)
-  - [durations](#durations)
   - [basic types](#basic-types)
+  - [durations](#durations)
   - [list type](#list-type)
   - [object type](#object-type)
   - [optional object or list](#optional-object-or-list)
@@ -46,10 +45,9 @@ Feel free to fork, enter issues, submit PRs, etc.
 In tscfg's approach, the configuration spec itself is any source parseable by Typesafe Config,
 so the familiar syntax/format and loading mechanisms are used.
 
-For example, from 
-[this configuration](https://github.com/carueda/tscfg/blob/master/example/example0.spec.conf):
+For example, from this configuration:
 
-```hocon
+```properties
 service {
   url = "http://example.net/rest"
   poolSize = 32
@@ -116,7 +114,7 @@ a string with a simple syntax as follows can be used
 
 The following is a complete example exercising this mechanism.
 
-```hocon
+```properties
 endpoint {
   path = "string"
   url = "String | http://example.net"
@@ -284,7 +282,7 @@ any other unit as supported by Typesafe Config according to the
 [A more complete example](https://github.com/carueda/tscfg/blob/master/example/duration.spec.conf)
 with some additional explanation:
 
-```hocon
+```properties
 durations {
   # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
   # or whatever is provided converted to days
@@ -322,7 +320,7 @@ As seen in examples above, each object in the given configuration spec becomes a
 
 It is of course possible to specify a field as a list of objects, for example:
 
-```hocon
+```properties
 positions: [
   {
     lat: double
@@ -362,7 +360,7 @@ object Cfg {
 An object or a list in the input configuration can be marked optional with
 the `#@optional` annotation:
 
-```hocon
+```properties
 #@optional
 email {
   server: string
@@ -409,7 +407,23 @@ may become more apparent.
 
 **Could tscfg generate `Optional<T>` by default for optional fields?**
 
-Yes, but it's not implemented yet. Feel free to contribute!
+Sorry, it's not implemented yet. Want to contribute?
+
+**What happened with the generated `toString` method?**
+
+It is not generated anymore as we think it's more flexible to let client code decide how to 
+render configuration instances while also recognizing that very likely typical serialization 
+libraries are already being used in the application.
+For example, the demo programs 
+[JavaMain](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaMain.java) 
+and [ScalaMain](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaMain.java) 
+use [Gson](https://github.com/google/gson) and
+[json4s](https://github.com/json4s/json4s), respectively.
+Also, worth noting that you can certainly use Typesafe Config itself for rendering purposes.
+However, in this case you would be using the original Typesafe Config parsed configuration object,
+so the rendering won't be restricted only to the elements captured in the _configuration specification_ used 
+by tscfg for the generated code.
+
 
 ## tests
 
