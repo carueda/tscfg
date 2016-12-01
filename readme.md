@@ -13,9 +13,6 @@ available in type safe, immutable objects
 Typesafe Config is used by the tool for the generation, and required for compilation 
 and execution of the generated classes in your code.
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 
 - [status](#status)
 - [configuration spec](#configuration-spec)
@@ -28,7 +25,6 @@ and execution of the generated classes in your code.
 - [FAQ](#faq)
 - [tests](#tests)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ### status
 
@@ -37,7 +33,7 @@ It supports a good part of the common types as supported by Typesafe Config
 (string, int, long, double, boolean, duration, list)
 and has good test coverage.
 However, it's in general still work in progress. 
-A missing "type" is [size bytes](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format);
+A missing "type" is [size in bytes](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format);
 command line interface can be improved;
 syntax for types is not stable yet.
 Feel free to fork, enter issues, submit PRs, etc.
@@ -51,7 +47,7 @@ so the familiar syntax/format and loading mechanisms are used.
 For example, from 
 [this configuration](https://github.com/carueda/tscfg/blob/master/example/example0.spec.conf):
 
-```properties
+```hocon
 service {
   url = "http://example.net/rest"
   poolSize = 32
@@ -118,7 +114,7 @@ a string with a simple syntax as follows can be used
 
 The following is a complete example exercising this mechanism.
 
-```properties
+```hocon
 endpoint {
   path = "string"
   url = "String | http://example.net"
@@ -132,22 +128,50 @@ endpoint {
 For Java, this basically becomes the immutable class:
 
 ```java
-public class ExampleCfg {
+public class JavaExampleCfg {
   public final Endpoint endpoint;
-  public static class Endpoint {
-    public final String path;
-    public final String url;
-    public final Integer serial;
 
-    public final Interface interface_;
-    public static class Interface {
+  public static class Endpoint {
+    public final int intReq;
+    public final Interface_ interface_;
+    public final String path;
+    public final Integer serial;
+    public final String url;
+
+    public static class Interface_ {
       public final int port;
+      public final String type;
     }
   }
 }
 ```
 
 > Note that Java keywords are appended "_". Corresponding handling also performed for Scala.
+
+And for Scala:
+
+```scala
+case class ScalaExampleCfg(
+  endpoint : ScalaExampleCfg.Endpoint
+)
+
+object ScalaExampleCfg {
+  case class Endpoint(
+    intReq    : Int,
+    interface : Endpoint.Interface,
+    path      : String,
+    serial    : Option[Int],
+    url       : String
+  )
+
+  object Endpoint {
+    case class Interface(
+      port   : Int,
+      `type` : Option[String]
+    )
+  }
+}
+```
 
 ## running tscfg
 
@@ -234,16 +258,16 @@ and an example of use [like this](https://github.com/carueda/tscfg/blob/master/s
 
 ### basic types
 
-With explicit field typing, the following base types are currently supported:
+The following basic types are supported:
 
 | type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
 |---------------|---------------------|--------------------------
-| `string`      | String  / String    | String  / Option[String]    
-| `int`         | int     / Integer   | Int     / Option[Int]   
-| `long`        | long    / Long      | Long    / Option[Long]      
-| `double`      | double  / Double    | Double  / Option[Double]    
-| `boolean`     | boolean / Boolean   | Boolean / Option[Boolean]   
-| `duration`    | long    / Long      | Long    / Option[Long]
+| `string`      | `String`  / `String`    | `String`  / `Option[String]`    
+| `int`         | `int`     / `Integer`   | `Int`     / `Option[Int]`   
+| `long`        | `long`    / `Long`      | `Long`    / `Option[Long]`      
+| `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`    
+| `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`   
+| `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
       
 ### list type
 
@@ -252,11 +276,53 @@ is denoted `[` _t_ `]`. The corresponding types in Java and Scala are:
 
 | type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
 |---------------|---------------------|--------------------------
-| `[` _t_ `]`   | List&lt;T> / List&lt;T>   | List[T] / Option[List[T]]
+| `[` _t_ `]`   | `List<T>` / `List<T>`   | `List[T]` / `Option[List[T]]`
 
-where T is the translation of _t_ in the corresponding language, with
+where T is the corresponding translation of _t_ in the target language, with
 `List<T>` corresponding to an unmodifiable list in Java, and
-`List[T]` corresponding to an ummutable list in Scala.
+`List[T]` corresponding to an immutable list in Scala.
+
+### object type
+
+As seen in examples above, each object in the given configuration spec becomes a class.
+
+It is of course possible to specify a field as a list of objects, for example:
+
+```hocon
+positions: [
+  {
+    lat: double
+    lon: double
+  }
+]
+```
+
+In Java and Scala this basically becomes:
+
+```java
+public class Cfg {
+  public final java.util.List<$Elm> positions;
+
+  public static class $Elm {
+    public final double lat;
+    public final double lon;
+  }
+}
+```
+
+```scala
+case class Cfg(
+  positions : List[Cfg.$Elm]
+)
+
+object Cfg {
+  case class $Elm(
+    lat : Double,
+    lon : Double
+  )
+}
+```
+
 
 ### durations
 
@@ -270,7 +336,7 @@ any other unit as supported by Typesafe Config according to the
 [A more complete example](https://github.com/carueda/tscfg/blob/master/example/duration.spec.conf)
 with some additional explanation:
 
-```properties
+```hocon
 durations {
   # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
   # or whatever is provided converted to days
