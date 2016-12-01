@@ -416,7 +416,7 @@ render configuration instances while also recognizing that very likely typical s
 libraries are already being used in the application.
 For example, the demo programs 
 [JavaMain](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaMain.java) 
-and [ScalaMain](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaMain.java) 
+and [ScalaMain](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaMain.scala) 
 use [Gson](https://github.com/google/gson) and
 [json4s](https://github.com/json4s/json4s), respectively.
 Also, worth noting that you can certainly use Typesafe Config itself for rendering purposes.
