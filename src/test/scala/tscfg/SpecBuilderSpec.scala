@@ -25,7 +25,7 @@ class SpecBuilderSpec extends Specification {
   "with empty input" should {
     val spec = build("")
     "only build CFG spec" in {
-      spec === ObjSpec(Key(genOpts.className), Map.empty)
+      spec === ObjSpec(genOpts.className)
     }
   }
 

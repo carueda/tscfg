@@ -22,13 +22,11 @@ abstract class Generator(genOpts: GenOpts) {
   * @param className    class name
   * @param j7           true to generate code for Typesafe Config v &lt;= 1.2.1
   * @param preamble     preamble to include in generated code
-  * @param language     target language, default "java"
   */
 case class GenOpts(packageName: String         = defaults.packageName,
                    className: String           = defaults.className,
                    j7: Boolean                 = false,
-                   preamble: Option[String]    = None,
-                   language: String            = "java"
+                   preamble: Option[String]    = None
                   )
 
 case class GenResult(code: String = "?",

@@ -96,6 +96,11 @@ object specs {
     // $COVERAGE-ON$
   }
 
+  object ObjSpec {
+    def apply(name: String, elems: (String, Spec)*): ObjSpec =
+      ObjSpec(Key(name), Map(elems: _*))
+  }
+
   case class ListSpec(elemSpec: Spec,
                       comments: List[String] = List.empty
                      ) extends Spec {
