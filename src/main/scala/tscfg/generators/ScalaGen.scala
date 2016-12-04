@@ -296,18 +296,19 @@ object ScalaGen {
         case DURATION  ⇒  durUtil.getter(path, a)
       }
 
-      if (a.default.nonEmpty) {
-        val v = a.default
-        val value = if (a.t == DURATION) durUtil.durationValue(v, a)
-        else if (a.t == STRING) "\"" + v + "\"" else v
-        s"""if(c.$hasPath("$path")) c.$getter else $value"""
-      }
-      else if (a.optional) {
-        s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
-      }
-      else s"""c.$getter"""
-    }
+      a.default match {
+        case Some(v) ⇒
+          val value = if (a.t == DURATION) durUtil.durationValue(v, a)
+          else if (a.t == STRING) "\"" + v + "\"" else v
+          s"""if(c.$hasPath("$path")) c.$getter else $value"""
 
+        case None if a.optional ⇒
+          s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
+
+        case _ ⇒
+          s"""c.$getter"""
+      }
+    }
   }
 
   object accessors {

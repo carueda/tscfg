@@ -10,10 +10,9 @@ object model {
     implicit class RichString(s: String) {
       def :=(a: AnnType): (String, AnnType) = s → a
 
-      def %(a: AnnType): AnnType =
-        a.copy(comments = if (a.comments.isEmpty) s else a.comments + "\n" + s)
+      def %(a: AnnType): AnnType = a.copy(comments = Some(s + a.comments.getOrElse("")))
 
-      def %(t: Type): AnnType = AnnType(t, comments = s)
+      def %(t: Type): AnnType = AnnType(t, comments = Some(s))
     }
   }
 
@@ -31,13 +30,13 @@ object model {
   case class ListType(t: Type) extends Type
 
   case class AnnType(t: Type,
-                     optional: Boolean = false,
-                     default: String = "",
+                     optional:      Boolean = false,
+                     default:       Option[String] = None,
                      qualification: Option[String] = None,
-                     comments: String = ""
+                     comments:      Option[String] = None
                     ) {
 
-    def |(d: String): AnnType = copy(default = d)
+    def |(d: String): AnnType = copy(default = Some(d))
 
     def ^(q: String): AnnType = copy(qualification = Some(q))
 
@@ -68,14 +67,14 @@ object model {
           val a = o.members(symbol)
 
           val cmn = if (a.comments.isEmpty) "" else {
-            val x = a.comments.replaceAll("\n", s"\n$ind$IND# ")
+            val x = a.comments.get.replaceAll("\n", s"\n$ind$IND# ")
             s"# $x\n$ind$IND"
           }
 
           val opt = if (a.optional) "optional " else ""
           val typ = format(a.t, ind + IND)
           val qlf = if (a.qualification.nonEmpty) s" qualification='${a.qualification.get}'" else ""
-          val dfl = if (a.default.nonEmpty) s" default='${a.default}'" else ""
+          val dfl = if (a.default.nonEmpty) s" default='${a.default.get}'" else ""
 
           cmn +
           symbol + ": " + opt + typ + qlf + dfl
