@@ -1,20 +1,39 @@
 package tscfg.generators
 
+import tscfg.model._
+import _root_.java.util.concurrent.TimeUnit
+
 import com.typesafe.config.{Config, ConfigFactory}
-import tscfg.model.AnnType
 
-object durUtil {
-  import _root_.java.util.concurrent.TimeUnit
+/**
+  * Some typesafeConfig-related utilities for both java and scala generation.
+  */
+object tsConfigUtil {
 
-  def getter(path: String, a: AnnType): String = {
-    val q = a.qualification.getOrElse("millisecond")
-    s"""getDuration("$path", ${timeUnitParamString(q)})"""
+  def basicGetter(bt: BasicType, qualification: Option[String], path: String): String = bt match {
+    case STRING    ⇒  s"""getString("$path")"""
+    case INTEGER   ⇒  s"""getInt("$path")"""
+    case LONG      ⇒  s"""getLong("$path")"""
+    case DOUBLE    ⇒  s"""getDouble("$path")"""
+    case BOOLEAN   ⇒  s"""getBoolean("$path")"""
+    case DURATION  ⇒  durationGetter(path, qualification)
   }
 
-  def durationValue(value: String, a: AnnType): Long = {
-    val q = a.qualification.getOrElse("millisecond")
+  def basicValue(t: Type, value: String, qualification: Option[String]): String = t match {
+    case DURATION ⇒ durationValue(value, qualification)
+    case STRING   ⇒ '"' + value.replaceAll("\\\"", "\\\\\"") + '"'
+    case _        ⇒ value
+  }
+
+  private def durationValue(value: String, qualification: Option[String]): String = {
+    val q = qualification.getOrElse("millisecond")
     val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
-    config.getDuration("k", timeUnitParam(q))
+    config.getDuration("k", timeUnitParam(q)).toString
+  }
+
+  private def durationGetter(path: String, qualification: Option[String]): String = {
+    val q = qualification.getOrElse("millisecond")
+    s"""getDuration("$path", ${timeUnitParamString(q)})"""
   }
 
   private def timeUnitParamString(q: String): String = "java.util.concurrent.TimeUnit." + unify(q)
@@ -45,5 +64,4 @@ object durUtil {
 
     case _ => throw new AssertionError("unrecognized q='" + q + "'")
   }
-
 }

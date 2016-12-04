@@ -287,19 +287,11 @@ object ScalaGen {
     }
 
     private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
-      val getter = bt match {
-        case STRING    ⇒  s"""getString("$path")"""
-        case INTEGER   ⇒  s"""getInt("$path")"""
-        case LONG      ⇒  s"""getLong("$path")"""
-        case DOUBLE    ⇒  s"""getDouble("$path")"""
-        case BOOLEAN   ⇒  s"""getBoolean("$path")"""
-        case DURATION  ⇒  durUtil.getter(path, a)
-      }
+      val getter = tsConfigUtil.basicGetter(bt, a.qualification, path)
 
       a.default match {
         case Some(v) ⇒
-          val value = if (a.t == DURATION) durUtil.durationValue(v, a)
-          else if (a.t == STRING) "\"" + v + "\"" else v
+          val value = tsConfigUtil.basicValue(a.t, v, a.qualification)
           s"""if(c.$hasPath("$path")) c.$getter else $value"""
 
         case None if a.optional ⇒
@@ -366,7 +358,6 @@ object ScalaGen {
       case BOOLEAN  ⇒ methodNames.blnA
       case DURATION ⇒ methodNames.durA
 
-      //      case _: ObjectType  ⇒ name.replaceAll("^[^.]+", "")
       case _: ObjectType  ⇒ name.replace('.', '_')
 
       case _: ListType ⇒ throw new AssertionError()

@@ -2,6 +2,8 @@ package tscfg.example
 
 case class Cfg(
   durHr     : scala.Option[scala.Long],
+  foo       : java.lang.String,
+  optStr    : scala.Option[java.lang.String],
   positions : scala.List[scala.List[Cfg.$_E1]]
 )
 object Cfg {
@@ -14,7 +16,7 @@ object Cfg {
     def apply(c: com.typesafe.config.Config): $_E1 = {
       $_E1(
         attrs = if(c.hasPathOrNull("attrs")) scala.Some($_L$_bln(c.getList("attrs"))) else None,
-        lat   = c.getDouble("lat"),
+        lat   = if(c.hasPathOrNull("lat")) c.getDouble("lat") else 35.1,
         lon   = c.getDouble("lon")
       )
     }
@@ -23,6 +25,8 @@ object Cfg {
   def apply(c: com.typesafe.config.Config): Cfg = {
     Cfg(
       durHr     = if(c.hasPathOrNull("durHr")) Some(c.getDuration("durHr", java.util.concurrent.TimeUnit.HOURS)) else None,
+      foo       = if(c.hasPathOrNull("foo")) c.getString("foo") else "foo \"val\" etc ",
+      optStr    = if(c.hasPathOrNull("optStr")) Some(c.getString("optStr")) else None,
       positions = $_L$_LCfg_$_E1(c.getList("positions"))
     )
   }

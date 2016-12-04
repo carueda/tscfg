@@ -10,11 +10,13 @@ object ScalaGenMain {
 
     val objectType = ObjectType(
       "positions" := "Position information" % ListType(ListType(ObjectType(
-        "lat" := DOUBLE,
+        "lat" := DOUBLE | "35.1",
         "lon" := DOUBLE,
         "attrs" := ~ListType(BOOLEAN)
       ))),
-      "durHr" := "A duration" % ~DURATION ^ "hours"
+      "durHr" := "A duration" % ~DURATION ^ "hours",
+      "foo" := STRING | """foo "val" etc """,
+      "optStr" := ~STRING
     )
     println(model.util.format(objectType))
 
