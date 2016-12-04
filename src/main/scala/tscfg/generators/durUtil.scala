@@ -7,14 +7,12 @@ object durUtil {
   import _root_.java.util.concurrent.TimeUnit
 
   def getter(path: String, a: AnnType): String = {
-    //val q = a.qualification.getOrElse("millisecond")
-    val q = "millisecond" // TODO
+    val q = a.qualification.getOrElse("millisecond")
     s"""getDuration("$path", ${timeUnitParamString(q)})"""
   }
 
   def durationValue(value: String, a: AnnType): Long = {
-    //val q = s.qualification.getOrElse("millisecond")
-    val q = "millisecond" // TODO
+    val q = a.qualification.getOrElse("millisecond")
     val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
     config.getDuration("k", timeUnitParam(q))
   }

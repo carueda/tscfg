@@ -1,5 +1,7 @@
 package tscfg.generators
 
+import tscfg.model
+
 object ScalaGenMain {
   // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
@@ -12,8 +14,10 @@ object ScalaGenMain {
         "lon" := DOUBLE,
         "attrs" := ~ListType(BOOLEAN)
       ))),
-      "$_xyz" := "other string xyz" % ~STRING
+      "durHr" := "A duration" % ~DURATION ^ "hours"
     )
+    println(model.util.format(objectType))
+
     val className = "Cfg"
     val genOpts = GenOpts("tscfg.example", className)
     val gen = new ScalaGen(genOpts)

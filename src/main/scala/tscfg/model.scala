@@ -33,10 +33,13 @@ object model {
   case class AnnType(t: Type,
                      optional: Boolean = false,
                      default: String = "",
+                     qualification: Option[String] = None,
                      comments: String = ""
                     ) {
 
     def |(d: String): AnnType = copy(default = d)
+
+    def ^(q: String): AnnType = copy(qualification = Some(q))
 
     def unary_~ : AnnType = copy(optional = true)
   }
@@ -71,10 +74,11 @@ object model {
 
           val opt = if (a.optional) "optional " else ""
           val typ = format(a.t, ind + IND)
+          val qlf = if (a.qualification.nonEmpty) s" qualification='${a.qualification.get}'" else ""
           val dfl = if (a.default.nonEmpty) s" default='${a.default}'" else ""
 
           cmn +
-          symbol + ": " + opt + typ + dfl
+          symbol + ": " + opt + typ + qlf + dfl
         }.mkString("\n" + ind + IND)
 
         s"""{
@@ -96,7 +100,7 @@ object modelMain {
         "lon" := DOUBLE,
         "attrs" := ListType(ObjectType(
           "b" := BOOLEAN,
-          "d" := DURATION
+          "d" := DURATION ^ "hours"
         ))
       )),
       "baz" := "comments for baz..." % ObjectType(

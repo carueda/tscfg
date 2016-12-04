@@ -1,7 +1,7 @@
 package tscfg.example
 
 case class Cfg(
-  $_xyz     : scala.Option[java.lang.String],
+  durHr     : scala.Option[scala.Long],
   positions : scala.List[scala.List[Cfg.$_E1]]
 )
 object Cfg {
@@ -22,7 +22,7 @@ object Cfg {
         
   def apply(c: com.typesafe.config.Config): Cfg = {
     Cfg(
-      $_xyz     = if(c.hasPathOrNull("$_xyz")) Some(c.getString("$_xyz")) else None,
+      durHr     = if(c.hasPathOrNull("durHr")) Some(c.getDuration("durHr", java.util.concurrent.TimeUnit.HOURS)) else None,
       positions = $_L$_LCfg_$_E1(c.getList("positions"))
     )
   }
