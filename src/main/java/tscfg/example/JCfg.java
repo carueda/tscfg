@@ -23,13 +23,6 @@ public class JCfg {
     this.optStr = c.hasPathOrNull("optStr") ? c.getString("optStr") : null;
     this.positions = $_L$_LJCfg_$_E1(c.getList("positions"));
   }
-  private static java.util.List<JCfg.$_E1> $_LJCfg_$_E1(com.typesafe.config.ConfigList cl) {
-    java.util.ArrayList<JCfg.$_E1> al = new java.util.ArrayList<>();
-    for (com.typesafe.config.ConfigValue cv: cl) {
-      al.add(new JCfg.$_E1(((com.typesafe.config.ConfigObject)cv).toConfig()));
-    }
-    return java.util.Collections.unmodifiableList(al);
-  }
   private static java.util.List<java.util.List<JCfg.$_E1>> $_L$_LJCfg_$_E1(com.typesafe.config.ConfigList cl) {
     java.util.ArrayList<java.util.List<JCfg.$_E1>> al = new java.util.ArrayList<>();
     for (com.typesafe.config.ConfigValue cv: cl) {
@@ -37,7 +30,21 @@ public class JCfg {
     }
     return java.util.Collections.unmodifiableList(al);
   }
+  private static java.util.List<JCfg.$_E1> $_LJCfg_$_E1(com.typesafe.config.ConfigList cl) {
+    java.util.ArrayList<JCfg.$_E1> al = new java.util.ArrayList<>();
+    for (com.typesafe.config.ConfigValue cv: cl) {
+      al.add(new JCfg.$_E1(((com.typesafe.config.ConfigObject)cv).toConfig()));
+    }
+    return java.util.Collections.unmodifiableList(al);
+  }
 
+  private static java.util.List<java.lang.Boolean> $_L$_bln(com.typesafe.config.ConfigList cl) {
+    java.util.ArrayList<java.lang.Boolean> al = new java.util.ArrayList<>();
+    for (com.typesafe.config.ConfigValue cv: cl) {
+      al.add($_bln(cv));
+    }
+    return java.util.Collections.unmodifiableList(al);
+  }
   private static java.lang.Boolean $_bln(com.typesafe.config.ConfigValue cv) {
     java.lang.Object u = cv.unwrapped();
     if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
@@ -48,12 +55,5 @@ public class JCfg {
     java.lang.Object u = cv.unwrapped();
     return new java.lang.RuntimeException(cv.origin().lineNumber()
       + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\"" +u+ "\"" : u));
-  }
-  private static java.util.List<java.lang.Boolean> $_L$_bln(com.typesafe.config.ConfigList cl) {
-    java.util.ArrayList<java.lang.Boolean> al = new java.util.ArrayList<>();
-    for (com.typesafe.config.ConfigValue cv: cl) {
-      al.add($_bln(cv));
-    }
-    return java.util.Collections.unmodifiableList(al);
   }
 }

@@ -88,14 +88,14 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n" + ind2 + listAccessors.values.map { methodBody ⇒
-          methodBody.replaceAll("\n", "\n" + ind2)
+        "\n" + ind2 + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName).replaceAll("\n", "\n" + ind2)
         }.mkString("\n" + ind2)
       }
       val rootOnes = if (!isRoot) "" else {
         if (rootListAccessors.isEmpty) "" else {
-          "\n\n" + ind2 + rootListAccessors.values.map { methodBody ⇒
-            methodBody.replaceAll("\n", "\n" + ind2)
+          "\n\n" + ind2 + rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            rootListAccessors(methodName).replaceAll("\n", "\n" + ind2)
           }.mkString("\n" + ind2)
         }
       }

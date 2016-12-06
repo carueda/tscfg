@@ -30,15 +30,19 @@ object Cfg {
       positions = $_L$_LCfg_$_E1(c.getList("positions"))
     )
   }
-  private def $_LCfg_$_E1(cl:com.typesafe.config.ConfigList): scala.List[Cfg.$_E1] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => Cfg.$_E1(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
-  }
   private def $_L$_LCfg_$_E1(cl:com.typesafe.config.ConfigList): scala.List[scala.List[Cfg.$_E1]] = {
     import scala.collection.JavaConversions._
     cl.map(cv => $_LCfg_$_E1(cv.asInstanceOf[com.typesafe.config.ConfigList])).toList
   }
+  private def $_LCfg_$_E1(cl:com.typesafe.config.ConfigList): scala.List[Cfg.$_E1] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => Cfg.$_E1(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
+  }
 
+  private def $_L$_bln(cl:com.typesafe.config.ConfigList): scala.List[scala.Boolean] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_bln(cv)).toList
+  }
   private def $_bln(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
     val u: Any = cv.unwrapped
     if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN) || !u.isInstanceOf[java.lang.Boolean])
@@ -50,9 +54,5 @@ object Cfg {
     new java.lang.RuntimeException(cv.origin.lineNumber +
       ": expecting: " + exp + " got: " +
       (if (u.isInstanceOf[java.lang.String]) "\"" + u + "\"" else u))
-  }
-  private def $_L$_bln(cl:com.typesafe.config.ConfigList): scala.List[scala.Boolean] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $_bln(cv)).toList
   }
 }
