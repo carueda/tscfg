@@ -5,9 +5,7 @@ import tscfg.generators.java.javaUtil._
 import tscfg.model._
 
 
-class JavaGen(genOpts: GenOpts) {
-  val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
-  val className: String = genOpts.className
+class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
 
   import JavaGen.defs._
 
@@ -16,8 +14,6 @@ class JavaGen(genOpts: GenOpts) {
   import methodNames._
 
   private val rootListAccessors = collection.mutable.LinkedHashMap[String,String]()
-
-  var genResults = GenResult()
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
@@ -274,19 +270,15 @@ class JavaGen(genOpts: GenOpts) {
          |}""".stripMargin.trim
     (methodName, methodDef)
   }
-
 }
 
 object JavaGen {
 
   object defs {
-
     abstract sealed class JavaType
-
     case class BaseJavaType(name: String) extends JavaType {
       override def toString: String = name
     }
-
     case class ListJavaType(jt: JavaType) extends JavaType {
       override def toString: String = s"java.util.List<$jt>"
     }
@@ -294,7 +286,6 @@ object JavaGen {
     case class Res(typ: Type,
                    javaType: JavaType,
                    definition: String = "")
-
   }
 
   case class MethodNames(prefix: String = "$_") {

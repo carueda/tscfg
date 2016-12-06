@@ -5,17 +5,12 @@ import tscfg.generators.scala.scalaUtil.scalaIdentifier
 import tscfg.model._
 
 
-class ScalaGen(genOpts: GenOpts) {
-  val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
-  val className: String = genOpts.className
-
+class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
   import ScalaGen.defs._
   import ScalaGen.accessors._
   implicit val methodNames = ScalaGen.MethodNames()
   val getter = Getter(hasPath, methodNames)
   import methodNames._
-
-  var genResults = GenResult()
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
@@ -155,7 +150,6 @@ class ScalaGen(genOpts: GenOpts) {
       case DURATION ⇒ "scala.Long"
     }))
   }
-
 }
 
 object ScalaGen {
@@ -171,7 +165,6 @@ object ScalaGen {
     case class Res(typ: Type,
                    scalaType: ScalaType,
                    definition: String = "")
-
   }
 
   case class MethodNames(prefix: String = "$_") {
