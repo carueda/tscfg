@@ -27,6 +27,16 @@ object model {
   case object BOOLEAN   extends BasicType
   case object DURATION  extends BasicType
 
+  val recognizedAtomic: Map[String, BasicType] = Map(
+    "string"    → STRING,
+    "int"       → INTEGER,
+    "integer"   → INTEGER,
+    "long"      → LONG,
+    "double"    → DOUBLE,
+    "boolean"   → BOOLEAN,
+    "duration"  → DURATION
+  )
+
   case class ListType(t: Type) extends Type
 
   case class AnnType(t: Type,
@@ -61,14 +71,18 @@ object model {
 
       case ListType(t) ⇒ s"[ ${format(t, ind)} ]"
 
-      case o:ObjectType            ⇒
+      case o:ObjectType ⇒
         val symbols = o.members.keys.toList//.sorted
         val membersStr = symbols.map { symbol ⇒
           val a = o.members(symbol)
 
           val cmn = if (a.comments.isEmpty) "" else {
-            val x = a.comments.get.replaceAll("\n", s"\n$ind$IND# ")
-            s"# $x\n$ind$IND"
+            val lines = a.comments.get.split("\n")
+            val noOptComments = lines.filterNot(_.trim.startsWith("@optional"))
+            if (noOptComments.isEmpty) "" else {
+              val x = noOptComments.mkString(s"\n$ind$IND#")
+              s"#$x\n$ind$IND"
+            }
           }
 
           val opt = if (a.optional) "optional " else ""
@@ -102,7 +116,7 @@ object modelMain {
           "d" := DURATION ^ "hours"
         ))
       )),
-      "baz" := "comments for baz..." % ObjectType(
+      "baz" := "comments for baz..." % ~ObjectType(
         "b" := ~ STRING | "some value",
         "a" := LONG | "99999999",
         "i" := "i, an integer" % INTEGER
