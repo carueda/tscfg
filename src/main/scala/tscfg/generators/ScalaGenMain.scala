@@ -1,5 +1,6 @@
 package tscfg.generators
 
+import tscfg.generators.scala.ScalaGen
 import tscfg.model
 import tscfg.model.durations.hour
 
