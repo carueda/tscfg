@@ -31,7 +31,7 @@ object scalaUtil {
     // note: not scalaIdentifier because we are going to camelize anyway
     val parts = id.split("_")
     val name = parts.map(util.upperFirst).mkString
-    if (name.nonEmpty) name
+    if (name.nonEmpty) scalaIdentifier(name)
     else "U" + id.count(_ == '_') // named based on # of underscores ;)
   }
 

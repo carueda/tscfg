@@ -1,5 +1,6 @@
 package tscfg.generators.scala
 
+import tscfg.{ModelBuilder, model}
 import tscfg.generators.scala.scalaUtil.scalaIdentifier
 import tscfg.generators.{Gen, GenOpts, GenResult, tsConfigUtil}
 import tscfg.model._
@@ -70,7 +71,7 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
     val classMembersStr = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val memberType = res.scalaType
-      val typ = if (a.optional) s"scala.Option[$memberType]" else memberType
+      val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
       val scalaId = scalaIdentifier(symbol)
       padId(scalaId) + " : " + typ
     }.mkString(",\n  ")
@@ -160,36 +161,51 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
 }
 
 object ScalaGen {
-  // $COVERAGE-OFF$
-  def main(args: Array[String]): Unit = {
-    import _root_.java.io.{File, FileWriter, PrintWriter}
+  import java.io.{File, PrintWriter, FileWriter}
 
-    import tscfg.{ModelBuilder, model}
+  import tscfg.util
 
-    val filename = args(0)
+  def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
-    val source = io.Source.fromFile(file).mkString.trim
-    println("source:\n  |" + source.replaceAll("\n", "\n  |"))
-    val objectType = ModelBuilder(source)
-    println(s"objectType:")
-    println(model.util.format(objectType))
+    val src = io.Source.fromFile(file).mkString.trim
+
+    if (showOut)
+      println("src:\n  |" + src.replaceAll("\n", "\n  |"))
 
     val className = "Scala" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
       val noDef = noPath.replaceAll("""^def\.""", "")
       val symbol = noDef.substring(0, noDef.indexOf('.'))
-      tscfg.util.upperFirst(symbol) + "Cfg"
+      util.upperFirst(symbol) + "Cfg"
     }
+
+    val objectType = ModelBuilder(src)
+    if (showOut)
+      println("\nobjSpec:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
 
     val genOpts = GenOpts("tscfg.example", className)
 
-    val res = new ScalaGen(genOpts).generate(objectType)
-    //println("\n" + res.code)
+    val generator = new ScalaGen(genOpts)
+
+    val results = generator.generate(objectType)
+
+    //println("\n" + results.code)
 
     val destFilename  = s"src/main/scala/tscfg/example/$className.scala"
     val destFile = new File(destFilename)
     val out = new PrintWriter(new FileWriter(destFile), true)
-    out.println(res.code)
+    out.println(results.code)
+    results
+  }
+
+  // $COVERAGE-OFF$
+  def main(args: Array[String]): Unit = {
+    val filename = args(0)
+    val results = generate(filename, showOut = true)
+    println(
+      s"""classNames: ${results.classNames}
+         |fieldNames: ${results.fieldNames}
+      """.stripMargin)
   }
   // $COVERAGE-ON$
 }
