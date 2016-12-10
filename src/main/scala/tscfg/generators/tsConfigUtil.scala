@@ -29,13 +29,13 @@ object tsConfigUtil {
 
   // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
   def unify(q: String): Qualification = q match {
-    case "ns" | "nano"   | "nanos"  | "nanosecond"  | "nanoseconds"   => NANOSECONDS
-    case "us" | "micro"  | "micros" | "microsecond" | "microseconds"  => MICROSECONDS
-    case "ms" | "milli"  | "millis" | "millisecond" | "milliseconds"  => MILLISECONDS
-    case "s"  | "second" | "seconds"                                  => SECONDS
-    case "m"  | "minute" | "minutes"                                  => MINUTES
-    case "h"  | "hour"   | "hours"                                    => HOURS
-    case "d"  | "day"    | "days"                                     => DAYS
+    case "ns" | "nano"   | "nanos"  | "nanosecond"  | "nanoseconds"   => ns
+    case "us" | "micro"  | "micros" | "microsecond" | "microseconds"  => us
+    case "ms" | "milli"  | "millis" | "millisecond" | "milliseconds"  => ms
+    case "s"  | "second" | "seconds"                                  => second
+    case "m"  | "minute" | "minutes"                                  => minute
+    case "h"  | "hour"   | "hours"                                    => hour
+    case "d"  | "day"    | "days"                                     => day
 
     case _ => throw new AssertionError("unrecognized q='" + q + "'")
   }
@@ -53,13 +53,13 @@ object tsConfigUtil {
 
   private def timeUnitParam(q: Qualification): TimeUnit = {
     q match {
-      case NANOSECONDS   =>  TimeUnit.NANOSECONDS
-      case MICROSECONDS  =>  TimeUnit.MICROSECONDS
-      case MILLISECONDS  =>  TimeUnit.MILLISECONDS
-      case SECONDS       =>  TimeUnit.SECONDS
-      case MINUTES       =>  TimeUnit.MINUTES
-      case HOURS         =>  TimeUnit.HOURS
-      case DAYS          =>  TimeUnit.DAYS
+      case `ns`     =>  TimeUnit.NANOSECONDS
+      case `us`     =>  TimeUnit.MICROSECONDS
+      case `ms`     =>  TimeUnit.MILLISECONDS
+      case `second` =>  TimeUnit.SECONDS
+      case `minute` =>  TimeUnit.MINUTES
+      case `hour`   =>  TimeUnit.HOURS
+      case `day`    =>  TimeUnit.DAYS
     }
   }
 }

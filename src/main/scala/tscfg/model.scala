@@ -21,13 +21,13 @@ object model {
   object durations {
     sealed abstract class Qualification
 
-    case object NANOSECONDS  extends Qualification
-    case object MICROSECONDS extends Qualification
-    case object MILLISECONDS extends Qualification
-    case object SECONDS      extends Qualification
-    case object MINUTES      extends Qualification
-    case object HOURS        extends Qualification
-    case object DAYS         extends Qualification
+    case object ns      extends Qualification
+    case object us      extends Qualification
+    case object ms      extends Qualification
+    case object second  extends Qualification
+    case object minute  extends Qualification
+    case object hour    extends Qualification
+    case object day     extends Qualification
   }
 
   sealed abstract class Type
@@ -48,7 +48,7 @@ object model {
     "long"      → LONG,
     "double"    → DOUBLE,
     "boolean"   → BOOLEAN,
-    "duration"  → DURATION(MILLISECONDS)
+    "duration"  → DURATION(ms)
   )
 
   case class ListType(t: Type) extends Type
@@ -125,7 +125,7 @@ object modelMain {
         "lon" := DOUBLE,
         "attrs" := ListType(ObjectType(
           "b" := BOOLEAN,
-          "d" := DURATION(HOURS)
+          "d" := DURATION(hour)
         ))
       )),
       "baz" := "comments for baz..." % ~ObjectType(

@@ -1,7 +1,7 @@
 package tscfg.generators
 
 import tscfg.model
-import tscfg.model.durations.HOURS
+import tscfg.model.durations.hour
 
 object JavaGenMain {
   // $COVERAGE-OFF$
@@ -15,7 +15,7 @@ object JavaGenMain {
         "lon" := DOUBLE,
         "attrs" := ~ListType(BOOLEAN)
       ))),
-      "durHr" := "A duration" % ~DURATION(HOURS),
+      "durHr" := "A duration" % ~DURATION(hour),
       "foo" := STRING | """foo "val" etc """,
       "optStr" := ~STRING
     )
