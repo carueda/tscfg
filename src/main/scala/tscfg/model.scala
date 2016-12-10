@@ -46,6 +46,8 @@ object model {
                      comments:      Option[String] = None
                     ) {
 
+    def isOptional: Boolean = optional || default.isDefined
+
     def |(d: String): AnnType = copy(default = Some(d))
 
     def ^(q: String): AnnType = copy(qualification = Some(q))
@@ -53,7 +55,7 @@ object model {
     def unary_~ : AnnType = copy(optional = true)
   }
 
-  case class ObjectType(members: Map[String, AnnType]) extends Type
+  case class ObjectType(members: Map[String, AnnType] = Map.empty) extends Type
 
   object ObjectType {
     def apply(elems: (String, AnnType)*): ObjectType = {
@@ -72,7 +74,7 @@ object model {
       case ListType(t) ⇒ s"[ ${format(t, ind)} ]"
 
       case o:ObjectType ⇒
-        val symbols = o.members.keys.toList//.sorted
+        val symbols = o.members.keys.toList.sorted
         val membersStr = symbols.map { symbol ⇒
           val a = o.members(symbol)
 

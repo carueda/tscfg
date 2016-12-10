@@ -1,6 +1,7 @@
 package tscfg
 
 import com.typesafe.config._
+import tscfg.model.ObjectType
 
 import scala.collection.JavaConversions._
 
@@ -141,8 +142,34 @@ class ModelBuilder {
     }
 
     val cv0: ConfigValue = cv.get(0)
-    cv0.valueType()
-    model.ListType(fromConfigValue(cv0))
+    val typ = fromConfigValue(cv0)
+
+    val elemType = {
+      val valueString = cv0.unwrapped().toString
+      if (typ == model.STRING) {
+        // see possible type from the string literal:
+        toAnnBasicType(valueString) match {
+          case Some((basicType, isOpt, defaultValue, qualification)) ⇒
+            if (isOpt)
+              println(s"WARN: ignoring optional mark in list's element type: $valueString")
+
+            if (defaultValue.isDefined)
+              println(s"WARN: ignoring default value='${defaultValue.get}' in list's element type: $valueString")
+
+            // TODO: qualification should actually be part of the type!
+            if (qualification.isDefined)
+              println(s"WARN: ignoring qualification='${qualification.get}' in list's element type: $valueString")
+
+            basicType
+
+          case None ⇒
+            typ
+        }
+      }
+      else typ
+    }
+
+    model.ListType(elemType)
   }
 
   private def objType(cv: ConfigObject): model.ObjectType = fromConfig(cv.toConfig)
@@ -176,15 +203,18 @@ object ModelBuilder {
   import java.io.File
   import com.typesafe.config.ConfigFactory
 
+  def apply(source: String): ObjectType = {
+    val config = ConfigFactory.parseString(source).resolve()
+    new ModelBuilder().fromConfig(config)
+  }
+
   // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val file = new File(filename)
-    val src = io.Source.fromFile(file).mkString.trim
-    println("source:\n  |" + src.replaceAll("\n", "\n  |"))
-    val config = ConfigFactory.parseString(src).resolve()
-
-    val objectType = new ModelBuilder().fromConfig(config)
+    val source = io.Source.fromFile(file).mkString.trim
+    println("source:\n  |" + source.replaceAll("\n", "\n  |"))
+    val objectType = ModelBuilder(source)
     println(s"objectType:")
     println(model.util.format(objectType))
   }
