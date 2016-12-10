@@ -1,7 +1,8 @@
 package tscfg
 
 import com.typesafe.config._
-import tscfg.model.ObjectType
+import tscfg.generators.tsConfigUtil
+import tscfg.model.{DURATION, ObjectType}
 
 import scala.collection.JavaConversions._
 
@@ -15,7 +16,7 @@ class ModelBuilder {
       val name = childStruct.name
       val cv = conf.getValue(name)
 
-      val (childType, optional, default, qualification) = {
+      val (childType, optional, default) = {
         if (childStruct.isLeaf) {
           val typ = fromConfigValue(cv)
           val valueString = cv.unwrapped().toString
@@ -24,16 +25,16 @@ class ModelBuilder {
               case Some(annBasicType) ⇒
                 annBasicType
               case None ⇒
-                (typ, true, Some(valueString), None)
+                (typ, true, Some(valueString))
             }
           }
           else if (typ.isInstanceOf[model.BasicType])
-            (typ, true, Some(valueString), None)
+            (typ, true, Some(valueString))
           else
-            (typ, false, None, None)
+            (typ, false, None)
         }
         else {
-          (fromConfig(conf.getConfig(name)), false, None, None)
+          (fromConfig(conf.getConfig(name)), false, None)
         }
       }
 
@@ -44,7 +45,6 @@ class ModelBuilder {
       name -> model.AnnType(childType,
         optional      = optional || optFromComments,
         default       = default,
-        qualification = qualification,
         comments      = commentsOpt
       )
     }.toMap
@@ -106,7 +106,7 @@ class ModelBuilder {
   }
 
   def toAnnBasicType(valueString: String):
-      Option[(model.BasicType, Boolean, Option[String], Option[String])] = {
+      Option[(model.BasicType, Boolean, Option[String])] = {
 
     val tokens = valueString.split("""\s*\|\s*""")
     val typePart = tokens(0).toLowerCase
@@ -126,8 +126,13 @@ class ModelBuilder {
         (parts(0), Some(parts(1)))
     }
 
-    model.recognizedAtomic.get(base) map { basicType ⇒
-      (basicType, isOpt, defaultValue, qualification)
+    model.recognizedAtomic.get(base) map { bt ⇒
+      val basicType = bt match {
+        case DURATION(_) if qualification.isDefined ⇒
+          DURATION(tsConfigUtil.unify(qualification.get))
+        case _ ⇒ bt
+      }
+      (basicType, isOpt, defaultValue)
     }
   }
 
@@ -149,16 +154,12 @@ class ModelBuilder {
       if (typ == model.STRING) {
         // see possible type from the string literal:
         toAnnBasicType(valueString) match {
-          case Some((basicType, isOpt, defaultValue, qualification)) ⇒
+          case Some((basicType, isOpt, defaultValue)) ⇒
             if (isOpt)
               println(s"WARN: ignoring optional mark in list's element type: $valueString")
 
             if (defaultValue.isDefined)
               println(s"WARN: ignoring default value='${defaultValue.get}' in list's element type: $valueString")
-
-            // TODO: qualification should actually be part of the type!
-            if (qualification.isDefined)
-              println(s"WARN: ignoring qualification='${qualification.get}' in list's element type: $valueString")
 
             basicType
 

@@ -135,7 +135,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
       case LONG      ⇒ "long"
       case DOUBLE    ⇒ "double"
       case BOOLEAN   ⇒ "boolean"
-      case DURATION  ⇒ "long"
+      case DURATION(q)  ⇒ "long"
     }))
   }
 
@@ -179,11 +179,11 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
   }
 
   private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
-    val getter = tsConfigUtil.basicGetter(bt, a.qualification, path)
+    val getter = tsConfigUtil.basicGetter(bt, path)
 
     a.default match {
       case Some(v) ⇒
-        val value = tsConfigUtil.basicValue(a.t, v, a.qualification)
+        val value = tsConfigUtil.basicValue(a.t, v)
         s"""c.$hasPath("$path") ? c.$getter : $value"""
 
       case None if a.optional ⇒
@@ -239,7 +239,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     case LONG     ⇒ methodNames.lngA
     case DOUBLE   ⇒ methodNames.dblA
     case BOOLEAN  ⇒ methodNames.blnA
-    case DURATION ⇒ methodNames.durA
+    case DURATION(q) ⇒ methodNames.durA
 
     case _: ObjectType  ⇒ name.replace('.', '_')
 

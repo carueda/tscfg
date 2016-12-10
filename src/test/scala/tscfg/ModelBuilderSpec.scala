@@ -1,6 +1,7 @@
 package tscfg
 
 import org.specs2.mutable.Specification
+import model.durations._
 import tscfg.model._
 
 
@@ -19,19 +20,17 @@ class ModelBuilderSpec extends Specification {
     objSpec
   }
 
-  def verify(objType: ObjectType,
-             memberName: String,
-             t: Type,
-             optional: Boolean = false,
-             default: Option[String] = None,
-             qualification: Option[String] = None,
-             comments: Option[String] = None
-            ) = {
+  private def verify(objType: ObjectType,
+                     memberName: String,
+                     t: Type,
+                     optional: Boolean = false,
+                     default: Option[String] = None,
+                     comments: Option[String] = None
+                    ) = {
     val at = objType.members(memberName)
     at.t === t
     at.isOptional === optional
     at.default === default
-    at.qualification === qualification
     at.comments === comments
   }
 
@@ -77,16 +76,15 @@ class ModelBuilderSpec extends Specification {
         |  listDouble    = [ double ]
         |  listBoolean   = [ boolean ]
         |  listDuration  = [ duration ]
-        |  listDuration_se  = [ "duration : s" ]
+        |  listDuration_se  = [ "duration : second" ]
         |}
-      """.stripMargin, showOutput = true)
+      """.stripMargin)
 
     "build expected objType" in {
       objType.members.keySet === Set("foo")
       val foo = objType.members("foo")
       foo.optional === false
       foo.default must beNone
-      foo.qualification must beNone
       foo.comments must beNone
       foo.t must beAnInstanceOf[ObjectType]
       val fooObj = foo.t.asInstanceOf[ObjectType]
@@ -129,26 +127,33 @@ class ModelBuilderSpec extends Specification {
       verify(fooObj, "reqLong",     LONG)
       verify(fooObj, "reqDouble",   DOUBLE)
       verify(fooObj, "reqBoolean",  BOOLEAN)
-      verify(fooObj, "reqDuration", DURATION)
+      verify(fooObj, "reqDuration", DURATION(MILLISECONDS))
+      verify(fooObj, "duration_ns", DURATION(NANOSECONDS))
+      verify(fooObj, "duration_µs", DURATION(MICROSECONDS))
+      verify(fooObj, "duration_ms", DURATION(MILLISECONDS))
+      verify(fooObj, "duration_se", DURATION(SECONDS     ))
+      verify(fooObj, "duration_mi", DURATION(MINUTES     ))
+      verify(fooObj, "duration_hr", DURATION(HOURS       ))
+      verify(fooObj, "duration_dy", DURATION(DAYS        ))
       verify(fooObj, "optStr" ,     STRING,   optional = true)
       verify(fooObj, "optInt" ,     INTEGER,  optional = true)
       verify(fooObj, "optLong",     LONG,     optional = true)
       verify(fooObj, "optDouble",   DOUBLE,   optional = true)
       verify(fooObj, "optBoolean",  BOOLEAN,  optional = true)
-      verify(fooObj, "optDuration", DURATION, optional = true)
+      verify(fooObj, "optDuration", DURATION(MILLISECONDS), optional = true)
       verify(fooObj, "dflStr" ,     STRING,   optional = true, default = Some("hi"))
       verify(fooObj, "dflInt" ,     INTEGER,  optional = true, default = Some("3"))
       verify(fooObj, "dflLong",     LONG,     optional = true, default = Some("999999999"))
       verify(fooObj, "dflDouble",   DOUBLE,   optional = true, default = Some("3.14"))
       verify(fooObj, "dflBoolean",  BOOLEAN,  optional = true, default = Some("false"))
-      verify(fooObj, "dflDuration", DURATION, optional = true, default = Some("21d"))
+      verify(fooObj, "dflDuration", DURATION(MILLISECONDS), optional = true, default = Some("21d"))
       verify(fooObj, "listStr",      ListType(STRING))
       verify(fooObj, "listInt",      ListType(INTEGER))
       verify(fooObj, "listLong",     ListType(LONG))
       verify(fooObj, "listDouble",   ListType(DOUBLE))
       verify(fooObj, "listBoolean",  ListType(BOOLEAN))
-      verify(fooObj, "listDuration", ListType(DURATION))
-      verify(fooObj, "listDuration_se", ListType(DURATION))
+      verify(fooObj, "listDuration", ListType(DURATION(MILLISECONDS)))
+      verify(fooObj, "listDuration_se", ListType(DURATION(SECONDS)))
     }
   }
 }

@@ -1,5 +1,7 @@
 package tscfg
 
+import tscfg.model.durations._
+
 object model {
 
   object implicits {
@@ -16,6 +18,18 @@ object model {
     }
   }
 
+  object durations {
+    sealed abstract class Qualification
+
+    case object NANOSECONDS  extends Qualification
+    case object MICROSECONDS extends Qualification
+    case object MILLISECONDS extends Qualification
+    case object SECONDS      extends Qualification
+    case object MINUTES      extends Qualification
+    case object HOURS        extends Qualification
+    case object DAYS         extends Qualification
+  }
+
   sealed abstract class Type
 
   sealed abstract class BasicType extends Type
@@ -25,7 +39,7 @@ object model {
   case object LONG      extends BasicType
   case object DOUBLE    extends BasicType
   case object BOOLEAN   extends BasicType
-  case object DURATION  extends BasicType
+  case class DURATION(q: Qualification) extends BasicType
 
   val recognizedAtomic: Map[String, BasicType] = Map(
     "string"    → STRING,
@@ -34,7 +48,7 @@ object model {
     "long"      → LONG,
     "double"    → DOUBLE,
     "boolean"   → BOOLEAN,
-    "duration"  → DURATION
+    "duration"  → DURATION(MILLISECONDS)
   )
 
   case class ListType(t: Type) extends Type
@@ -42,15 +56,12 @@ object model {
   case class AnnType(t: Type,
                      optional:      Boolean = false,
                      default:       Option[String] = None,
-                     qualification: Option[String] = None,
                      comments:      Option[String] = None
                     ) {
 
     def isOptional: Boolean = optional || default.isDefined
 
     def |(d: String): AnnType = copy(default = Some(d))
-
-    def ^(q: String): AnnType = copy(qualification = Some(q))
 
     def unary_~ : AnnType = copy(optional = true)
   }
@@ -89,11 +100,10 @@ object model {
 
           val opt = if (a.optional) "optional " else ""
           val typ = format(a.t, ind + IND)
-          val qlf = if (a.qualification.nonEmpty) s" qualification='${a.qualification.get}'" else ""
           val dfl = if (a.default.nonEmpty) s" default='${a.default.get}'" else ""
 
           cmn +
-          symbol + ": " + opt + typ + qlf + dfl
+          symbol + ": " + opt + typ + dfl
         }.mkString("\n" + ind + IND)
 
         s"""{
@@ -115,7 +125,7 @@ object modelMain {
         "lon" := DOUBLE,
         "attrs" := ListType(ObjectType(
           "b" := BOOLEAN,
-          "d" := DURATION ^ "hours"
+          "d" := DURATION(HOURS)
         ))
       )),
       "baz" := "comments for baz..." % ~ObjectType(
