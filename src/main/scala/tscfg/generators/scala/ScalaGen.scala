@@ -36,7 +36,7 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt)
-    case lt: ListType   ⇒ generateForList(lt,classNamePrefixOpt)
+    case lt: ListType   ⇒ generateForList(lt,classNamePrefixOpt, classNameOpt)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
 
@@ -46,7 +46,7 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
                              isRoot: Boolean = false
                             ): Res = {
 
-    val className = classNameOpt.getOrElse(generateClassName())
+    val className = classNameOpt.getOrElse(throw new AssertionError())
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
     val symbols = ot.members.keys.toList.sorted
@@ -61,7 +61,9 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
       genResults = genResults.copy(fieldNames = genResults.fieldNames + scalaId)
       val a = ot.members(symbol)
       val res = generate(a.t,
-        classNamePrefixOpt = Some(className + "."))
+        classNamePrefixOpt = Some(className + "."),
+        classNameOpt = Some(scalaUtil.getClassName(symbol))
+      )
       (symbol, res)
     }
 
@@ -130,8 +132,15 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
     )
   }
 
-  private def generateForList(lt: ListType, classNamePrefixOpt: Option[String]): Res = {
-    val elem = generate(lt.t, classNamePrefixOpt)
+  private def generateForList(lt: ListType,
+                              classNamePrefixOpt: Option[String],
+                              classNameOpt: Option[String]
+                             ): Res = {
+    val classNameOpt2 = Some(classNameOpt match {
+      case None    ⇒ "$Elm"
+      case Some(n) ⇒ n + (if (n.endsWith("$Elm")) "" else "$Elm")
+    })
+    val elem = generate(lt.t, classNamePrefixOpt, classNameOpt2)
     Res(lt,
       scalaType = ListScalaType(elem.scalaType),
       definition = elem.definition
@@ -208,7 +217,6 @@ private[scala] case class MethodNames(prefix: String = "$_") {
   val durA       = prefix + "dur"
   val expE       = prefix + "expE"
   val listPrefix = prefix + "L"
-  val elemPrefix = prefix + "E"
 
   def checkUserSymbol(symbol: String): Unit = {
     if (symbol.startsWith(prefix))
@@ -219,12 +227,6 @@ private[scala] case class MethodNames(prefix: String = "$_") {
          """.stripMargin
       )
   }
-
-  def generateClassName(): String = {
-    newClassCount += 1
-    elemPrefix + newClassCount
-  }
-  private var newClassCount = 0
 
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
@@ -393,14 +395,10 @@ private[scala] object accessors {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
       s"$elemMethodName(cv.asInstanceOf[com.typesafe.config.ConfigList])"
-    else if (elemMethodName.startsWith(methodNames.elemPrefix)) {
-      val adjusted = elemMethodName.replace("_" + methodNames.elemPrefix, "." + methodNames.elemPrefix)
-      s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)"
-    }
     else if (elemMethodName.startsWith("$"))
       s"$elemMethodName(cv)"
     else {
-      val adjusted = elemMethodName.replace("_" + methodNames.elemPrefix, "." + methodNames.elemPrefix)
+      val adjusted = elemMethodName.replace("_", ".")
       s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)"
     }
 
