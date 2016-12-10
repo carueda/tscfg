@@ -31,12 +31,11 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
   }
 
   private def generate(typ: Type,
-                       ind: String = "",
                        classNamePrefixOpt: Option[String],
                        classNameOpt: Option[String] = None
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt, ind)
+    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt)
     case lt: ListType   ⇒ generateForList(lt,classNamePrefixOpt)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
@@ -44,7 +43,6 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
   private def generateForObj(ot: ObjectType,
                              classNamePrefixOpt: Option[String] = None,
                              classNameOpt: Option[String],
-                             ind: String = "",
                              isRoot: Boolean = false
                             ): Res = {
 
@@ -62,7 +60,7 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
       val scalaId = scalaIdentifier(symbol)
       genResults = genResults.copy(fieldNames = genResults.fieldNames + scalaId)
       val a = ot.members(symbol)
-      val res = generate(a.t, ind + "  ",
+      val res = generate(a.t,
         classNamePrefixOpt = Some(className + "."))
       (symbol, res)
     }
@@ -73,13 +71,13 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
       val typ = if (a.optional) s"scala.Option[$memberType]" else memberType
       val scalaId = scalaIdentifier(symbol)
       padId(scalaId) + " : " + typ
-    }.mkString(",\n" + ind + "  ")
+    }.mkString(",\n  ")
 
     val classStr = {
       s"""case class $className(
          |  $classMembersStr
          |)
-         |""".stripMargin.replaceAll("\n", "\n" + ind)
+         |""".stripMargin
     }
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
@@ -88,9 +86,9 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
       val a = ot.members(symbol)
       val scalaId = scalaIdentifier(symbol)
       padId(scalaId) + " = " + getter.instance(a, res, symbol)
-    }.mkString(",\n" + ind + "      ")
+    }.mkString(",\n      ")
 
-    val ind2 = ind + "  "
+    val ind2 = "  "
 
     val innerClassesStr = {
       val defs = results.map(_._2.definition).filter(_.nonEmpty)
@@ -123,7 +121,7 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
          |    )
          |  }$elemAccessorsStr
          |}
-      """.stripMargin.replaceAll("\n", "\n" + ind)
+      """.stripMargin
     }
 
     Res(ot,
@@ -132,8 +130,8 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
     )
   }
 
-  def generateForList(lt: ListType, classNamePrefixOpt: Option[String], ind: String = ""): Res = {
-    val elem = generate(lt.t, ind = ind, classNamePrefixOpt)
+  def generateForList(lt: ListType, classNamePrefixOpt: Option[String]): Res = {
+    val elem = generate(lt.t, classNamePrefixOpt)
     Res(lt,
       scalaType = ListScalaType(elem.scalaType),
       definition = elem.definition
@@ -361,6 +359,10 @@ object ScalaGen {
 
       val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
         s"$elemMethodName(cv.asInstanceOf[com.typesafe.config.ConfigList])"
+      else if (elemMethodName.startsWith(methodNames.elemPrefix)) {
+        val adjusted = elemMethodName.replace("_" + methodNames.elemPrefix, "." + methodNames.elemPrefix)
+        s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)"
+      }
       else if (elemMethodName.startsWith("$"))
         s"$elemMethodName(cv)"
       else {
@@ -378,4 +380,36 @@ object ScalaGen {
       (methodName, methodDef)
     }
   }
+  // $COVERAGE-OFF$
+  def main(args: Array[String]): Unit = {
+    import tscfg.{ModelBuilder, model}
+
+    import _root_.java.io.{File, FileWriter, PrintWriter}
+
+    val filename = args(0)
+    val file = new File(filename)
+    val source = io.Source.fromFile(file).mkString.trim
+    println("source:\n  |" + source.replaceAll("\n", "\n  |"))
+    val objectType = ModelBuilder(source)
+    println(s"objectType:")
+    println(model.util.format(objectType))
+
+    val className = "Scala" + {
+      val noPath = filename.substring(filename.lastIndexOf('/') + 1)
+      val noDef = noPath.replaceAll("""^def\.""", "")
+      val symbol = noDef.substring(0, noDef.indexOf('.'))
+      tscfg.util.upperFirst(symbol) + "Cfg"
+    }
+
+    val genOpts = GenOpts("tscfg.example", className)
+
+    val res = new ScalaGen(genOpts).generate(objectType)
+    //println("\n" + res.code)
+
+    val destFilename  = s"src/main/scala/tscfg/example/$className.scala"
+    val destFile = new File(destFilename)
+    val out = new PrintWriter(new FileWriter(destFile), true)
+    out.println(res.code)
+  }
+  // $COVERAGE-ON$
 }
