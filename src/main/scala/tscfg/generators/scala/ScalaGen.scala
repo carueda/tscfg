@@ -32,17 +32,17 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
   }
 
   private def generate(typ: Type,
-                       classNamePrefixOpt: Option[String],
+                       classNamesPrefix: List[String],
                        classNameOpt: Option[String] = None
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt)
-    case lt: ListType   ⇒ generateForList(lt,classNamePrefixOpt, classNameOpt)
+    case ot: ObjectType ⇒ generateForObj(ot, classNamesPrefix, classNameOpt)
+    case lt: ListType   ⇒ generateForList(lt,classNamesPrefix, classNameOpt)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
 
   private def generateForObj(ot: ObjectType,
-                             classNamePrefixOpt: Option[String] = None,
+                             classNamesPrefix: List[String] = List.empty,
                              classNameOpt: Option[String],
                              isRoot: Boolean = false
                             ): Res = {
@@ -62,7 +62,7 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
       genResults = genResults.copy(fieldNames = genResults.fieldNames + scalaId)
       val a = ot.members(symbol)
       val res = generate(a.t,
-        classNamePrefixOpt = Some(className + "."),
+        classNamesPrefix = className+"." :: classNamesPrefix,
         classNameOpt = Some(scalaUtil.getClassName(symbol))
       )
       (symbol, res)
@@ -91,35 +91,34 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
       padId(scalaId) + " = " + getter.instance(a, res, symbol)
     }.mkString(",\n      ")
 
-    val ind2 = "  "
-
     val innerClassesStr = {
       val defs = results.map(_._2.definition).filter(_.nonEmpty)
       if (defs.isEmpty) "" else {
-        "\n" + ind2 + defs.mkString("\n").replaceAll("\n", "\n" + ind2)
+        "\n  " + defs.mkString("\n").replaceAll("\n", "\n  ")
       }
     }
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n" + ind2 + listAccessors.keys.toList.sorted.map { methodName ⇒
-          listAccessors(methodName).replaceAll("\n", "\n" + ind2)
-        }.mkString("\n" + ind2)
+        "\n  " + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName).replaceAll("\n", "\n  ")
+        }.mkString("\n  ")
       }
       val rootOnes = if (!isRoot) "" else {
         if (rootListAccessors.isEmpty) "" else {
-          "\n\n" + ind2 + rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            rootListAccessors(methodName).replaceAll("\n", "\n" + ind2)
-          }.mkString("\n" + ind2)
+          "\n\n  " + rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            rootListAccessors(methodName).replaceAll("\n", "\n  ")
+          }.mkString("\n  ")
         }
       }
       objOnes + rootOnes
     }
 
+    val fullClassName = classNamesPrefix.reverse.mkString + className
     val objectString = {
       s"""object $className {$innerClassesStr
-         |  def apply(c: com.typesafe.config.Config): $className = {
-         |    $className(
+         |  def apply(c: com.typesafe.config.Config): $fullClassName = {
+         |    $fullClassName(
          |      $objectMembersStr
          |    )
          |  }$elemAccessorsStr
@@ -128,20 +127,20 @@ class ScalaGen(genOpts: GenOpts) extends Gen(genOpts) {
     }
 
     Res(ot,
-      scalaType = BaseScalaType(classNamePrefixOpt.getOrElse("") + className),
+      scalaType = BaseScalaType(classNamesPrefix.reverse.mkString + className),
       definition = classStr +  objectString
     )
   }
 
   private def generateForList(lt: ListType,
-                              classNamePrefixOpt: Option[String],
+                              classNamesPrefix: List[String],
                               classNameOpt: Option[String]
                              ): Res = {
     val classNameOpt2 = Some(classNameOpt match {
       case None    ⇒ "$Elm"
       case Some(n) ⇒ n + (if (n.endsWith("$Elm")) "" else "$Elm")
     })
-    val elem = generate(lt.t, classNamePrefixOpt, classNameOpt2)
+    val elem = generate(lt.t, classNamesPrefix, classNameOpt2)
     Res(lt,
       scalaType = ListScalaType(elem.scalaType),
       definition = elem.definition
@@ -255,32 +254,32 @@ private[scala] case class MethodNames(prefix: String = "$_") {
       intA → s"""
                 |private def $intA(cv:com.typesafe.config.ConfigValue): scala.Int = {
                 |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
-                |    || !u.isInstanceOf[Integer]) throw $expE(cv, "integer")
+                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
+                |    !u.isInstanceOf[Integer]) throw $expE(cv, "integer")
                 |  u.asInstanceOf[Integer]
                 |}""".stripMargin.trim,
 
       lngA → s"""
                 |private def $lngA(cv:com.typesafe.config.ConfigValue): scala.Long = {
                 |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
-                |    || !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
+                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
+                |    !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
                 |  u.asInstanceOf[java.lang.Number].longValue()
                 |}""".stripMargin.trim,
 
       dblA → s"""
                 |private def $dblA(cv:com.typesafe.config.ConfigValue): scala.Double = {
                 |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) || !u.isInstanceOf[java.lang.Number])
-                |    throw $expE(cv, "double")
+                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
+                |    !u.isInstanceOf[java.lang.Number]) throw $expE(cv, "double")
                 |  u.asInstanceOf[java.lang.Number].doubleValue()
                 |}""".stripMargin.trim,
 
       blnA → s"""
                 |private def $blnA(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
                 |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN) || !u.isInstanceOf[java.lang.Boolean])
-                |    throw $expE(cv, "boolean")
+                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN) ||
+                |    !u.isInstanceOf[java.lang.Boolean]) throw $expE(cv, "boolean")
                 |  u.asInstanceOf[java.lang.Boolean].booleanValue()
                 |}""".stripMargin.trim
     )
