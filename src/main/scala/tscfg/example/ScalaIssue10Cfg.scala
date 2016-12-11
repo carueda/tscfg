@@ -3,53 +3,51 @@ package tscfg.example
 case class ScalaIssue10Cfg(
   main : ScalaIssue10Cfg.Main
 )
-
 object ScalaIssue10Cfg {
   case class Main(
-    email : scala.Option[Main.Email],
-    reals : scala.Option[scala.collection.immutable.List[Main.Reals$Elm]]
+    email : scala.Option[ScalaIssue10Cfg.Main.Email],
+    reals : scala.Option[scala.List[ScalaIssue10Cfg.Main.Reals$Elm]]
   )
-
   object Main {
     case class Email(
       password : java.lang.String,
       server   : java.lang.String
     )
-
     object Email {
-      def apply(c: com.typesafe.config.Config): Email = {
-        Email(
-          c.getString("password"),
-          c.getString("server")
+      def apply(c: com.typesafe.config.Config): ScalaIssue10Cfg.Main.Email = {
+        ScalaIssue10Cfg.Main.Email(
+          password = c.getString("password"),
+          server   = c.getString("server")
         )
       }
     }
+          
     case class Reals$Elm(
       foo : scala.Double
     )
-
     object Reals$Elm {
-      def apply(c: com.typesafe.config.Config): Reals$Elm = {
-        Reals$Elm(
-          c.getDouble("foo")
+      def apply(c: com.typesafe.config.Config): ScalaIssue10Cfg.Main.Reals$Elm = {
+        ScalaIssue10Cfg.Main.Reals$Elm(
+          foo = c.getDouble("foo")
         )
       }
     }
-    def apply(c: com.typesafe.config.Config): Main = {
-      Main(
-        if(c.hasPathOrNull("email")) scala.Some(Email(c.getConfig("email"))) else None,
-        if(c.hasPathOrNull("reals")) scala.Some($listReals$Elm(c.getList("reals"))) else None
+          
+    def apply(c: com.typesafe.config.Config): ScalaIssue10Cfg.Main = {
+      ScalaIssue10Cfg.Main(
+        email = if(c.hasPathOrNull("email")) scala.Some(ScalaIssue10Cfg.Main.Email(c.getConfig("email"))) else None,
+        reals = if(c.hasPathOrNull("reals")) scala.Some($_LScalaIssue10Cfg_Main_Reals$Elm(c.getList("reals"))) else None
       )
     }
-
-    private def $listReals$Elm(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[Reals$Elm] = {
+    private def $_LScalaIssue10Cfg_Main_Reals$Elm(cl:com.typesafe.config.ConfigList): scala.List[ScalaIssue10Cfg.Main.Reals$Elm] = {
       import scala.collection.JavaConversions._
-      cl.map(cv => Reals$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
+      cl.map(cv => ScalaIssue10Cfg.Main.Reals$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
     }
   }
+        
   def apply(c: com.typesafe.config.Config): ScalaIssue10Cfg = {
     ScalaIssue10Cfg(
-      Main(c.getConfig("main"))
+      main = ScalaIssue10Cfg.Main(c.getConfig("main"))
     )
   }
 }

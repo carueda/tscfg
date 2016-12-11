@@ -1,94 +1,89 @@
 package tscfg.example
 
 case class ScalaIssue15cCfg(
-  positions : scala.collection.immutable.List[ScalaIssue15cCfg.Positions$1$Elm],
+  positions : scala.List[ScalaIssue15cCfg.Positions$Elm],
   qaz       : ScalaIssue15cCfg.Qaz
 )
-
 object ScalaIssue15cCfg {
-  case class Positions$1$Elm(
-    attrs : scala.collection.immutable.List[scala.collection.immutable.List[Positions$1$Elm.Attrs$2$Elm]],
+  case class Positions$Elm(
+    attrs : scala.List[scala.List[ScalaIssue15cCfg.Positions$Elm.Attrs$Elm]],
     lat   : scala.Double,
     lon   : scala.Double
   )
-
-  object Positions$1$Elm {
-    case class Attrs$2$Elm(
+  object Positions$Elm {
+    case class Attrs$Elm(
       foo : scala.Long
     )
-
-    object Attrs$2$Elm {
-      def apply(c: com.typesafe.config.Config): Attrs$2$Elm = {
-        Attrs$2$Elm(
-          c.getLong("foo")
+    object Attrs$Elm {
+      def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg.Positions$Elm.Attrs$Elm = {
+        ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(
+          foo = c.getLong("foo")
         )
       }
     }
-
-    def apply(c: com.typesafe.config.Config): Positions$1$Elm = {
-      Positions$1$Elm(
-        $list$listAttrs$2$Elm(c.getList("attrs")),
-        c.getDouble("lat"),
-        c.getDouble("lon")
+          
+    def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg.Positions$Elm = {
+      ScalaIssue15cCfg.Positions$Elm(
+        attrs = $_L$_LScalaIssue15cCfg_Positions$Elm_Attrs$Elm(c.getList("attrs")),
+        lat   = c.getDouble("lat"),
+        lon   = c.getDouble("lon")
       )
     }
-
-    private def $list$listAttrs$2$Elm(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[scala.collection.immutable.List[Attrs$2$Elm]] = {
+    private def $_L$_LScalaIssue15cCfg_Positions$Elm_Attrs$Elm(cl:com.typesafe.config.ConfigList): scala.List[scala.List[ScalaIssue15cCfg.Positions$Elm.Attrs$Elm]] = {
       import scala.collection.JavaConversions._
-      cl.map(cv => $listAttrs$2$Elm(cv.asInstanceOf[com.typesafe.config.ConfigList])).toList
+      cl.map(cv => $_LScalaIssue15cCfg_Positions$Elm_Attrs$Elm(cv.asInstanceOf[com.typesafe.config.ConfigList])).toList
     }
-    private def $listAttrs$2$Elm(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[Attrs$2$Elm] = {
+    private def $_LScalaIssue15cCfg_Positions$Elm_Attrs$Elm(cl:com.typesafe.config.ConfigList): scala.List[ScalaIssue15cCfg.Positions$Elm.Attrs$Elm] = {
       import scala.collection.JavaConversions._
-      cl.map(cv => Attrs$2$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
+      cl.map(cv => ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
     }
   }
+        
   case class Qaz(
-    aa : Qaz.Aa
+    aa : ScalaIssue15cCfg.Qaz.Aa
   )
-
   object Qaz {
     case class Aa(
-      bb : scala.collection.immutable.List[Aa.Bb$Elm]
+      bb : scala.List[ScalaIssue15cCfg.Qaz.Aa.Bb$Elm]
     )
-
     object Aa {
       case class Bb$Elm(
         cc : java.lang.String
       )
-
       object Bb$Elm {
-        def apply(c: com.typesafe.config.Config): Bb$Elm = {
-          Bb$Elm(
-            c.getString("cc")
+        def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg.Qaz.Aa.Bb$Elm = {
+          ScalaIssue15cCfg.Qaz.Aa.Bb$Elm(
+            cc = c.getString("cc")
           )
         }
       }
-      def apply(c: com.typesafe.config.Config): Aa = {
-        Aa(
-          $listBb$Elm(c.getList("bb"))
+            
+      def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg.Qaz.Aa = {
+        ScalaIssue15cCfg.Qaz.Aa(
+          bb = $_LScalaIssue15cCfg_Qaz_Aa_Bb$Elm(c.getList("bb"))
         )
       }
-
-      private def $listBb$Elm(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[Bb$Elm] = {
+      private def $_LScalaIssue15cCfg_Qaz_Aa_Bb$Elm(cl:com.typesafe.config.ConfigList): scala.List[ScalaIssue15cCfg.Qaz.Aa.Bb$Elm] = {
         import scala.collection.JavaConversions._
-        cl.map(cv => Bb$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
+        cl.map(cv => ScalaIssue15cCfg.Qaz.Aa.Bb$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
       }
     }
-    def apply(c: com.typesafe.config.Config): Qaz = {
-      Qaz(
-        Aa(c.getConfig("aa"))
+          
+    def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg.Qaz = {
+      ScalaIssue15cCfg.Qaz(
+        aa = ScalaIssue15cCfg.Qaz.Aa(c.getConfig("aa"))
       )
     }
   }
+        
   def apply(c: com.typesafe.config.Config): ScalaIssue15cCfg = {
     ScalaIssue15cCfg(
-      $listPositions$1$Elm(c.getList("positions")),
-      Qaz(c.getConfig("qaz"))
+      positions = $_LScalaIssue15cCfg_Positions$Elm(c.getList("positions")),
+      qaz       = ScalaIssue15cCfg.Qaz(c.getConfig("qaz"))
     )
   }
-
-  private def $listPositions$1$Elm(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[Positions$1$Elm] = {
+  private def $_LScalaIssue15cCfg_Positions$Elm(cl:com.typesafe.config.ConfigList): scala.List[ScalaIssue15cCfg.Positions$Elm] = {
     import scala.collection.JavaConversions._
-    cl.map(cv => Positions$1$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
+    cl.map(cv => ScalaIssue15cCfg.Positions$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)).toList
   }
 }

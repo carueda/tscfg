@@ -8,7 +8,7 @@ class ScalaMainSpec extends Specification {
 
   "issue5" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue5.conf")
+      val r = ScalaGen.generate("example/issue5.conf")
       r.classNames === Set("ScalaIssue5Cfg", "Foo", "Config")
       r.fieldNames === Set("foo", "config", "bar")
     }
@@ -16,7 +16,7 @@ class ScalaMainSpec extends Specification {
 
   "issue10" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue10.conf")
+      val r = ScalaGen.generate("example/issue10.conf")
       r.classNames === Set("ScalaIssue10Cfg", "Main", "Email", "Reals$Elm")
       r.fieldNames === Set("server", "email", "main", "reals", "password", "foo")
     }
@@ -51,7 +51,7 @@ class ScalaMainSpec extends Specification {
 
   "issue11" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue11.conf")
+      val r = ScalaGen.generate("example/issue11.conf")
       r.classNames === Set("ScalaIssue11Cfg", "Foo")
       r.fieldNames === Set("notify_", "wait_", "getClass_", "clone_", "finalize_", "notifyAll_", "toString_", "foo")
     }
@@ -59,7 +59,7 @@ class ScalaMainSpec extends Specification {
 
   "issue12" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue12.conf")
+      val r = ScalaGen.generate("example/issue12.conf")
       r.classNames === Set("ScalaIssue12Cfg", "String", "Option", "Boolean", "Int")
       r.fieldNames === Set("String", "Option", "Boolean", "int", "bar")
     }
@@ -67,7 +67,7 @@ class ScalaMainSpec extends Specification {
 
   "issue13" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue13.conf")
+      val r = ScalaGen.generate("example/issue13.conf")
       r.classNames === Set("ScalaIssue13Cfg", "Issue")
       r.fieldNames === Set("issue", "optionalFoo")
     }
@@ -75,7 +75,7 @@ class ScalaMainSpec extends Specification {
 
   "issue14" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue14.conf")
+      val r = ScalaGen.generate("example/issue14.conf")
       r.classNames === Set("ScalaIssue14Cfg", "_0")
       r.fieldNames === Set("_0", "_1", "_2")
     }
@@ -83,7 +83,7 @@ class ScalaMainSpec extends Specification {
 
   "issue15a" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue15a.conf")
+      val r = ScalaGen.generate("example/issue15a.conf")
       r.classNames === Set("ScalaIssue15aCfg")
       r.fieldNames === Set("ii")
     }
@@ -109,7 +109,7 @@ class ScalaMainSpec extends Specification {
 
   "issue15b" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue15b.conf")
+      val r = ScalaGen.generate("example/issue15b.conf")
       r.classNames === Set("ScalaIssue15bCfg")
       r.fieldNames === Set("strings", "integers", "doubles", "longs", "booleans")
     }
@@ -134,8 +134,8 @@ class ScalaMainSpec extends Specification {
 
   "issue15c" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue15c.conf")
-      r.classNames === Set("ScalaIssue15cCfg", "Qaz", "Aa", "Positions$1$Elm", "Bb$Elm", "Attrs$2$Elm")
+      val r = ScalaGen.generate("example/issue15c.conf")
+      r.classNames === Set("ScalaIssue15cCfg", "Qaz", "Aa", "Positions$Elm", "Bb$Elm", "Attrs$Elm")
       r.fieldNames === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
     }
 
@@ -152,15 +152,15 @@ class ScalaMainSpec extends Specification {
           |""".stripMargin
       ))
       c.positions  === List(
-        ScalaIssue15cCfg.Positions$1$Elm(
-          attrs = List(List(ScalaIssue15cCfg.Positions$1$Elm.Attrs$2$Elm(foo = 99))),
+        ScalaIssue15cCfg.Positions$Elm(
+          attrs = List(List(ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 99))),
           lat = 1,
           lon = 2
         ),
-        ScalaIssue15cCfg.Positions$1$Elm(
+        ScalaIssue15cCfg.Positions$Elm(
           attrs = List(List(
-            ScalaIssue15cCfg.Positions$1$Elm.Attrs$2$Elm(foo = 3),
-            ScalaIssue15cCfg.Positions$1$Elm.Attrs$2$Elm(foo = 0)
+            ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 3),
+            ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 0)
           )),
           lat = 3,
           lon = 4
@@ -176,7 +176,7 @@ class ScalaMainSpec extends Specification {
 
   "issue15d" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue15d.conf")
+      val r = ScalaGen.generate("example/issue15d.conf")
       r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm")
       r.fieldNames === Set("baz", "aa", "dd")
     }
@@ -196,8 +196,8 @@ class ScalaMainSpec extends Specification {
 
   "issue15" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/issue15.conf")
-      r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm", "Positions$2$Elm")
+      val r = ScalaGen.generate("example/issue15.conf")
+      r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm")
       r.fieldNames === Set("positions", "numbers", "other", "stuff")
     }
 
@@ -216,7 +216,7 @@ class ScalaMainSpec extends Specification {
         ScalaIssue15Cfg.Positions$Elm(
           numbers = List(1, 2, 3),
           positions = List(List(
-            ScalaIssue15Cfg.Positions$Elm.Positions$2$Elm(other = 33, stuff = "baz")
+            ScalaIssue15Cfg.Positions$Elm.Positions$Elm(other = 33, stuff = "baz")
           ))
         )
       )
@@ -225,7 +225,7 @@ class ScalaMainSpec extends Specification {
 
   "duration" should {
     "generate code" in {
-      val r = ScalaGenerator.generate("example/duration.spec.conf")
+      val r = ScalaGen.generate("example/duration.spec.conf")
       r.classNames === Set("ScalaDurationCfg", "Durations")
       r.fieldNames === Set("durations", "days", "hours", "millis",
         "duration_ns",

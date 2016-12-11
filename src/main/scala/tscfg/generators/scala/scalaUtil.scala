@@ -20,12 +20,27 @@ object scalaUtil {
     else javaUtil.javaIdentifier(symbol)
   }
 
-  def getClassName(symbol:String) = util.upperFirst(scalaIdentifier(symbol))
+  /**
+    * Returns a class name from the given symbol.
+    * Since underscores are specially used in generated code,
+    * this method camelizes the symbol in case of any underscores.
+    */
+  def getClassName(symbol: String): String = {
+    // regular javaUtil.javaIdentifier as it might generate underscores:
+    val id = javaUtil.javaIdentifier(symbol)
+    // note: not scalaIdentifier because we are going to camelize anyway
+    val parts = id.split("_")
+    val name = parts.map(util.upperFirst).mkString
+    if (name.nonEmpty) scalaIdentifier(name)
+    else "U" + id.count(_ == '_') // named based on # of underscores ;)
+  }
 
   /**
-    * from Sect 1.1 of the Scala Language Spec, v2.9
+    * The ones from Sect 1.1 of the Scala Language Spec, v2.9
+    * plus `_`
     */
   val scalaReservedWords: List[String] = List(
+    "_",
     "abstract", "case",     "catch",   "class",   "def",
     "do",       "else",     "extends", "false",   "final",
     "finally",  "for",      "forSome", "if",      "implicit",

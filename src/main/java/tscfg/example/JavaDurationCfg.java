@@ -1,8 +1,7 @@
 package tscfg.example;
 
 public class JavaDurationCfg {
-  public final Durations durations;
-
+  public final JavaDurationCfg.Durations durations;
   public static class Durations {
     public final java.lang.Long days;
     public final long duration_dy;
@@ -14,7 +13,7 @@ public class JavaDurationCfg {
     public final long duration_µs;
     public final long hours;
     public final long millis;
-
+    
     public Durations(com.typesafe.config.Config c) {
       this.days = c.hasPathOrNull("days") ? c.getDuration("days", java.util.concurrent.TimeUnit.DAYS) : null;
       this.duration_dy = c.hasPathOrNull("duration_dy") ? c.getDuration("duration_dy", java.util.concurrent.TimeUnit.DAYS) : 0;
@@ -28,13 +27,8 @@ public class JavaDurationCfg {
       this.millis = c.hasPathOrNull("millis") ? c.getDuration("millis", java.util.concurrent.TimeUnit.MILLISECONDS) : 550000;
     }
   }
-
+  
   public JavaDurationCfg(com.typesafe.config.Config c) {
-    this.durations = new Durations(_$config(c, "durations"));
-  }
-
-  private static com.typesafe.config.Config _$config(com.typesafe.config.Config c, java.lang.String path) {
-    return c.hasPathOrNull(path) ? c.getConfig(path) : null;
+    this.durations = new JavaDurationCfg.Durations(c.getConfig("durations"));
   }
 }
-

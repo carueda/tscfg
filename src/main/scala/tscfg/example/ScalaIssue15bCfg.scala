@@ -1,78 +1,77 @@
 package tscfg.example
 
 case class ScalaIssue15bCfg(
-  booleans : scala.collection.immutable.List[scala.Boolean],
-  doubles  : scala.collection.immutable.List[scala.Double],
-  integers : scala.collection.immutable.List[scala.collection.immutable.List[scala.Int]],
-  longs    : scala.collection.immutable.List[scala.Long],
-  strings  : scala.collection.immutable.List[java.lang.String]
+  booleans : scala.List[scala.Boolean],
+  doubles  : scala.List[scala.Double],
+  integers : scala.List[scala.List[scala.Int]],
+  longs    : scala.List[scala.Long],
+  strings  : scala.List[java.lang.String]
 )
-
 object ScalaIssue15bCfg {
   def apply(c: com.typesafe.config.Config): ScalaIssue15bCfg = {
     ScalaIssue15bCfg(
-      $list$bln(c.getList("booleans")),
-      $list$dbl(c.getList("doubles")),
-      $list$list$int(c.getList("integers")),
-      $list$lng(c.getList("longs")),
-      $list$str(c.getList("strings"))
+      booleans = $_L$_bln(c.getList("booleans")),
+      doubles  = $_L$_dbl(c.getList("doubles")),
+      integers = $_L$_L$_int(c.getList("integers")),
+      longs    = $_L$_lng(c.getList("longs")),
+      strings  = $_L$_str(c.getList("strings"))
     )
   }
 
-  private def $bln(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
+  private def $_L$_L$_int(cl:com.typesafe.config.ConfigList): scala.List[scala.List[scala.Int]] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_L$_int(cv.asInstanceOf[com.typesafe.config.ConfigList])).toList
+  }
+  private def $_L$_bln(cl:com.typesafe.config.ConfigList): scala.List[scala.Boolean] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_bln(cv)).toList
+  }
+  private def $_L$_dbl(cl:com.typesafe.config.ConfigList): scala.List[scala.Double] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_dbl(cv)).toList
+  }
+  private def $_L$_int(cl:com.typesafe.config.ConfigList): scala.List[scala.Int] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_int(cv)).toList
+  }
+  private def $_L$_lng(cl:com.typesafe.config.ConfigList): scala.List[scala.Long] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_lng(cv)).toList
+  }
+  private def $_L$_str(cl:com.typesafe.config.ConfigList): scala.List[java.lang.String] = {
+    import scala.collection.JavaConversions._
+    cl.map(cv => $_str(cv)).toList
+  }
+  private def $_bln(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
     val u: Any = cv.unwrapped
-    if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN)
-      || !u.isInstanceOf[java.lang.Boolean]) throw $expE(cv, "boolean")
+    if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN) ||
+      !u.isInstanceOf[java.lang.Boolean]) throw $_expE(cv, "boolean")
     u.asInstanceOf[java.lang.Boolean].booleanValue()
   }
-  private def $dbl(cv:com.typesafe.config.ConfigValue): scala.Double = {
+  private def $_dbl(cv:com.typesafe.config.ConfigValue): scala.Double = {
     val u: Any = cv.unwrapped
-    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
-      || !u.isInstanceOf[java.lang.Number]) throw $expE(cv, "double")
+    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
+      !u.isInstanceOf[java.lang.Number]) throw $_expE(cv, "double")
     u.asInstanceOf[java.lang.Number].doubleValue()
   }
-  private def $expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
+  private def $_expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
     val u: Any = cv.unwrapped
     new java.lang.RuntimeException(cv.origin.lineNumber +
       ": expecting: " + exp + " got: " +
       (if (u.isInstanceOf[java.lang.String]) "\"" + u + "\"" else u))
   }
-  private def $int(cv:com.typesafe.config.ConfigValue): scala.Int = {
+  private def $_int(cv:com.typesafe.config.ConfigValue): scala.Int = {
     val u: Any = cv.unwrapped
-    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
-      || !u.isInstanceOf[Integer]) throw $expE(cv, "integer")
+    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
+      !u.isInstanceOf[Integer]) throw $_expE(cv, "integer")
     u.asInstanceOf[Integer]
   }
-  private def $list$bln(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[scala.Boolean] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $bln(cv)).toList
-  }
-  private def $list$dbl(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[scala.Double] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $dbl(cv)).toList
-  }
-  private def $list$int(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[scala.Int] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $int(cv)).toList
-  }
-  private def $list$list$int(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[scala.collection.immutable.List[scala.Int]] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $list$int(cv.asInstanceOf[com.typesafe.config.ConfigList])).toList
-  }
-  private def $list$lng(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[scala.Long] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $lng(cv)).toList
-  }
-  private def $list$str(cl:com.typesafe.config.ConfigList): scala.collection.immutable.List[java.lang.String] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $str(cv)).toList
-  }
-  private def $lng(cv:com.typesafe.config.ConfigValue): scala.Long = {
+  private def $_lng(cv:com.typesafe.config.ConfigValue): scala.Long = {
     val u: Any = cv.unwrapped
-    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER)
-      || !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
+    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
+      !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $_expE(cv, "long")
     u.asInstanceOf[java.lang.Number].longValue()
   }
-  private def $str(cv:com.typesafe.config.ConfigValue) =
+  private def $_str(cv:com.typesafe.config.ConfigValue) =
     java.lang.String.valueOf(cv.unwrapped())
 }
