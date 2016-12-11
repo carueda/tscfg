@@ -65,32 +65,43 @@ class ModelBuilder {
   }
 
   private def getMemberStructs(conf: Config): List[Struct] = {
-    val structs = mutable.HashMap[Key, Struct](Key.root → Struct(""))
-    def resolve(key: Key): Struct = {
-      if (!structs.contains(key)) structs.put(key, Struct(key.simple))
+    val structs = mutable.HashMap[String, Struct]("" → Struct(""))
+    def resolve(key: String): Struct = {
+      if (!structs.contains(key)) structs.put(key, Struct(getSimple(key)))
       structs(key)
     }
 
     conf.entrySet() foreach { e ⇒
-      val name = e.getKey
-      val key = Key(name)
-      val leaf = Struct(name)
-      doAncestorsOf(key, leaf)
+      val path = e.getKey
+      val leaf = Struct(path)
+      doAncestorsOf(path, leaf)
 
-      def doAncestorsOf(childKey: Key, childStruct: Struct): Unit = {
-        createParent(childKey.parent, childKey.simple, childStruct)
+      def doAncestorsOf(childKey: String, childStruct: Struct): Unit = {
+        val (parent, simple) = (getParent(childKey), getSimple(childKey))
+        createParent(parent, simple, childStruct)
 
         @annotation.tailrec
-        def createParent(parentKey: Key, simple: String, child: Struct): Unit = {
+        def createParent(parentKey: String, simple: String, child: Struct): Unit = {
           val parentGroup = resolve(parentKey)
           parentGroup.members.put(simple, child)
-          if (parentKey != Key.root) {
-            createParent(parentKey.parent, parentKey.simple, parentGroup)
+          if (parentKey != "") {
+            createParent(getParent(parentKey), getSimple(parentKey), parentGroup)
           }
         }
       }
     }
-    structs(Key.root).members.values.toList
+
+    def getParent(path: String): String = {
+      val idx = path.lastIndexOf('.')
+      if (idx >= 0) path.substring(0, idx) else ""
+    }
+
+    def getSimple(path: String): String = {
+      val idx = path.lastIndexOf('.')
+      if (idx >= 0) path.substring(idx + 1) else path
+    }
+
+    structs("").members.values.toList
   }
 
   private def fromConfigValue(cv: ConfigValue): model.Type = {
