@@ -49,17 +49,23 @@ object tsConfigUtil {
   }
 
   private def timeUnitParamString(q: Qualification): String =
-    "java.util.concurrent.TimeUnit." + q.toString
+    "java.util.concurrent.TimeUnit." + (q match {
+      case `ns`     =>  "NANOSECONDS"
+      case `us`     =>  "MICROSECONDS"
+      case `ms`     =>  "MILLISECONDS"
+      case `second` =>  "SECONDS"
+      case `minute` =>  "MINUTES"
+      case `hour`   =>  "HOURS"
+      case `day`    =>  "DAYS"
+    })
 
-  private def timeUnitParam(q: Qualification): TimeUnit = {
-    q match {
-      case `ns`     =>  TimeUnit.NANOSECONDS
-      case `us`     =>  TimeUnit.MICROSECONDS
-      case `ms`     =>  TimeUnit.MILLISECONDS
-      case `second` =>  TimeUnit.SECONDS
-      case `minute` =>  TimeUnit.MINUTES
-      case `hour`   =>  TimeUnit.HOURS
-      case `day`    =>  TimeUnit.DAYS
-    }
+  private def timeUnitParam(q: Qualification): TimeUnit = q match {
+    case `ns`     =>  TimeUnit.NANOSECONDS
+    case `us`     =>  TimeUnit.MICROSECONDS
+    case `ms`     =>  TimeUnit.MILLISECONDS
+    case `second` =>  TimeUnit.SECONDS
+    case `minute` =>  TimeUnit.MINUTES
+    case `hour`   =>  TimeUnit.HOURS
+    case `day`    =>  TimeUnit.DAYS
   }
 }
