@@ -17,7 +17,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     genResults = GenResult()
 
     checkUserSymbol(className)
-    val res = generateForObj(objectType, classNameOpt = Some(className), isRoot = true)
+    val res = generateForObj(objectType, className = className, isRoot = true)
 
     val packageStr = s"package ${genOpts.packageName}\n\n"
 
@@ -28,21 +28,20 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generate(typ: Type,
                        classNamesPrefix: List[String],
-                       classNameOpt: Option[String] = None
+                       className: String
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamesPrefix, classNameOpt)
-    case lt: ListType   ⇒ generateForList(lt,classNamesPrefix, classNameOpt)
+    case ot: ObjectType ⇒ generateForObj(ot, classNamesPrefix, className)
+    case lt: ListType   ⇒ generateForList(lt,classNamesPrefix, className)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
 
   private def generateForObj(ot: ObjectType,
                              classNamesPrefix: List[String] = List.empty,
-                             classNameOpt: Option[String],
+                             className: String,
                              isRoot: Boolean = false
                             ): Res = {
 
-    val className = classNameOpt.getOrElse(throw new AssertionError())
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
     val symbols = ot.members.keys.toList.sorted
@@ -58,7 +57,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamesPrefix = className+"." :: classNamesPrefix,
-        classNameOpt = Some(scalaUtil.getClassName(symbol))
+        className = scalaUtil.getClassName(symbol)
       )
       (symbol, res)
     }
@@ -129,13 +128,10 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generateForList(lt: ListType,
                               classNamesPrefix: List[String],
-                              classNameOpt: Option[String]
+                              className: String
                              ): Res = {
-    val classNameOpt2 = Some(classNameOpt match {
-      case None    ⇒ "$Elm"
-      case Some(n) ⇒ n + (if (n.endsWith("$Elm")) "" else "$Elm")
-    })
-    val elem = generate(lt.t, classNamesPrefix, classNameOpt2)
+    val className2 = className + (if (className.endsWith("$Elm")) "" else "$Elm")
+    val elem = generate(lt.t, classNamesPrefix, className2)
     Res(lt,
       scalaType = ListScalaType(elem.scalaType),
       definition = elem.definition
@@ -159,6 +155,7 @@ object ScalaGen {
 
   import tscfg.util
 
+  // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
     val source = io.Source.fromFile(file).mkString.trim
@@ -192,7 +189,6 @@ object ScalaGen {
     results
   }
 
-  // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val results = generate(filename, showOut = true)

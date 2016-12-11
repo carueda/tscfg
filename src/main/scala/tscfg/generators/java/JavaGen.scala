@@ -14,7 +14,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     genResults = GenResult()
 
     //checkUserSymbol(className)
-    val res = generateForObj(objectType, classNameOpt = Some(className), isRoot = true)
+    val res = generateForObj(objectType, className = className, isRoot = true)
 
     val packageStr = s"package ${genOpts.packageName};\n\n"
 
@@ -25,22 +25,22 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generate(typ: Type,
                        classNamePrefixOpt: Option[String],
-                       classNameOpt: Option[String] = None
+                       className: String
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt)
-    case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, classNameOpt)
+    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, className)
+    case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, className)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
 
   private def generateForObj(ot: ObjectType,
                              classNamePrefixOpt: Option[String] = None,
-                             classNameOpt: Option[String],
+                             className: String,
                              isRoot: Boolean = false
                             ): Res = {
 
-    val className = adjustClassName(classNameOpt.getOrElse(throw new AssertionError()))
-    genResults = genResults.copy(classNames = genResults.classNames + className)
+    val classNameAdjusted = adjustClassName(className)
+    genResults = genResults.copy(classNames = genResults.classNames + classNameAdjusted)
 
     val symbols = ot.members.keys.toList.sorted
 
@@ -49,8 +49,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       genResults = genResults.copy(fieldNames = genResults.fieldNames + javaId)
       val a = ot.members(symbol)
       val res = generate(a.t,
-        classNamePrefixOpt = Some(className + "."),
-        classNameOpt = Some(javaUtil.getClassName(symbol))
+        classNamePrefixOpt = Some(classNameAdjusted + "."),
+        className = javaUtil.getClassName(symbol)
       )
       (symbol, res)
     }
@@ -95,10 +95,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }
 
     val classStr = {
-      s"""public ${if (isRoot) "" else "static "}class $className {
+      s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted {
          |  $classDeclMembersStr
          |  $membersStr
-         |  public $className(com.typesafe.config.Config c) {
+         |  public $classNameAdjusted(com.typesafe.config.Config c) {
          |    $ctorMembersStr
          |  }$elemAccessorsStr
          |}
@@ -106,19 +106,16 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }
 
     Res(ot,
-      javaType = BaseJavaType(classNamePrefixOpt.getOrElse("") + className),
+      javaType = BaseJavaType(classNamePrefixOpt.getOrElse("") + classNameAdjusted),
       definition = classStr
     )
   }
 
   private def generateForList(lt: ListType,
                       classNamePrefixOpt: Option[String],
-                      classNameOpt: Option[String]): Res = {
-    val classNameOpt2 = Some(classNameOpt match {
-      case None    ⇒ "$Elm"
-      case Some(n) ⇒ n + (if (n.endsWith("$Elm")) "" else "$Elm")
-    })
-    val elem = generate(lt.t, classNamePrefixOpt, classNameOpt2)
+                      className: String): Res = {
+    val className2 = className + (if (className.endsWith("$Elm")) "" else "$Elm")
+    val elem = generate(lt.t, classNamePrefixOpt, className2)
     val elemRefType = toObjectType(elem.javaType)
     Res(lt,
       javaType = ListJavaType(elemRefType),
@@ -293,6 +290,7 @@ object JavaGen {
   import tscfg.{ModelBuilder, model}
   import tscfg.util
 
+  // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
     val src = io.Source.fromFile(file).mkString.trim
@@ -326,7 +324,6 @@ object JavaGen {
     results
   }
 
-  // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val results = generate(filename, showOut = true)

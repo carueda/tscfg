@@ -41,6 +41,94 @@ class ModelBuilderSpec extends Specification {
     }
   }
 
+  "with empty list" should {
+    def a = build(
+      """
+        |list: [ ]
+      """.stripMargin)
+
+    "throw IllegalArgumentException" in {
+      a must throwA[IllegalArgumentException]
+    }
+  }
+
+  "with list with multiple elements" should {
+    build(
+      """
+        |list: [ true, false ]
+      """.stripMargin)
+
+    "generate warning" in {
+      1===1 // not actually verified here
+    }
+  }
+
+  "with list element indicating optional" should {
+    build(
+      """
+        |list: [ "string?" ]
+      """.stripMargin)
+
+    "generate warning" in {
+      1===1 // not actually verified here
+    }
+  }
+
+  "with list element indicating a default value" should {
+    build(
+      """
+        |list: [ "double | 3.14" ]
+      """.stripMargin)
+
+    "generate warning" in {
+      1===1 // not actually verified here
+    }
+  }
+
+  "with list with literal int" should {
+    val ot = build(
+      """
+        |list: [ 99999999 ]
+      """.stripMargin)
+
+    "translate into ListType(INTEGER)" in {
+      ot.members("list").t === ListType(INTEGER)
+    }
+  }
+
+  "with list with literal long" should {
+    val ot = build(
+      """
+        |list: [ 99999999999 ]
+      """.stripMargin)
+
+    "translate into ListType(LONG)" in {
+      ot.members("list").t === ListType(LONG)
+    }
+  }
+
+  "with list with literal double" should {
+    val ot = build(
+      """
+        |list: [ 3.14 ]
+      """.stripMargin)
+
+    "translate into ListType(DOUBLE)" in {
+      ot.members("list").t === ListType(DOUBLE)
+    }
+  }
+
+  "with list with literal boolean" should {
+    val ot = build(
+      """
+        |list: [ false ]
+      """.stripMargin)
+
+    "translate into ListType(BOOLEAN)" in {
+      ot.members("list").t === ListType(BOOLEAN)
+    }
+  }
+
   "with good input" should {
     val objType = build(
       """
