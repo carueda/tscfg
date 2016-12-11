@@ -76,6 +76,7 @@ object model {
     }
   }
 
+  // $COVERAGE-OFF$
   object util {
     val IND = "    "
 
@@ -111,12 +112,14 @@ object model {
            |$ind}""".stripMargin
     }
   }
+  // $COVERAGE-ON$
 }
 
 object modelMain {
   import model._
   import model.implicits._
 
+  // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
 
     val objectType = ObjectType(
@@ -138,4 +141,5 @@ object modelMain {
 
     println(model.util.format(objectType))
   }
+  // $COVERAGE-ON$
 }
