@@ -36,35 +36,35 @@ public class JavaIssue15cCfg {
     }
   }
   
-public static class Qaz {
-      public final Qaz.Aa aa;
-      public static class Aa {
-              public final java.util.List<Aa.Bb$Elm> bb;
-              public static class Bb$Elm {
-                    public final java.lang.String cc;
-                    
-                    public Bb$Elm(com.typesafe.config.Config c) {
-                      this.cc = c.getString("cc");
-                    }
-                  }
-                  
-              public Aa(com.typesafe.config.Config c) {
-                this.bb = $_LAa_Bb$Elm(c.getList("bb"));
-              }
-                  private static java.util.List<Aa.Bb$Elm> $_LAa_Bb$Elm(com.typesafe.config.ConfigList cl) {
-                    java.util.ArrayList<Aa.Bb$Elm> al = new java.util.ArrayList<>();
-                    for (com.typesafe.config.ConfigValue cv: cl) {
-                      al.add(new Aa.Bb$Elm(((com.typesafe.config.ConfigObject)cv).toConfig()));
-                    }
-                    return java.util.Collections.unmodifiableList(al);
-                  }
-            }
-            
-      public Qaz(com.typesafe.config.Config c) {
-        this.aa = new Qaz.Aa(c.getConfig("aa"));
+  public static class Qaz {
+    public final Qaz.Aa aa;
+    public static class Aa {
+      public final java.util.List<Aa.Bb$Elm> bb;
+      public static class Bb$Elm {
+        public final java.lang.String cc;
+        
+        public Bb$Elm(com.typesafe.config.Config c) {
+          this.cc = c.getString("cc");
+        }
+      }
+      
+      public Aa(com.typesafe.config.Config c) {
+        this.bb = $_LAa_Bb$Elm(c.getList("bb"));
+      }
+      private static java.util.List<Aa.Bb$Elm> $_LAa_Bb$Elm(com.typesafe.config.ConfigList cl) {
+        java.util.ArrayList<Aa.Bb$Elm> al = new java.util.ArrayList<>();
+        for (com.typesafe.config.ConfigValue cv: cl) {
+          al.add(new Aa.Bb$Elm(((com.typesafe.config.ConfigObject)cv).toConfig()));
+        }
+        return java.util.Collections.unmodifiableList(al);
       }
     }
     
+    public Qaz(com.typesafe.config.Config c) {
+      this.aa = new Qaz.Aa(c.getConfig("aa"));
+    }
+  }
+  
   public JavaIssue15cCfg(com.typesafe.config.Config c) {
     this.positions = $_LJavaIssue15cCfg_Positions$Elm(c.getList("positions"));
     this.qaz = new JavaIssue15cCfg.Qaz(c.getConfig("qaz"));

@@ -6,37 +6,37 @@ public class JavaIssue12Cfg {
   public final JavaIssue12Cfg.String String;
   public final JavaIssue12Cfg.Int_ int_;
   public static class Boolean {
-      public final java.lang.String bar;
-      
-      public Boolean(com.typesafe.config.Config c) {
-        this.bar = c.hasPathOrNull("bar") ? c.getString("bar") : "foo";
-      }
-    }
+    public final java.lang.String bar;
     
-public static class Option {
-      public final java.lang.String bar;
-      
-      public Option(com.typesafe.config.Config c) {
-        this.bar = c.hasPathOrNull("bar") ? c.getString("bar") : "baz";
-      }
+    public Boolean(com.typesafe.config.Config c) {
+      this.bar = c.hasPathOrNull("bar") ? c.getString("bar") : "foo";
     }
+  }
+  
+  public static class Option {
+    public final java.lang.String bar;
     
-public static class String {
-      public final java.lang.String bar;
-      
-      public String(com.typesafe.config.Config c) {
-        this.bar = c.hasPathOrNull("bar") ? c.getString("bar") : "baz";
-      }
+    public Option(com.typesafe.config.Config c) {
+      this.bar = c.hasPathOrNull("bar") ? c.getString("bar") : "baz";
     }
+  }
+  
+  public static class String {
+    public final java.lang.String bar;
     
-public static class Int_ {
-      public final java.lang.Integer bar;
-      
-      public Int_(com.typesafe.config.Config c) {
-        this.bar = c.hasPathOrNull("bar") ? c.getInt("bar") : 1;
-      }
+    public String(com.typesafe.config.Config c) {
+      this.bar = c.hasPathOrNull("bar") ? c.getString("bar") : "baz";
     }
+  }
+  
+  public static class Int_ {
+    public final java.lang.Integer bar;
     
+    public Int_(com.typesafe.config.Config c) {
+      this.bar = c.hasPathOrNull("bar") ? c.getInt("bar") : 1;
+    }
+  }
+  
   public JavaIssue12Cfg(com.typesafe.config.Config c) {
     this.Boolean = new JavaIssue12Cfg.Boolean(c.getConfig("Boolean"));
     this.Option = new JavaIssue12Cfg.Option(c.getConfig("Option"));

@@ -29,12 +29,11 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
   }
 
   private def generate(typ: Type,
-                       ind: String = "",
                        classNamePrefixOpt: Option[String],
                        classNameOpt: Option[String] = None
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt, ind)
+    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt)
     case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, classNameOpt)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
@@ -42,7 +41,6 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
   private def generateForObj(ot: ObjectType,
                              classNamePrefixOpt: Option[String] = None,
                              classNameOpt: Option[String],
-                             ind: String = "",
                              isRoot: Boolean = false
                             ): Res = {
 
@@ -56,7 +54,6 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
       genResults = genResults.copy(fieldNames = genResults.fieldNames + javaId)
       val a = ot.members(symbol)
       val res = generate(a.t,
-        ind = ind + "  ",
         classNamePrefixOpt = Some(className + "."),
         classNameOpt = Some(javaUtil.getClassName(symbol))
       )
@@ -69,11 +66,14 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
       val typ = if (a.optional) toObjectType(memberType) else memberType
       val javaId = javaIdentifier(symbol)
       s"public final $typ $javaId;"
-    }.mkString("\n" + ind + "  ")
+    }.mkString("\n  ")
 
-    val membersStr = results.map(_._2.definition).filter(_.nonEmpty).
-      map(_.replaceAll("\n", "\n" + ind + "  ")).
-      mkString("\n")
+    val membersStr = {
+      val defined = results.map(_._2.definition).filter(_.nonEmpty)
+      if (defined.isEmpty) "" else {
+        defined.map(_.replaceAll("\n", "\n  ")).mkString("\n  ")
+      }
+    }
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
 
@@ -81,21 +81,19 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
       val a = ot.members(symbol)
       val javaId = javaIdentifier(symbol)
       "this." + javaId + " = " + instance(a, res, symbol) + ";"
-    }.mkString("\n" + ind + "    ")
-
-    val ind2 = ind + "  "
+    }.mkString("\n    ")
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n" + ind2 + listAccessors.keys.toList.sorted.map { methodName ⇒
-          listAccessors(methodName).replaceAll("\n", "\n" + ind2)
-        }.mkString("\n" + ind2)
+        "\n  " + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName).replaceAll("\n", "\n  ")
+        }.mkString("\n  ")
       }
       val rootOnes = if (!isRoot) "" else {
         if (rootListAccessors.isEmpty) "" else {
-          "\n\n" + ind2 + rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            rootListAccessors(methodName).replaceAll("\n", "\n" + ind2)
-          }.mkString("\n" + ind2)
+          "\n\n  " + rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            rootListAccessors(methodName).replaceAll("\n", "\n  ")
+          }.mkString("\n  ")
         }
       }
       objOnes + rootOnes
@@ -109,7 +107,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
          |    $ctorMembersStr
          |  }$elemAccessorsStr
          |}
-         |""".stripMargin.replaceAll("\n", "\n" + ind)
+         |""".stripMargin
     }
 
     Res(ot,
@@ -120,13 +118,12 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
 
   private def generateForList(lt: ListType,
                       classNamePrefixOpt: Option[String],
-                      classNameOpt: Option[String],
-                      ind: String = ""): Res = {
+                      classNameOpt: Option[String]): Res = {
     val classNameOpt2 = Some(classNameOpt match {
       case None    ⇒ "$Elm"
       case Some(n) ⇒ n + (if (n.endsWith("$Elm")) "" else "$Elm")
     })
-    val elem = generate(lt.t, ind = ind, classNamePrefixOpt, classNameOpt2)
+    val elem = generate(lt.t, classNamePrefixOpt, classNameOpt2)
     val elemRefType = toObjectType(elem.javaType)
     Res(lt,
       javaType = ListJavaType(elemRefType),
