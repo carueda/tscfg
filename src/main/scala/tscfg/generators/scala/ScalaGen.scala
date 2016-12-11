@@ -7,10 +7,10 @@ import tscfg.model._
 
 
 class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
-  import accessors._
+  val accessors = new Accessors
   import defs._
   implicit val methodNames = MethodNames()
-  val getter = Getter(hasPath, methodNames)
+  val getter = Getter(hasPath, accessors, methodNames)
   import methodNames._
 
   def generate(objectType: ObjectType): GenResult = {
@@ -100,9 +100,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         }.mkString("\n  ")
       }
       val rootOnes = if (!isRoot) "" else {
-        if (rootListAccessors.isEmpty) "" else {
-          "\n\n  " + rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            rootListAccessors(methodName).replaceAll("\n", "\n  ")
+        if (accessors.rootListAccessors.isEmpty) "" else {
+          "\n\n  " + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            accessors.rootListAccessors(methodName).replaceAll("\n", "\n  ")
           }.mkString("\n  ")
         }
       }
@@ -291,8 +291,7 @@ private[scala] case class MethodNames(prefix: String = "$_") {
   }
 }
 
-private[scala] case class Getter(hasPath: String, implicit val methodNames: MethodNames) {
-  import accessors._
+private[scala] case class Getter(hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {
   import defs._
 
   def instance(a: AnnType, res: Res, path: String)
@@ -316,7 +315,7 @@ private[scala] case class Getter(hasPath: String, implicit val methodNames: Meth
                           (implicit listAccessors: collection.mutable.Map[String, String]
                           ): String = {
     val scalaType: ListScalaType = res.scalaType.asInstanceOf[ListScalaType]
-    val base = listMethodName(scalaType, lt, path)
+    val base = accessors.listMethodName(scalaType, lt, path)
     if (a.optional) {
       s"""if(c.$hasPath("$path")) scala.Some($base) else None"""
     }
@@ -340,7 +339,7 @@ private[scala] case class Getter(hasPath: String, implicit val methodNames: Meth
   }
 }
 
-private[scala] object accessors {
+private[scala] class Accessors {
   import defs._
 
   val rootListAccessors = collection.mutable.LinkedHashMap[String,String]()

@@ -50,21 +50,4 @@ object ScalaIssue10Cfg {
       main = ScalaIssue10Cfg.Main(c.getConfig("main"))
     )
   }
-
-  private def $_L$_int(cl:com.typesafe.config.ConfigList): scala.List[scala.Int] = {
-    import scala.collection.JavaConversions._
-    cl.map(cv => $_int(cv)).toList
-  }
-  private def $_expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
-    val u: Any = cv.unwrapped
-    new java.lang.RuntimeException(cv.origin.lineNumber +
-      ": expecting: " + exp + " got: " +
-      (if (u.isInstanceOf[java.lang.String]) "\"" + u + "\"" else u))
-  }
-  private def $_int(cv:com.typesafe.config.ConfigValue): scala.Int = {
-    val u: Any = cv.unwrapped
-    if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-      !u.isInstanceOf[Integer]) throw $_expE(cv, "integer")
-    u.asInstanceOf[Integer]
-  }
 }
