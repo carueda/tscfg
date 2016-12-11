@@ -1,11 +1,11 @@
 package tscfg.generators.java
 
 import tscfg.generators.java.javaUtil._
-import tscfg.generators.{Gen, GenOpts, GenResult, tsConfigUtil}
+import tscfg.generators.{Generator, GenOpts, GenResult, tsConfigUtil}
 import tscfg.model._
 
 
-class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
+class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   import defs._
   implicit val methodNames = MethodNames()
@@ -16,15 +16,10 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     //checkUserSymbol(className)
     val res = generateForObj(objectType, classNameOpt = Some(className), isRoot = true)
 
-    val header = if (genOpts.preamble.isEmpty) "" else {
-      genOpts.preamble.map { p =>
-        p.replaceAll("\n", "\n// ")
-      } + "\n\n"
-    }
     val packageStr = s"package ${genOpts.packageName};\n\n"
 
-    val definition = (header + packageStr + res.definition).trim
-    res.copy(definition = (header + res.definition).trim)
+    val definition = (packageStr + res.definition).trim
+    res.copy(definition = res.definition.trim)
     genResults.copy(code = definition)
   }
 

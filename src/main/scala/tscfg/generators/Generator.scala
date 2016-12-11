@@ -1,6 +1,6 @@
 package tscfg.generators
 
-import tscfg.specs.ObjSpec
+import tscfg.model.ObjectType
 
 /**
   * Base generation class.
@@ -9,10 +9,11 @@ import tscfg.specs.ObjSpec
   */
 abstract class Generator(genOpts: GenOpts) {
 
-  def generate(objSpec: ObjSpec): GenResult
+  def generate(objectType: ObjectType): GenResult
 
+  protected val className: String = genOpts.className
   protected val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
-
+  protected var genResults = GenResult()
 }
 
 /**
