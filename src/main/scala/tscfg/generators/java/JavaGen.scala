@@ -1,19 +1,14 @@
-package tscfg.generators
+package tscfg.generators.java
 
-import tscfg.generators.JavaGen.MethodNames
 import tscfg.generators.java.javaUtil._
+import tscfg.generators.{Gen, GenOpts, GenResult, tsConfigUtil}
 import tscfg.model._
 
 
 class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
 
-  import JavaGen.defs._
-
-  implicit val methodNames = JavaGen.MethodNames()
-
-  import methodNames._
-
-  private val rootListAccessors = collection.mutable.LinkedHashMap[String,String]()
+  import defs._
+  implicit val methodNames = MethodNames()
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
@@ -40,7 +35,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, classNameOpt, ind)
-    case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt)
+    case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, classNameOpt)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
 
@@ -51,7 +46,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
                              isRoot: Boolean = false
                             ): Res = {
 
-    val className = classNameOpt.getOrElse(generateClassName())
+    val className = adjustClassName(classNameOpt.getOrElse(throw new AssertionError()))
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
     val symbols = ot.members.keys.toList.sorted
@@ -60,7 +55,11 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
       val javaId = javaIdentifier(symbol)
       genResults = genResults.copy(fieldNames = genResults.fieldNames + javaId)
       val a = ot.members(symbol)
-      val res = generate(a.t, ind + "  ", classNamePrefixOpt = Some(className + "."))
+      val res = generate(a.t,
+        ind = ind + "  ",
+        classNamePrefixOpt = Some(className + "."),
+        classNameOpt = Some(javaUtil.getClassName(symbol))
+      )
       (symbol, res)
     }
 
@@ -119,8 +118,15 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     )
   }
 
-  def generateForList(lt: ListType, classNamePrefixOpt: Option[String], ind: String = ""): Res = {
-    val elem = generate(lt.t, ind = ind, classNamePrefixOpt)
+  private def generateForList(lt: ListType,
+                      classNamePrefixOpt: Option[String],
+                      classNameOpt: Option[String],
+                      ind: String = ""): Res = {
+    val classNameOpt2 = Some(classNameOpt match {
+      case None    ⇒ "$Elm"
+      case Some(n) ⇒ n + (if (n.endsWith("$Elm")) "" else "$Elm")
+    })
+    val elem = generate(lt.t, ind = ind, classNamePrefixOpt, classNameOpt2)
     val elemRefType = toObjectType(elem.javaType)
     Res(lt,
       javaType = ListJavaType(elemRefType),
@@ -128,7 +134,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     )
   }
 
-  def generateForBasic(b: BasicType): Res = {
+  private def generateForBasic(b: BasicType): Res = {
     Res(b, javaType = BaseJavaType(name = b match {
       case STRING    ⇒ "java.lang.String"
       case INTEGER   ⇒ "int"
@@ -139,7 +145,25 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     }))
   }
 
-  def toObjectType(javaType: JavaType): JavaType = javaType match {
+  private val rootListAccessors = collection.mutable.LinkedHashMap[String,String]()
+
+  /**
+    * Avoids duplicate class names as they are not supported by Java (the namespaces implied
+    * by nesting are not enough to distinguish inner classes with the same name)
+    */
+  private def adjustClassName(className: String): String = {
+    classNameCounter.get(className) match {
+      case None ⇒
+        classNameCounter.put(className, 1)
+        className
+      case Some(counter) ⇒
+        classNameCounter.put(className, counter + 1)
+        className + (counter + 1)
+    }
+  }
+  private val classNameCounter = collection.mutable.HashMap[String,Int]()
+
+  private def toObjectType(javaType: JavaType): JavaType = javaType match {
     case BaseJavaType(name) ⇒ name match {
       case "int"     ⇒ BaseJavaType("java.lang.Integer")
       case "long"    ⇒ BaseJavaType("java.lang.Long")
@@ -162,9 +186,9 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
   private def objectInstance(a: AnnType, res: Res, path: String): String = {
     val className = res.javaType.toString
     if (a.optional) {
-      s"""c.$hasPath("$path") ? $className(c.getConfig("$path")) : null"""
+      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
     }
-    else s"""$className(c.getConfig("$path"))"""
+    else s"""new $className(c.getConfig("$path"))"""
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
@@ -194,7 +218,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     }
   }
 
-  def listMethodName(javaType: ListJavaType, lt: ListType, path: String)
+  private def listMethodName(javaType: ListJavaType, lt: ListType, path: String)
                     (implicit listAccessors: collection.mutable.Map[String, String],
                      methodNames: MethodNames
                     ): String = {
@@ -246,7 +270,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     case _: ListType ⇒ throw new AssertionError()
   }
 
-  def listMethodDefinition(elemMethodName: String, javaType: JavaType)
+  private def listMethodDefinition(elemMethodName: String, javaType: JavaType)
                           (implicit methodNames: MethodNames): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
@@ -254,7 +278,7 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
     else if (elemMethodName.startsWith("$"))
       s"$elemMethodName(cv)"
     else {
-      val adjusted = elemMethodName.replace("_" + methodNames.elemPrefix, "." + methodNames.elemPrefix)
+      val adjusted = elemMethodName.replace("_", ".")
       s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig())"
     }
 
@@ -273,103 +297,143 @@ class JavaGen(genOpts: GenOpts) extends Gen(genOpts) {
 }
 
 object JavaGen {
+  import java.io.{File, PrintWriter, FileWriter}
+  import tscfg.{ModelBuilder, model}
+  import tscfg.util
 
-  object defs {
-    abstract sealed class JavaType
-    case class BaseJavaType(name: String) extends JavaType {
-      override def toString: String = name
-    }
-    case class ListJavaType(jt: JavaType) extends JavaType {
-      override def toString: String = s"java.util.List<$jt>"
+  def generate(filename: String, showOut: Boolean = false): GenResult = {
+    val file = new File(filename)
+    val src = io.Source.fromFile(file).mkString.trim
+
+    if (showOut)
+      println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+
+    val className = "Java" + {
+      val noPath = filename.substring(filename.lastIndexOf('/') + 1)
+      val noDef = noPath.replaceAll("""^def\.""", "")
+      val symbol = noDef.substring(0, noDef.indexOf('.'))
+      util.upperFirst(symbol) + "Cfg"
     }
 
-    case class Res(typ: Type,
-                   javaType: JavaType,
-                   definition: String = "")
+    val objectType = ModelBuilder(src)
+    if (showOut)
+      println("\nobjSpec:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+
+    val genOpts = GenOpts("tscfg.example", className)
+
+    val generator = new JavaGen(genOpts)
+
+    val results = generator.generate(objectType)
+
+    //println("\n" + results.code)
+
+    val destFilename  = s"src/main/java/tscfg/example/$className.java"
+    val destFile = new File(destFilename)
+    val out = new PrintWriter(new FileWriter(destFile), true)
+    out.println(results.code)
+    results
   }
 
-  case class MethodNames(prefix: String = "$_") {
-    val strA = prefix + "str"
-    val intA = prefix + "int"
-    val lngA = prefix + "lng"
-    val dblA = prefix + "dbl"
-    val blnA = prefix + "bln"
-    val durA = prefix + "dur"
-    val expE = prefix + "expE"
-    val listPrefix = prefix + "L"
-    val elemPrefix = prefix + "E"
+  // $COVERAGE-OFF$
+  def main(args: Array[String]): Unit = {
+    val filename = args(0)
+    val results = generate(filename, showOut = true)
+    println(
+      s"""classNames: ${results.classNames}
+         |fieldNames: ${results.fieldNames}
+      """.stripMargin)
+  }
+  // $COVERAGE-ON$
 
-    def checkUserSymbol(symbol: String): Unit = {
-      if (symbol.startsWith(prefix))
-        println(
-          s"""
-             |WARNING: Symbol $symbol may cause conflict with generated code.
-             |         Avoid the $prefix prefix in your spec's identifiers.
+}
+
+private[java] object defs {
+  abstract sealed class JavaType
+  case class BaseJavaType(name: String) extends JavaType {
+    override def toString: String = name
+  }
+  case class ListJavaType(jt: JavaType) extends JavaType {
+    override def toString: String = s"java.util.List<$jt>"
+  }
+
+  case class Res(typ: Type,
+                 javaType: JavaType,
+                 definition: String = "")
+}
+
+private[java] case class MethodNames(prefix: String = "$_") {
+  val strA = prefix + "str"
+  val intA = prefix + "int"
+  val lngA = prefix + "lng"
+  val dblA = prefix + "dbl"
+  val blnA = prefix + "bln"
+  val durA = prefix + "dur"
+  val expE = prefix + "expE"
+  val listPrefix = prefix + "L"
+
+  def checkUserSymbol(symbol: String): Unit = {
+    if (symbol.startsWith(prefix))
+      println(
+        s"""
+           |WARNING: Symbol $symbol may cause conflict with generated code.
+           |         Avoid the $prefix prefix in your spec's identifiers.
          """.stripMargin
-        )
-    }
-
-    def generateClassName(): String = {
-      newClassCount += 1
-      elemPrefix + newClassCount
-    }
-
-    private var newClassCount = 0
-
-    // definition of methods used to access list's elements of basic type
-    val basicElemAccessDefinition: Map[String, String] = {
-      Map(
-        strA → s"""
-          |private static java.lang.String $strA(com.typesafe.config.ConfigValue cv) {
-          |  return java.lang.String.valueOf(cv.unwrapped());
-          |}""".stripMargin.trim,
-
-        intA → s"""
-          |private static java.lang.Integer $intA(com.typesafe.config.ConfigValue cv) {
-          |  java.lang.Object u = cv.unwrapped();
-          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-          |    !(u instanceof java.lang.Integer)) throw $expE(cv, "integer");
-          |  return (java.lang.Integer) u;
-          |}
-          |""".stripMargin.trim,
-
-        lngA → s"""
-          |private static java.lang.Long $lngA(com.typesafe.config.ConfigValue cv) {
-          |  java.lang.Object u = cv.unwrapped();
-          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-          |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $expE(cv, "long");
-          |  return ((java.lang.Number) u).longValue();
-          |}
-          |""".stripMargin.trim,
-
-        dblA → s"""
-          |private static java.lang.Double $dblA(com.typesafe.config.ConfigValue cv) {
-          |  java.lang.Object u = cv.unwrapped();
-          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-          |    !(u instanceof java.lang.Number)) throw $expE(cv, "double");
-          |  return ((java.lang.Number) u).doubleValue();
-          |}
-          |""".stripMargin.trim,
-
-        blnA → s"""
-          |private static java.lang.Boolean $blnA(com.typesafe.config.ConfigValue cv) {
-          |  java.lang.Object u = cv.unwrapped();
-          |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
-          |    !(u instanceof java.lang.Boolean)) throw $expE(cv, "boolean");
-          |  return (java.lang.Boolean) u;
-          |}
-          |""".stripMargin.trim
       )
-    }
+  }
 
-    val expEDef: String = {
-      s"""
-        |private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
-        |  java.lang.Object u = cv.unwrapped();
-        |  return new java.lang.RuntimeException(cv.origin().lineNumber()
-        |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\\"" +u+ "\\"" : u));
-        |}
-        |""".stripMargin.trim
-    }
+  // definition of methods used to access list's elements of basic type
+  val basicElemAccessDefinition: Map[String, String] = {
+    Map(
+      strA → s"""
+                |private static java.lang.String $strA(com.typesafe.config.ConfigValue cv) {
+                |  return java.lang.String.valueOf(cv.unwrapped());
+                |}""".stripMargin.trim,
+
+      intA → s"""
+                |private static java.lang.Integer $intA(com.typesafe.config.ConfigValue cv) {
+                |  java.lang.Object u = cv.unwrapped();
+                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+                |    !(u instanceof java.lang.Integer)) throw $expE(cv, "integer");
+                |  return (java.lang.Integer) u;
+                |}
+                |""".stripMargin.trim,
+
+      lngA → s"""
+                |private static java.lang.Long $lngA(com.typesafe.config.ConfigValue cv) {
+                |  java.lang.Object u = cv.unwrapped();
+                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+                |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $expE(cv, "long");
+                |  return ((java.lang.Number) u).longValue();
+                |}
+                |""".stripMargin.trim,
+
+      dblA → s"""
+                |private static java.lang.Double $dblA(com.typesafe.config.ConfigValue cv) {
+                |  java.lang.Object u = cv.unwrapped();
+                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
+                |    !(u instanceof java.lang.Number)) throw $expE(cv, "double");
+                |  return ((java.lang.Number) u).doubleValue();
+                |}
+                |""".stripMargin.trim,
+
+      blnA → s"""
+                |private static java.lang.Boolean $blnA(com.typesafe.config.ConfigValue cv) {
+                |  java.lang.Object u = cv.unwrapped();
+                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
+                |    !(u instanceof java.lang.Boolean)) throw $expE(cv, "boolean");
+                |  return (java.lang.Boolean) u;
+                |}
+                |""".stripMargin.trim
+    )
+  }
+
+  val expEDef: String = {
+    s"""
+       |private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
+       |  java.lang.Object u = cv.unwrapped();
+       |  return new java.lang.RuntimeException(cv.origin().lineNumber()
+       |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\\"" +u+ "\\"" : u));
+       |}
+       |""".stripMargin.trim
   }
 }
