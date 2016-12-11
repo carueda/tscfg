@@ -161,10 +161,10 @@ object ScalaGen {
 
   def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
-    val src = io.Source.fromFile(file).mkString.trim
+    val source = io.Source.fromFile(file).mkString.trim
 
     if (showOut)
-      println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+      println("src:\n  |" + source.replaceAll("\n", "\n  |"))
 
     val className = "Scala" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
@@ -173,11 +173,11 @@ object ScalaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
-    val objectType = ModelBuilder(src)
+    val objectType = ModelBuilder(source)
     if (showOut)
       println("\nobjSpec:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
 
-    val genOpts = GenOpts("tscfg.example", className)
+    val genOpts = GenOpts("tscfg.example", className, j7 = false)
 
     val generator = new ScalaGen(genOpts)
 

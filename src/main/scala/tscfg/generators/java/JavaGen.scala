@@ -311,7 +311,7 @@ object JavaGen {
     if (showOut)
       println("\nobjSpec:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
 
-    val genOpts = GenOpts("tscfg.example", className)
+    val genOpts = GenOpts("tscfg.example", className, j7 = false)
 
     val generator = new JavaGen(genOpts)
 

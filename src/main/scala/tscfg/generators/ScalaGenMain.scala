@@ -23,7 +23,7 @@ object ScalaGenMain {
     println(model.util.format(objectType))
 
     val className = "Cfg"
-    val genOpts = GenOpts("tscfg.example", className)
+    val genOpts = GenOpts("tscfg.example", className, j7 = false)
     val gen = new ScalaGen(genOpts)
     val res = gen.generate(objectType)
     println(s"classNames = ${res.classNames}")

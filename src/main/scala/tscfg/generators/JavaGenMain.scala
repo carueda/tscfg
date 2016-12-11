@@ -23,7 +23,7 @@ object JavaGenMain {
     println(model.util.format(objectType))
 
     val className = "JCfg"
-    val genOpts = GenOpts("tscfg.example", className)
+    val genOpts = GenOpts("tscfg.example", className, j7 = false)
     val gen = new JavaGen(genOpts)
     val res = gen.generate(objectType)
     println(s"classNames = ${res.classNames}")

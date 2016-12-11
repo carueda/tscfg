@@ -23,17 +23,11 @@ abstract class Generator(genOpts: GenOpts) {
   * @param className    class name
   * @param j7           true to generate code for Typesafe Config v &lt;= 1.2.1
   */
-case class GenOpts(packageName: String  = defaults.packageName,
-                   className: String    = defaults.className,
-                   j7: Boolean          = false
+case class GenOpts(packageName: String,
+                   className: String,
+                   j7: Boolean
                   )
 
 case class GenResult(code: String = "?",
                      classNames: Set[String] = Set(),
                      fieldNames: Set[String] = Set())
-
-
-object defaults {
-  val packageName = "tscfg.example"
-  val className = "ExampleCfg"
-}

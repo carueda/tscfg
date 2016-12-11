@@ -14,14 +14,20 @@ import tscfg.generators.{Generator, GenOpts}
 object Main {
   val version: String = ConfigFactory.load().getString("tscfg.version")
 
+  val defaultGenOpts = GenOpts(
+    packageName = "tscfg.example",
+    className = "ExampleCfg",
+    j7 = false
+  )
+
   val defaultDestDir: String = "/tmp"
 
   val usage: String = s"""
              |tscfg $version
              |Usage:  tscfg.Main --spec inputFile [options]
              |Options (default):
-             |  --pn <packageName>                                     (${generators.defaults.packageName})
-             |  --cn <className>                                       (${generators.defaults.className})
+             |  --pn <packageName>                                     (${defaultGenOpts.packageName})
+             |  --cn <className>                                       (${defaultGenOpts.className})
              |  --dd <destDir>                                         ($defaultDestDir)
              |  --j7                  generate code for java <= 7      (8)
              |  --scala               generate scala code              (java)
@@ -30,8 +36,8 @@ object Main {
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
-                         packageName: String = generators.defaults.packageName,
-                         className: String =   generators.defaults.className,
+                         packageName: String = defaultGenOpts.packageName,
+                         className: String =   defaultGenOpts.className,
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java"
