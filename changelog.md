@@ -1,3 +1,6 @@
+2016-12-12 - 0.7.0
+	- capture model build warnings
+
 2016-12-01 - 0.7.0
 	- another model revision
 

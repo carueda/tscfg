@@ -2,15 +2,45 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
-import tscfg.model.{DURATION, ObjectType}
+import tscfg.model.DURATION
 
 import scala.collection.JavaConversions._
 
+case class ModelBuildResult(objectType: model.ObjectType,
+                            warnings: List[buildWarnings.Warning])
+
+object buildWarnings {
+  sealed abstract class Warning(ln: Int,
+                                src: String,
+                                msg: String = "") {
+    val line: Int = ln
+    val source: String = src
+    val message: String = msg
+  }
+
+  case class MultElemListWarning(ln: Int, src: String) extends
+    Warning(ln, src, "only first element will be considered")
+
+  case class OptListElemWarning(ln: Int, src: String) extends
+    Warning(ln, src, "ignoring optional mark in list's element type")
+
+  case class DefaultListElemWarning(ln: Int, default: String, elemType: String) extends
+    Warning(ln, default, s"ignoring default value='$default' in list's element type: $elemType")
+}
 
 class ModelBuilder {
   import collection._
+  import buildWarnings._
 
-  def fromConfig(conf: Config): model.ObjectType = {
+  def build(conf: Config): ModelBuildResult = {
+    warns.clear()
+    ModelBuildResult(objectType = fromConfig(conf),
+      warnings = warns.toList.sortBy(_.line))
+  }
+
+  private val warns = collection.mutable.ArrayBuffer[Warning]()
+
+  private def fromConfig(conf: Config): model.ObjectType = {
     val memberStructs = getMemberStructs(conf)
     val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct ⇒
       val name = childStruct.name
@@ -116,8 +146,8 @@ class ModelBuilder {
     }
   }
 
-  def toAnnBasicType(valueString: String):
-      Option[(model.BasicType, Boolean, Option[String])] = {
+  private def toAnnBasicType(valueString: String):
+  Option[(model.BasicType, Boolean, Option[String])] = {
 
     val tokens = valueString.split("""\s*\|\s*""")
     val typePart = tokens(0).toLowerCase
@@ -154,7 +184,7 @@ class ModelBuilder {
       val line = cv.origin().lineNumber()
       val options: ConfigRenderOptions = ConfigRenderOptions.defaults
         .setFormatted(false).setComments(false).setOriginComments(false)
-      println(s"$line: ${cv.render(options)}: WARN: only first element will be considered")
+      warns += MultElemListWarning(line, cv.render(options))
     }
 
     val cv0: ConfigValue = cv.get(0)
@@ -167,10 +197,10 @@ class ModelBuilder {
         toAnnBasicType(valueString) match {
           case Some((basicType, isOpt, defaultValue)) ⇒
             if (isOpt)
-              println(s"WARN: ignoring optional mark in list's element type: $valueString")
+              warns += OptListElemWarning(cv0.origin().lineNumber(), valueString)
 
             if (defaultValue.isDefined)
-              println(s"WARN: ignoring default value='${defaultValue.get}' in list's element type: $valueString")
+              warns += DefaultListElemWarning(cv0.origin().lineNumber(), defaultValue.get, valueString)
 
             basicType
 
@@ -213,11 +243,12 @@ class ModelBuilder {
 
 object ModelBuilder {
   import java.io.File
+
   import com.typesafe.config.ConfigFactory
 
-  def apply(source: String): ObjectType = {
+  def apply(source: String): ModelBuildResult = {
     val config = ConfigFactory.parseString(source).resolve()
-    new ModelBuilder().fromConfig(config)
+    new ModelBuilder().build(config)
   }
 
   // $COVERAGE-OFF$
@@ -226,9 +257,9 @@ object ModelBuilder {
     val file = new File(filename)
     val source = io.Source.fromFile(file).mkString.trim
     println("source:\n  |" + source.replaceAll("\n", "\n  |"))
-    val objectType = ModelBuilder(source)
-    println(s"objectType:")
-    println(model.util.format(objectType))
+    val result = ModelBuilder(source)
+    println("objectType:")
+    println(model.util.format(result.objectType))
   }
   // $COVERAGE-ON$
 }

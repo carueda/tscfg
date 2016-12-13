@@ -2,22 +2,24 @@ package tscfg
 
 import org.specs2.mutable.Specification
 import model.durations._
+import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
 import tscfg.model._
 
 
 class ModelBuilderSpec extends Specification {
 
-  def build(source: String, showOutput: Boolean = false): ObjectType = {
+  def build(source: String, showOutput: Boolean = false): ModelBuildResult = {
 
     if (showOutput)
       println("\nsource:\n  |" + source.replaceAll("\n", "\n  |"))
 
-    val objSpec = ModelBuilder(source)
+    val result = ModelBuilder(source)
+    val objectType = result.objectType
 
     if (showOutput)
-      println("\nobjSpec:\n  |" + model.util.format(objSpec).replaceAll("\n", "\n  |"))
+      println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
 
-    objSpec
+    result
   }
 
   private def verify(objType: ObjectType,
@@ -35,16 +37,16 @@ class ModelBuilderSpec extends Specification {
   }
 
   "with empty input" should {
-    val spec = build("")
+    val result = build("")
     "build empty ObjectType" in {
-      spec === ObjectType()
+      result.objectType === ObjectType()
     }
   }
 
   "with empty list" should {
     def a = build(
       """
-        |list: [ ]
+        |my_list: [ ]
       """.stripMargin)
 
     "throw IllegalArgumentException" in {
@@ -53,84 +55,82 @@ class ModelBuilderSpec extends Specification {
   }
 
   "with list with multiple elements" should {
-    build(
-      """
-        |list: [ true, false ]
-      """.stripMargin)
+    val result = build("my_list: [ true, false ]")
 
     "generate warning" in {
-      1===1 // not actually verified here
+      val warns = result.warnings.filter(_.isInstanceOf[MultElemListWarning])
+      warns.map(_.source) must contain("[true,false]")
     }
   }
 
   "with list element indicating optional" should {
-    build(
-      """
-        |list: [ "string?" ]
-      """.stripMargin)
+    val result = build("""my_list: [ "string?" ]""")
 
     "generate warning" in {
-      1===1 // not actually verified here
+      val warns = result.warnings.filter(_.isInstanceOf[OptListElemWarning])
+      warns.map(_.source) must contain("string?")
     }
   }
 
   "with list element indicating a default value" should {
-    build(
+    val result = build(
       """
-        |list: [ "double | 3.14" ]
+        |my_list: [ "double | 3.14" ]
       """.stripMargin)
 
     "generate warning" in {
-      1===1 // not actually verified here
+      val warns = result.warnings.filter(_.isInstanceOf[DefaultListElemWarning]).
+        asInstanceOf[List[DefaultListElemWarning]]
+      warns.map(_.default) must contain("3.14")
     }
   }
 
   "with list with literal int" should {
-    val ot = build(
+    val result = build(
       """
-        |list: [ 99999999 ]
+        |my_list: [ 99999999 ]
       """.stripMargin)
 
     "translate into ListType(INTEGER)" in {
-      ot.members("list").t === ListType(INTEGER)
+      result.objectType.members("my_list").t === ListType(INTEGER)
     }
   }
 
   "with list with literal long" should {
-    val ot = build(
+    val result = build(
       """
-        |list: [ 99999999999 ]
+        |my_list: [ 99999999999 ]
       """.stripMargin)
 
     "translate into ListType(LONG)" in {
-      ot.members("list").t === ListType(LONG)
+      result.objectType.members("my_list").t === ListType(LONG)
     }
   }
 
   "with list with literal double" should {
-    val ot = build(
+    val result = build(
       """
-        |list: [ 3.14 ]
+        |my_list: [ 3.14 ]
       """.stripMargin)
 
     "translate into ListType(DOUBLE)" in {
-      ot.members("list").t === ListType(DOUBLE)
+      result.objectType.members("my_list").t === ListType(DOUBLE)
     }
   }
 
   "with list with literal boolean" should {
-    val ot = build(
+    val result = build(
       """
-        |list: [ false ]
+        |my_list: [ false ]
       """.stripMargin)
 
     "translate into ListType(BOOLEAN)" in {
-      ot.members("list").t === ListType(BOOLEAN)
+      result.objectType.members("my_list").t === ListType(BOOLEAN)
     }
   }
 
   "with good input" should {
-    val objType = build(
+    val result = build(
       """
         |foo {
         |  reqStr        = string
@@ -167,6 +167,8 @@ class ModelBuilderSpec extends Specification {
         |  listDuration_se  = [ "duration : second" ]
         |}
       """.stripMargin)
+
+    val objType = result.objectType
 
     "build expected objType" in {
       objType.members.keySet === Set("foo")

@@ -112,8 +112,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   }
 
   private def generateForList(lt: ListType,
-                      classNamePrefixOpt: Option[String],
-                      className: String): Res = {
+                              classNamePrefixOpt: Option[String],
+                              className: String): Res = {
     val className2 = className + (if (className.endsWith("$Elm")) "" else "$Elm")
     val elem = generate(lt.t, classNamePrefixOpt, className2)
     val elemRefType = toObjectType(elem.javaType)
@@ -208,9 +208,9 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   }
 
   private def listMethodName(javaType: ListJavaType, lt: ListType, path: String)
-                    (implicit listAccessors: collection.mutable.Map[String, String],
-                     methodNames: MethodNames
-                    ): String = {
+                            (implicit listAccessors: collection.mutable.Map[String, String],
+                             methodNames: MethodNames
+                            ): String = {
 
     val (_, methodName) = rec(javaType, lt, "")
     methodName + s"""(c.getList("$path"))"""
@@ -260,7 +260,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   }
 
   private def listMethodDefinition(elemMethodName: String, javaType: JavaType)
-                          (implicit methodNames: MethodNames): (String, String) = {
+                                  (implicit methodNames: MethodNames): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
       s"$elemMethodName((com.typesafe.config.ConfigList)cv)"
@@ -293,10 +293,10 @@ object JavaGen {
   // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false): GenResult = {
     val file = new File(filename)
-    val src = io.Source.fromFile(file).mkString.trim
+    val source = io.Source.fromFile(file).mkString.trim
 
     if (showOut)
-      println("src:\n  |" + src.replaceAll("\n", "\n  |"))
+      println("source:\n  |" + source.replaceAll("\n", "\n  |"))
 
     val className = "Java" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
@@ -305,9 +305,15 @@ object JavaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
-    val objectType = ModelBuilder(src)
-    if (showOut)
-      println("\nobjSpec:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+    val buildResult = ModelBuilder(source)
+    val objectType = buildResult.objectType
+    if (showOut) {
+      println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+      if (buildResult.warnings.nonEmpty) {
+        println("warnings:")
+        buildResult.warnings.foreach(w ⇒ println(s"   line ${w.line}: ${w.source}: ${w.message}"))
+      }
+    }
 
     val genOpts = GenOpts("tscfg.example", className, j7 = false)
 

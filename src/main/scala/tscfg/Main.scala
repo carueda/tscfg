@@ -23,16 +23,16 @@ object Main {
   val defaultDestDir: String = "/tmp"
 
   val usage: String = s"""
-             |tscfg $version
-             |Usage:  tscfg.Main --spec inputFile [options]
-             |Options (default):
-             |  --pn <packageName>                                     (${defaultGenOpts.packageName})
-             |  --cn <className>                                       (${defaultGenOpts.className})
-             |  --dd <destDir>                                         ($defaultDestDir)
-             |  --j7                  generate code for java <= 7      (8)
-             |  --scala               generate scala code              (java)
-             |  --java                generate java code               (the default)
-             |Output is written to $$destDir/$$className.ext
+                         |tscfg $version
+                         |Usage:  tscfg.Main --spec inputFile [options]
+                         |Options (default):
+                         |  --pn <packageName>                                     (${defaultGenOpts.packageName})
+                         |  --cn <className>                                       (${defaultGenOpts.className})
+                         |  --dd <destDir>                                         ($defaultDestDir)
+                         |  --j7                  generate code for java <= 7      (8)
+                         |  --scala               generate scala code              (java)
+                         |  --java                generate java code               (the default)
+                         |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
@@ -41,7 +41,7 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java"
-                 )
+                        )
 
   def main(args: Array[String]): Unit = {
     generate(getOpts(args.toList))
@@ -113,8 +113,16 @@ object Main {
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim
-    val objectType = ModelBuilder(source)
+
+    val buildResult = ModelBuilder(source)
+    val objectType = buildResult.objectType
+
     //println("\nobjectType:\n  |" + objectType.format().replaceAll("\n", "\n  |"))
+
+    if (buildResult.warnings.nonEmpty) {
+      println("WARNINGS:")
+      buildResult.warnings.foreach(w ⇒ println(s"   line ${w.line}: ${w.source}: ${w.message}"))
+    }
 
     println(s"generating: $destFile")
     val pw = out match {
@@ -137,14 +145,14 @@ object Main {
 
     out.close()
 
-/*
-    opts.templates foreach { genTemplate =>
-      val destFile = new File(genTemplate.filename)
-      printf("%10s: %s\n", genTemplate.what, destFile.getAbsolutePath)
-      val out = new PrintWriter(destFile)
-      templateGenerator.generate(genTemplate.what, root, out)
-      out.close()
-    }
-*/
+    /*
+        opts.templates foreach { genTemplate =>
+          val destFile = new File(genTemplate.filename)
+          printf("%10s: %s\n", genTemplate.what, destFile.getAbsolutePath)
+          val out = new PrintWriter(destFile)
+          templateGenerator.generate(genTemplate.what, root, out)
+          out.close()
+        }
+    */
   }
 }

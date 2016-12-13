@@ -161,7 +161,7 @@ object ScalaGen {
     val source = io.Source.fromFile(file).mkString.trim
 
     if (showOut)
-      println("src:\n  |" + source.replaceAll("\n", "\n  |"))
+      println("source:\n  |" + source.replaceAll("\n", "\n  |"))
 
     val className = "Scala" + {
       val noPath = filename.substring(filename.lastIndexOf('/') + 1)
@@ -170,9 +170,15 @@ object ScalaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
-    val objectType = ModelBuilder(source)
-    if (showOut)
-      println("\nobjSpec:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+    val buildResult = ModelBuilder(source)
+    val objectType = buildResult.objectType
+    if (showOut) {
+      println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+      if (buildResult.warnings.nonEmpty) {
+        println("warnings:")
+        buildResult.warnings.foreach(w ⇒ println(s"   line ${w.line}: ${w.source}: ${w.message}"))
+      }
+    }
 
     val genOpts = GenOpts("tscfg.example", className, j7 = false)
 
