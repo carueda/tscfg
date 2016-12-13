@@ -1,5 +1,7 @@
 package tscfg.example;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
@@ -28,13 +30,18 @@ public class JavaUse {
     Integer serial2 = cfg.endpoint.serial;
     int port2       = cfg.endpoint.interface_.port;
     String type2    = cfg.endpoint.interface_.type;
-
-    System.out.println("\n*** tscfg toString: ***");
-    System.out.println(cfg.toString());
-
-    System.out.println("\n*** Typesafe Config toString: ***");
+  
+    System.out.println("\n*** tscfg POJO structure (in JSON): *** ");
+    System.out.println("  " + toJson(cfg).replaceAll("\n", "\n  "));
+  
+    System.out.println("\n*** Typesafe rendering of input Config object: *** ");
     ConfigRenderOptions options = ConfigRenderOptions.defaults()
         .setFormatted(true).setComments(true).setOriginComments(false);
     System.out.println(tsConfig.root().render(options));
+  }
+
+  private static String toJson(JavaExampleCfg cfg) {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    return gson.toJson(cfg);
   }
 }

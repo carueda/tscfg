@@ -33,10 +33,10 @@ The tool is already pretty usable.
 It supports a good part of the common types as supported by Typesafe Config 
 (string, int, long, double, boolean, duration, list)
 and has good test coverage.
-However, it's in general still work in progress. 
-A missing "type" is [size in bytes](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format);
+However, it can be enhanced in a number of ways, including: 
 command line interface can be improved;
-syntax for types is not stable yet.
+syntax for types is not stable yet;
+and a missing "type" is [size in bytes](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format).
 Feel free to fork, enter issues, submit PRs, etc.
 
 
@@ -175,7 +175,7 @@ object ScalaExampleCfg {
 
 ## running tscfg
 
-You will need a JRE 8 and the latest "fat" JAR (tscfg-x.y.z.jar)
+You will need a JRE 8 and the latest fat JAR (tscfg-x.y.z.jar)
 from the [releases](https://github.com/carueda/tscfg/releases).
 
 > Or run `sbt assembly` under a clone of this repo to generate the fat jar. 
@@ -273,7 +273,7 @@ The following basic types are supported:
 #### durations
 
 A duration type can be further qualified with a suffix consisting of a colon 
-an a desired time unit for the reported value. 
+and a desired time unit for the reported value. 
 For example, with the type `"duration:day"`, the reported long value will be in day units, 
 with conversion automatically performed if the actual configuration value is given in 
 any other unit as supported by Typesafe Config according to the 
@@ -329,26 +329,27 @@ positions: [
 ]
 ```
 
-In Java and Scala this basically becomes:
+In Java this basically becomes:
 
 ```java
 public class Cfg {
-  public final java.util.List<$Elm> positions;
+  public final java.util.List<Cfg.Positions$Elm> positions;
 
-  public static class $Elm {
+  public static class Positions$Elm {
     public final double lat;
     public final double lon;
   }
 }
 ```
 
+and in Scala:
 ```scala
 case class Cfg(
-  positions : List[Cfg.$Elm]
+  positions : List[Cfg.Positions$Elm]
 )
 
 object Cfg {
-  case class $Elm(
+  case class Positions$Elm(
     lat : Double,
     lon : Double
   )
@@ -376,7 +377,7 @@ In Scala this basically becomes:
 ```scala
 case class Cfg(
   email : Option[Cfg.Email],
-  reals : Option[List[Cfg.$Elm]]
+  reals : Option[List[Cfg.Reals$Elm]]
 )
 
 object Cfg {
@@ -384,7 +385,7 @@ object Cfg {
     password : String,
     server   : String
   )
-  case class $Elm(
+  case class Reals$Elm(
     foo : Double
   )
 }
@@ -407,7 +408,7 @@ may become more apparent.
 
 **Could tscfg generate `Optional<T>` by default for optional fields?**
 
-Sorry, it's not implemented yet. Want to contribute?
+It's not yet implemented. Want to contribute?
 
 **What happened with the generated `toString` method?**
 
