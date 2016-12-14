@@ -196,7 +196,11 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     a.default match {
       case Some(v) ⇒
         val value = tsConfigUtil.basicValue(a.t, v)
-        s"""c.$hasPath("$path") ? c.$getter : $value"""
+        (bt, value) match {
+          case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
+          case _                  ⇒ s"""c.$hasPath("$path") ? c.$getter : $value"""
+        }
 
       case None if a.optional ⇒
         s"""c.$hasPath("$path") ? c.$getter : null"""

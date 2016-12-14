@@ -1,4 +1,5 @@
 2016-12-14 - 0.7.1
+- use simpler, equivalent boolean access expression according to given default
 - fixed: spec with literal values were not generating "primitive" types 
   in java. There was a missing `&& a.default.isEmpty` in:
   `val typ = if (a.optional && a.default.isEmpty) toObjectType(memberType) else memberType`

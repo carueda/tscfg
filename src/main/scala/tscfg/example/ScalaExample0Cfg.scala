@@ -13,7 +13,7 @@ object ScalaExample0Cfg {
   object Service {
     def apply(c: com.typesafe.config.Config): ScalaExample0Cfg.Service = {
       ScalaExample0Cfg.Service(
-        debug    = if(c.hasPathOrNull("debug")) c.getBoolean("debug") else true,
+        debug    = !c.hasPathOrNull("debug") || c.getBoolean("debug"),
         factor   = if(c.hasPathOrNull("factor")) c.getDouble("factor") else 0.75,
         poolSize = if(c.hasPathOrNull("poolSize")) c.getInt("poolSize") else 32,
         url      = if(c.hasPathOrNull("url")) c.getString("url") else "http://example.net/rest"

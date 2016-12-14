@@ -330,7 +330,11 @@ private[scala] case class Getter(hasPath: String, accessors: Accessors, implicit
     a.default match {
       case Some(v) ⇒
         val value = tsConfigUtil.basicValue(a.t, v)
-        s"""if(c.$hasPath("$path")) c.$getter else $value"""
+        (bt, value) match {
+          case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
+          case _                  ⇒ s"""if(c.$hasPath("$path")) c.$getter else $value"""
+        }
 
       case None if a.optional ⇒
         s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
