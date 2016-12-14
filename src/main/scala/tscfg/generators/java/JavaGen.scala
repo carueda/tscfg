@@ -3,6 +3,7 @@ package tscfg.generators.java
 import tscfg.generators.java.javaUtil._
 import tscfg.generators._
 import tscfg.model._
+import tscfg.util.escapeString
 
 
 class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
@@ -75,7 +76,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val ctorMembersStr = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val javaId = javaIdentifier(symbol)
-      "this." + javaId + " = " + instance(a, res, symbol) + ";"
+      "this." + javaId + " = " + instance(a, res, path = escapeString(symbol)) + ";"
     }.mkString("\n    ")
 
     val elemAccessorsStr = {

@@ -297,4 +297,25 @@ class ScalaMainSpec extends Specification {
     }
   }
 
+  "issue19" should {
+    """replace leading and trailing " with _""" in {
+      val r = ScalaGen.generate("example/issue19.conf")
+      r.classNames === Set("ScalaIssue19Cfg")
+      r.fields === Map(
+        "_do_log_"  → "scala.Boolean",
+        "_$_foo_"   → "java.lang.String"
+      )
+    }
+
+    "example" in {
+      val c = ScalaIssue19Cfg(ConfigFactory.parseString(
+        """
+          |"do log" : true
+          |"$_foo"  : some string
+        """.stripMargin
+      ))
+      c._do_log_  === true
+      c._$_foo_   === "some string"
+    }
+  }
 }

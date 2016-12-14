@@ -4,6 +4,7 @@ import tscfg.{ModelBuilder, model}
 import tscfg.generators.scala.scalaUtil.scalaIdentifier
 import tscfg.generators._
 import tscfg.model._
+import tscfg.util.escapeString
 
 
 class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
@@ -82,7 +83,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val objectMembersStr = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val scalaId = scalaIdentifier(symbol)
-      padId(scalaId) + " = " + getter.instance(a, res, symbol)
+      padId(scalaId) + " = " + getter.instance(a, res, path = escapeString(symbol))
     }.mkString(",\n      ")
 
     val innerClassesStr = {

@@ -1,6 +1,7 @@
 package tscfg.generators
 
 import tscfg.model._
+import tscfg.util.escapeString
 import tscfg.model.durations._
 
 import _root_.java.util.concurrent.TimeUnit
@@ -23,7 +24,7 @@ object tsConfigUtil {
 
   def basicValue(t: Type, value: String): String = t match {
     case DURATION(q) ⇒ durationValue(value, q)
-    case STRING   ⇒ '"' + value.replaceAll("\\\"", "\\\\\"") + '"'
+    case STRING   ⇒ '"' + escapeString(value) + '"'
     case _        ⇒ value
   }
 

@@ -293,4 +293,25 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue19" should {
+    """replace leading and trailing " with _""" in {
+      val r = JavaGen.generate("example/issue19.conf")
+      r.classNames === Set("JavaIssue19Cfg")
+      r.fields === Map(
+        "_do_log_"  → "boolean",
+        "_$_foo_"   → "java.lang.String"
+      )
+    }
+
+    "example" in {
+      val c = new JavaIssue19Cfg(ConfigFactory.parseString(
+        """
+          |"do log" : true
+          |"$_foo"  : some string
+        """.stripMargin
+      ))
+      c._do_log_  === true
+      c._$_foo_   === "some string"
+    }
+  }
 }
