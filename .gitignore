@@ -1,5 +1,3 @@
-src/main/resources/application.conf
-
 ### Scala template
 *.class
 *.log
