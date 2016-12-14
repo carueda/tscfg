@@ -129,6 +129,20 @@ class ModelBuilderSpec extends Specification {
     }
   }
 
+  "with literal integer" should {
+    val result = build(
+      """
+        |optInt: 21
+      """.stripMargin)
+
+    "translate into ListType(BOOLEAN)" in {
+      val at = result.objectType.members("optInt")
+      at.t === INTEGER
+      at.isOptional must beTrue
+      at.default must beSome("21")
+    }
+  }
+
   "with good input" should {
     val result = build(
       """

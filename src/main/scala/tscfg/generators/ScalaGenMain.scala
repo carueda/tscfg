@@ -26,8 +26,8 @@ object ScalaGenMain {
     val genOpts = GenOpts("tscfg.example", className, j7 = false)
     val gen = new ScalaGen(genOpts)
     val res = gen.generate(objectType)
-    println(s"classNames = ${res.classNames}")
-    println(s"fieldNames = ${res.fieldNames}")
+    println(s"classNames: ${res.classNames}")
+    println(s"fields    : ${res.fields}")
 
     import _root_.java.io._
     val destFilename  = s"src/main/scala/tscfg/example/Cfg.scala"

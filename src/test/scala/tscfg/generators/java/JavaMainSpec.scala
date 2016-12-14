@@ -7,11 +7,38 @@ import tscfg.example._
 class JavaMainSpec extends Specification {
   import scala.collection.JavaConversions._
 
+  "literal values as types" should {
+    "generate primitive types with given values as defaults" in {
+      val r = JavaGen.generate("example/example0.spec.conf")
+      r.classNames === Set("JavaExample0Cfg", "Service")
+      r.fields === Map(
+        "service"  → "JavaExample0Cfg.Service",
+        "url"      → "java.lang.String",
+        "debug"    → "boolean",
+        "factor"   → "double",
+        "poolSize" → "int"
+      )
+    }
+
+    "example with missing entries should get their defaults" in {
+      val c = new JavaExample0Cfg(ConfigFactory.parseString(
+        """
+          |service = {
+          |}
+        """.stripMargin
+      ))
+      c.service.url      === "http://example.net/rest"
+      c.service.poolSize === 32
+      c.service.debug    === true
+      c.service.factor   === 0.75
+    }
+  }
+
   "issue5" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue5.conf")
       r.classNames === Set("JavaIssue5Cfg", "Foo", "Config")
-      r.fieldNames === Set("foo", "config", "bar")
+      r.fields.keySet === Set("foo", "config", "bar")
     }
   }
 
@@ -19,7 +46,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue10.conf")
       r.classNames === Set("JavaIssue10Cfg", "Main", "Email", "Reals$Elm")
-      r.fieldNames === Set("server", "email", "main", "reals", "password", "foo")
+      r.fields.keySet === Set("server", "email", "main", "reals", "password", "foo")
     }
 
     "example 1" in {
@@ -56,7 +83,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue11.conf")
       r.classNames === Set("JavaIssue11Cfg", "Foo")
-      r.fieldNames === Set("notify", "wait", "getClass", "clone", "finalize", "notifyAll", "toString", "foo")
+      r.fields.keySet === Set("notify", "wait", "getClass", "clone", "finalize", "notifyAll", "toString", "foo")
     }
   }
 
@@ -64,7 +91,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue12.conf")
       r.classNames === Set("JavaIssue12Cfg", "String", "Option", "Boolean", "Int_")
-      r.fieldNames === Set("String", "Option", "Boolean", "int_", "bar")
+      r.fields.keySet === Set("String", "Option", "Boolean", "int_", "bar")
     }
   }
 
@@ -72,7 +99,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue13.conf")
       r.classNames === Set("JavaIssue13Cfg", "Issue")
-      r.fieldNames === Set("issue", "optionalFoo")
+      r.fields.keySet === Set("issue", "optionalFoo")
     }
   }
 
@@ -80,7 +107,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue14.conf")
       r.classNames === Set("JavaIssue14Cfg", "_0")
-      r.fieldNames === Set("_0", "_1", "_2")
+      r.fields.keySet === Set("_0", "_1", "_2")
     }
   }
 
@@ -88,7 +115,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue15a.conf")
       r.classNames === Set("JavaIssue15aCfg")
-      r.fieldNames === Set("ii")
+      r.fields.keySet === Set("ii")
     }
 
     "example 1" in {
@@ -114,7 +141,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue15b.conf")
       r.classNames === Set("JavaIssue15bCfg")
-      r.fieldNames === Set("strings", "integers", "doubles", "longs", "booleans")
+      r.fields.keySet === Set("strings", "integers", "doubles", "longs", "booleans")
     }
 
     "example 1" in {
@@ -139,7 +166,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue15c.conf")
       r.classNames === Set("JavaIssue15cCfg", "Qaz", "Aa", "Positions$Elm", "Bb$Elm", "Attrs$Elm")
-      r.fieldNames === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
+      r.fields.keySet === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
     }
 
     "example 1" in {
@@ -175,7 +202,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue15d.conf")
       r.classNames === Set("JavaIssue15dCfg", "Baz$Elm")
-      r.fieldNames === Set("baz", "aa", "dd")
+      r.fields.keySet === Set("baz", "aa", "dd")
     }
 
     "example 1" in {
@@ -197,7 +224,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/issue15.conf")
       r.classNames === Set("JavaIssue15Cfg", "Positions$Elm", "Positions$Elm2")
-      r.fieldNames === Set("positions", "numbers", "other", "stuff")
+      r.fields.keySet === Set("positions", "numbers", "other", "stuff")
     }
 
     "example 1" in {
@@ -224,7 +251,7 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/duration.spec.conf")
       r.classNames === Set("JavaDurationCfg", "Durations")
-      r.fieldNames === Set("durations", "days", "hours", "millis",
+      r.fields.keySet === Set("durations", "days", "hours", "millis",
         "duration_ns",
         "duration_µs",
         "duration_ms",

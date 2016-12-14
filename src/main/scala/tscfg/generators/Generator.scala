@@ -30,4 +30,4 @@ case class GenOpts(packageName: String,
 
 case class GenResult(code: String = "?",
                      classNames: Set[String] = Set(),
-                     fieldNames: Set[String] = Set())
+                     fields: Map[String, String] = Map.empty)

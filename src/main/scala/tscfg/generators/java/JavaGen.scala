@@ -1,7 +1,7 @@
 package tscfg.generators.java
 
 import tscfg.generators.java.javaUtil._
-import tscfg.generators.{Generator, GenOpts, GenResult, tsConfigUtil}
+import tscfg.generators._
 import tscfg.model._
 
 
@@ -45,8 +45,6 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val symbols = ot.members.keys.toList.sorted
 
     val results = symbols.map { symbol ⇒
-      val javaId = javaIdentifier(symbol)
-      genResults = genResults.copy(fieldNames = genResults.fieldNames + javaId)
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamePrefixOpt = Some(classNameAdjusted + "."),
@@ -58,8 +56,9 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classDeclMembersStr = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val memberType = res.javaType
-      val typ = if (a.optional) toObjectType(memberType) else memberType
+      val typ = if (a.optional && a.default.isEmpty) toObjectType(memberType) else memberType
       val javaId = javaIdentifier(symbol)
+      genResults = genResults.copy(fields = genResults.fields + (javaId → typ.toString))
       s"public final $typ $javaId;"
     }.mkString("\n  ")
 
@@ -286,7 +285,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 }
 
 object JavaGen {
-  import java.io.{File, PrintWriter, FileWriter}
+  import _root_.java.io.{File, PrintWriter, FileWriter}
   import tscfg.{ModelBuilder, model}
   import tscfg.util
 
@@ -335,7 +334,7 @@ object JavaGen {
     val results = generate(filename, showOut = true)
     println(
       s"""classNames: ${results.classNames}
-         |fieldNames: ${results.fieldNames}
+         |fields    : ${results.fields}
       """.stripMargin)
   }
   // $COVERAGE-ON$

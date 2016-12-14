@@ -6,11 +6,37 @@ import tscfg.example.{ScalaDurationCfg, _}
 
 class ScalaMainSpec extends Specification {
 
+  "literal values as types" should {
+    "generate primitive types with given values as defaults" in {
+      val r = ScalaGen.generate("example/example0.spec.conf")
+      r.classNames === Set("ScalaExample0Cfg", "Service")
+      r.fields === Map(
+        "service"  → "ScalaExample0Cfg.Service",
+        "url"      → "java.lang.String",
+        "debug"    → "scala.Boolean",
+        "factor"   → "scala.Double",
+        "poolSize" → "scala.Int"
+      )
+    }
+    "example with missing entries should get their defaults" in {
+      val c = ScalaExample0Cfg(ConfigFactory.parseString(
+        """
+          |service = {
+          |}
+        """.stripMargin
+      ))
+      c.service.url      === "http://example.net/rest"
+      c.service.poolSize === 32
+      c.service.debug    === true
+      c.service.factor   === 0.75
+    }
+  }
+
   "issue5" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue5.conf")
       r.classNames === Set("ScalaIssue5Cfg", "Foo", "Config")
-      r.fieldNames === Set("foo", "config", "bar")
+      r.fields.keySet === Set("foo", "config", "bar")
     }
   }
 
@@ -18,7 +44,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue10.conf")
       r.classNames === Set("ScalaIssue10Cfg", "Main", "Email", "Reals$Elm")
-      r.fieldNames === Set("server", "email", "main", "reals", "password", "foo")
+      r.fields.keySet === Set("server", "email", "main", "reals", "password", "foo")
     }
 
     "example 1" in {
@@ -53,7 +79,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue11.conf")
       r.classNames === Set("ScalaIssue11Cfg", "Foo")
-      r.fieldNames === Set("notify_", "wait_", "getClass_", "clone_", "finalize_", "notifyAll_", "toString_", "foo")
+      r.fields.keySet === Set("notify_", "wait_", "getClass_", "clone_", "finalize_", "notifyAll_", "toString_", "foo")
     }
   }
 
@@ -61,7 +87,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue12.conf")
       r.classNames === Set("ScalaIssue12Cfg", "String", "Option", "Boolean", "Int")
-      r.fieldNames === Set("String", "Option", "Boolean", "int", "bar")
+      r.fields.keySet === Set("String", "Option", "Boolean", "int", "bar")
     }
   }
 
@@ -69,7 +95,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue13.conf")
       r.classNames === Set("ScalaIssue13Cfg", "Issue")
-      r.fieldNames === Set("issue", "optionalFoo")
+      r.fields.keySet === Set("issue", "optionalFoo")
     }
   }
 
@@ -77,7 +103,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue14.conf")
       r.classNames === Set("ScalaIssue14Cfg", "_0")
-      r.fieldNames === Set("_0", "_1", "_2")
+      r.fields.keySet === Set("_0", "_1", "_2")
     }
   }
 
@@ -85,7 +111,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15a.conf")
       r.classNames === Set("ScalaIssue15aCfg")
-      r.fieldNames === Set("ii")
+      r.fields.keySet === Set("ii")
     }
 
     "example 1" in {
@@ -111,7 +137,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15b.conf")
       r.classNames === Set("ScalaIssue15bCfg")
-      r.fieldNames === Set("strings", "integers", "doubles", "longs", "booleans")
+      r.fields.keySet === Set("strings", "integers", "doubles", "longs", "booleans")
     }
 
     "example 1" in {
@@ -136,7 +162,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15c.conf")
       r.classNames === Set("ScalaIssue15cCfg", "Qaz", "Aa", "Positions$Elm", "Bb$Elm", "Attrs$Elm")
-      r.fieldNames === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
+      r.fields.keySet === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
     }
 
     "example 1" in {
@@ -178,7 +204,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15d.conf")
       r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm")
-      r.fieldNames === Set("baz", "aa", "dd")
+      r.fields.keySet === Set("baz", "aa", "dd")
     }
 
     "example 1" in {
@@ -198,7 +224,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15.conf")
       r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm")
-      r.fieldNames === Set("positions", "numbers", "other", "stuff")
+      r.fields.keySet === Set("positions", "numbers", "other", "stuff")
     }
 
     "example 1" in {
@@ -227,7 +253,7 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/duration.spec.conf")
       r.classNames === Set("ScalaDurationCfg", "Durations")
-      r.fieldNames === Set("durations", "days", "hours", "millis",
+      r.fields.keySet === Set("durations", "days", "hours", "millis",
         "duration_ns",
         "duration_µs",
         "duration_ms",

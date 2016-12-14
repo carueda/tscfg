@@ -30,7 +30,7 @@ public class JavaIssue12Cfg {
   }
   
   public static class Int_ {
-    public final java.lang.Integer bar;
+    public final int bar;
     
     public Int_(com.typesafe.config.Config c) {
       this.bar = c.hasPathOrNull("bar") ? c.getInt("bar") : 1;

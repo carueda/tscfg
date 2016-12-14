@@ -2,7 +2,7 @@ package tscfg.generators.scala
 
 import tscfg.{ModelBuilder, model}
 import tscfg.generators.scala.scalaUtil.scalaIdentifier
-import tscfg.generators.{Generator, GenOpts, GenResult, tsConfigUtil}
+import tscfg.generators._
 import tscfg.model._
 
 
@@ -53,7 +53,6 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val results = symbols.map { symbol ⇒
       val scalaId = scalaIdentifier(symbol)
-      genResults = genResults.copy(fieldNames = genResults.fieldNames + scalaId)
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamesPrefix = className+"." :: classNamesPrefix,
@@ -67,6 +66,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       val memberType = res.scalaType
       val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
       val scalaId = scalaIdentifier(symbol)
+      genResults = genResults.copy(fields = genResults.fields + (scalaId → typ.toString))
       padId(scalaId) + " : " + typ
     }.mkString(",\n  ")
 
@@ -151,7 +151,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 }
 
 object ScalaGen {
-  import java.io.{File, PrintWriter, FileWriter}
+  import _root_.java.io.{File, PrintWriter, FileWriter}
 
   import tscfg.util
 
@@ -200,7 +200,7 @@ object ScalaGen {
     val results = generate(filename, showOut = true)
     println(
       s"""classNames: ${results.classNames}
-         |fieldNames: ${results.fieldNames}
+         |fields    : ${results.fields}
       """.stripMargin)
   }
   // $COVERAGE-ON$
