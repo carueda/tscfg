@@ -15,6 +15,7 @@ class JavaMainSpec extends Specification {
         "service"  → "JavaExample0Cfg.Service",
         "url"      → "java.lang.String",
         "debug"    → "boolean",
+        "doLog"    → "boolean",
         "factor"   → "double",
         "poolSize" → "int"
       )
@@ -30,6 +31,7 @@ class JavaMainSpec extends Specification {
       c.service.url      === "http://example.net/rest"
       c.service.poolSize === 32
       c.service.debug    === true
+      c.service.doLog    === false
       c.service.factor   === 0.75
     }
   }

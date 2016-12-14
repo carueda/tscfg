@@ -13,7 +13,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
 
-    //checkUserSymbol(className)
+    methodNames.checkUserSymbol(className)
     val res = generateForObj(objectType, className = className, isRoot = true)
 
     val packageStr = s"package ${genOpts.packageName};\n\n"
@@ -43,6 +43,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     genResults = genResults.copy(classNames = genResults.classNames + classNameAdjusted)
 
     val symbols = ot.members.keys.toList.sorted
+    symbols.foreach(methodNames.checkUserSymbol)
 
     val results = symbols.map { symbol ⇒
       val a = ot.members(symbol)

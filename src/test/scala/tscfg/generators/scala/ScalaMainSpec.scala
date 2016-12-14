@@ -14,6 +14,7 @@ class ScalaMainSpec extends Specification {
         "service"  → "ScalaExample0Cfg.Service",
         "url"      → "java.lang.String",
         "debug"    → "scala.Boolean",
+        "doLog"    → "scala.Boolean",
         "factor"   → "scala.Double",
         "poolSize" → "scala.Int"
       )
@@ -28,6 +29,7 @@ class ScalaMainSpec extends Specification {
       c.service.url      === "http://example.net/rest"
       c.service.poolSize === 32
       c.service.debug    === true
+      c.service.doLog    === false
       c.service.factor   === 0.75
     }
   }

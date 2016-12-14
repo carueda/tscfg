@@ -196,12 +196,12 @@ Output is written to $destDir/$className.ext
 ```
 
 So, to generate the Java class `tscfg.example.ExampleCfg` with the example above
-(which is saved in `def.example.conf`), we can run:
+saved in a file `example.spec.conf`, we can run:
 
 ```shell
-$ java -jar tscfg-x.y.z.jar --spec def.example.conf
+$ java -jar tscfg-x.y.z.jar --spec example.spec.conf
 
-parsing: def.example.conf
+parsing: example.spec.conf
 generating: /tmp/ExampleCfg.java
 ```
 
@@ -246,7 +246,7 @@ An object reference will never be `null` (`None` in Scala) if the corresponding 
 the specification. It will only be `null` (`None`) if it is marked optional with no default value and
 has been omitted in the input configuration.
  
-With this [example spec](https://github.com/carueda/tscfg/blob/master/example/def.example.conf),
+With this [example spec](https://github.com/carueda/tscfg/blob/master/example/example.spec.conf),
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaExampleCfg.java)
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java).
 
