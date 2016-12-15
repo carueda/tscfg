@@ -3,6 +3,11 @@ package tscfg.generators.scala
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example.{ScalaDurationCfg, _}
+import tscfg.generators.GenOpts
+import tscfg.model
+import tscfg.model._
+import model.implicits._
+
 
 class ScalaMainSpec extends Specification {
 
@@ -316,6 +321,38 @@ class ScalaMainSpec extends Specification {
       ))
       c._do_log_  === true
       c._$_foo_   === "some string"
+    }
+  }
+
+  "given class name starting with $_" should {
+    "generate warning" in {
+      val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
+      val r = new ScalaGen(genOpts).generate(ObjectType())
+      r.classNames === Set("Classy")
+      r.fields === Map()
+      // TODO actually verify generated warning
+    }
+  }
+
+  "keys starting with $_" should {
+    val objectType = ObjectType(
+      "$_baz" := STRING | "some value",
+      "other" := ObjectType(
+        "$_foo" := DOUBLE
+      )
+    )
+
+    "generate warnings" in {
+      val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
+      val r = new ScalaGen(genOpts).generate(objectType)
+
+      r.classNames === Set("Classy", "Other")
+      r.fields === Map(
+        "$_baz" → "java.lang.String",
+        "other" → "Classy.Other",
+        "$_foo" → "scala.Double"
+      )
+      // TODO actually verify the generated warnings
     }
   }
 }

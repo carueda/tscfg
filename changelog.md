@@ -1,4 +1,6 @@
 2016-12-14 - 0.7.1
+
+- add tests for class name or keys starting with `$_`
 - fix #19 "quoted keys"
 - use simpler, equivalent boolean access expression according to given default
 - fixed: spec with literal values were not generating "primitive" types 
