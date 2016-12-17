@@ -6,21 +6,20 @@ version := tscfgVersion
 
 scalaVersion := "2.11.8"
 
-libraryDependencies += "com.typesafe" % "config" % "1.3.0"
-
-libraryDependencies += "org.specs2" %% "specs2-core" % "3.8.4" % "test"
-
-libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.0"
-
-libraryDependencies += "com.google.code.gson" % "gson" % "2.8.0"
+libraryDependencies ++= Seq(
+  "com.typesafe"          %  "config"         % "1.3.0",
+  "org.specs2"           %%  "specs2-core"    % "3.8.4" % "test",
+  "org.json4s"           %%  "json4s-native"  % "3.5.0",
+  "com.google.code.gson"  %  "gson"           % "2.8.0"
+)
 
 mainClass in assembly := Some("tscfg.Main")
 
 assemblyJarName in assembly := s"tscfg-$tscfgVersion.jar"
 
-coverageExcludedPackages := "tscfg.example.*;tscfg.Main;tscfg.GenExamples"
+coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
 
-coverageMinimum := 70
+coverageMinimum := 80
 
 coverageFailOnMinimum := false
 
