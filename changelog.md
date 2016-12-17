@@ -1,3 +1,6 @@
+2016-12-17 - 0.7.2
+- generate code as part of test phase 
+
 2016-12-14 - 0.7.1
 
 - add tests for class name or keys starting with `$_`

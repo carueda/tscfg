@@ -1,6 +1,6 @@
 name := "tscfg"
 
-val tscfgVersion = setVersion("0.7.1")
+val tscfgVersion = setVersion("0.7.2")
 
 version := tscfgVersion
 
@@ -26,16 +26,16 @@ coverageFailOnMinimum := false
 
 coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
+lazy val genCode = taskKey[Unit]("Generate classes for tests")
+fullRunTask(genCode, Compile, "tscfg.gen4tests")
+fork in genCode := true
+
+(testOnly in Test) <<= (testOnly in Test) dependsOn genCode
+(test in Test)     <<= (test in Test)     dependsOn genCode
+
 def setVersion(version: String): String = {
-  import java.nio.file.Files._
-  import java.nio.file.Paths
-  import java.nio.file.StandardOpenOption._
-  val appConf = Paths.get("src/main/resources/application.conf")
-  val contents = s"tscfg.version = $version\n"
   println(s"setting version $version")
-  write(appConf,
-    contents.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-    CREATE, TRUNCATE_EXISTING, WRITE
-  )
+  IO.write(file("src/main/resources/application.conf"),
+           s"tscfg.version = $version\n")
   version
 }

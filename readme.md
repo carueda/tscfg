@@ -246,7 +246,7 @@ An object reference will never be `null` (`None` in Scala) if the corresponding 
 the specification. It will only be `null` (`None`) if it is marked optional with no default value and
 has been omitted in the input configuration.
  
-With this [example spec](https://github.com/carueda/tscfg/blob/master/example/example.spec.conf),
+With this [example spec](https://github.com/carueda/tscfg/blob/master/src/tscfg/example/example.spec.conf),
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaExampleCfg.java)
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java).
 
@@ -279,7 +279,7 @@ with conversion automatically performed if the actual configuration value is giv
 any other unit as supported by Typesafe Config according to the 
 [duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
 
-[A more complete example](https://github.com/carueda/tscfg/blob/master/example/duration.spec.conf)
+[A more complete example](https://github.com/carueda/tscfg/blob/master/src/tscfg/example/duration.spec.conf)
 with some additional explanation:
 
 ```properties

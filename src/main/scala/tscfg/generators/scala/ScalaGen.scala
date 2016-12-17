@@ -158,7 +158,7 @@ object ScalaGen {
 
   // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false): GenResult = {
-    val file = new File(filename)
+    val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
     if (showOut)
@@ -189,7 +189,7 @@ object ScalaGen {
 
     //println("\n" + results.code)
 
-    val destFilename  = s"src/main/scala/tscfg/example/$className.scala"
+    val destFilename  = s"src/test/scala/tscfg/example/$className.scala"
     val destFile = new File(destFilename)
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)

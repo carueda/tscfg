@@ -2,6 +2,9 @@
 *.class
 *.log
 
+src/test/scala/tscfg/example/*
+src/test/java/tscfg/example/*
+
 # sbt specific
 .cache
 .history

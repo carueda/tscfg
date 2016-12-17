@@ -297,7 +297,7 @@ object JavaGen {
 
   // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false): GenResult = {
-    val file = new File(filename)
+    val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
     if (showOut)
@@ -328,7 +328,7 @@ object JavaGen {
 
     //println("\n" + results.code)
 
-    val destFilename  = s"src/main/java/tscfg/example/$className.java"
+    val destFilename  = s"src/test/java/tscfg/example/$className.java"
     val destFile = new File(destFilename)
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
