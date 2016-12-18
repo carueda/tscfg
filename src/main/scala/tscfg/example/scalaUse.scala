@@ -2,34 +2,30 @@ package tscfg.example
 
 import java.io.File
 
-import com.typesafe.config.{ConfigRenderOptions, ConfigFactory, Config}
+import com.typesafe.config.{ConfigRenderOptions, ConfigFactory}
 
 /*
- * sbt> runMain tscfg.example.scalaUse example/example.conf
+ * sbt> runMain tscfg.example.scalaUse src/main/tscfg/example/example.conf
  */
 object scalaUse {
 
   def main(args: Array[String]): Unit = {
-    val configFile: File = new File(args(0))
+    val configFile = new File(args(0))
 
     // usual Typesafe Config mechanism to load the file
-    val tsConfig: Config = ConfigFactory.parseFile(configFile).resolve
+    val tsConfig = ConfigFactory.parseFile(configFile).resolve
 
-    // but, instead of:
-    val endpoint: Config = tsConfig.getConfig("endpoint")
-    val path: String = endpoint.getString("path")
-    val url: String = if (endpoint.hasPathOrNull("url")) endpoint.getString("url") else "http://example.net"
-    val serial: Option[Int] = if (endpoint.hasPathOrNull("serial")) Some(endpoint.getInt("serial")) else None
-    val port: Int = if (endpoint.hasPathOrNull("port")) endpoint.getInt("interface.port") else 8080
-    val `type`: Option[String] = if (endpoint.hasPathOrNull("type")) Some(endpoint.getString("type")) else None
+    // create instance of the tscfg generated main class. This will
+    // perform all validations according to required properties and types:
+    val cfg = ScalaExampleCfg(tsConfig)
 
-    // you can:
-    val cfg: ScalaExampleCfg = ScalaExampleCfg(tsConfig)
-    val path2: String = cfg.endpoint.path
-    val url2: String = cfg.endpoint.url
-    val serial2: Option[Int] = cfg.endpoint.serial
-    val port2: Int = cfg.endpoint.interface.port
-    val type2: Option[String] = cfg.endpoint.interface.`type`
+    // access the configuration properties in a type-safe fashion while also
+    // enjoying your IDE features for code completion, navigation, etc:
+    val path: String         = cfg.endpoint.path
+    val url: String          = cfg.endpoint.url
+    val serial: Option[Int]  = cfg.endpoint.serial
+    val port: Int            = cfg.endpoint.interface.port
+    val typ : Option[String] = cfg.endpoint.interface.`type`
 
     println("\n*** tscfg case class structure: *** ")
     println("  " + cfg.toString.replaceAll("\n", "\n  "))
@@ -47,7 +43,6 @@ object scalaUse {
     import org.json4s.native.Serialization
     import org.json4s.native.Serialization.writePretty
     implicit val formats = Serialization.formats(NoTypeHints)
-
     writePretty(cfg)
   }
 }

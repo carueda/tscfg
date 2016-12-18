@@ -146,8 +146,6 @@ public class JavaExampleCfg {
 }
 ```
 
-> Note that Java keywords are appended "_". Corresponding handling also performed for Scala.
-
 And for Scala:
 
 ```scala
@@ -229,13 +227,17 @@ int port       = endpoint.hasPathOrNull("port")   ? endpoint.getInt("interface.p
 ```
 
 you can:
+
+1. create the tscfg generated wrapper:
+ 
 ```java
 ExampleCfg cfg = new ExampleCfg(tsConfig);
 ```
 which will make all verifications about required settings and associated types. 
 In particular, as is typical with Config use, an exception will be thrown if this verification fails.
 
-Then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
+2. then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
+
 ```java
 String path    = cfg.endpoint.path;
 Integer serial = cfg.endpoint.serial;
@@ -246,7 +248,7 @@ An object reference will never be `null` (`None` in Scala) if the corresponding 
 the specification. It will only be `null` (`None`) if it is marked optional with no default value and
 has been omitted in the input configuration.
  
-With this [example spec](https://github.com/carueda/tscfg/blob/master/src/tscfg/example/example.spec.conf),
+With this [example spec](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/example.spec.conf),
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaExampleCfg.java)
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java).
 
@@ -279,7 +281,7 @@ with conversion automatically performed if the actual configuration value is giv
 any other unit as supported by Typesafe Config according to the 
 [duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
 
-[A more complete example](https://github.com/carueda/tscfg/blob/master/src/tscfg/example/duration.spec.conf)
+[A more complete example](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/duration.spec.conf)
 with some additional explanation:
 
 ```properties
@@ -398,32 +400,32 @@ a given configuration instance.
 
 ## FAQ
 
-**Why the trouble? -- I can just access the configuration values directly with Typesafe Config 
-and put them in my own classes**
+**But I can just access the configuration values directly with Typesafe Config 
+and even put them in my own classes**
   
 Sure. However, as the number of configuration properties and levels of nesting increase,
 the benefits of automated generation of the typesafe, immutable objects, 
-along with the centralized verification,
-may become more apparent.
-
-**Could tscfg generate `Optional<T>` by default for optional fields?**
-
-It's not yet implemented. Want to contribute?
+along with the centralized verification, shall become more apparent. All of this
+–worth emphasizing– based on an explicit schema for the configuration.
 
 **What happened with the generated `toString` method?**
 
-It is not generated anymore as we think it's more flexible to let client code decide how to 
-render configuration instances while also recognizing that very likely typical serialization 
-libraries are already being used in the application.
+We think it's more flexible to let client code decide how to render configuration instances 
+while also recognizing that very likely typical serialization libraries are already being 
+used in the application.
 For example, the demo programs 
-[JavaMain](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaMain.java) 
-and [ScalaMain](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaMain.scala) 
+[JavaUse](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java) 
+and [ScalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaUse.scala) 
 use [Gson](https://github.com/google/gson) and
 [json4s](https://github.com/json4s/json4s), respectively.
-Also, worth noting that you can certainly use Typesafe Config itself for rendering purposes.
-However, in this case you would be using the original Typesafe Config parsed configuration object,
-so the rendering won't be restricted only to the elements captured in the _configuration specification_ used 
-by tscfg for the generated code.
+Although you could also use Typesafe Config itself for rendering purposes, you would be 
+using the original Typesafe Config parsed configuration object, so the rendering won't 
+necessarily be restricted only to the elements captured in the _configuration specification_ 
+used by tscfg for the generated wrapper.
+
+**Could tscfg generate `Optional<T>` for optional fields?**
+
+Yes but it's not implemented. Want to contribute?
 
 
 ## tests
