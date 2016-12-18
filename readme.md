@@ -60,37 +60,37 @@ tscfg will generate the following (constructors and other methods omitted):
  
 - Java:
 
-	```java
-	public class Cfg {
-	  public final Service service;
-	  public static class Service {
-		public final boolean debug;
-		public final double factor;
-		public final int poolSize;
-		public final String url;
-	  }
-	}
-	```
-	
-	Nesting of configuration properties is captured via inner static classes.
+    ```java
+    public class Cfg {
+      public final Service service;
+      public static class Service {
+        public final boolean debug;
+        public final double factor;
+        public final int poolSize;
+        public final String url;
+      }
+    }
+    ```
+    
+    Nesting of configuration properties is captured via inner static classes.
 
 - Scala:
 
-	```scala
-	case class Cfg(
-	  service : Cfg.Service
-	)
-	object Cfg {
-	  case class Service(
-		debug : Boolean,
-		factor : Double,
-		poolSize : Int,
-		url : String
-	  )
-	}
-	```
-	
-	Nesting of configuration properties is captured via nested companion objects.
+    ```scala
+    case class Cfg(
+      service : Cfg.Service
+    )
+    object Cfg {
+      case class Service(
+        debug : Boolean,
+        factor : Double,
+        poolSize : Int,
+        url : String
+      )
+    }
+    ```
+    
+    Nesting of configuration properties is captured via nested companion objects.
 
 The tool determines the type of each field according to the given value
 in the input configuration.
@@ -230,19 +230,19 @@ you can:
 
 1. create the tscfg generated wrapper:
  
-```java
-ExampleCfg cfg = new ExampleCfg(tsConfig);
-```
-which will make all verifications about required settings and associated types. 
-In particular, as is typical with Config use, an exception will be thrown if this verification fails.
+    ```java
+    ExampleCfg cfg = new ExampleCfg(tsConfig);
+    ```
+    which will make all verifications about required settings and associated types. 
+    In particular, as is typical with Config use, an exception will be thrown if this verification fails.
 
 2. then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
 
-```java
-String path    = cfg.endpoint.path;
-Integer serial = cfg.endpoint.serial;
-int port       = cfg.endpoint.interface_.port;
-```
+    ```java
+    String path    = cfg.endpoint.path;
+    Integer serial = cfg.endpoint.serial;
+    int port       = cfg.endpoint.interface_.port;
+    ```
 
 An object reference will never be `null` (`None` in Scala) if the corresponding field is required according to
 the specification. It will only be `null` (`None`) if it is marked optional with no default value and
@@ -361,7 +361,7 @@ object Cfg {
 ### optional object or list
 
 An object or a list in the input configuration can be marked optional with
-the `#@optional` annotation:
+the `@optional` annotation (in a comment):
 
 ```properties
 #@optional
@@ -427,6 +427,10 @@ used by tscfg for the generated wrapper.
 
 Yes but it's not implemented. Want to contribute?
 
+**Is there any sbt plugin for tscfg that I can use as part of the build for my project?**
+
+Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21) if you want 
+to add comments or reactions.  PRs are also welcome.
 
 ## tests
 
