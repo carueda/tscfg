@@ -16,8 +16,10 @@ class ModelBuilderSpec extends Specification {
     val result = ModelBuilder(source)
     val objectType = result.objectType
 
-    if (showOutput)
+    if (showOutput) {
+      println("\nobjectType: " + objectType)
       println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+    }
 
     result
   }
@@ -140,6 +142,20 @@ class ModelBuilderSpec extends Specification {
       at.t === INTEGER
       at.isOptional must beTrue
       at.default must beSome("21")
+    }
+  }
+
+  "with literal duration (issue 22)" should {
+    val result = build(
+      """
+        |idleTimeout = 75 seconds
+      """.stripMargin)
+
+    "translate into DURATION(ms) with given default" in {
+      val at = result.objectType.members("idleTimeout")
+      at.t === DURATION(ms)
+      at.isOptional must beTrue
+      at.default must beSome("75 seconds")
     }
   }
 

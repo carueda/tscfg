@@ -3,7 +3,7 @@ package tscfg.generators
 import tscfg.model._
 import tscfg.util.escapeString
 import tscfg.model.durations._
-
+import _root_.scala.util.control.NonFatal
 import _root_.java.util.concurrent.TimeUnit
 
 import com.typesafe.config.{Config, ConfigFactory}
@@ -40,6 +40,18 @@ object tsConfigUtil {
 
     case _ => throw new AssertionError("unrecognized q='" + q + "'")
   }
+
+  def isDurationValue(value: String): Boolean = {
+    val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
+    try {
+      config.getDuration("k")
+      true
+    }
+    catch {
+      case NonFatal(_) ⇒ false
+    }
+  }
+
   private def durationValue(value: String, q: Qualification): String = {
     val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
     config.getDuration("k", timeUnitParam(q)).toString

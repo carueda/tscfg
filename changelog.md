@@ -1,4 +1,5 @@
 2016-12-17 - 0.7.2
+- fix #22 "literal duration captured as string"
 - generate code as part of test phase 
 
 2016-12-14 - 0.7.1

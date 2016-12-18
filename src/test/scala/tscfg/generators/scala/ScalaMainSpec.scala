@@ -355,4 +355,22 @@ class ScalaMainSpec extends Specification {
       // TODO actually verify the generated warnings
     }
   }
+  "issue22" should {
+    "generate DURATION type" in {
+      val r = ScalaGen.generate("example/issue22.spec.conf")
+      r.classNames === Set("ScalaIssue22Cfg")
+      r.fields === Map(
+        "idleTimeout" → "scala.Long"
+      )
+    }
+
+    "example with default value" in {
+      val c = ScalaIssue22Cfg(ConfigFactory.parseString(
+        """
+          | idleTimeout = 1 hour
+        """.stripMargin
+      ))
+      c.idleTimeout === 3600*1000
+    }
+  }
 }

@@ -350,4 +350,31 @@ class JavaMainSpec extends Specification {
       // TODO actually verify the generated warnings
     }
   }
+
+  "issue22" should {
+    "generate DURATION type" in {
+      val r = JavaGen.generate("example/issue22.spec.conf")
+      r.classNames === Set("JavaIssue22Cfg")
+      r.fields === Map(
+        "idleTimeout" → "long"
+      )
+    }
+
+    "example with default value" in {
+      val c = new JavaIssue22Cfg(ConfigFactory.parseString(
+        """
+          |  # empty
+        """.stripMargin
+      ))
+      c.idleTimeout  === 75000
+    }
+    "example with new value" in {
+      val c = new JavaIssue22Cfg(ConfigFactory.parseString(
+        """
+          | idleTimeout = 1 hour
+        """.stripMargin
+      ))
+      c.idleTimeout === 3600*1000
+    }
+  }
 }

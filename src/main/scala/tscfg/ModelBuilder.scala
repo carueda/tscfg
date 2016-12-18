@@ -3,6 +3,7 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.DURATION
+import tscfg.model.durations.ms
 
 import scala.collection.JavaConversions._
 
@@ -148,6 +149,9 @@ class ModelBuilder {
 
   private def toAnnBasicType(valueString: String):
   Option[(model.BasicType, Boolean, Option[String])] = {
+
+    if (tsConfigUtil.isDurationValue(valueString))
+      return Some((DURATION(ms), true, Some(valueString)))
 
     val tokens = valueString.split("""\s*\|\s*""")
     val typePart = tokens(0).toLowerCase
