@@ -43,7 +43,7 @@ class JavaMainSpec extends Specification {
 
   "issue5" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue5.conf")
+      val r = JavaGen.generate("example/issue5.spec.conf")
       r.classNames === Set("JavaIssue5Cfg", "Foo", "Config")
       r.fields.keySet === Set("foo", "config", "bar")
     }
@@ -51,7 +51,7 @@ class JavaMainSpec extends Specification {
 
   "issue10" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue10.conf")
+      val r = JavaGen.generate("example/issue10.spec.conf")
       r.classNames === Set("JavaIssue10Cfg", "Main", "Email", "Reals$Elm")
       r.fields.keySet === Set("server", "email", "main", "reals", "password", "foo")
     }
@@ -88,7 +88,7 @@ class JavaMainSpec extends Specification {
 
   "issue11" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue11.conf")
+      val r = JavaGen.generate("example/issue11.spec.conf")
       r.classNames === Set("JavaIssue11Cfg", "Foo")
       r.fields.keySet === Set("notify", "wait", "getClass", "clone", "finalize", "notifyAll", "toString", "foo")
     }
@@ -96,7 +96,7 @@ class JavaMainSpec extends Specification {
 
   "issue12" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue12.conf")
+      val r = JavaGen.generate("example/issue12.spec.conf")
       r.classNames === Set("JavaIssue12Cfg", "String", "Option", "Boolean", "Int_")
       r.fields.keySet === Set("String", "Option", "Boolean", "int_", "bar")
     }
@@ -104,7 +104,7 @@ class JavaMainSpec extends Specification {
 
   "issue13" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue13.conf")
+      val r = JavaGen.generate("example/issue13.spec.conf")
       r.classNames === Set("JavaIssue13Cfg", "Issue")
       r.fields.keySet === Set("issue", "optionalFoo")
     }
@@ -112,7 +112,7 @@ class JavaMainSpec extends Specification {
 
   "issue14" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue14.conf")
+      val r = JavaGen.generate("example/issue14.spec.conf")
       r.classNames === Set("JavaIssue14Cfg", "_0")
       r.fields.keySet === Set("_0", "_1", "_2")
     }
@@ -120,7 +120,7 @@ class JavaMainSpec extends Specification {
 
   "issue15a" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue15a.conf")
+      val r = JavaGen.generate("example/issue15a.spec.conf")
       r.classNames === Set("JavaIssue15aCfg")
       r.fields.keySet === Set("ii")
     }
@@ -146,7 +146,7 @@ class JavaMainSpec extends Specification {
 
   "issue15b" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue15b.conf")
+      val r = JavaGen.generate("example/issue15b.spec.conf")
       r.classNames === Set("JavaIssue15bCfg")
       r.fields.keySet === Set("strings", "integers", "doubles", "longs", "booleans")
     }
@@ -171,7 +171,7 @@ class JavaMainSpec extends Specification {
 
   "issue15c" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue15c.conf")
+      val r = JavaGen.generate("example/issue15c.spec.conf")
       r.classNames === Set("JavaIssue15cCfg", "Qaz", "Aa", "Positions$Elm", "Bb$Elm", "Attrs$Elm")
       r.fields.keySet === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
     }
@@ -207,7 +207,7 @@ class JavaMainSpec extends Specification {
 
   "issue15d" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue15d.conf")
+      val r = JavaGen.generate("example/issue15d.spec.conf")
       r.classNames === Set("JavaIssue15dCfg", "Baz$Elm")
       r.fields.keySet === Set("baz", "aa", "dd")
     }
@@ -229,7 +229,7 @@ class JavaMainSpec extends Specification {
 
   "issue15" should {
     "generate code" in {
-      val r = JavaGen.generate("example/issue15.conf")
+      val r = JavaGen.generate("example/issue15.spec.conf")
       r.classNames === Set("JavaIssue15Cfg", "Positions$Elm", "Positions$Elm2")
       r.fields.keySet === Set("positions", "numbers", "other", "stuff")
     }
@@ -300,7 +300,7 @@ class JavaMainSpec extends Specification {
 
   "issue19" should {
     """replace leading and trailing " with _""" in {
-      val r = JavaGen.generate("example/issue19.conf")
+      val r = JavaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("JavaIssue19Cfg")
       r.fields === Map(
         "_do_log_"  → "boolean",

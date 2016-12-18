@@ -1,21 +1,21 @@
-package tscfg.example
+package tscfg.generators.scala
 
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
+import tscfg.example.ScalaExampleCfg
 
-class JavaExampleSpec extends Specification {
+class ScalaExampleSpec extends Specification {
 
-  """JavaExampleCfg with good input""" should {
+  """ScalaExampleCfg with good input""" should {
     val config = ConfigFactory.parseString("""
       |endpoint {
       |  path = "/var/www"
       |  intReq = 12
-      |  name = "Calvin"
       |  interface.port = 9191
       |  interface.type = "foo"
       |}
       |""".stripMargin)
-    val cfg: JavaExampleCfg = new JavaExampleCfg(config)
+    val cfg = ScalaExampleCfg(config)
 
     "capture given required values" in {
       cfg.endpoint.path must_== "/var/www"
@@ -23,28 +23,28 @@ class JavaExampleSpec extends Specification {
     }
 
     "capture given optional values" in {
-      cfg.endpoint.interface_.port must_== 9191
-      cfg.endpoint.interface_.`type` must_== "foo"
+      cfg.endpoint.interface.port must_== 9191
+      cfg.endpoint.interface.`type` must_== Some("foo")
     }
 
     "capture default values" in {
       cfg.endpoint.url must_== "http://example.net"
-      cfg.endpoint.serial must_== null
+      cfg.endpoint.serial must_== None
     }
   }
 
-  """JavaExampleCfg with input having missing required entries""" should {
+  """ScalaExampleCfg with input having missing required entries""" should {
     val config = ConfigFactory.parseString("")
 
     "throw exception in constructor" in {
       def a: Unit = {
-        new JavaExampleCfg(config)
+        ScalaExampleCfg(config)
       }
       a must throwA[Exception]
     }
   }
 
-  """JavaExampleCfg with null given to a field""" should {
+  """ScalaExampleCfg with null given to a field""" should {
     val config = ConfigFactory.parseString("""
       |endpoint {
       |  path = "/var/www"
@@ -55,7 +55,7 @@ class JavaExampleSpec extends Specification {
 
     "throw exception in constructor" in {
       def a: Unit = {
-        new JavaExampleCfg(config)
+        ScalaExampleCfg(config)
       }
       a must throwA[Exception]
     }
