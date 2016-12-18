@@ -31,6 +31,7 @@ object gen4tests {
 
       val fileName = className + "." + lang.toLowerCase
       val targetFile = new File(targetScalaDir, fileName)
+      // $COVERAGE-OFF$
       if (confFile.lastModified >= targetFile.lastModified) {
         println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {
@@ -42,6 +43,7 @@ object gen4tests {
         val out = new PrintWriter(new FileWriter(targetFile), true)
         out.println(results.code)
       }
+      // $COVERAGE-ON$
     }
   }
 }
