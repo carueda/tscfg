@@ -19,15 +19,15 @@ object model {
   }
 
   object durations {
-    sealed abstract class Qualification
+    sealed abstract class DurationQualification
 
-    case object ns      extends Qualification
-    case object us      extends Qualification
-    case object ms      extends Qualification
-    case object second  extends Qualification
-    case object minute  extends Qualification
-    case object hour    extends Qualification
-    case object day     extends Qualification
+    case object ns      extends DurationQualification
+    case object us      extends DurationQualification
+    case object ms      extends DurationQualification
+    case object second  extends DurationQualification
+    case object minute  extends DurationQualification
+    case object hour    extends DurationQualification
+    case object day     extends DurationQualification
   }
 
   sealed abstract class Type
@@ -39,7 +39,7 @@ object model {
   case object LONG      extends BasicType
   case object DOUBLE    extends BasicType
   case object BOOLEAN   extends BasicType
-  case class DURATION(q: Qualification) extends BasicType
+  case class DURATION(q: DurationQualification) extends BasicType
 
   val recognizedAtomic: Map[String, BasicType] = Map(
     "string"    → STRING,

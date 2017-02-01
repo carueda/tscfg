@@ -174,7 +174,7 @@ class ModelBuilder {
     model.recognizedAtomic.get(base) map { bt ⇒
       val basicType = bt match {
         case DURATION(_) if qualification.isDefined ⇒
-          DURATION(tsConfigUtil.unify(qualification.get))
+          DURATION(tsConfigUtil.unifyDuration(qualification.get))
         case _ ⇒ bt
       }
       (basicType, isOpt, defaultValue)

@@ -1,3 +1,6 @@
+2017-01-31 - 0.8.0
+- renaming to better reflect "duration" elements, and in preparation for "size in bytes" support.
+
 2016-12-17 - 0.7.2
 - fix #22 "literal duration captured as string"
 - generate code as part of test phase 

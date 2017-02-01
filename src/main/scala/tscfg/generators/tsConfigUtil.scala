@@ -29,7 +29,7 @@ object tsConfigUtil {
   }
 
   // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
-  def unify(q: String): Qualification = q match {
+  def unifyDuration(q: String): DurationQualification = q match {
     case "ns" | "nano"   | "nanos"  | "nanosecond"  | "nanoseconds"   => ns
     case "us" | "micro"  | "micros" | "microsecond" | "microseconds"  => us
     case "ms" | "milli"  | "millis" | "millisecond" | "milliseconds"  => ms
@@ -52,16 +52,16 @@ object tsConfigUtil {
     }
   }
 
-  private def durationValue(value: String, q: Qualification): String = {
+  private def durationValue(value: String, q: DurationQualification): String = {
     val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
     config.getDuration("k", timeUnitParam(q)).toString
   }
 
-  private def durationGetter(path: String, q: Qualification): String = {
+  private def durationGetter(path: String, q: DurationQualification): String = {
     s"""getDuration("$path", ${timeUnitParamString(q)})"""
   }
 
-  private def timeUnitParamString(q: Qualification): String =
+  private def timeUnitParamString(q: DurationQualification): String =
     "java.util.concurrent.TimeUnit." + (q match {
       case `ns`     =>  "NANOSECONDS"
       case `us`     =>  "MICROSECONDS"
@@ -72,7 +72,7 @@ object tsConfigUtil {
       case `day`    =>  "DAYS"
     })
 
-  private def timeUnitParam(q: Qualification): TimeUnit = q match {
+  private def timeUnitParam(q: DurationQualification): TimeUnit = q match {
     case `ns`     =>  TimeUnit.NANOSECONDS
     case `us`     =>  TimeUnit.MICROSECONDS
     case `ms`     =>  TimeUnit.MILLISECONDS
