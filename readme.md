@@ -19,6 +19,7 @@ The generated code only depends on the Typesafe Config library.
 - [configuration access](#configuration-access)
 - [supported types](#supported-types)
   - [basic types](#basic-types)
+  - [size-in-bytes](#size-in-bytes)
   - [durations](#durations)
   - [list type](#list-type)
   - [object type](#object-type)
