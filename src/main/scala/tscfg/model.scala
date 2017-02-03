@@ -39,6 +39,7 @@ object model {
   case object LONG      extends BasicType
   case object DOUBLE    extends BasicType
   case object BOOLEAN   extends BasicType
+  case object SIZE      extends BasicType
   case class DURATION(q: DurationQualification) extends BasicType
 
   val recognizedAtomic: Map[String, BasicType] = Map(
@@ -48,6 +49,7 @@ object model {
     "long"      → LONG,
     "double"    → DOUBLE,
     "boolean"   → BOOLEAN,
+    "size"      → SIZE,
     "duration"  → DURATION(ms)
   )
 

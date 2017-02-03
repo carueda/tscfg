@@ -2,7 +2,7 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
-import tscfg.model.DURATION
+import tscfg.model.{DURATION, SIZE}
 import tscfg.model.durations.ms
 
 import scala.collection.JavaConversions._
@@ -152,6 +152,9 @@ class ModelBuilder {
 
     if (tsConfigUtil.isDurationValue(valueString))
       return Some((DURATION(ms), true, Some(valueString)))
+
+    if (tsConfigUtil.isSizeValue(valueString))
+      return Some((SIZE, true, Some(valueString)))
 
     val tokens = valueString.split("""\s*\|\s*""")
     val typePart = tokens(0).toLowerCase

@@ -29,15 +29,12 @@ The generated code only depends on the Typesafe Config library.
 
 ### status
 
-The tool is already pretty usable.
-It supports a good part of the common types as supported by Typesafe Config 
-(string, int, long, double, boolean, duration, list)
+The tool supports all types handled by Typesafe Config 
+(string, int, long, double, boolean, duration, size-in-bytes, list)
 and has good test coverage.
-However, it can be enhanced in a number of ways, including: 
-command line interface can be improved;
-syntax for types is not stable yet;
-and a missing "type" is [size in bytes](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format).
-Feel free to fork, enter issues, submit PRs, etc.
+Possible improvements include a more standard command line interface and perhaps
+a revision of the syntax for types.
+Feel free to fork, enter issues/reactions, submit PRs, etc.
 
 
 ## configuration spec
@@ -269,8 +266,16 @@ The following basic types are supported:
 | `long`        | `long`    / `Long`      | `Long`    / `Option[Long]`      
 | `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`    
 | `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`   
+| `size`        | `long`    / `Long`      | `Long`    / `Option[Long]`
 | `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
     
+
+#### size-in-bytes
+
+The `size` type corresponds to the 
+[size-in-bytes formats](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format) 
+supported by the Typesafe library. 
+See [#23](https://github.com/carueda/tscfg/issues/23) for various examples. 
 
 #### durations
 
@@ -312,7 +317,7 @@ is denoted `[` _t_ `]`. The corresponding types in Java and Scala are:
 |---------------|---------------------|--------------------------
 | `[` _t_ `]`   | `List<T>` / `List<T>`   | `List[T]` / `Option[List[T]]`
 
-where T is the corresponding translation of _t_ in the target language, with
+where `T` is the corresponding translation of _t_ in the target language, with
 `List<T>` corresponding to an unmodifiable list in Java, and
 `List[T]` corresponding to an immutable list in Scala.
 

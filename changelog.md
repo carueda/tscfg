@@ -1,4 +1,5 @@
-2017-01-31 - 0.8.0
+2017-02-03 - 0.8.0
+- resolve #23 "support size-in-bytes type"
 - renaming to better reflect "duration" elements, and in preparation for "size in bytes" support.
 
 2016-12-17 - 0.7.2

@@ -377,4 +377,36 @@ class JavaMainSpec extends Specification {
       c.idleTimeout === 3600*1000
     }
   }
+
+  "issue23" should {
+    "generate SIZE type" in {
+      val r = JavaGen.generate("example/issue23.spec.conf")
+      r.classNames === Set("JavaIssue23Cfg")
+      r.fields === Map(
+        "sizeReq"    → "long",
+        "sizeOpt"    → "java.lang.Long",
+        "sizeOptDef" → "long",
+        "sizes"      → "java.util.List<java.lang.Long>",
+        "sizes2"     → "java.util.List<java.util.List<java.lang.Long>>"
+      )
+    }
+
+    "example" in {
+      val c = new JavaIssue23Cfg(ConfigFactory.parseString(
+        """
+          |sizeReq = "2048K"
+          |sizeOpt = "1024000"
+          |sizes   = [ 1000, "64G", "16kB" ]
+          |sizes2  = [[ 1000, "64G" ], [ "16kB" ] ]
+        """.stripMargin
+      ))
+      c.sizeReq === 2048*1024
+      c.sizeOpt === 1024000
+      c.sizeOptDef === 1024
+      c.sizes.toList === List(1000, 64*1024*1024*1024L, 16*1000)
+      c.sizes2.toList.map(_.toList) === List(
+        List(1000, 64*1024*1024*1024L),
+        List(16*1000))
+    }
+  }
 }

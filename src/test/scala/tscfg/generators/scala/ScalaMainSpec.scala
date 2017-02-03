@@ -373,4 +373,36 @@ class ScalaMainSpec extends Specification {
       c.idleTimeout === 3600*1000
     }
   }
+
+  "issue23" should {
+    "generate SIZE type" in {
+      val r = ScalaGen.generate("example/issue23.spec.conf")
+      r.classNames === Set("ScalaIssue23Cfg")
+      r.fields === Map(
+        "sizeReq"    → "scala.Long",
+        "sizeOpt"    → "scala.Option[scala.Long]",
+        "sizeOptDef" → "scala.Long",
+        "sizes"      → "scala.List[scala.Long]",
+        "sizes2"     → "scala.List[scala.List[scala.Long]]"
+      )
+    }
+
+    "example" in {
+      val c = ScalaIssue23Cfg(ConfigFactory.parseString(
+        """
+          |sizeReq = "2048K"
+          |sizeOpt = "1024000"
+          |sizes   = [ 1000, "64G", "16kB" ]
+          |sizes2  = [[ 1000, "64G" ], [ "16kB" ] ]
+        """.stripMargin
+      ))
+      c.sizeReq === 2048*1024
+      c.sizeOpt === Some(1024000)
+      c.sizeOptDef === 1024
+      c.sizes === List(1000, 64*1024*1024*1024L, 16*1000)
+      c.sizes2 === List(
+        List(1000, 64*1024*1024*1024L),
+        List(16*1000))
+    }
+  }
 }

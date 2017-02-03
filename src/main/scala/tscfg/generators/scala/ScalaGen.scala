@@ -146,6 +146,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case LONG     ⇒ "scala.Long"
       case DOUBLE   ⇒ "scala.Double"
       case BOOLEAN  ⇒ "scala.Boolean"
+      case SIZE     ⇒ "scala.Long"
       case DURATION(_) ⇒ "scala.Long"
     }))
   }
@@ -228,6 +229,7 @@ private[scala] case class MethodNames(prefix: String = "$_") {
   val dblA       = prefix + "dbl"
   val blnA       = prefix + "bln"
   val durA       = prefix + "dur"
+  val sizA       = prefix + "siz"
   val expE       = prefix + "expE"
   val listPrefix = prefix + "L"
 
@@ -264,6 +266,21 @@ private[scala] case class MethodNames(prefix: String = "$_") {
                 |    !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
                 |  u.asInstanceOf[java.lang.Number].longValue()
                 |}""".stripMargin.trim,
+
+      // since there's no something like cv.getBytes() nor is SimpleConfig.parseBytes visible,
+      // use ConfigFactory.parseString:
+      sizA → s"""
+                |private def $sizA(cv:com.typesafe.config.ConfigValue): scala.Long = {
+                |  val u: Any = cv.unwrapped
+                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.NUMBER ||
+                |     u.isInstanceOf[scala.Long] || u.isInstanceOf[scala.Int])
+                |    u.asInstanceOf[java.lang.Number].longValue()
+                |  else if (cv.valueType() == com.typesafe.config.ConfigValueType.STRING) {
+                |    com.typesafe.config.ConfigFactory.parseString("s = " + '"' + u + '"').getBytes("s")
+                |  }
+                |  else throw $expE(cv, "size")
+                |}
+                |""".stripMargin.trim,
 
       dblA → s"""
                 |private def $dblA(cv:com.typesafe.config.ConfigValue): scala.Double = {
@@ -399,6 +416,7 @@ private[scala] class Accessors {
     case LONG     ⇒ methodNames.lngA
     case DOUBLE   ⇒ methodNames.dblA
     case BOOLEAN  ⇒ methodNames.blnA
+    case SIZE     ⇒ methodNames.sizA
     case DURATION(_) ⇒ methodNames.durA
 
     case _: ObjectType  ⇒ name.replace('.', '_')

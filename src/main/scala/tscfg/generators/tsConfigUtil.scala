@@ -19,10 +19,12 @@ object tsConfigUtil {
     case LONG      ⇒  s"""getLong("$path")"""
     case DOUBLE    ⇒  s"""getDouble("$path")"""
     case BOOLEAN   ⇒  s"""getBoolean("$path")"""
+    case SIZE      ⇒  s"""getBytes("$path")"""
     case DURATION(q)  ⇒  durationGetter(path, q)
   }
 
   def basicValue(t: Type, value: String): String = t match {
+    case SIZE        ⇒ sizeValue(value)
     case DURATION(q) ⇒ durationValue(value, q)
     case STRING   ⇒ '"' + escapeString(value) + '"'
     case _        ⇒ value
@@ -80,5 +82,21 @@ object tsConfigUtil {
     case `minute` =>  TimeUnit.MINUTES
     case `hour`   =>  TimeUnit.HOURS
     case `day`    =>  TimeUnit.DAYS
+  }
+
+  def isSizeValue(value: String): Boolean = {
+    val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
+    try {
+      config.getBytes("s")
+      true
+    }
+    catch {
+      case NonFatal(_) ⇒ false
+    }
+  }
+
+  private def sizeValue(value: String): String = {
+    val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
+    config.getBytes("s").toString
   }
 }

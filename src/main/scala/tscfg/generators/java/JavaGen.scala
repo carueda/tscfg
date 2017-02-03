@@ -131,7 +131,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case LONG      ⇒ "long"
       case DOUBLE    ⇒ "double"
       case BOOLEAN   ⇒ "boolean"
-      case DURATION(q)  ⇒ "long"
+      case SIZE      ⇒ "long"
+      case DURATION(q) ⇒ "long"
     }))
   }
 
@@ -218,7 +219,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                             ): String = {
 
     val (_, methodName) = rec(javaType, lt, "")
-    methodName + s"""(c.getList("$path"))"""
+      methodName + s"""(c.getList("$path"))"""
   }
 
   private def rec(ljt: ListJavaType, lt: ListType, prefix: String
@@ -257,6 +258,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case LONG     ⇒ methodNames.lngA
     case DOUBLE   ⇒ methodNames.dblA
     case BOOLEAN  ⇒ methodNames.blnA
+    case SIZE     ⇒ methodNames.sizA
     case DURATION(q) ⇒ methodNames.durA
 
     case _: ObjectType  ⇒ name.replace('.', '_')
@@ -368,6 +370,7 @@ private[java] case class MethodNames(prefix: String = "$_") {
   val dblA = prefix + "dbl"
   val blnA = prefix + "bln"
   val durA = prefix + "dur"
+  val sizA = prefix + "siz"
   val expE = prefix + "expE"
   val listPrefix = prefix + "L"
 
@@ -404,6 +407,21 @@ private[java] case class MethodNames(prefix: String = "$_") {
                 |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
                 |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $expE(cv, "long");
                 |  return ((java.lang.Number) u).longValue();
+                |}
+                |""".stripMargin.trim,
+
+      // since there's no something like cv.getBytes() nor is SimpleConfig.parseBytes visible,
+      // use ConfigFactory.parseString:
+      sizA → s"""
+                |private static java.lang.Long $sizA(com.typesafe.config.ConfigValue cv) {
+                |  java.lang.Object u = cv.unwrapped();
+                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.NUMBER ||
+                |     (u instanceof java.lang.Long) || (u instanceof java.lang.Integer))
+                |    return ((java.lang.Number) u).longValue();
+                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.STRING) {
+                |    return com.typesafe.config.ConfigFactory.parseString("s = " + '"' + u + '"').getBytes("s");
+                |  }
+                |  throw $expE(cv, "size");
                 |}
                 |""".stripMargin.trim,
 
