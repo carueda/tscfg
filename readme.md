@@ -421,7 +421,7 @@ while also recognizing that very likely typical serialization libraries are alre
 used in the application.
 For example, the demo programs 
 [JavaUse](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java) 
-and [ScalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaUse.scala) 
+and [scalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala) 
 use [Gson](https://github.com/google/gson) and
 [json4s](https://github.com/json4s/json4s), respectively.
 Although you could also use Typesafe Config itself for rendering purposes, you would be 
