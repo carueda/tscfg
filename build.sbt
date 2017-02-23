@@ -1,7 +1,7 @@
+lazy val tscfgVersion = setVersion("0.8.0")
+
+organization := "com.github.carueda"
 name := "tscfg"
-
-val tscfgVersion = setVersion("0.8.0")
-
 version := tscfgVersion
 
 scalaVersion := "2.11.8"
@@ -18,11 +18,8 @@ mainClass in assembly := Some("tscfg.Main")
 assemblyJarName in assembly := s"tscfg-$tscfgVersion.jar"
 
 coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
-
 coverageMinimum := 80
-
 coverageFailOnMinimum := false
-
 coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
@@ -31,6 +28,30 @@ fork in genCode := true
 
 (testOnly in Test) <<= (testOnly in Test) dependsOn genCode
 (test in Test)     <<= (test in Test)     dependsOn genCode
+
+publishMavenStyle := true
+publishArtifact in Test := false
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+pomIncludeRepository := { _ => false }
+homepage := Some(url("https://github.com/carueda/tscfg"))
+licenses := Seq("Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0"))
+scmInfo := Some(ScmInfo(url("http://github.com/carueda/tscfg"), "scm:git@github.com:carueda/tscfg.git"))
+pomExtra :=
+  <developers>
+    <developer>
+      <id>carueda</id>
+      <name>Carlos Rueda</name>
+      <url>http://carueda.info</url>
+    </developer>
+  </developers>;
+
+sonatypeProfileName := "com.github.carueda"
 
 def setVersion(version: String): String = {
   println(s"setting version $version")

@@ -1,3 +1,10 @@
+2017-02-24 - 0.8.0
+- resolve #24 "Maven central"
+  Note:
+    - this uses the default artifact publication (jar, javadocs, etc), **not** the
+      executable "fat" jar, which is basically the only artifact properly built.
+  	- kept the current version   
+  	
 2017-02-03 - 0.8.0
 - resolve #23 "support size-in-bytes type"
 - renaming to better reflect "duration" elements, and in preparation for "size in bytes" support.
