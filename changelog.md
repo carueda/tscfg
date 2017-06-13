@@ -1,3 +1,8 @@
+2017-06-13 - 0.8.1
+
+- use JavaConverters (instead of deprecated JavaConversions) in generated Scala code.
+  Thanks @zishanbilal.
+
 2017-02-24 - 0.8.0
 - resolve #24 "Maven central"
   Note:
