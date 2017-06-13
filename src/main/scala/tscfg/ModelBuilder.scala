@@ -5,7 +5,7 @@ import tscfg.generators.tsConfigUtil
 import tscfg.model.{DURATION, SIZE}
 import tscfg.model.durations.ms
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 case class ModelBuildResult(objectType: model.ObjectType,
                             warnings: List[buildWarnings.Warning])
@@ -69,7 +69,7 @@ class ModelBuilder {
         }
       }
 
-      val comments = cv.origin().comments().toList
+      val comments = cv.origin().comments().asScala.toList
       val optFromComments = comments.exists(_.trim.startsWith("@optional"))
       val commentsOpt = if (comments.isEmpty) None else Some(comments.mkString("\n"))
 
@@ -102,7 +102,7 @@ class ModelBuilder {
       structs(key)
     }
 
-    conf.entrySet() foreach { e ⇒
+    conf.entrySet().asScala foreach { e ⇒
       val path = e.getKey
       val leaf = Struct(path)
       doAncestorsOf(path, leaf)

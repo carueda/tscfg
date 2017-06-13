@@ -1,3 +1,7 @@
+2017-06-13 - 0.8.2
+
+- use JavaConverters
+
 2017-06-13 - 0.8.1
 
 - use JavaConverters (instead of deprecated JavaConversions) in generated Scala code.

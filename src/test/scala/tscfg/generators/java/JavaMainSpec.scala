@@ -10,7 +10,7 @@ import model.implicits._
 
 
 class JavaMainSpec extends Specification {
-  import scala.collection.JavaConversions._
+  import scala.collection.JavaConverters._
 
   "literal values as types" should {
     "generate primitive types with given values as defaults" in {
@@ -131,7 +131,7 @@ class JavaMainSpec extends Specification {
           |ii: [1,2 ,3 ]
         """.stripMargin
       ))
-      c.ii.toList === List(1, 2, 3)
+      c.ii.asScala.toList === List(1, 2, 3)
     }
 
     "example 2" in {
@@ -140,7 +140,7 @@ class JavaMainSpec extends Specification {
           |ii: []
         """.stripMargin
       ))
-      c.ii.toList === List.empty
+      c.ii.asScala.toList === List.empty
     }
   }
 
@@ -161,11 +161,11 @@ class JavaMainSpec extends Specification {
           |booleans: [true, false]
           |""".stripMargin
       ))
-      c.strings .toList === List("hello", "world", "true")
-      c.integers.toList.map(_.toList) === List(List(1, 2, 3), List(4, 5))
-      c.doubles .toList === List(3.14, 2.7182, 1.618)
-      c.longs   .toList === List(1, 9999999999L)
-      c.booleans.toList === List(true, false)
+      c.strings .asScala.toList === List("hello", "world", "true")
+      c.integers.asScala.toList.map(_.asScala.toList) === List(List(1, 2, 3), List(4, 5))
+      c.doubles .asScala.toList === List(3.14, 2.7182, 1.618)
+      c.longs   .asScala.toList === List(1, 9999999999L)
+      c.booleans.asScala.toList === List(true, false)
     }
   }
 
@@ -246,7 +246,7 @@ class JavaMainSpec extends Specification {
           |""".stripMargin
       ))
       c.positions.size() === 1
-      c.positions.get(0).numbers.toList === List(1, 2, 3)
+      c.positions.get(0).numbers.asScala.toList === List(1, 2, 3)
       c.positions.get(0).positions.size() === 1
       c.positions.get(0).positions.get(0).size() === 1
       c.positions.get(0).positions.get(0).get(0).other === 33
@@ -403,8 +403,8 @@ class JavaMainSpec extends Specification {
       c.sizeReq === 2048*1024
       c.sizeOpt === 1024000
       c.sizeOptDef === 1024
-      c.sizes.toList === List(1000, 64*1024*1024*1024L, 16*1000)
-      c.sizes2.toList.map(_.toList) === List(
+      c.sizes.asScala.toList === List(1000, 64*1024*1024*1024L, 16*1000)
+      c.sizes2.asScala.toList.map(_.asScala.toList) === List(
         List(1000, 64*1024*1024*1024L),
         List(16*1000))
     }
