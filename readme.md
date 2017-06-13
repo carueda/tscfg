@@ -104,9 +104,9 @@ a string with a simple syntax as follows can be used
 
 | field spec | meaning | java type / default | scala type / default
 |---|---|---|---|
-| `name = "int"`  | required integer | `int` / no default | `Int` / no default
-| `name = "int|3"`  | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
-| `name = "int?"` | optional integer | `Integer` / `null` | `Option[Int]` / `None`
+| "int"          | required integer | `int` / no default | `Int` / no default
+| "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
+| "int?"         | optional integer | `Integer` / `null` | `Option[Int]` / `None`
 
 > The type syntax is still subject to change.
 
