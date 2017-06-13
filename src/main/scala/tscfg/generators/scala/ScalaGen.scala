@@ -440,8 +440,8 @@ private[scala] class Accessors {
     val methodDef =
       s"""
          |private def $methodName(cl:com.typesafe.config.ConfigList): scala.List[$scalaType] = {
-         |  import scala.collection.JavaConversions._
-         |  cl.map(cv => $elem).toList
+         |  import scala.collection.JavaConverters._  
+         |  cl.asScala.map(cv => $elem).toList
          |}""".stripMargin.trim
     (methodName, methodDef)
   }
