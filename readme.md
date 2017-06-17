@@ -114,11 +114,11 @@ The following is a complete example exercising this mechanism.
 
 ```properties
 endpoint {
-  path = "string"
-  url = "String | http://example.net"
-  serial = "int?"
+  path: "string"
+  url: "String | http://example.net"
+  serial: "int?"
   interface {
-    port = "int | 8080"
+    port: "int | 8080"
   }
 }
 ```
@@ -294,16 +294,16 @@ with some additional explanation:
 durations {
   # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
   # or whatever is provided converted to days
-  days = "duration:day?"
+  days: "duration:day?"
 
   # required duration; reported long (Long) is whatever is provided
   # converted to hours
-  hours = "duration:hour"
+  hours: "duration:hour"
 
   # optional duration with default value;
   # reported long (Long) is in milliseconds, either 550,000 if value is missing
   # or whatever is provided converted to millis
-  millis = "duration:ms | 550s"
+  millis: "duration:ms | 550s"
 
   ...
 }
