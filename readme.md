@@ -33,8 +33,9 @@ The generated code only depends on the Typesafe Config library.
 The tool supports all types handled by Typesafe Config 
 (string, int, long, double, boolean, duration, size-in-bytes, list)
 and has good test coverage.
-Possible improvements include a more standard command line interface and perhaps
-a revision of the syntax for types.
+Possible improvements include a more standard command line interface,
+a proper tscfg library,
+and perhaps a revision of the syntax for types.
 Feel free to fork, enter issues/reactions, submit PRs, etc.
 
 
