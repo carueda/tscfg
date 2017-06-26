@@ -417,7 +417,7 @@ along with the centralized verification, shall become more apparent. All of this
 
 **How does tscfg compare to possible alternatives?**
 
-Please see [this wiki](/carueda/tscfg/wiki/alternatives).
+Please see [this wiki](https://github.com/carueda/tscfg/wiki/alternatives).
 
 **Is there any sbt plugin for tscfg that I can use as part of the build for my project?**
 
