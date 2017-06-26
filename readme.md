@@ -415,6 +415,19 @@ the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
 –worth emphasizing– based on an explicit schema for the configuration.
 
+**How does tscfg compare to possible alternatives?**
+
+Please see [this wiki](/carueda/tscfg/wiki/alternatives).
+
+**Is there any sbt plugin for tscfg that I can use as part of the build for my project?**
+
+Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21) 
+if you want to add comments or reactions.  PRs are also welcome.
+
+**Could tscfg generate `Optional<T>` for optional fields?**
+
+Not implemented (yet). Want to contribute?
+
 **What happened with the generated `toString` method?**
 
 We think it's more flexible to let client code decide how to render configuration instances 
@@ -429,15 +442,6 @@ Although you could also use Typesafe Config itself for rendering purposes, you w
 using the original Typesafe Config parsed configuration object, so the rendering won't 
 necessarily be restricted only to the elements captured in the _configuration specification_ 
 used by tscfg for the generated wrapper.
-
-**Could tscfg generate `Optional<T>` for optional fields?**
-
-Yes but it's not implemented. Want to contribute?
-
-**Is there any sbt plugin for tscfg that I can use as part of the build for my project?**
-
-Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21) if you want 
-to add comments or reactions.  PRs are also welcome.
 
 ## tests
 
