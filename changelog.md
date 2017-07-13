@@ -1,3 +1,7 @@
+2017-07-13
+
+- basic experimentation with static-config
+
 2017-06-13 - 0.8.2
 
 - use JavaConverters
