@@ -5,7 +5,8 @@ import com.typesafe.config._
 import scala.collection.JavaConverters._
 
 /**
-  * From https://github.com/Krever/static-config
+  * Some ideas to extend the basic mechanisms from https://github.com/Krever/static-config.
+  * A possible further (optional) addition into the mix is https://github.com/fthomas/refined/
   */
 trait DConfig {
   def config: Config
