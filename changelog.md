@@ -1,3 +1,7 @@
+2017-09-05 - 0.8.3
+
+- resolve #6: "generate conf template"
+
 2017-07-13
 
 - basic experimentation with static-config

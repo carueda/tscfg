@@ -6,7 +6,7 @@ import java.util.Date
 import com.typesafe.config.ConfigFactory
 import tscfg.generators.java.JavaGen
 import tscfg.generators.scala.ScalaGen
-import tscfg.generators.{Generator, GenOpts}
+import tscfg.generators.{GenOpts, Generator, TemplateOpts, TemplateGenerator}
 
 /**
   * The main program. Run with no arguments to see usage.
@@ -22,17 +22,23 @@ object Main {
 
   val defaultDestDir: String = "/tmp"
 
-  val usage: String = s"""
-                         |tscfg $version
-                         |Usage:  tscfg.Main --spec inputFile [options]
-                         |Options (default):
-                         |  --pn <packageName>                                     (${defaultGenOpts.packageName})
-                         |  --cn <className>                                       (${defaultGenOpts.className})
-                         |  --dd <destDir>                                         ($defaultDestDir)
-                         |  --j7                  generate code for java <= 7      (8)
-                         |  --scala               generate scala code              (java)
-                         |  --java                generate java code               (the default)
-                         |Output is written to $$destDir/$$className.ext
+  var templateOpts = TemplateOpts()
+
+  val usage: String =
+    s"""
+       |tscfg $version
+       |Usage:  tscfg.Main --spec inputFile [options]
+       |Options (default):
+       |  --pn <packageName>                                     (${defaultGenOpts.packageName})
+       |  --cn <className>                                       (${defaultGenOpts.className})
+       |  --dd <destDir>                                         ($defaultDestDir)
+       |  --j7                  generate code for java <= 7      (8)
+       |  --scala               generate scala code              (java)
+       |  --java                generate java code               (the default)
+       |  --tpl <filename>      generate config template         (no default)
+       |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
+       |  --tpl.cp <string>     prefix for template comments     ("${templateOpts.commentPrefix}")
+       |Output is written to $$destDir/$$className.ext
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
@@ -40,7 +46,8 @@ object Main {
                          className: String =   defaultGenOpts.className,
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
-                         language: String = "java"
+                         language: String = "java",
+                         tplFilename: Option[String] = None
                         )
 
   def main(args: Array[String]): Unit = {
@@ -82,11 +89,22 @@ object Main {
         case "--java" :: rest =>
           traverseList(rest, opts.copy(language = "java"))
 
-        case opt :: nil =>
+        case "--tpl" :: filename :: rest =>
+          traverseList(rest, opts.copy(tplFilename = Some(filename)))
+
+        case "--tpl.ind" :: indent :: rest =>
+          templateOpts = templateOpts.copy(indent = indent)
+          traverseList(rest, opts)
+
+        case "--tpl.cp" :: prefixComment :: rest =>
+          templateOpts = templateOpts.copy(commentPrefix = prefixComment)
+          traverseList(rest, opts)
+
+        case opt :: _ =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
 
-        case nil => opts
+        case Nil => opts
       }
     }
 
@@ -145,14 +163,14 @@ object Main {
 
     out.close()
 
-    /*
-        opts.templates foreach { genTemplate =>
-          val destFile = new File(genTemplate.filename)
-          printf("%10s: %s\n", genTemplate.what, destFile.getAbsolutePath)
-          val out = new PrintWriter(destFile)
-          templateGenerator.generate(genTemplate.what, root, out)
-          out.close()
-        }
-    */
+    opts.tplFilename foreach { filename ⇒
+      println(s"generating template $filename")
+      val destFile = new File(filename)
+      val out = new PrintWriter(destFile)
+      val templater = new TemplateGenerator(templateOpts)
+      val template = templater.generate(objectType)
+      out.println(template)
+      out.close()
+    }
   }
 }

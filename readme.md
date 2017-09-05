@@ -24,6 +24,7 @@ The generated code only depends on the Typesafe Config library.
   - [list type](#list-type)
   - [object type](#object-type)
   - [optional object or list](#optional-object-or-list)
+- [configuration template](#configuration-template)
 - [FAQ](#faq)
 - [tests](#tests)
 
@@ -189,6 +190,9 @@ Options (default):
   --j7                  generate code for java <= 7      (8)
   --scala               generate scala code              (java)
   --java                generate java code               (the default)
+  --tpl <filename>      generate config template         (not generated)
+  --tpl.ind <string>    template indentation string      ("  ")
+  --tpl.cp <string>     prefix for template comments     ("##")
 Output is written to $destDir/$className.ext
 ```
 
@@ -403,6 +407,12 @@ object Cfg {
 As with basic types, the meaning of an optional object or list is that the corresponding 
 value will be `null` (`None` in Scala) when the corresponding actual entry is missing in 
 a given configuration instance.
+
+
+## configuration template
+
+tscfg can also generate user-oriented configuration templates from given config specs.
+See [this wiki](https://github.com/carueda/tscfg/wiki/template-generation).
 
 
 ## FAQ
