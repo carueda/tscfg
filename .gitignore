@@ -21,3 +21,9 @@ project/plugins/project/
 .worksheet
 
 # Created by .ignore support plugin (hsz.mobi)
+
+# IntelliJ
+.idea
+*.iml
+maven-plugin/.idea/
+maven-plugin/*.iml
