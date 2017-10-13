@@ -13,6 +13,14 @@ Maven plugin to generate config class file based on template file using tscfg.
         <packageName>com.sentiance.service.aligner.config</packageName>
         <className>AlignerConfig</className>
     </configuration>
+     <executions>
+        <execution>
+            <id>tscfg-sources</id>
+            <goals>
+                <goal>generate-config-class</goal>
+            </goals>
+        </execution>
+    </executions>
 </plugin>
 ```
 

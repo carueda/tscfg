@@ -59,6 +59,18 @@
             <artifactId>tscfg_2.11</artifactId>
             <version>0.8.3</version>
         </dependency>
-
     </dependencies>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sentiance.repo</id>
+            <name>Sentiance Repository</name>
+            <url>http://ec2-52-210-185-85.eu-west-1.compute.amazonaws.com:8081/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+        <repository>
+            <id>sentiance.repo</id>
+            <name>Sentiance Repository</name>
+            <url>http://ec2-52-210-185-85.eu-west-1.compute.amazonaws.com:8081/artifactory/libs-release-local</url>
+        </repository>
+    </distributionManagement>
 </project>
