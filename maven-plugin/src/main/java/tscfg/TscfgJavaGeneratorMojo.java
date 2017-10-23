@@ -44,18 +44,6 @@ public class TscfgJavaGeneratorMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}", required = true, readonly = true)
   private MavenProject project;
 
-  public TscfgJavaGeneratorMojo() {
-  }
-
-  // visible for testing
-  protected TscfgJavaGeneratorMojo(File templateFile, String packageName, String className, String outputDirectory, MavenProject project) {
-    this.templateFile = templateFile;
-    this.packageName = packageName;
-    this.className = className;
-    this.outputDirectory = outputDirectory;
-    this.project = project;
-  }
-
   public void execute() throws MojoExecutionException, MojoFailureException {
     String template = readTscfgTemplate();
 
