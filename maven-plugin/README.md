@@ -32,4 +32,4 @@ Maven plugin to generate config class file based on template file using tscfg.
 
 ## Current limitations
 * Currently only Java class generated is supported. It should be easy to extend this plugin to generate Scala files.
-* This plugin always generates java classes for Java 7 and above. This should also be easy to extend.   
+* This plugin always generates java classes for Java 8 and above. This should also be easy to extend.   
