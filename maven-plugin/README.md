@@ -29,3 +29,7 @@ Maven plugin to generate config class file based on template file using tscfg.
 * className: the name of the generated config class 
 * packageName: the package of the generated config class
 * outputDirectory: the output directory for the generated class, default is `target/generated-sources/tscfg/`
+
+## Current limitations
+* Currently only Java class generated is supported. It should be easy to extend this plugin to generate Scala files.
+* This plugin always generates java classes for Java 7 and above. This should also be easy to extend.   
