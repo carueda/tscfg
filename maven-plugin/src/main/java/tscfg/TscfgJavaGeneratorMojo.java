@@ -19,15 +19,18 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 @Mojo(name = "generate-config-class", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 @Execute(phase = LifecyclePhase.GENERATE_SOURCES, goal = "generate-config-class")
 public class TscfgJavaGeneratorMojo extends AbstractMojo {
 
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
-  private static final String PACKAGE_SEPARATOR = ".";
-  private static final String JAVA_FILE_EXTENSION = ".java";
+  public static final Charset UTF_8 = Charset.forName("UTF-8");
+  public static final String PACKAGE_SEPARATOR = ".";
+  public static final String JAVA_FILE_EXTENSION = ".java";
 
   @Parameter(required = true)
   private File templateFile;
@@ -45,43 +48,42 @@ public class TscfgJavaGeneratorMojo extends AbstractMojo {
   private MavenProject project;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
-    String template = readTscfgTemplate();
-
-    GenResult generatorResult = generateJavaCodeForTemplate(template);
-
-    Path javaFile = assembleGeneratedJavaFilePath();
-    writeGeneratedCodeToJavaFile(generatorResult.code(), javaFile);
+    GenResult generatorResult = generateJavaCodeForTemplate(templateFile);
+    writeGeneratedCodeToJavaFile(generatorResult.code());
 
     getLog().debug("Adding " + outputDirectory + " as source root in the maven project.");
     project.addCompileSourceRoot(outputDirectory);
   }
 
-  private String readTscfgTemplate() throws MojoExecutionException {
+  private GenResult generateJavaCodeForTemplate(File templateFile) throws MojoExecutionException {
+    Generator tscfgGenerator = new JavaGen(new GenOpts(packageName, className, false));
+    return tscfgGenerator.generate(ModelBuilder.apply(readTscfgTemplate(templateFile)).objectType());
+  }
+
+  private String readTscfgTemplate(File templateFile) throws MojoExecutionException {
     try {
       return new String(Files.readAllBytes(templateFile.toPath()), UTF_8);
     } catch (IOException e) {
-      throw new MojoExecutionException("Failed to read template file: " + e.getMessage());
+      throw new MojoExecutionException("Failed to read template file (" + templateFile + "): " + e.getMessage());
     }
   }
 
-  private GenResult generateJavaCodeForTemplate(String template) {
-    Generator tscfgGenerator = new JavaGen(new GenOpts(packageName, className, false));
-    return tscfgGenerator.generate(ModelBuilder.apply(template).objectType());
+  private void writeGeneratedCodeToJavaFile(String javaClassCode) throws MojoExecutionException {
+    Path javaClassFile = assembleJavaFilePath();
+    try {
+      createParentDirsIfNecessary(javaClassFile);
+      Files.write(javaClassFile, javaClassCode.getBytes(UTF_8), CREATE, WRITE, TRUNCATE_EXISTING);
+      getLog().debug("Wrote generated java config file to " + javaClassFile);
+    } catch (IOException e) {
+      throw new MojoExecutionException("Failed to write file (" + javaClassFile + "). " +
+          e.getClass() + ": " + e.getMessage());
+    }
   }
 
-  private Path assembleGeneratedJavaFilePath() {
+  private Path assembleJavaFilePath() {
     String packageDirectoryPath = packageName.replace(PACKAGE_SEPARATOR, File.separator);
     String javaFileName = className + JAVA_FILE_EXTENSION;
     return Paths.get(outputDirectory, packageDirectoryPath, javaFileName);
-  }
-
-  private void writeGeneratedCodeToJavaFile(String javaClassCode, Path javaClassFile) throws MojoExecutionException {
-    try {
-      createParentDirsIfNecessary(javaClassFile);
-      Files.write(javaClassFile, javaClassCode.getBytes(UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-    } catch (IOException e) {
-      throw new MojoExecutionException("Failed to write file: " + e.getClass() + ": " + e.getMessage());
-    }
   }
 
   private void createParentDirsIfNecessary(Path outputFile) throws IOException {
@@ -89,5 +91,25 @@ public class TscfgJavaGeneratorMojo extends AbstractMojo {
     if (!Files.exists(parentDir)) {
       Files.createDirectories(parentDir);
     }
+  }
+
+  public void setTemplateFile(File templateFile) {
+    this.templateFile = templateFile;
+  }
+
+  public void setPackageName(String packageName) {
+    this.packageName = packageName;
+  }
+
+  public void setClassName(String className) {
+    this.className = className;
+  }
+
+  public void setOutputDirectory(String outputDirectory) {
+    this.outputDirectory = outputDirectory;
+  }
+
+  public void setProject(MavenProject project) {
+    this.project = project;
   }
 }
