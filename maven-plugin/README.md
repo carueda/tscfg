@@ -5,9 +5,9 @@ Maven plugin to generate config class file based on template file using tscfg.
 ## Usage
 ```xml
 <plugin>
-    <groupId>com.sentiance</groupId>
+    <groupId>com.github.carueda</groupId>
     <artifactId>tscfg-maven-plugin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <configuration>
         <templateFile>config-spec/aligner.spec.conf</templateFile>
         <packageName>com.sentiance.service.aligner.config</packageName>

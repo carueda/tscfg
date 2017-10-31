@@ -1,9 +1,9 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sentiance</groupId>
+    <groupId>com.github.carueda</groupId>
     <artifactId>tscfg-maven-plugin</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <build>
         <plugins>
             <plugin>
@@ -27,9 +27,7 @@
     <developers>
         <developer>
             <name>Tim Van Laer</name>
-            <email>tim.vanlaer@sentiance.com</email>
-            <organization>Sentiance</organization>
-            <organizationUrl>https://sentiance.com</organizationUrl>
+            <email>timvanlaer@gmail.com</email>
         </developer>
     </developers>
 
@@ -92,17 +90,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sentiance.repo</id>
-            <name>Sentiance Repository</name>
-            <url>http://ec2-52-210-185-85.eu-west-1.compute.amazonaws.com:8081/artifactory/libs-snapshot-local</url>
-        </snapshotRepository>
-        <repository>
-            <id>sentiance.repo</id>
-            <name>Sentiance Repository</name>
-            <url>http://ec2-52-210-185-85.eu-west-1.compute.amazonaws.com:8081/artifactory/libs-release-local</url>
-        </repository>
-    </distributionManagement>
 </project>

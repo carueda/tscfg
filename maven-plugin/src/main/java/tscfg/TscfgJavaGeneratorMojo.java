@@ -64,7 +64,7 @@ public class TscfgJavaGeneratorMojo extends AbstractMojo {
     try {
       return new String(Files.readAllBytes(templateFile.toPath()), UTF_8);
     } catch (IOException e) {
-      throw new MojoExecutionException("Failed to read template file (" + templateFile + "): " + e.getMessage());
+      throw new MojoExecutionException("Failed to read template file (" + templateFile + "): " + e.getClass() + ": " + e.getMessage());
     }
   }
 
@@ -93,23 +93,23 @@ public class TscfgJavaGeneratorMojo extends AbstractMojo {
     }
   }
 
-  public void setTemplateFile(File templateFile) {
+  void setTemplateFile(File templateFile) {
     this.templateFile = templateFile;
   }
 
-  public void setPackageName(String packageName) {
+  void setPackageName(String packageName) {
     this.packageName = packageName;
   }
 
-  public void setClassName(String className) {
+  void setClassName(String className) {
     this.className = className;
   }
 
-  public void setOutputDirectory(String outputDirectory) {
+  void setOutputDirectory(String outputDirectory) {
     this.outputDirectory = outputDirectory;
   }
 
-  public void setProject(MavenProject project) {
+  void setProject(MavenProject project) {
     this.project = project;
   }
 }
