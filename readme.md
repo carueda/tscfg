@@ -210,7 +210,7 @@ generating: /tmp/ExampleCfg.java
 ### maven plugin
 
 Please see [tscfg-maven-plugin](https://github.com/timvlaer/tscfg-maven-plugin).
-Thanks (@timvlaer)[https://github.com/timvlaer]!
+Thanks [@timvlaer](https://github.com/timvlaer)!
 
 ## configuration access
 
