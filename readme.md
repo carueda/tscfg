@@ -16,6 +16,7 @@ The generated code only depends on the Typesafe Config library.
 - [status](#status)
 - [configuration spec](#configuration-spec)
 - [running tscfg](#running-tscfg)
+  - [maven plugin](#maven-plugin)
 - [configuration access](#configuration-access)
 - [supported types](#supported-types)
   - [basic types](#basic-types)
@@ -205,6 +206,11 @@ $ java -jar tscfg-x.y.z.jar --spec example.spec.conf
 parsing: example.spec.conf
 generating: /tmp/ExampleCfg.java
 ```
+
+### maven plugin
+
+Please see [tscfg-maven-plugin](https://github.com/timvlaer/tscfg-maven-plugin).
+Thanks (@timvlaer)[https://github.com/timvlaer]!
 
 ## configuration access
 
