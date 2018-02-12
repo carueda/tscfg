@@ -190,8 +190,9 @@ Options (default):
   --dd <destDir>                                         (/tmp)
   --j7                  generate code for java <= 7      (8)
   --scala               generate scala code              (java)
+  --scala:`             use backsticks                   (false)
   --java                generate java code               (the default)
-  --tpl <filename>      generate config template         (not generated)
+  --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
   --tpl.cp <string>     prefix for template comments     ("##")
 Output is written to $destDir/$className.ext
