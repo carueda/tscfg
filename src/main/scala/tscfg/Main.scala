@@ -34,6 +34,7 @@ object Main {
        |  --dd <destDir>                                         ($defaultDestDir)
        |  --j7                  generate code for java <= 7      (8)
        |  --scala               generate scala code              (java)
+       |  --scala:`             use backsticks                   (false)
        |  --java                generate java code               (the default)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
@@ -47,6 +48,7 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java",
+                         useBacksticks: Boolean = false,
                          tplFilename: Option[String] = None
                         )
 
@@ -85,6 +87,9 @@ object Main {
 
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
+
+        case "--scala:`" :: rest =>
+          traverseList(rest, opts.copy(useBacksticks = true))
 
         case "--java" :: rest =>
           traverseList(rest, opts.copy(language = "java"))
@@ -127,7 +132,8 @@ object Main {
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
 
-    val genOpts = GenOpts(opts.packageName, opts.className, opts.j7)
+    val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
+                          useBacksticks = opts.useBacksticks)
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim

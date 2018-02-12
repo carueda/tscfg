@@ -299,12 +299,12 @@ class JavaMainSpec extends Specification {
   }
 
   "issue19" should {
-    """replace leading and trailing " with _""" in {
+    """put underscores for key having $""" in {
       val r = JavaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("JavaIssue19Cfg")
       r.fields === Map(
-        "_do_log_"  → "boolean",
-        "_$_foo_"   → "java.lang.String"
+        "do_log"  → "boolean",
+        "_$_foo_" → "java.lang.String"
       )
     }
 
@@ -315,8 +315,8 @@ class JavaMainSpec extends Specification {
           |"$_foo"  : some string
         """.stripMargin
       ))
-      c._do_log_  === true
-      c._$_foo_   === "some string"
+      c.do_log  === true
+      c._$_foo_ === "some string"
     }
   }
 

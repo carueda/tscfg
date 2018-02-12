@@ -74,7 +74,14 @@ object model {
     def apply(elems: (String, AnnType)*): ObjectType = {
       val x = elems.groupBy(_._1).mapValues(_.length).filter(_._2 > 1)
       if (x.nonEmpty) throw new RuntimeException(s"key repeated in object: ${x.head}")
-      ObjectType(Map(elems : _*))
+
+      val noQuotes = elems map { case (k, v) ⇒
+        // per Lightbend Config restrictions involving $, leave the key alone if
+        // contains $, otherwise unquote the key in case is quoted.
+        val adjName = if (k.contains("$")) k else k.replaceAll("^\"|\"$", "")
+        adjName.replaceAll("^\"|\"$", "") -> v
+      }
+      ObjectType(Map(noQuotes : _*))
     }
   }
 

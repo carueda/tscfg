@@ -1,3 +1,11 @@
+2018-02-11 - 0.9.0
+
+- resolve #30 "scala: option to use back ticks"
+- Adjustments regarding keys with $ and quoted strings:
+    - key containing $ is left alone (even if it's quoted).
+      This mainly due to Config restrictions on keys involving $ 
+    - otherwise, the key is unquoted (if quoted of course) 
+
 2018-02-11 - 0.8.4
 
 - internal: use scala 2.12 (but cross compile to 2.11 too) 

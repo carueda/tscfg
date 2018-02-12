@@ -73,7 +73,11 @@ class ModelBuilder {
       val optFromComments = comments.exists(_.trim.startsWith("@optional"))
       val commentsOpt = if (comments.isEmpty) None else Some(comments.mkString("\n"))
 
-      name -> model.AnnType(childType,
+      // per Lightbend Config restrictions involving $, leave the key alone if
+      // contains $, otherwise unquote the key in case is quoted.
+      val adjName = if (name.contains("$")) name else name.replaceAll("^\"|\"$", "")
+
+      adjName -> model.AnnType(childType,
         optional      = optional || optFromComments,
         default       = default,
         comments      = commentsOpt

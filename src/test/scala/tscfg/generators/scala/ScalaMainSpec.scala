@@ -303,12 +303,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue19" should {
-    """replace leading and trailing " with _""" in {
+    """put underscores for key having $""" in {
       val r = ScalaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("ScalaIssue19Cfg")
       r.fields === Map(
-        "_do_log_"  → "scala.Boolean",
-        "_$_foo_"   → "java.lang.String"
+        "do_log"  → "scala.Boolean",
+        "_$_foo_" → "java.lang.String"
       )
     }
 
@@ -319,8 +319,8 @@ class ScalaMainSpec extends Specification {
           |"$_foo"  : some string
         """.stripMargin
       ))
-      c._do_log_  === true
-      c._$_foo_   === "some string"
+      c.do_log  === true
+      c._$_foo_ === "some string"
     }
   }
 
@@ -403,6 +403,20 @@ class ScalaMainSpec extends Specification {
       c.sizes2 === List(
         List(1000, 64*1024*1024*1024L),
         List(16*1000))
+    }
+  }
+
+  "issue30" should {
+    "generate as indicated for useBacksticks" in {
+      val r = ScalaGen.generate("example/issue30.spec.conf",
+                                useBacksticks = true)
+
+      r.classNames === Set("ScalaIssue30Cfg", "`Foo-object`")
+      r.fields.size === 4
+      r.fields("`foo-object`" ) === "ScalaIssue30Cfg.`Foo-object`"
+      r.fields("`bar-baz`"    ) === "java.lang.String"
+      r.fields("`0`"          ) === "java.lang.String"
+      r.fields("`other#stuff`") === "scala.Int"
     }
   }
 }

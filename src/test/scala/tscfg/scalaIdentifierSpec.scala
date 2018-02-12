@@ -2,12 +2,17 @@ package tscfg
 
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
-import tscfg.generators.scala.scalaUtil.{scalaReservedWords, scalaIdentifier}
+import tscfg.generators.scala.ScalaUtil
+import tscfg.generators.scala.ScalaUtil.scalaReservedWords
+
 import scala.util.Random
 
 object scalaIdentifierSpec extends Specification {
 
   """scalaIdentifier""" should {
+    val scalaUtil: ScalaUtil = new ScalaUtil()
+    import scalaUtil.scalaIdentifier
+
 
     List("foo", "bar_3", "$baz").foldLeft(Fragments.empty) { (res, id) =>
       res.append(s"""keep valid identifier "$id"""" in {
@@ -30,6 +35,23 @@ object scalaIdentifierSpec extends Specification {
 
     s"""prefix with '_' if first character is valid but not at first position: "21" -> "_21"""" in {
       scalaIdentifier("21") must_== "_21"
+    }
+  }
+
+  """scalaIdentifier with useBacksticks=true""" should {
+    val scalaUtil: ScalaUtil = new ScalaUtil(useBacksticks = true)
+    import scalaUtil.scalaIdentifier
+
+    List("foo-bar", "foo:bar", "foo#bar").foldLeft(Fragments.empty) { (res, id) =>
+      res.append(s"""put non scala id with backsticks: "$id" -> "`$id`"""" in {
+        scalaIdentifier(id) must_== s"`$id`"
+      })
+    }
+
+    List("0", "1", "3").foldLeft(Fragments.empty) { (res, id) =>
+      res.append(s"""put literal with backsticks: "$id" -> "`$id`"""" in {
+        scalaIdentifier(id) must_== s"`$id`"
+      })
     }
   }
 }

@@ -1,7 +1,6 @@
 package tscfg.generators.scala
 
 import tscfg.{ModelBuilder, model}
-import tscfg.generators.scala.scalaUtil.scalaIdentifier
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
@@ -13,6 +12,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   implicit val methodNames = MethodNames()
   val getter = Getter(hasPath, accessors, methodNames)
   import methodNames._
+
+  val scalaUtil: ScalaUtil = new ScalaUtil(useBacksticks = genOpts.useBacksticks)
+  import scalaUtil.{scalaIdentifier, getClassName}
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
@@ -53,11 +55,10 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     def padId(id: String) = id + (" " * (padScalaIdLength - id.length))
 
     val results = symbols.map { symbol ⇒
-      val scalaId = scalaIdentifier(symbol)
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamesPrefix = className+"." :: classNamesPrefix,
-        className = scalaUtil.getClassName(symbol)
+        className = getClassName(symbol)
       )
       (symbol, res)
     }
@@ -158,7 +159,10 @@ object ScalaGen {
   import tscfg.util
 
   // $COVERAGE-OFF$
-  def generate(filename: String, showOut: Boolean = false): GenResult = {
+  def generate(filename: String,
+               showOut: Boolean = false,
+               useBacksticks: Boolean = false
+              ): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
@@ -182,7 +186,8 @@ object ScalaGen {
       }
     }
 
-    val genOpts = GenOpts("tscfg.example", className, j7 = false)
+    val genOpts = GenOpts("tscfg.example", className, j7 = false,
+                          useBacksticks = useBacksticks)
 
     val generator = new ScalaGen(genOpts)
 
@@ -440,7 +445,7 @@ private[scala] class Accessors {
     val methodDef =
       s"""
          |private def $methodName(cl:com.typesafe.config.ConfigList): scala.List[$scalaType] = {
-         |  import scala.collection.JavaConverters._  
+         |  import scala.collection.JavaConverters._
          |  cl.asScala.map(cv => $elem).toList
          |}""".stripMargin.trim
     (methodName, methodDef)
