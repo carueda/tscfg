@@ -13,7 +13,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   val getter = Getter(hasPath, accessors, methodNames)
   import methodNames._
 
-  val scalaUtil: ScalaUtil = new ScalaUtil(useBacksticks = genOpts.useBacksticks)
+  val scalaUtil: ScalaUtil = new ScalaUtil(useBackticks = genOpts.useBackticks)
   import scalaUtil.{scalaIdentifier, getClassName}
 
   def generate(objectType: ObjectType): GenResult = {
@@ -161,7 +161,7 @@ object ScalaGen {
   // $COVERAGE-OFF$
   def generate(filename: String,
                showOut: Boolean = false,
-               useBacksticks: Boolean = false
+               useBackticks: Boolean = false
               ): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
@@ -187,7 +187,7 @@ object ScalaGen {
     }
 
     val genOpts = GenOpts("tscfg.example", className, j7 = false,
-                          useBacksticks = useBacksticks)
+                          useBackticks = useBackticks)
 
     val generator = new ScalaGen(genOpts)
 

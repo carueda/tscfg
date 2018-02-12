@@ -34,12 +34,14 @@ object Main {
        |  --dd <destDir>                                         ($defaultDestDir)
        |  --j7                  generate code for java <= 7      (8)
        |  --scala               generate scala code              (java)
-       |  --scala:`             use backsticks                   (false)
+       |  --scala:bt            use backticks (see #30)          (false)
        |  --java                generate java code               (the default)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
        |  --tpl.cp <string>     prefix for template comments     ("${templateOpts.commentPrefix}")
        |Output is written to $$destDir/$$className.ext
+       |
+       |More information at https://github.com/carueda/tscfg
     """.stripMargin
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
@@ -48,7 +50,7 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java",
-                         useBacksticks: Boolean = false,
+                         useBackticks: Boolean = false,
                          tplFilename: Option[String] = None
                         )
 
@@ -88,8 +90,8 @@ object Main {
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
 
-        case "--scala:`" :: rest =>
-          traverseList(rest, opts.copy(useBacksticks = true))
+        case "--scala:bt" :: rest =>
+          traverseList(rest, opts.copy(useBackticks = true))
 
         case "--java" :: rest =>
           traverseList(rest, opts.copy(language = "java"))
@@ -133,7 +135,7 @@ object Main {
     val out = new PrintWriter(destFile)
 
     val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
-                          useBacksticks = opts.useBacksticks)
+                          useBackticks = opts.useBackticks)
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim

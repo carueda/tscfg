@@ -407,9 +407,9 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue30" should {
-    "generate as indicated for useBacksticks" in {
+    "generate as indicated for useBackticks" in {
       val r = ScalaGen.generate("example/issue30.spec.conf",
-                                useBacksticks = true)
+                                useBackticks = true)
 
       r.classNames === Set("ScalaIssue30Cfg", "`Foo-object`")
       r.fields.size === 4

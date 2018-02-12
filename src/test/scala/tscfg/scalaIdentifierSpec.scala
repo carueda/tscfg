@@ -38,18 +38,18 @@ object scalaIdentifierSpec extends Specification {
     }
   }
 
-  """scalaIdentifier with useBacksticks=true""" should {
-    val scalaUtil: ScalaUtil = new ScalaUtil(useBacksticks = true)
+  """scalaIdentifier with useBackticks=true""" should {
+    val scalaUtil: ScalaUtil = new ScalaUtil(useBackticks = true)
     import scalaUtil.scalaIdentifier
 
     List("foo-bar", "foo:bar", "foo#bar").foldLeft(Fragments.empty) { (res, id) =>
-      res.append(s"""put non scala id with backsticks: "$id" -> "`$id`"""" in {
+      res.append(s"""put non scala id with backticks: "$id" -> "`$id`"""" in {
         scalaIdentifier(id) must_== s"`$id`"
       })
     }
 
     List("0", "1", "3").foldLeft(Fragments.empty) { (res, id) =>
-      res.append(s"""put literal with backsticks: "$id" -> "`$id`"""" in {
+      res.append(s"""put literal number with backticks: "$id" -> "`$id`"""" in {
         scalaIdentifier(id) must_== s"`$id`"
       })
     }

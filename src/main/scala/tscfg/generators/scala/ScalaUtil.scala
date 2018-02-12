@@ -8,13 +8,13 @@ import tscfg.util
   * that need translation of the given identifier to make it valid Scala.
   * Similarly, [[getClassName]] also does some related logic.
   *
-  * With this flag set to true, both methods will change their logic to uses
-  * backsticks instead of replacing or removing the characters that would
+  * With this flag set to true, both methods will change their logic to use
+  * backticks instead of replacing or removing the characters that would
   * make the resulting identifiers invalid.
   *
-  * @param useBacksticks  False by default
+  * @param useBackticks  False by default
   */
-class ScalaUtil(useBacksticks: Boolean = false) {
+class ScalaUtil(useBackticks: Boolean = false) {
   import ScalaUtil._
 
   /**
@@ -25,28 +25,28 @@ class ScalaUtil(useBacksticks: Boolean = false) {
     * - otherwise:
     *   - returns symbol if it is a valid java identifier
     *   - otherwise:
-    * if useBacksticks is true, enclose symbol in backsticks
+    * if useBackticks is true, encloses symbol in backticks
     * otherwise, returns `javaGenerator.javaIdentifier(symbol)`
     */
   def scalaIdentifier(symbol: String): String = {
     if (scalaReservedWords.contains(symbol)) "`" + symbol + "`"
     else if (noArgMethodInScope.contains(symbol)) symbol + "_"
     else if (javaUtil.isJavaIdentifier(symbol)) symbol
-    else if (useBacksticks) "`" + symbol + "`"
+    else if (useBackticks) "`" + symbol + "`"
     else javaUtil.javaIdentifier(symbol)
   }
 
   /**
     * Returns a class name from the given symbol.
-    * If useBacksticks:
-    * This is basically capitalizing the first character that
-    * can be capitalized. If none, then a `U` is prepended.
+    * If useBackticks:
+    *   This is basically capitalizing the first character that
+    *   can be capitalized. If none, then a `U` is prepended.
     * Otherwise:
     * Since underscores are specially used in generated code,
     * this method camelizes the symbol in case of any underscores.
     */
   def getClassName(symbol: String): String = {
-    if (useBacksticks) {
+    if (useBackticks) {
       val scalaId = scalaIdentifier(symbol)
       val search = scalaId.zipWithIndex.find { case (c, _) ⇒ c.toUpper != c }
       search match {

@@ -26,7 +26,7 @@ abstract class Generator(genOpts: GenOpts) {
 case class GenOpts(packageName: String,
                    className: String,
                    j7: Boolean,
-                   useBacksticks: Boolean = false
+                   useBackticks: Boolean = false
                   )
 
 case class GenResult(code: String = "?",

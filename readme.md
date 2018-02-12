@@ -190,7 +190,7 @@ Options (default):
   --dd <destDir>                                         (/tmp)
   --j7                  generate code for java <= 7      (8)
   --scala               generate scala code              (java)
-  --scala:`             use backsticks                   (false)
+  --scala:bt            use backticks (#30)              (false)
   --java                generate java code               (the default)
   --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
