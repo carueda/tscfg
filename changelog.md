@@ -1,3 +1,8 @@
+2018-02-11 - 0.8.4
+
+- internal: use scala 2.12 (but cross compile to 2.11 too) 
+  and upgrade some dependencies
+
 2017-09-05 - 0.8.3
 
 - resolve #6: "generate conf template"

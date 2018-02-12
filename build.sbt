@@ -1,17 +1,20 @@
-lazy val tscfgVersion = setVersion("0.8.3")
+lazy val tscfgVersion = setVersion("0.8.4")
 
 organization := "com.github.carueda"
 name := "tscfg"
 version := tscfgVersion
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.2"
+
+crossScalaVersions := Seq("2.11.11", "2.12.2")
 
 libraryDependencies ++= Seq(
   "com.typesafe"          %  "config"         % "1.3.0",
-  "org.specs2"           %%  "specs2-core"    % "3.8.4" % "test",
+  "org.specs2"           %%  "specs2-core"    % "4.0.2" % "test",
   "org.json4s"           %%  "json4s-native"  % "3.5.0",
   "com.google.code.gson"  %  "gson"           % "2.8.0"
 )
+scalacOptions in Test ++= Seq("-Yrangepos")  // per specs2-core
 
 mainClass in assembly := Some("tscfg.Main")
 
