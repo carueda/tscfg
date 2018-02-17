@@ -55,14 +55,27 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       (symbol, res)
     }
 
-    val classDeclMembersStr = results.map { case (symbol, res) ⇒
+    val classDeclMembers = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val memberType = res.javaType
       val typ = if (a.optional && a.default.isEmpty) toObjectType(memberType) else memberType
       val javaId = javaIdentifier(symbol)
+      (typ, javaId)
+    }
+
+    val classDeclMembersStr = classDeclMembers.map{ case (typ, javaId) ⇒
       genResults = genResults.copy(fields = genResults.fields + (javaId → typ.toString))
       s"public final $typ $javaId;"
     }.mkString("\n  ")
+
+    val classMemberGettersStr = if (genOpts.genGetters) {
+      classDeclMembers.map{ case (typ, javaId) ⇒
+        val getter = s"get${javaId.capitalize}"
+        genResults = genResults.copy(getters = genResults.getters + (getter → typ.toString))
+        s"public final $typ $getter() { return $javaId; }"
+      }.mkString("\n  ", "\n  ", "")
+    }
+    else ""
 
     val membersStr = {
       val defined = results.map(_._2.definition).filter(_.nonEmpty)
@@ -97,7 +110,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val classStr = {
       s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted {
-         |  $classDeclMembersStr
+         |  $classDeclMembersStr$classMemberGettersStr
          |  $membersStr
          |  public $classNameAdjusted(com.typesafe.config.Config c) {
          |    $ctorMembersStr
@@ -298,7 +311,8 @@ object JavaGen {
   import tscfg.util
 
   // $COVERAGE-OFF$
-  def generate(filename: String, showOut: Boolean = false): GenResult = {
+  def generate(filename: String, showOut: Boolean = false,
+               genGetters: Boolean = false): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
@@ -322,7 +336,8 @@ object JavaGen {
       }
     }
 
-    val genOpts = GenOpts("tscfg.example", className, j7 = false)
+    val genOpts = GenOpts("tscfg.example", className, j7 = false,
+                          genGetters = genGetters)
 
     val generator = new JavaGen(genOpts)
 

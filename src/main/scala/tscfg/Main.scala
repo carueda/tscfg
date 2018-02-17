@@ -36,6 +36,7 @@ object Main {
        |  --scala               generate scala code              (java)
        |  --scala:bt            use backticks (see #30)          (false)
        |  --java                generate java code               (the default)
+       |  --java:getters        generate getters (see #31)       (false)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
        |  --tpl.cp <string>     prefix for template comments     ("${templateOpts.commentPrefix}")
@@ -51,6 +52,7 @@ object Main {
                          j7: Boolean = false,
                          language: String = "java",
                          useBackticks: Boolean = false,
+                         genGetters: Boolean = false,
                          tplFilename: Option[String] = None
                         )
 
@@ -96,6 +98,9 @@ object Main {
         case "--java" :: rest =>
           traverseList(rest, opts.copy(language = "java"))
 
+        case "--java:getters" :: rest =>
+          traverseList(rest, opts.copy(genGetters = true))
+
         case "--tpl" :: filename :: rest =>
           traverseList(rest, opts.copy(tplFilename = Some(filename)))
 
@@ -135,7 +140,8 @@ object Main {
     val out = new PrintWriter(destFile)
 
     val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
-                          useBackticks = opts.useBackticks)
+                          useBackticks = opts.useBackticks,
+                          genGetters = opts.genGetters)
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim

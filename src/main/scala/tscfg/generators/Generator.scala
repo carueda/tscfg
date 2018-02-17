@@ -26,9 +26,12 @@ abstract class Generator(genOpts: GenOpts) {
 case class GenOpts(packageName: String,
                    className: String,
                    j7: Boolean,
-                   useBackticks: Boolean = false
+                   useBackticks: Boolean = false,
+                   genGetters: Boolean = false
                   )
 
 case class GenResult(code: String = "?",
                      classNames: Set[String] = Set(),
-                     fields: Map[String, String] = Map.empty)
+                     fields: Map[String, String] = Map.empty,
+                     getters: Map[String, String] = Map.empty
+                    )

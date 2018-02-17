@@ -1,3 +1,8 @@
+2018-02-16 - 0.9.3
+
+- resolve #31 "Option to generate getters".
+  The option is `--java:getters`
+
 2018-02-11 - 0.9.0
 
 - resolve #30 "scala: option to use back ticks"

@@ -409,4 +409,26 @@ class JavaMainSpec extends Specification {
         List(16*1000))
     }
   }
+
+  "issue31" should {
+    "generate getters" in {
+      val r = JavaGen.generate("example/issue31.spec.conf",
+                               genGetters = true)
+
+      r.classNames === Set("JavaIssue31Cfg", "B", "D")
+      r.fields.size === 5
+      r.fields("a" ) === "int"
+      r.fields("b" ) === "JavaIssue31Cfg.B"
+      r.fields("c" ) === "java.lang.String"
+      r.fields("d" ) === "B.D"
+      r.fields("e" ) === "boolean"
+
+      r.getters.size === 5
+      r.getters("getA" ) === "int"
+      r.getters("getB" ) === "JavaIssue31Cfg.B"
+      r.getters("getC" ) === "java.lang.String"
+      r.getters("getD" ) === "B.D"
+      r.getters("getE" ) === "boolean"
+    }
+  }
 }
