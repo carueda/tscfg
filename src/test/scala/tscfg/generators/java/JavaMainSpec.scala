@@ -431,4 +431,16 @@ class JavaMainSpec extends Specification {
       r.getters("getE" ) === "boolean"
     }
   }
+
+  "issue33" should {
+    "generate empty config for object level" in {
+      val c = new JavaIssue33Cfg(ConfigFactory.parseString(""))
+      c.endpoint.url === "http://example.net"
+    }
+
+    "generate empty config for dot notated object level" in {
+      val c = new JavaIssue33aCfg(ConfigFactory.parseString(""))
+      c.endpoint.more.url === "http://example.net"
+    }
+  }
 }

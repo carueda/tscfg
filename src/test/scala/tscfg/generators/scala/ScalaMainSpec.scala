@@ -419,4 +419,16 @@ class ScalaMainSpec extends Specification {
       r.fields("`other#stuff`") === "scala.Int"
     }
   }
+
+  "issue33" should {
+    "generate empty config for object level" in {
+      val c = ScalaIssue33Cfg(ConfigFactory.parseString(""))
+      c.endpoint.url === "http://example.net"
+    }
+
+    "generate empty config for dot notated object level" in {
+      val c = ScalaIssue33aCfg(ConfigFactory.parseString(""))
+      c.endpoint.more.url === "http://example.net"
+    }
+  }
 }

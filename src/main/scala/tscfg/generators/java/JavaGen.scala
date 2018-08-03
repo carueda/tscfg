@@ -192,7 +192,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     if (a.optional) {
       s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
     }
-    else s"""new $className(c.getConfig("$path"))"""
+    else s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)

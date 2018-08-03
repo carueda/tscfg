@@ -333,7 +333,7 @@ private[scala] case class Getter(hasPath: String, accessors: Accessors, implicit
     if (a.optional) {
       s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path"))) else None"""
     }
-    else s"""$className(c.getConfig("$path"))"""
+    else s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
