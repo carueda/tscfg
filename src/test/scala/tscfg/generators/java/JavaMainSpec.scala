@@ -442,5 +442,25 @@ class JavaMainSpec extends Specification {
       val c = new JavaIssue33aCfg(ConfigFactory.parseString(""))
       c.endpoint.more.url === "http://example.net"
     }
+
+    "generate config for object first level" in {
+      val c = new JavaIssue33bCfg(ConfigFactory.parseString(""))
+      c.endpoint.url === "http://example.net"
+      c.endpoint.foo === null
+      c.endpoint.baz.key === "bar"
+    }
+
+    "generate config for object nested level" in {
+      val c = new JavaIssue33bCfg(ConfigFactory.parseString("endpoint.foo = 1"))
+      c.endpoint.url === "http://example.net"
+      c.endpoint.foo === 1
+      c.endpoint.baz.key === "bar"
+    }
+
+    "generate config for sub-object under required object" in {
+      val c = new JavaIssue33cCfg(ConfigFactory.parseString("endpoint.req = foo"))
+      c.endpoint.req === "foo"
+      c.endpoint.optObj.key === "bar"
+    }
   }
 }
