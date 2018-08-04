@@ -27,7 +27,7 @@ class modelSpec extends Specification {
 
     "build empty ObjectType" in {
       val baz = objectType.members("baz")
-      baz.isOptional must beTrue
+      baz.optional must beTrue
       baz.comments must beSome("comments for baz...")
     }
   }

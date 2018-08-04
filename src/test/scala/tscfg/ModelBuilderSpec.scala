@@ -33,7 +33,7 @@ class ModelBuilderSpec extends Specification {
                     ) = {
     val at = objType.members(memberName)
     at.t === t
-    at.isOptional === optional
+    at.optional === optional
     at.default === default
     at.comments === comments
   }
@@ -140,7 +140,7 @@ class ModelBuilderSpec extends Specification {
     "translate into ListType(BOOLEAN)" in {
       val at = result.objectType.members("optInt")
       at.t === INTEGER
-      at.isOptional must beTrue
+      at.optional must beTrue
       at.default must beSome("21")
     }
   }
@@ -154,7 +154,7 @@ class ModelBuilderSpec extends Specification {
     "translate into DURATION(ms) with given default" in {
       val at = result.objectType.members("idleTimeout")
       at.t === DURATION(ms)
-      at.isOptional must beTrue
+      at.optional must beTrue
       at.default must beSome("75 seconds")
     }
   }

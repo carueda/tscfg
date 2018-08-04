@@ -32,7 +32,7 @@ class TemplateGenerator(opts: TemplateOpts) {
         opts.commentPrefix + comments.mkString("\n" + opts.commentPrefix) + "\n"
       }
 
-      val opt = if (a.isOptional) "optional" else "required"
+      val opt = if (a.optional) "optional" else "required"
       val dfl = a.default.map(d ⇒ s". Default: $d").getOrElse("")
       val (typ, abbrev) = gen(a.t)
       val abbrev2 = if (abbrev == abbrevObject) "section" else abbrev
@@ -56,7 +56,7 @@ class TemplateGenerator(opts: TemplateOpts) {
 
       decl +
         cmn +
-        (if (a.isOptional) "#" + assign.replaceAll("\n", "\n#") else assign) +
+        (if (a.optional) "#" + assign.replaceAll("\n", "\n#") else assign) +
         assignSysProp +
         assignEnvVar
 

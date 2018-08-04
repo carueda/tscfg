@@ -1,3 +1,8 @@
+2018-08-04 - 0.9.5
+
+- internal: for consistency, `optional` in AnnType construction
+  now also set to true if there's a default value
+
 2018-08-03 - 0.9.4
 
 - resolve #33 "Generate default config objects if non-existent".

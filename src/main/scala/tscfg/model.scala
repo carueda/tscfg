@@ -61,8 +61,6 @@ object model {
                      comments:      Option[String] = None
                     ) {
 
-    def isOptional: Boolean = optional || default.isDefined
-
     def |(d: String): AnnType = copy(default = Some(d))
 
     def unary_~ : AnnType = copy(optional = true)

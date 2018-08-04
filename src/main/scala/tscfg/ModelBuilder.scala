@@ -168,7 +168,7 @@ class ModelBuilder {
     val (baseString, isOpt) = if (typePart.endsWith("?"))
       (typePart.substring(0, typePart.length - 1), true)
     else
-      (typePart, false)
+      (typePart, hasDefault)
 
     val (base, qualification) = {
       val parts = baseString.split("""\s*\:\s*""", 2)
