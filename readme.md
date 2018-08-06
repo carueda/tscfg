@@ -4,13 +4,13 @@
 
 ## tscfg
 
-tscfg is a command line tool that takes a configuration specification 
+tscfg is a command line tool that takes a configuration specification
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
-and generates all the boiler-plate to make the definitions 
-available in type safe, immutable objects 
+and generates all the boiler-plate to make the definitions
+available in type safe, immutable objects
 (POJOs for Java, case classes for Scala).
 
-The generated code only depends on the Typesafe Config library.  
+The generated code only depends on the Typesafe Config library.
 
 
 - [status](#status)
@@ -32,7 +32,7 @@ The generated code only depends on the Typesafe Config library.
 
 ### status
 
-The tool supports all types handled by Typesafe Config 
+The tool supports all types handled by Typesafe Config
 (string, int, long, double, boolean, duration, size-in-bytes, list)
 and has good test coverage.
 Possible improvements include a more standard command line interface,
@@ -58,7 +58,7 @@ service {
 ```
 
 tscfg will generate the following (constructors and other methods omitted):
- 
+
 - Java:
 
     ```java
@@ -72,7 +72,7 @@ tscfg will generate the following (constructors and other methods omitted):
       }
     }
     ```
-    
+
     Nesting of configuration properties is captured via inner static classes.
 
 - Scala:
@@ -90,12 +90,12 @@ tscfg will generate the following (constructors and other methods omitted):
       )
     }
     ```
-    
+
     Nesting of configuration properties is captured via nested companion objects.
 
 The tool determines the type of each field according to the given value
 in the input configuration.
-Used in this way, all fields are considered optional, with the given value as the default. 
+Used in this way, all fields are considered optional, with the given value as the default.
 
 But this wouldn't be flexible enough!
 To allow the specification of
@@ -177,7 +177,7 @@ object ScalaExampleCfg {
 You will need a JRE 8 and the latest fat JAR (tscfg-x.y.z.jar)
 from the [releases](https://github.com/carueda/tscfg/releases).
 
-> Or run `sbt assembly` under a clone of this repo to generate the fat jar. 
+> Or run `sbt assembly` under a clone of this repo to generate the fat jar.
 
 ```shell
 $ java -jar tscfg-x.y.z.jar
@@ -190,6 +190,7 @@ Options (default):
   --dd <destDir>                                         (/tmp)
   --j7                  generate code for java <= 7      (8)
   --scala               generate scala code              (java)
+  --scala:fp            report full path (see #36)       (false)
   --scala:bt            use backticks (see #30)          (false)
   --java                generate java code               (the default)
   --java:getters        generate getters (see #31)       (false)
@@ -240,11 +241,11 @@ int port       = endpoint.hasPathOrNull("port")   ? endpoint.getInt("interface.p
 you can:
 
 1. create the tscfg generated wrapper:
- 
+
     ```java
     ExampleCfg cfg = new ExampleCfg(tsConfig);
     ```
-    which will make all verifications about required settings and associated types. 
+    which will make all verifications about required settings and associated types.
     In particular, as is typical with Config use, an exception will be thrown if this verification fails.
 
 2. then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
@@ -258,13 +259,13 @@ you can:
 An object reference will never be `null` (`None` in Scala) if the corresponding field is required according to
 the specification. It will only be `null` (`None`) if it is marked optional with no default value and
 has been omitted in the input configuration.
- 
+
 With this [example spec](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/example.spec.conf),
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaExampleCfg.java)
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java).
 
 For Scala
-the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala) 
+the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala)
 and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
 
 ## supported types
@@ -273,31 +274,31 @@ and an example of use [like this](https://github.com/carueda/tscfg/blob/master/s
 
 The following basic types are supported:
 
-| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
+| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt
 |---------------|---------------------|--------------------------
-| `string`      | `String`  / `String`    | `String`  / `Option[String]`    
-| `int`         | `int`     / `Integer`   | `Int`     / `Option[Int]`   
-| `long`        | `long`    / `Long`      | `Long`    / `Option[Long]`      
-| `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`    
-| `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`   
+| `string`      | `String`  / `String`    | `String`  / `Option[String]`
+| `int`         | `int`     / `Integer`   | `Int`     / `Option[Int]`
+| `long`        | `long`    / `Long`      | `Long`    / `Option[Long]`
+| `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`
+| `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`
 | `size`        | `long`    / `Long`      | `Long`    / `Option[Long]`
 | `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
-    
+
 
 #### size-in-bytes
 
-The `size` type corresponds to the 
-[size-in-bytes formats](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format) 
-supported by the Typesafe library. 
-See [#23](https://github.com/carueda/tscfg/issues/23) for various examples. 
+The `size` type corresponds to the
+[size-in-bytes formats](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format)
+supported by the Typesafe library.
+See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
 #### durations
 
-A duration type can be further qualified with a suffix consisting of a colon 
-and a desired time unit for the reported value. 
-For example, with the type `"duration:day"`, the reported long value will be in day units, 
-with conversion automatically performed if the actual configuration value is given in 
-any other unit as supported by Typesafe Config according to the 
+A duration type can be further qualified with a suffix consisting of a colon
+and a desired time unit for the reported value.
+For example, with the type `"duration:day"`, the reported long value will be in day units,
+with conversion automatically performed if the actual configuration value is given in
+any other unit as supported by Typesafe Config according to the
 [duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
 
 [A more complete example](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/duration.spec.conf)
@@ -324,10 +325,10 @@ durations {
 
 ### list type
 
-With _t_ denoting a handled type, a list of elements of that type 
+With _t_ denoting a handled type, a list of elements of that type
 is denoted `[` _t_ `]`. The corresponding types in Java and Scala are:
 
-| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt      
+| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt
 |---------------|---------------------|--------------------------
 | `[` _t_ `]`   | `List<T>` / `List<T>`   | `List[T]` / `Option[List[T]]`
 
@@ -412,8 +413,8 @@ object Cfg {
 }
 ```
 
-As with basic types, the meaning of an optional object or list is that the corresponding 
-value will be `null` (`None` in Scala) when the corresponding actual entry is missing in 
+As with basic types, the meaning of an optional object or list is that the corresponding
+value will be `null` (`None` in Scala) when the corresponding actual entry is missing in
 a given configuration instance.
 
 
@@ -425,11 +426,11 @@ See [this wiki](https://github.com/carueda/tscfg/wiki/template-generation).
 
 ## FAQ
 
-**But I can just access the configuration values directly with Typesafe Config 
+**But I can just access the configuration values directly with Typesafe Config
 and even put them in my own classes**
-  
+
 Sure. However, as the number of configuration properties and levels of nesting increase,
-the benefits of automated generation of the typesafe, immutable objects, 
+the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
 –worth emphasizing– based on an explicit schema for the configuration.
 
@@ -439,7 +440,7 @@ Please see [this wiki](https://github.com/carueda/tscfg/wiki/alternatives).
 
 **Is there any sbt plugin for tscfg that I can use as part of the build for my project?**
 
-Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21) 
+Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21)
 if you want to add comments or reactions.  PRs are also welcome.
 
 **Could tscfg generate `Optional<T>` for optional fields?**
@@ -448,17 +449,17 @@ Not implemented (yet). Want to contribute?
 
 **What happened with the generated `toString` method?**
 
-We think it's more flexible to let client code decide how to render configuration instances 
-while also recognizing that very likely typical serialization libraries are already being 
+We think it's more flexible to let client code decide how to render configuration instances
+while also recognizing that very likely typical serialization libraries are already being
 used in the application.
-For example, the demo programs 
-[JavaUse](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java) 
-and [scalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala) 
+For example, the demo programs
+[JavaUse](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java)
+and [scalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala)
 use [Gson](https://github.com/google/gson) and
 [json4s](https://github.com/json4s/json4s), respectively.
-Although you could also use Typesafe Config itself for rendering purposes, you would be 
-using the original Typesafe Config parsed configuration object, so the rendering won't 
-necessarily be restricted only to the elements captured in the _configuration specification_ 
+Although you could also use Typesafe Config itself for rendering purposes, you would be
+using the original Typesafe Config parsed configuration object, so the rendering won't
+necessarily be restricted only to the elements captured in the _configuration specification_
 used by tscfg for the generated wrapper.
 
 ## tests

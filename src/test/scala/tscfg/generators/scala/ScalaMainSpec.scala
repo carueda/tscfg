@@ -416,7 +416,20 @@ class ScalaMainSpec extends Specification {
       r.fields("`foo-object`" ) === "ScalaIssue30Cfg.`Foo-object`"
       r.fields("`bar-baz`"    ) === "java.lang.String"
       r.fields("`0`"          ) === "java.lang.String"
-      r.fields("`other#stuff`") === "scala.Int"
+      r.fields("`other stuff`") === "scala.Int"
+    }
+
+    "verify generated backticks" in {
+      val c = ScalaIssue30Cfg(ConfigFactory.parseString(
+        """foo-object {
+          |  bar-baz = quz
+          |  0 = zero
+          |}
+          |"other stuff" = 142857
+        """.stripMargin
+      ))
+      c.`foo-object`.`bar-baz` === "quz"
+      c.`other stuff` === 142857
     }
   }
 

@@ -1,3 +1,7 @@
+2018-08-06 - 0.9.5
+
+- minor misc adjustments
+
 2018-08-05 - 0.9.5
 
 - \#36 "Report full path for missing required parameter":

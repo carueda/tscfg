@@ -430,6 +430,18 @@ class JavaMainSpec extends Specification {
       r.getters("getD" ) === "B.D"
       r.getters("getE" ) === "boolean"
     }
+
+    "verify generated getters" in {
+      val c = new JavaIssue31Cfg(ConfigFactory.parseString(
+        """
+          |a = 1
+          |b.c = foo
+        """.stripMargin
+      ))
+      c.getA === 1
+      c.getB.getC === "foo"
+      c.getB.getD.getE === false
+    }
   }
 
   "issue33" should {

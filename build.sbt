@@ -9,7 +9,7 @@ scalaVersion := "2.12.2"
 crossScalaVersions := Seq("2.12.2")
 
 libraryDependencies ++= Seq(
-  "com.typesafe"          %  "config"         % "1.3.0",
+  "com.typesafe"          %  "config"         % "1.3.3",
   "org.specs2"           %%  "specs2-core"    % "4.0.2" % "test",
   "org.json4s"           %%  "json4s-native"  % "3.5.0",
   "com.google.code.gson"  %  "gson"           % "2.8.0"
