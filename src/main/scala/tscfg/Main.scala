@@ -35,6 +35,7 @@ object Main {
        |  --j7                  generate code for java <= 7      (8)
        |  --scala               generate scala code              (java)
        |  --scala:bt            use backticks (see #30)          (false)
+       |  --scala:fp            report full path (see #36)       (false)
        |  --java                generate java code               (the default)
        |  --java:getters        generate getters (see #31)       (false)
        |  --tpl <filename>      generate config template         (no default)
@@ -51,6 +52,7 @@ object Main {
                          destDir: String = defaultDestDir,
                          j7: Boolean = false,
                          language: String = "java",
+                         reportFullPath: Boolean = false,
                          useBackticks: Boolean = false,
                          genGetters: Boolean = false,
                          tplFilename: Option[String] = None
@@ -91,6 +93,9 @@ object Main {
 
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
+
+        case "--scala:fp" :: rest =>
+          traverseList(rest, opts.copy(reportFullPath = true))
 
         case "--scala:bt" :: rest =>
           traverseList(rest, opts.copy(useBackticks = true))
@@ -140,6 +145,7 @@ object Main {
     val out = new PrintWriter(destFile)
 
     val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
+                          reportFullPath = opts.reportFullPath,
                           useBackticks = opts.useBackticks,
                           genGetters = opts.genGetters)
 

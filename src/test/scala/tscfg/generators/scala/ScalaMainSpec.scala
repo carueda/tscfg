@@ -451,4 +451,14 @@ class ScalaMainSpec extends Specification {
       c.endpoint.optObj.key === "bar"
     }
   }
+
+  "issue 36" should {
+    def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
+    "report full path for missing required parameter 'obj.foo.bar'" in {
+      a must throwA[com.typesafe.config.ConfigException.Missing].like {
+        case e: com.typesafe.config.ConfigException.Missing ⇒
+          e.getMessage must contain(s"key 'obj.foo.bar'")
+      }
+    }
+  }
 }

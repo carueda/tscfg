@@ -10,7 +10,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   val accessors = new Accessors
   import defs._
   implicit val methodNames = MethodNames()
-  val getter = Getter(hasPath, accessors, methodNames)
+  val getter = Getter(genOpts, hasPath, accessors, methodNames)
   import methodNames._
 
   val scalaUtil: ScalaUtil = new ScalaUtil(useBackticks = genOpts.useBackticks)
@@ -101,6 +101,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         }.mkString("\n  ")
       }
       val rootOnes = if (!isRoot) "" else {
+        if (genOpts.reportFullPath) {
+          accessors.rootListAccessors += methodNames.requireName → methodNames.requireDef
+        }
         if (accessors.rootListAccessors.isEmpty) "" else {
           "\n\n  " + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
             accessors.rootListAccessors(methodName).replaceAll("\n", "\n  ")
@@ -112,8 +115,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val fullClassName = classNamesPrefix.reverse.mkString + className
     val objectString = {
+      val ppParam = if (genOpts.reportFullPath) """, parentPath:java.lang.String=""""" else ""
       s"""object $className {$innerClassesStr
-         |  def apply(c: com.typesafe.config.Config): $fullClassName = {
+         |  def apply(c: com.typesafe.config.Config$ppParam): $fullClassName = {
          |    $fullClassName(
          |      $objectMembersStr
          |    )
@@ -237,6 +241,7 @@ private[scala] case class MethodNames(prefix: String = "$_") {
   val sizA       = prefix + "siz"
   val expE       = prefix + "expE"
   val listPrefix = prefix + "L"
+  val requireName = prefix + "require"
 
   def checkUserSymbol(symbol: String): Unit = {
     if (symbol.startsWith(prefix))
@@ -314,9 +319,18 @@ private[scala] case class MethodNames(prefix: String = "$_") {
        |    (if (u.isInstanceOf[java.lang.String]) "\\"" + u + "\\"" else u))
        |}""".stripMargin.trim
   }
+
+  val requireDef: String =
+    s"""def $requireName[T](parentPath: java.lang.String, path: java.lang.String)(get: ⇒ T): T = {
+       |  import com.typesafe.config.ConfigException.Missing
+       |  try get
+       |  catch {
+       |    case e: Missing ⇒ throw if (parentPath.isEmpty) e else new Missing(parentPath + path, e)
+       |  }
+       |}""".stripMargin
 }
 
-private[scala] case class Getter(hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {
+private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {
   import defs._
 
   def instance(a: AnnType, res: Res, path: String)
@@ -333,7 +347,10 @@ private[scala] case class Getter(hasPath: String, accessors: Accessors, implicit
     if (a.optional) {
       s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path"))) else None"""
     }
-    else s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
+    else {
+      val ppArg = if (genOpts.reportFullPath) s""", s"$${parentPath}$path."""" else ""
+      s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+    }
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
@@ -362,7 +379,10 @@ private[scala] case class Getter(hasPath: String, accessors: Accessors, implicit
       case None if a.optional ⇒
         s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
 
-      case _ ⇒
+      case _ if genOpts.reportFullPath ⇒
+        s"""${methodNames.requireName}(parentPath, "$path") { c.$getter }"""
+
+      case _  ⇒
         s"""c.$getter"""
     }
   }

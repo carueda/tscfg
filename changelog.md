@@ -1,4 +1,11 @@
-2018-08-04 - 0.9.5
+2018-08-05 - 0.9.5
+
+- \#36 "Report full path for missing required parameter":
+    - Only implemented for scala at the moment.
+      Also, this is an opt-in (new option `--scala:fp`) --
+      perhaps later on make it the default behavior?
+- for testing purposes now some options can be passed in the
+  config spec file itself.
 
 - internal: for consistency, `optional` in AnnType construction
   now also set to true if there's a default value

@@ -26,6 +26,7 @@ abstract class Generator(genOpts: GenOpts) {
 case class GenOpts(packageName: String,
                    className: String,
                    j7: Boolean,
+                   reportFullPath: Boolean = false,
                    useBackticks: Boolean = false,
                    genGetters: Boolean = false
                   )

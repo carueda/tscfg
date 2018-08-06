@@ -17,6 +17,27 @@ object gen4tests {
     val buildResult = ModelBuilder(source)
     val objectType = buildResult.objectType
 
+    val baseGenOpts = GenOpts("tscfg.example", "?", j7 = false)
+
+    def updatedGenOpts(className: String): GenOpts = {
+      var genOpts = baseGenOpts.copy(className = className)
+      val opts = {
+        val linePat = """\s*//\s*GenOpts:(.*)""".r
+        source.split("\n")
+          .collect { case linePat(xs) ⇒ xs.trim }
+          .flatMap(_.split("\\s+"))
+      }
+
+      opts foreach {
+        case "--scala:fp"      ⇒ genOpts = genOpts.copy(reportFullPath = true)
+        case "--scala:bt"      ⇒ genOpts = genOpts.copy(useBackticks = true)
+        case "--java:getters"  ⇒ genOpts = genOpts.copy(genGetters = true)
+
+        case opt ⇒ println(s"WARN: $confFile: unrecognized GenOpts argument: `$opt'")
+      }
+      genOpts
+    }
+
     val name = confFile.getName
     val (base, _) = name.span(_ != '.')
     val classNameSuffix = util.upperFirst(base.replace('-', '_')) + "Cfg"
@@ -27,12 +48,11 @@ object gen4tests {
 
       val className = lang + classNameSuffix
 
-      val genOpts = GenOpts("tscfg.example", className, j7 = false)
-
       val fileName = className + "." + lang.toLowerCase
       val targetFile = new File(targetScalaDir, fileName)
       // $COVERAGE-OFF$
       if (confFile.lastModified >= targetFile.lastModified) {
+        val genOpts = updatedGenOpts(className)
         println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {
           case "Scala" ⇒ new ScalaGen(genOpts)
