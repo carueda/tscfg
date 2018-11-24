@@ -3,7 +3,6 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.{DURATION, SIZE}
-import tscfg.model.durations.ms
 
 import scala.collection.JavaConverters._
 
@@ -155,7 +154,7 @@ class ModelBuilder {
   Option[(model.BasicType, Boolean, Option[String])] = {
 
     if (tsConfigUtil.isDurationValue(valueString))
-      return Some((DURATION(ms), true, Some(valueString)))
+      return Some((DURATION, true, Some(valueString)))
 
     if (tsConfigUtil.isSizeValue(valueString))
       return Some((SIZE, true, Some(valueString)))
@@ -170,20 +169,7 @@ class ModelBuilder {
     else
       (typePart, hasDefault)
 
-    val (base, qualification) = {
-      val parts = baseString.split("""\s*\:\s*""", 2)
-      if (parts.length == 1)
-        (parts(0), None)
-      else
-        (parts(0), Some(parts(1)))
-    }
-
-    model.recognizedAtomic.get(base) map { bt ⇒
-      val basicType = bt match {
-        case DURATION(_) if qualification.isDefined ⇒
-          DURATION(tsConfigUtil.unifyDuration(qualification.get))
-        case _ ⇒ bt
-      }
+    model.recognizedAtomic.get(baseString) map { basicType ⇒
       (basicType, isOpt, defaultValue)
     }
   }

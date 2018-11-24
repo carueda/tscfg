@@ -58,7 +58,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classDeclMembers = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val memberType = res.javaType
-      val typ = if (a.optional && a.default.isEmpty) toObjectType(memberType) else memberType
+      val typ = if (a.optional && a.default.isEmpty) s"java.util.Optional<${toObjectType(memberType)}>" else memberType
       val javaId = javaIdentifier(symbol)
       (typ, javaId)
     }
@@ -145,7 +145,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case DOUBLE    ⇒ "double"
       case BOOLEAN   ⇒ "boolean"
       case SIZE      ⇒ "long"
-      case DURATION(q) ⇒ "long"
+      case DURATION  ⇒ "java.time.Duration"
     }))
   }
 
@@ -190,7 +190,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private def objectInstance(a: AnnType, res: Res, path: String): String = {
     val className = res.javaType.toString
     if (a.optional) {
-      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
+      s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path"))) : java.util.Optional.empty()"""
     }
     else s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
   }
@@ -201,7 +201,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val javaType = res.javaType.asInstanceOf[ListJavaType]
     val base = listMethodName(javaType, lt, path)
     if (a.optional) {
-      s"""c.$hasPath("$path") ? $base : null"""
+      s"""c.$hasPath("$path") ? java.util.Optional.of($base) : java.util.Optional.empty()"""
     }
     else base
   }
@@ -213,13 +213,14 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case Some(v) ⇒
         val value = tsConfigUtil.basicValue(a.t, v)
         (bt, value) match {
-          case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
-          case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
-          case _                  ⇒ s"""c.$hasPath("$path") ? c.$getter : $value"""
+          case (BOOLEAN, "true")     ⇒ s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false")    ⇒ s"""c.$hasPath("$path") && c.$getter"""
+          case (DURATION, duration)  ⇒ s"""c.$hasPath("$path") ? c.$getter : java.time.Duration.parse("$duration")"""
+          case _                     ⇒ s"""c.$hasPath("$path") ? c.$getter : $value"""
         }
 
       case None if a.optional ⇒
-        s"""c.$hasPath("$path") ? c.$getter : null"""
+        s"""c.$hasPath("$path") ? java.util.Optional.of(c.$getter) : java.util.Optional.empty()"""
 
       case _ ⇒
         s"""c.$getter"""
@@ -272,7 +273,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case DOUBLE   ⇒ methodNames.dblA
     case BOOLEAN  ⇒ methodNames.blnA
     case SIZE     ⇒ methodNames.sizA
-    case DURATION(q) ⇒ methodNames.durA
+    case DURATION ⇒ methodNames.durA
 
     case _: ObjectType  ⇒ name.replace('.', '_')
 

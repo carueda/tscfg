@@ -109,7 +109,7 @@ a string with a simple syntax as follows can be used
 |---|---|---|---|
 | "int"          | required integer | `int` / no default | `Int` / no default
 | "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
-| "int?"         | optional integer | `Integer` / `null` | `Option[Int]` / `None`
+| "int?"         | optional integer | `Optional<Integer>` / `Optional.emty()` | `Option[Int]` / `None`
 
 > The type syntax is still subject to change.
 
@@ -122,6 +122,7 @@ endpoint {
   serial: "int?"
   interface {
     port: "int | 8080"
+    type:  "string?"
   }
 }
 ```
@@ -136,12 +137,12 @@ public class JavaExampleCfg {
     public final int intReq;
     public final Interface_ interface_;
     public final String path;
-    public final Integer serial;
+    public final Optional<Integer> serial;
     public final String url;
 
     public static class Interface_ {
       public final int port;
-      public final String type;
+      public final Optional<String> type;
     }
   }
 }
@@ -251,13 +252,13 @@ you can:
 2. then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
 
     ```java
-    String path    = cfg.endpoint.path;
-    Integer serial = cfg.endpoint.serial;
-    int port       = cfg.endpoint.interface_.port;
+    String path              = cfg.endpoint.path;
+    Optional<Integer> serial = cfg.endpoint.serial;
+    int port                 = cfg.endpoint.interface_.port;
     ```
 
-An object reference will never be `null` (`None` in Scala) if the corresponding field is required according to
-the specification. It will only be `null` (`None`) if it is marked optional with no default value and
+An object reference will never be `Option.empty()` (`None` in Scala) if the corresponding field is required according to
+the specification. It will only be `Option.empty()` (`None`) if it is marked optional with no default value and
 has been omitted in the input configuration.
 
 With this [example spec](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/example.spec.conf),
@@ -276,13 +277,13 @@ The following basic types are supported:
 
 | type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt
 |---------------|---------------------|--------------------------
-| `string`      | `String`  / `String`    | `String`  / `Option[String]`
-| `int`         | `int`     / `Integer`   | `Int`     / `Option[Int]`
-| `long`        | `long`    / `Long`      | `Long`    / `Option[Long]`
-| `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`
-| `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`
-| `size`        | `long`    / `Long`      | `Long`    / `Option[Long]`
-| `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
+| `string`      | `String`  / `Optional<String>`    | `String`  / `Option[String]`
+| `int`         | `int`     / `Optional<Integer>`   | `Int`     / `Option[Int]`
+| `long`        | `long`    / `Optional<Long>`      | `Long`    / `Option[Long]`
+| `double`      | `double`  / `Optional<Double>`    | `Double`  / `Option[Double]`
+| `boolean`     | `boolean` / `Optional<Boolean>`   | `Boolean` / `Option[Boolean]`
+| `size`        | `long`    / `Optional<Long>`      | `Long`    / `Option[Long]`
+| `duration`    | `Duration`    / `Optional<Duration>`      | `Duration`    / `Option[Duration]`
 
 
 #### size-in-bytes
@@ -294,32 +295,29 @@ See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
 #### durations
 
-A duration type can be further qualified with a suffix consisting of a colon
-and a desired time unit for the reported value.
-For example, with the type `"duration:day"`, the reported long value will be in day units,
-with conversion automatically performed if the actual configuration value is given in
-any other unit as supported by Typesafe Config according to the
+A durations can be further specified with a timeUnit suffix according to
 [duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
+Is no timeUnit is given, the duration is interpreted as milliseconds. 
 
 [A more complete example](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/duration.spec.conf)
 with some additional explanation:
 
 ```properties
 durations {
-  # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
-  # or whatever is provided converted to days
-  days: "duration:day?"
+  # optional duration; reported java.time.Duration (Option[java.time.Duration] in scala) is Optional.empty() (None) if value is missing
+  # or whatever is provided
+  duration_option = "duration?"
 
-  # required duration; reported long (Long) is whatever is provided
-  # converted to hours
-  hours: "duration:hour"
+  # required duration; reported java.time.Duration is whatever is provided
+  duration = "duration"
 
   # optional duration with default value;
-  # reported long (Long) is in milliseconds, either 550,000 if value is missing
-  # or whatever is provided converted to millis
-  millis: "duration:ms | 550s"
+  # reported java.time.Duration is whatever is provided or 5 days if value is missing
+  duration_default = "duration | 5d"
 
-  ...
+  # optional duration with default value;
+  # reported java.time.Duration is whatever is provided or 50 milliseconds if value is missing
+  duration_default_without_Unit = "duration | 50"
 }
 ```
 
@@ -414,7 +412,7 @@ object Cfg {
 ```
 
 As with basic types, the meaning of an optional object or list is that the corresponding
-value will be `null` (`None` in Scala) when the corresponding actual entry is missing in
+value will be `Optional.empty()` (`None` in Scala) when the corresponding actual entry is missing in
 a given configuration instance.
 
 
@@ -442,10 +440,6 @@ Please see [this wiki](https://github.com/carueda/tscfg/wiki/alternatives).
 
 Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21)
 if you want to add comments or reactions.  PRs are also welcome.
-
-**Could tscfg generate `Optional<T>` for optional fields?**
-
-Not implemented (yet). Want to contribute?
 
 **What happened with the generated `toString` method?**
 

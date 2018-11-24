@@ -1,12 +1,16 @@
 package tscfg.generators.java
 
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.Optional
+
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example._
 import tscfg.generators.GenOpts
 import tscfg.model
 import tscfg.model._
-import model.implicits._
+import tscfg.model.implicits._
 
 
 class JavaMainSpec extends Specification {
@@ -64,9 +68,9 @@ class JavaMainSpec extends Specification {
           |}
         """.stripMargin
       ))
-      c.main.email must beNull
-      c.main.reals.size() === 1
-      c.main.reals.get(0).foo === 3.14
+      c.main.email must be (Optional.empty())
+      c.main.reals.get().size() === 1
+      c.main.reals.get().get(0).foo === 3.14
     }
 
     "example 2" in {
@@ -80,9 +84,9 @@ class JavaMainSpec extends Specification {
           |}
           |""".stripMargin
       ))
-      c.main.email.password === "pw"
-      c.main.email.server === "foo"
-      c.main.reals must beNull
+      c.main.email.get().password === "pw"
+      c.main.email.get().server === "foo"
+      c.main.reals must be (Optional.empty())
     }
   }
 
@@ -220,9 +224,9 @@ class JavaMainSpec extends Specification {
       ))
       c.baz.size() === 1
       c.baz.get(0).size() === 2
-      c.baz.get(0).get(0).aa === true
+      c.baz.get(0).get(0).aa === Optional.of(true)
       c.baz.get(0).get(0).dd === 1
-      c.baz.get(0).get(1).aa === null
+      c.baz.get(0).get(1).aa === Optional.empty()
       c.baz.get(0).get(1).dd === 2
     }
   }
@@ -258,14 +262,8 @@ class JavaMainSpec extends Specification {
     "generate code" in {
       val r = JavaGen.generate("example/duration.spec.conf")
       r.classNames === Set("JavaDurationCfg", "Durations")
-      r.fields.keySet === Set("durations", "days", "hours", "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
+      r.fields.keySet === Set("durations", "duration_option", "duration", "duration_default",
+        "duration_default_without_Unit"
       )
     }
 
@@ -273,28 +271,31 @@ class JavaMainSpec extends Specification {
       val c = new JavaDurationCfg(ConfigFactory.parseString(
         """
           |durations {
-          |  days  = "10d"
-          |  hours = "24h"
-          |  duration_ns = "7ns"
-          |  duration_µs = "7us"
-          |  duration_ms = "7ms"
-          |  duration_se = "7s"
-          |  duration_mi = "7m"
-          |  duration_hr = "7h"
-          |  duration_dy = "7d"
+          |  duration_option  = "10d"
+          |  duration = "24h"
+          |  duration_default = "7ns"
+          |  duration_default_without_Unit = "7us"
           |}
           |""".stripMargin
       ))
-      c.durations.days === 10
-      c.durations.hours === 24
-      c.durations.millis === 550000
-      c.durations.duration_ns === 7
-      c.durations.duration_µs === 7
-      c.durations.duration_ms === 7
-      c.durations.duration_se === 7
-      c.durations.duration_mi === 7
-      c.durations.duration_hr === 7
-      c.durations.duration_dy === 7
+      c.durations.duration_option === Optional.of(Duration.ofDays(10))
+      c.durations.duration === Duration.ofHours(24)
+      c.durations.duration_default === Duration.ofNanos(7)
+      c.durations.duration_default_without_Unit === Duration.of(7, ChronoUnit.MICROS)
+    }
+
+    "example 2" in {
+      val c = new JavaDurationCfg(ConfigFactory.parseString(
+        """
+          |durations {
+          |  duration = "24h"
+          |}
+          |""".stripMargin
+      ))
+      c.durations.duration_option === Optional.empty()
+      c.durations.duration === Duration.ofHours(24)
+      c.durations.duration_default === Duration.ofDays(5)
+      c.durations.duration_default_without_Unit === Duration.ofMillis(50)
     }
   }
 
@@ -356,7 +357,7 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/issue22.spec.conf")
       r.classNames === Set("JavaIssue22Cfg")
       r.fields === Map(
-        "idleTimeout" → "long"
+        "idleTimeout" → "java.time.Duration"
       )
     }
 
@@ -366,7 +367,7 @@ class JavaMainSpec extends Specification {
           |  # empty
         """.stripMargin
       ))
-      c.idleTimeout  === 75000
+      c.idleTimeout  === Duration.ofMillis(75000)
     }
     "example with new value" in {
       val c = new JavaIssue22Cfg(ConfigFactory.parseString(
@@ -374,7 +375,7 @@ class JavaMainSpec extends Specification {
           | idleTimeout = 1 hour
         """.stripMargin
       ))
-      c.idleTimeout === 3600*1000
+      c.idleTimeout === Duration.ofHours(1)
     }
   }
 
@@ -384,7 +385,7 @@ class JavaMainSpec extends Specification {
       r.classNames === Set("JavaIssue23Cfg")
       r.fields === Map(
         "sizeReq"    → "long",
-        "sizeOpt"    → "java.lang.Long",
+        "sizeOpt"    → "java.util.Optional<java.lang.Long>",
         "sizeOptDef" → "long",
         "sizes"      → "java.util.List<java.lang.Long>",
         "sizes2"     → "java.util.List<java.util.List<java.lang.Long>>"
@@ -401,7 +402,7 @@ class JavaMainSpec extends Specification {
         """.stripMargin
       ))
       c.sizeReq === 2048*1024
-      c.sizeOpt === 1024000
+      c.sizeOpt === Optional.of(1024000L)
       c.sizeOptDef === 1024
       c.sizes.asScala.toList === List(1000, 64*1024*1024*1024L, 16*1000)
       c.sizes2.asScala.toList.map(_.asScala.toList) === List(
@@ -458,14 +459,14 @@ class JavaMainSpec extends Specification {
     "generate config for object first level" in {
       val c = new JavaIssue33bCfg(ConfigFactory.parseString(""))
       c.endpoint.url === "http://example.net"
-      c.endpoint.foo === null
+      c.endpoint.foo === Optional.empty()
       c.endpoint.baz.key === "bar"
     }
 
     "generate config for object nested level" in {
       val c = new JavaIssue33bCfg(ConfigFactory.parseString("endpoint.foo = 1"))
       c.endpoint.url === "http://example.net"
-      c.endpoint.foo === 1
+      c.endpoint.foo === Optional.of(1)
       c.endpoint.baz.key === "bar"
     }
 

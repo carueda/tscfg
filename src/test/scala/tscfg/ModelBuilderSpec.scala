@@ -1,7 +1,6 @@
 package tscfg
 
 import org.specs2.mutable.Specification
-import model.durations._
 import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
 import tscfg.model._
 
@@ -151,9 +150,9 @@ class ModelBuilderSpec extends Specification {
         |idleTimeout = 75 seconds
       """.stripMargin)
 
-    "translate into DURATION(ms) with given default" in {
+    "translate into DURATION2 with given default" in {
       val at = result.objectType.members("idleTimeout")
-      at.t === DURATION(ms)
+      at.t === DURATION
       at.optional must beTrue
       at.default must beSome("75 seconds")
     }
@@ -169,13 +168,7 @@ class ModelBuilderSpec extends Specification {
         |  reqDouble     = double
         |  reqBoolean    = boolean
         |  reqDuration   = duration
-        |  duration_ns   = "duration : ns"
-        |  duration_µs   = "duration : us"
-        |  duration_ms   = "duration : ms"
-        |  duration_se   = "duration : s"
-        |  duration_mi   = "duration : m"
-        |  duration_hr   = "duration : h"
-        |  duration_dy   = "duration : d"
+        |  duration      = "duration"
         |  optStr        = "string?"
         |  optInt        = "int?"
         |  optLong       = "long?"
@@ -194,7 +187,7 @@ class ModelBuilderSpec extends Specification {
         |  listDouble    = [ double ]
         |  listBoolean   = [ boolean ]
         |  listDuration  = [ duration ]
-        |  listDuration_se  = [ "duration : second" ]
+        |  listDuration_se  = [ "duration" ]
         |}
       """.stripMargin)
 
@@ -215,13 +208,7 @@ class ModelBuilderSpec extends Specification {
         "reqDouble",
         "reqBoolean",
         "reqDuration",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy",
+        "duration",
         "optStr",
         "optInt",
         "optLong",
@@ -247,33 +234,27 @@ class ModelBuilderSpec extends Specification {
       verify(fooObj, "reqLong",     LONG)
       verify(fooObj, "reqDouble",   DOUBLE)
       verify(fooObj, "reqBoolean",  BOOLEAN)
-      verify(fooObj, "reqDuration", DURATION(ms))
-      verify(fooObj, "duration_ns", DURATION(ns))
-      verify(fooObj, "duration_µs", DURATION(us))
-      verify(fooObj, "duration_ms", DURATION(ms))
-      verify(fooObj, "duration_se", DURATION(second))
-      verify(fooObj, "duration_mi", DURATION(minute))
-      verify(fooObj, "duration_hr", DURATION(hour))
-      verify(fooObj, "duration_dy", DURATION(day ))
+      verify(fooObj, "reqDuration", DURATION)
+      verify(fooObj, "duration", DURATION)
       verify(fooObj, "optStr" ,     STRING,   optional = true)
       verify(fooObj, "optInt" ,     INTEGER,  optional = true)
       verify(fooObj, "optLong",     LONG,     optional = true)
       verify(fooObj, "optDouble",   DOUBLE,   optional = true)
       verify(fooObj, "optBoolean",  BOOLEAN,  optional = true)
-      verify(fooObj, "optDuration", DURATION(ms), optional = true)
+      verify(fooObj, "optDuration", DURATION, optional = true)
       verify(fooObj, "dflStr" ,     STRING,   optional = true, default = Some("hi"))
       verify(fooObj, "dflInt" ,     INTEGER,  optional = true, default = Some("3"))
       verify(fooObj, "dflLong",     LONG,     optional = true, default = Some("999999999"))
       verify(fooObj, "dflDouble",   DOUBLE,   optional = true, default = Some("3.14"))
       verify(fooObj, "dflBoolean",  BOOLEAN,  optional = true, default = Some("false"))
-      verify(fooObj, "dflDuration", DURATION(ms), optional = true, default = Some("21d"))
+      verify(fooObj, "dflDuration", DURATION, optional = true, default = Some("21d"))
       verify(fooObj, "listStr",      ListType(STRING))
       verify(fooObj, "listInt",      ListType(INTEGER))
       verify(fooObj, "listLong",     ListType(LONG))
       verify(fooObj, "listDouble",   ListType(DOUBLE))
       verify(fooObj, "listBoolean",  ListType(BOOLEAN))
-      verify(fooObj, "listDuration", ListType(DURATION(ms)))
-      verify(fooObj, "listDuration_se", ListType(DURATION(second)))
+      verify(fooObj, "listDuration", ListType(DURATION))
+      verify(fooObj, "listDuration_se", ListType(DURATION))
     }
   }
 }

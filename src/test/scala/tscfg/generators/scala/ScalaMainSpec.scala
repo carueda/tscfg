@@ -1,10 +1,14 @@
 package tscfg.generators.scala
 
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.Optional
+
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example.{ScalaDurationCfg, _}
 import tscfg.generators.GenOpts
-import tscfg.model
+import tscfg.{example, model}
 import tscfg.model._
 import model.implicits._
 
@@ -16,11 +20,11 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/example0.spec.conf")
       r.classNames === Set("ScalaExample0Cfg", "Service")
       r.fields === Map(
-        "service"  → "ScalaExample0Cfg.Service",
-        "url"      → "java.lang.String",
-        "debug"    → "scala.Boolean",
-        "doLog"    → "scala.Boolean",
-        "factor"   → "scala.Double",
+        "service" → "ScalaExample0Cfg.Service",
+        "url" → "java.lang.String",
+        "debug" → "scala.Boolean",
+        "doLog" → "scala.Boolean",
+        "factor" → "scala.Double",
         "poolSize" → "scala.Int"
       )
     }
@@ -31,11 +35,11 @@ class ScalaMainSpec extends Specification {
           |}
         """.stripMargin
       ))
-      c.service.url      === "http://example.net/rest"
+      c.service.url === "http://example.net/rest"
       c.service.poolSize === 32
-      c.service.debug    === true
-      c.service.doLog    === false
-      c.service.factor   === 0.75
+      c.service.debug === true
+      c.service.doLog === false
+      c.service.factor === 0.75
     }
   }
 
@@ -157,10 +161,10 @@ class ScalaMainSpec extends Specification {
           |booleans: [true, false]
           |""".stripMargin
       ))
-      c.strings  === List("hello", "world", "true")
+      c.strings === List("hello", "world", "true")
       c.integers === List(List(1, 2, 3), List(4, 5))
-      c.doubles  === List(3.14, 2.7182, 1.618)
-      c.longs    === List(1, 9999999999L)
+      c.doubles === List(3.14, 2.7182, 1.618)
+      c.longs === List(1, 9999999999L)
       c.booleans === List(true, false)
     }
   }
@@ -184,7 +188,7 @@ class ScalaMainSpec extends Specification {
           |}
           |""".stripMargin
       ))
-      c.positions  === List(
+      c.positions === List(
         ScalaIssue15cCfg.Positions$Elm(
           attrs = List(List(ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 99))),
           lat = 1,
@@ -260,44 +264,42 @@ class ScalaMainSpec extends Specification {
     "generate code" in {
       val r = ScalaGen.generate("example/duration.spec.conf")
       r.classNames === Set("ScalaDurationCfg", "Durations")
-      r.fields.keySet === Set("durations", "days", "hours", "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
-      )
+      r.fields.keySet === Set("durations", "duration_option", "duration", "duration_default", "duration_default_without_Unit")
     }
 
     "example 1" in {
       val c = ScalaDurationCfg(ConfigFactory.parseString(
         """
           |durations {
-          |  days  = "10d"
-          |  hours = "24h"
-          |  duration_ns = "7ns"
-          |  duration_µs = "7us"
-          |  duration_ms = "7ms"
-          |  duration_se = "7s"
-          |  duration_mi = "7m"
-          |  duration_hr = "7h"
-          |  duration_dy = "7d"
+          |  duration_option  = "10d"
+          |  duration = "24h"
+          |  duration_default = "7ns"
+          |  duration_default_without_Unit = "7us"
           |}
           |""".stripMargin
       ))
       c.durations === ScalaDurationCfg.Durations(
-        days = Some(10),
-        hours = 24,
-        millis = 550000,
-        duration_ns = 7,
-        duration_µs = 7,
-        duration_ms = 7,
-        duration_se = 7,
-        duration_mi = 7,
-        duration_hr = 7,
-        duration_dy = 7
+        duration_option = Some(Duration.ofDays(10)),
+        duration = Duration.ofHours(24),
+        duration_default = Duration.ofNanos(7),
+        duration_default_without_Unit = Duration.of(7, ChronoUnit.MICROS)
+      )
+    }
+
+
+    "example 2" in {
+      val c = ScalaDurationCfg(ConfigFactory.parseString(
+        """
+          |durations {
+          |  duration = "24h"
+          |}
+          |""".stripMargin
+      ))
+      c.durations === ScalaDurationCfg.Durations(
+        duration_option = None,
+        duration = Duration.ofHours(24),
+        duration_default = Duration.ofDays(5),
+        duration_default_without_Unit = Duration.ofMillis(50)
       )
     }
   }
@@ -307,7 +309,7 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("ScalaIssue19Cfg")
       r.fields === Map(
-        "do_log"  → "scala.Boolean",
+        "do_log" → "scala.Boolean",
         "_$_foo_" → "java.lang.String"
       )
     }
@@ -319,7 +321,7 @@ class ScalaMainSpec extends Specification {
           |"$_foo"  : some string
         """.stripMargin
       ))
-      c.do_log  === true
+      c.do_log === true
       c._$_foo_ === "some string"
     }
   }
@@ -360,7 +362,7 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue22.spec.conf")
       r.classNames === Set("ScalaIssue22Cfg")
       r.fields === Map(
-        "idleTimeout" → "scala.Long"
+        "idleTimeout" → "java.time.Duration"
       )
     }
 
@@ -370,7 +372,7 @@ class ScalaMainSpec extends Specification {
           | idleTimeout = 1 hour
         """.stripMargin
       ))
-      c.idleTimeout === 3600*1000
+      c.idleTimeout === Duration.ofHours(1)
     }
   }
 
@@ -379,11 +381,11 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue23.spec.conf")
       r.classNames === Set("ScalaIssue23Cfg")
       r.fields === Map(
-        "sizeReq"    → "scala.Long",
-        "sizeOpt"    → "scala.Option[scala.Long]",
+        "sizeReq" → "scala.Long",
+        "sizeOpt" → "scala.Option[scala.Long]",
         "sizeOptDef" → "scala.Long",
-        "sizes"      → "scala.List[scala.Long]",
-        "sizes2"     → "scala.List[scala.List[scala.Long]]"
+        "sizes" → "scala.List[scala.Long]",
+        "sizes2" → "scala.List[scala.List[scala.Long]]"
       )
     }
 
@@ -396,26 +398,26 @@ class ScalaMainSpec extends Specification {
           |sizes2  = [[ 1000, "64G" ], [ "16kB" ] ]
         """.stripMargin
       ))
-      c.sizeReq === 2048*1024
+      c.sizeReq === 2048 * 1024
       c.sizeOpt === Some(1024000)
       c.sizeOptDef === 1024
-      c.sizes === List(1000, 64*1024*1024*1024L, 16*1000)
+      c.sizes === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000)
       c.sizes2 === List(
-        List(1000, 64*1024*1024*1024L),
-        List(16*1000))
+        List(1000, 64 * 1024 * 1024 * 1024L),
+        List(16 * 1000))
     }
   }
 
   "issue30" should {
     "generate as indicated for useBackticks" in {
       val r = ScalaGen.generate("example/issue30.spec.conf",
-                                useBackticks = true)
+        useBackticks = true)
 
       r.classNames === Set("ScalaIssue30Cfg", "`Foo-object`")
       r.fields.size === 4
-      r.fields("`foo-object`" ) === "ScalaIssue30Cfg.`Foo-object`"
-      r.fields("`bar-baz`"    ) === "java.lang.String"
-      r.fields("`0`"          ) === "java.lang.String"
+      r.fields("`foo-object`") === "ScalaIssue30Cfg.`Foo-object`"
+      r.fields("`bar-baz`") === "java.lang.String"
+      r.fields("`0`") === "java.lang.String"
       r.fields("`other stuff`") === "scala.Int"
     }
 
@@ -467,6 +469,7 @@ class ScalaMainSpec extends Specification {
 
   "issue 36" should {
     def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
+
     "report full path for missing required parameter 'obj.foo.bar'" in {
       a must throwA[com.typesafe.config.ConfigException.Missing].like {
         case e: com.typesafe.config.ConfigException.Missing ⇒

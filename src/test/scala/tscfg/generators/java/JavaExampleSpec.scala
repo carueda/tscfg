@@ -1,5 +1,7 @@
 package tscfg.generators.java
 
+import java.util.Optional
+
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example.JavaExampleCfg
@@ -25,12 +27,12 @@ class JavaExampleSpec extends Specification {
 
     "capture given optional values" in {
       cfg.endpoint.interface_.port must_== 9191
-      cfg.endpoint.interface_.`type` must_== "foo"
+      cfg.endpoint.interface_.`type` must_== Optional.of("foo")
     }
 
     "capture default values" in {
       cfg.endpoint.url must_== "http://example.net"
-      cfg.endpoint.serial must_== null
+      cfg.endpoint.serial must_== Optional.empty()
     }
   }
 

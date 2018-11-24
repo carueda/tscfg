@@ -152,7 +152,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case DOUBLE   ⇒ "scala.Double"
       case BOOLEAN  ⇒ "scala.Boolean"
       case SIZE     ⇒ "scala.Long"
-      case DURATION(_) ⇒ "scala.Long"
+      case DURATION ⇒ "java.time.Duration"
     }))
   }
 }
@@ -196,8 +196,6 @@ object ScalaGen {
     val generator = new ScalaGen(genOpts)
 
     val results = generator.generate(objectType)
-
-    //println("\n" + results.code)
 
     val destFilename  = s"src/test/scala/tscfg/example/$className.scala"
     val destFile = new File(destFilename)
@@ -371,9 +369,10 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
       case Some(v) ⇒
         val value = tsConfigUtil.basicValue(a.t, v)
         (bt, value) match {
-          case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
-          case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
-          case _                  ⇒ s"""if(c.$hasPath("$path")) c.$getter else $value"""
+          case (BOOLEAN, "true")    ⇒ s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false")   ⇒ s"""c.$hasPath("$path") && c.$getter"""
+          case (DURATION, duration) ⇒ s"""if(c.$hasPath("$path")) c.$getter else java.time.Duration.parse("$duration")"""
+          case _                    ⇒ s"""if(c.$hasPath("$path")) c.$getter else $value"""
         }
 
       case None if a.optional ⇒
@@ -442,7 +441,7 @@ private[scala] class Accessors {
     case DOUBLE   ⇒ methodNames.dblA
     case BOOLEAN  ⇒ methodNames.blnA
     case SIZE     ⇒ methodNames.sizA
-    case DURATION(_) ⇒ methodNames.durA
+    case DURATION ⇒ methodNames.durA
 
     case _: ObjectType  ⇒ name.replace('.', '_')
 

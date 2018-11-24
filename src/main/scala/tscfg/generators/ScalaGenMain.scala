@@ -2,7 +2,6 @@ package tscfg.generators
 
 import tscfg.generators.scala.ScalaGen
 import tscfg.model
-import tscfg.model.durations.hour
 
 object ScalaGenMain {
   // $COVERAGE-OFF$
@@ -16,7 +15,7 @@ object ScalaGenMain {
         "lon" := DOUBLE,
         "attrs" := ~ListType(BOOLEAN)
       ))),
-      "durHr" := "A duration" % ~DURATION(hour),
+      "durHr" := "A duration" % ~DURATION,
       "foo" := STRING | """foo "val" etc """,
       "optStr" := ~STRING
     )

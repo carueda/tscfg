@@ -1,7 +1,5 @@
 package tscfg
 
-import tscfg.model.durations._
-
 object model {
 
   object implicits {
@@ -18,18 +16,6 @@ object model {
     }
   }
 
-  object durations {
-    sealed abstract class DurationQualification
-
-    case object ns      extends DurationQualification
-    case object us      extends DurationQualification
-    case object ms      extends DurationQualification
-    case object second  extends DurationQualification
-    case object minute  extends DurationQualification
-    case object hour    extends DurationQualification
-    case object day     extends DurationQualification
-  }
-
   sealed abstract class Type
 
   sealed abstract class BasicType extends Type
@@ -40,7 +26,7 @@ object model {
   case object DOUBLE    extends BasicType
   case object BOOLEAN   extends BasicType
   case object SIZE      extends BasicType
-  case class DURATION(q: DurationQualification) extends BasicType
+  case object DURATION  extends BasicType
 
   val recognizedAtomic: Map[String, BasicType] = Map(
     "string"    → STRING,
@@ -50,7 +36,7 @@ object model {
     "double"    → DOUBLE,
     "boolean"   → BOOLEAN,
     "size"      → SIZE,
-    "duration"  → DURATION(ms)
+    "duration"  → DURATION
   )
 
   case class ListType(t: Type) extends Type
@@ -135,7 +121,7 @@ object modelMain {
         "lon" := DOUBLE,
         "attrs" := ListType(ObjectType(
           "b" := BOOLEAN,
-          "d" := DURATION(hour)
+          "d" := DURATION
         ))
       )),
       "baz" := "comments for baz..." % ~ObjectType(

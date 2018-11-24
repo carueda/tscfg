@@ -5,7 +5,6 @@ import org.specs2.mutable.Specification
 class modelSpec extends Specification {
   import model._
   import model.implicits._
-  import model.durations._
 
   "basic ObjectType construction" should {
     val objectType = ObjectType(
@@ -14,7 +13,7 @@ class modelSpec extends Specification {
         "lon" := DOUBLE,
         "attrs" := ListType(ObjectType(
           "b" := BOOLEAN,
-          "d" := DURATION(hour)
+          "d" := DURATION
         ))
       )),
       "baz" := "comments for baz..." % ~ObjectType(
