@@ -474,4 +474,12 @@ class ScalaMainSpec extends Specification {
       }
     }
   }
+
+  "issue 40" should {
+    "capture explicit memory size value in spec as a long literal" in {
+      val c = ScalaIssue40Cfg(ConfigFactory.parseString(""))
+      // well, the actual test is that the generated class compiles
+      c.memory === 53687091200L
+    }
+  }
 }

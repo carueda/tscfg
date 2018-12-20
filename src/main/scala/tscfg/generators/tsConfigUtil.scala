@@ -97,6 +97,6 @@ object tsConfigUtil {
 
   private def sizeValue(value: String): String = {
     val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
-    config.getBytes("s").toString
+    s"""${config.getBytes("s")}L"""
   }
 }

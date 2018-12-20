@@ -475,4 +475,12 @@ class JavaMainSpec extends Specification {
       c.endpoint.optObj.key === "bar"
     }
   }
+
+  "issue40" should {
+    "capture explicit memory size value in spec as a long literal" in {
+      val c = new JavaIssue40Cfg(ConfigFactory.parseString(""))
+      // well, the actual test is that the generated class compiles
+      c.memory === 53687091200L
+    }
+  }
 }
