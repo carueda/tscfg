@@ -1,5 +1,6 @@
-2018-12-20 - 0.9.5
+2018-12-20 - 0.9.6
 
+- publish v0.9.6
 - fix #40 "String-to-bytes conversion results in compilation error"
 
 2018-08-06 - 0.9.5

@@ -8,7 +8,7 @@ One-time steps:
         > set pgpReadOnly := false
         > pgp-cmd gen-key
         > pgp-cmd send-key me@example.net hkp://pool.sks-keyservers.net
-        
+
 `~/.sbt/version/sonatype.sbt`:
 
     credentials += Credentials("Sonatype Nexus Repository Manager",
@@ -18,6 +18,9 @@ One-time steps:
 
 Then:
 
-        > +package        
-        > +publishSigned        
+        > reload
+        > clean
+        > assembly
+        > +package
+        > +publishSigned
         > +sonatypeRelease
