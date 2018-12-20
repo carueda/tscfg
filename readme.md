@@ -34,7 +34,7 @@ The generated code only depends on the Typesafe Config library.
 
 The tool supports all types handled by Typesafe Config
 (string, int, long, double, boolean, duration, size-in-bytes, list)
-and has good test coverage.
+and has great test coverage.
 Possible improvements include a more standard command line interface,
 a proper tscfg library,
 and perhaps a revision of the syntax for types.
@@ -240,7 +240,7 @@ int port       = endpoint.hasPathOrNull("port")   ? endpoint.getInt("interface.p
 
 you can:
 
-1. create the tscfg generated wrapper:
+1. Create the tscfg generated wrapper:
 
     ```java
     ExampleCfg cfg = new ExampleCfg(tsConfig);
@@ -248,7 +248,7 @@ you can:
     which will make all verifications about required settings and associated types.
     In particular, as is typical with Config use, an exception will be thrown if this verification fails.
 
-2. then, while enjoying full type safety and the code completion and navigation capabilities of your IDE:
+2. Then, while enjoying full type safety and the code completion and navigation capabilities of your editor or IDE:
 
     ```java
     String path    = cfg.endpoint.path;
@@ -433,10 +433,6 @@ Sure. However, as the number of configuration properties and levels of nesting i
 the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
 –worth emphasizing– based on an explicit schema for the configuration.
-
-**How does tscfg compare to possible alternatives?**
-
-Please see [this wiki](https://github.com/carueda/tscfg/wiki/alternatives).
 
 **Is there any sbt plugin for tscfg that I can use as part of the build for my project?**
 
