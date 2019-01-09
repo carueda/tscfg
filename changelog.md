@@ -1,7 +1,7 @@
-2018-12-20 - 0.9.6
+2019-01-09 - 0.9.7
 
-- publish v0.9.6
-- fix #40 "String-to-bytes conversion results in compilation error"
+- publish v0.9.7 with new `--java:optionals` option to generate
+  `Optional<T>` for optional fields in java. Thanks @qux42!
 
 2018-08-06 - 0.9.5
 

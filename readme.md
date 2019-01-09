@@ -440,9 +440,9 @@ along with the centralized verification, shall become more apparent. All of this
 Not implemented yet. The issue is [#21](https://github.com/carueda/tscfg/issues/21)
 if you want to add comments or reactions.  PRs are also welcome.
 
-**Could tscfg generate `Optional<T>` for optional fields?**
+**Can tscfg generate `Optional<T>` for optional fields?**
 
-Use the `--java:optionals` flag for enabling `Optional<T>` instead of `null` for optional fields in java. 
+Use the `--java:optionals` flag for enabling `Optional<T>` instead of `null` for optional fields in java.
 
 **What happened with the generated `toString` method?**
 
