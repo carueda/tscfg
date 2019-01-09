@@ -58,7 +58,12 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classDeclMembers = results.map { case (symbol, res) ⇒
       val a = ot.members(symbol)
       val memberType = res.javaType
-      val typ = if (a.optional && a.default.isEmpty) toObjectType(memberType) else memberType
+      val typ = if (a.optional && a.default.isEmpty) {
+        if (genOpts.useOptionals) s"java.util.Optional<${toObjectType(memberType)}>" else s"${toObjectType(memberType)}"
+      }
+      else {
+        memberType
+      }
       val javaId = javaIdentifier(symbol)
       (typ, javaId)
     }
@@ -190,9 +195,14 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private def objectInstance(a: AnnType, res: Res, path: String): String = {
     val className = res.javaType.toString
     if (a.optional) {
-      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
+      if (genOpts.useOptionals) {
+        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path"))) : java.util.Optional.empty()"""
+      } else {
+        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
+      }
     }
-    else s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
+    else
+      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
@@ -201,7 +211,11 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val javaType = res.javaType.asInstanceOf[ListJavaType]
     val base = listMethodName(javaType, lt, path)
     if (a.optional) {
-      s"""c.$hasPath("$path") ? $base : null"""
+      if (genOpts.useOptionals) {
+        s"""c.$hasPath("$path") ? java.util.Optional.of($base) : java.util.Optional.empty()"""
+      } else {
+        s"""c.$hasPath("$path") ? $base : null"""
+      }
     }
     else base
   }
@@ -218,6 +232,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
           case _                  ⇒ s"""c.$hasPath("$path") ? c.$getter : $value"""
         }
 
+      case None if a.optional && genOpts.useOptionals ⇒
+        s"""c.$hasPath("$path") ? java.util.Optional.of(c.$getter) : java.util.Optional.empty()"""
       case None if a.optional ⇒
         s"""c.$hasPath("$path") ? c.$getter : null"""
 
@@ -306,13 +322,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 }
 
 object JavaGen {
-  import _root_.java.io.{File, PrintWriter, FileWriter}
-  import tscfg.{ModelBuilder, model}
-  import tscfg.util
+  import _root_.java.io.{File, FileWriter, PrintWriter}
+
+  import tscfg.{ModelBuilder, model, util}
 
   // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false,
-               genGetters: Boolean = false): GenResult = {
+               genGetters: Boolean = false, useOptionals:Boolean = false): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
@@ -337,7 +353,7 @@ object JavaGen {
     }
 
     val genOpts = GenOpts("tscfg.example", className, j7 = false,
-                          genGetters = genGetters)
+                          genGetters = genGetters, useOptionals = useOptionals)
 
     val generator = new JavaGen(genOpts)
 

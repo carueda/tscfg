@@ -38,6 +38,7 @@ object Main {
        |  --scala:fp            report full path (see #36)       (false)
        |  --java                generate java code               (the default)
        |  --java:getters        generate getters (see #31)       (false)
+       |  --java:optionals      use optionals                    (false)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
        |  --tpl.cp <string>     prefix for template comments     ("${templateOpts.commentPrefix}")
@@ -55,6 +56,7 @@ object Main {
                          reportFullPath: Boolean = false,
                          useBackticks: Boolean = false,
                          genGetters: Boolean = false,
+                         useOptionals: Boolean = false,
                          tplFilename: Option[String] = None
                         )
 
@@ -106,6 +108,9 @@ object Main {
         case "--java:getters" :: rest =>
           traverseList(rest, opts.copy(genGetters = true))
 
+        case "--java:optionals" ::rest =>
+          traverseList(rest, opts.copy(useOptionals = true))
+
         case "--tpl" :: filename :: rest =>
           traverseList(rest, opts.copy(tplFilename = Some(filename)))
 
@@ -147,7 +152,8 @@ object Main {
     val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
                           reportFullPath = opts.reportFullPath,
                           useBackticks = opts.useBackticks,
-                          genGetters = opts.genGetters)
+                          genGetters = opts.genGetters,
+                          useOptionals = opts.useOptionals)
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim

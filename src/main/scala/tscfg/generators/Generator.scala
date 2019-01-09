@@ -28,7 +28,8 @@ case class GenOpts(packageName: String,
                    j7: Boolean,
                    reportFullPath: Boolean = false,
                    useBackticks: Boolean = false,
-                   genGetters: Boolean = false
+                   genGetters: Boolean = false,
+                   useOptionals: Boolean = false
                   )
 
 case class GenResult(code: String = "?",
