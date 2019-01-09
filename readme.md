@@ -287,6 +287,9 @@ The following basic types are supported:
 | `size`        | `long`    / `Long`      | `Long`    / `Option[Long]`
 | `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
 
+> Note: please read `Optional<T>` instead of the `T` values in the
+java "opt" column above if using the `--java:optionals` flag.
+
 
 #### size-in-bytes
 
