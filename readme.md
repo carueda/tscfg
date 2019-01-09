@@ -440,7 +440,7 @@ the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
 –worth emphasizing– based on an explicit schema for the configuration.
 
-**Any recommended use of tscfg in my development workflow?**
+**Any tscfg best practice for my development workflow?**
 
 Please see [this wiki](https://github.com/carueda/tscfg/wiki/workflow).
 
