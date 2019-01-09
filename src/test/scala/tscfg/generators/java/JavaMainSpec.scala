@@ -1,5 +1,6 @@
 package tscfg.generators.java
 
+import java.util.Optional
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example._
@@ -481,6 +482,53 @@ class JavaMainSpec extends Specification {
       val c = new JavaIssue40Cfg(ConfigFactory.parseString(""))
       // well, the actual test is that the generated class compiles
       c.memory === 53687091200L
+    }
+  }
+
+  "issue41" should {
+    "generate code" in {
+      val r = JavaGen.generate("example/issue41.spec.conf", useOptionals = true)
+      r.classNames === Set("JavaIssue41Cfg", "C", "F")
+      r.fields.keySet === Set("a", "b", "c", "d", "e", "f", "g", "h", "i")
+    }
+
+    "example 1" in {
+      val c = new JavaIssue41Cfg(ConfigFactory.parseString(
+        """
+          |{}
+        """.stripMargin
+      ))
+      c.a === Optional.empty()
+      c.b === 10
+      c.c.d === Optional.empty()
+      c.c.e === "hello"
+      c.c.f === Optional.empty()
+      c.i === Optional.empty()
+    }
+
+    "example 2" in {
+      val c = new JavaIssue41Cfg(ConfigFactory.parseString(
+        """
+          |a = 5
+          |b = 6
+          |c = {
+          |  d = "c.d"
+          |  e = "c.e"
+          |  f = {
+          |    g = 5
+          |    h = "c.f.h"
+          |  }
+          |}
+          |i = [1,  2, 3]
+        """.stripMargin
+      ))
+      c.a === Optional.of(5)
+      c.b === 6
+      c.c.d === Optional.of("c.d")
+      c.c.e === "c.e"
+      c.c.f.get().g === 5
+      c.c.f.get().h === "c.f.h"
+      c.i.get() === List(1.0,2.0,3.0).asJava
     }
   }
 }
