@@ -111,7 +111,9 @@ a string with a simple syntax as follows can be used
 | "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
 | "int?"         | optional integer | `Integer` / `null` | `Option[Int]` / `None`
 
-> The type syntax is still subject to change.
+> **NOTE**
+> - For java, you can use the `--java:optionals` flag to generate `Optional<T>` instead of `null`.
+> - The type syntax is still subject to change.
 
 The following is a complete example exercising this mechanism.
 
@@ -257,8 +259,8 @@ you can:
     int port       = cfg.endpoint.interface_.port;
     ```
 
-An object reference will never be `null` (`None` in Scala) if the corresponding field is required according to
-the specification. It will only be `null` (`None`) if it is marked optional with no default value and
+An object reference will never be `null` (or `Optional.empty()`) (`None` in Scala) if the corresponding field is required according to
+the specification. It will only be `null` (or `Optional.empty()`) (`None` in Scala) if it is marked optional with no default value and
 has been omitted in the input configuration.
 
 With this [example spec](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/example.spec.conf),
@@ -415,7 +417,7 @@ object Cfg {
 ```
 
 As with basic types, the meaning of an optional object or list is that the corresponding
-value will be `null` (`None` in Scala) when the corresponding actual entry is missing in
+value will be `null` (or `Optional.empty()`) (`None` in Scala) when the corresponding actual entry is missing in
 a given configuration instance.
 
 
