@@ -194,6 +194,7 @@ Options (default):
   --scala:bt            use backticks (see #30)          (false)
   --java                generate java code               (the default)
   --java:getters        generate getters (see #31)       (false)
+  --java:optionals      use Optional instead of null     (false)
   --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
   --tpl.cp <string>     prefix for template comments     ("##")
@@ -441,7 +442,7 @@ if you want to add comments or reactions.  PRs are also welcome.
 
 **Could tscfg generate `Optional<T>` for optional fields?**
 
-Not implemented (yet). Want to contribute?
+Use the `--java:optionals` flag for enabling `Optional<T>` instead of `null` for optional fields in java. 
 
 **What happened with the generated `toString` method?**
 
