@@ -13,19 +13,19 @@ import com.typesafe.config.{Config, ConfigFactory}
   */
 object tsConfigUtil {
 
-  def basicGetter(bt: BasicType, path: String): String = bt match {
+  def basicGetter(bt: BasicType, path: String, useDurations:Boolean): String = bt match {
     case STRING    ⇒  s"""getString("$path")"""
     case INTEGER   ⇒  s"""getInt("$path")"""
     case LONG      ⇒  s"""getLong("$path")"""
     case DOUBLE    ⇒  s"""getDouble("$path")"""
     case BOOLEAN   ⇒  s"""getBoolean("$path")"""
     case SIZE      ⇒  s"""getBytes("$path")"""
-    case DURATION(q)  ⇒  durationGetter(path, q)
+    case DURATION(q)  ⇒  durationGetter(path, q, useDurations)
   }
 
-  def basicValue(t: Type, value: String): String = t match {
+  def basicValue(t: Type, value: String, useDurations: Boolean): String = t match {
     case SIZE        ⇒ sizeValue(value)
-    case DURATION(q) ⇒ durationValue(value, q)
+    case DURATION(q) ⇒ durationValue(value, q, useDurations)
     case STRING   ⇒ '"' + escapeString(value) + '"'
     case _        ⇒ value
   }
@@ -54,13 +54,19 @@ object tsConfigUtil {
     }
   }
 
-  private def durationValue(value: String, q: DurationQualification): String = {
+  private def durationValue(value: String, q: DurationQualification, useDurations: Boolean): String = {
     val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
-    config.getDuration("k", timeUnitParam(q)).toString
+    if(useDurations)
+      config.getDuration("k").toString
+    else
+      config.getDuration("k", timeUnitParam(q)).toString
   }
 
-  private def durationGetter(path: String, q: DurationQualification): String = {
-    s"""getDuration("$path", ${timeUnitParamString(q)})"""
+  private def durationGetter(path: String, q: DurationQualification, useDurations: Boolean): String = {
+    if(useDurations)
+      s"""getDuration("$path")"""
+    else
+      s"""getDuration("$path", ${timeUnitParamString(q)})"""
   }
 
   private def timeUnitParamString(q: DurationQualification): String =
@@ -73,6 +79,19 @@ object tsConfigUtil {
       case `hour`   =>  "HOURS"
       case `day`    =>  "DAYS"
     })
+
+  def temporalUnitString(q: DurationQualification): String = {
+    "java.time.temporal.ChronoUnit." + (q match {
+      case `ns`     => "NANOS"
+      case `us`     => "MICROS"
+      case `ms`     => "MILLIS"
+      case `second` => "SECONDS"
+      case `minute` => "MINUTES"
+      case `hour`   => "HOURS"
+      case `day`    => "DAYS"
+    })
+  }
+
 
   private def timeUnitParam(q: DurationQualification): TimeUnit = q match {
     case `ns`     =>  TimeUnit.NANOSECONDS

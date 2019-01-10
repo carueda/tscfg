@@ -150,7 +150,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case DOUBLE    ⇒ "double"
       case BOOLEAN   ⇒ "boolean"
       case SIZE      ⇒ "long"
-      case DURATION(q) ⇒ "long"
+      case DURATION(_) ⇒ if(genOpts.useDurations) "java.time.Duration" else "long"
     }))
   }
 
@@ -221,14 +221,15 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   }
 
   private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
-    val getter = tsConfigUtil.basicGetter(bt, path)
+    val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
       case Some(v) ⇒
-        val value = tsConfigUtil.basicValue(a.t, v)
+        val value = tsConfigUtil.basicValue(a.t, v, genOpts.useDurations)
         (bt, value) match {
           case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
           case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
+          case (DURATION(_), duration) if genOpts.useDurations ⇒ s"""c.$hasPath("$path") ? c.$getter : java.time.Duration.parse("$duration")"""
           case _                  ⇒ s"""c.$hasPath("$path") ? c.$getter : $value"""
         }
 
@@ -328,7 +329,8 @@ object JavaGen {
 
   // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false,
-               genGetters: Boolean = false, useOptionals:Boolean = false): GenResult = {
+               genGetters: Boolean = false, useOptionals:Boolean = false,
+               useDurations:Boolean = false): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
@@ -353,7 +355,8 @@ object JavaGen {
     }
 
     val genOpts = GenOpts("tscfg.example", className, j7 = false,
-                          genGetters = genGetters, useOptionals = useOptionals)
+                          genGetters = genGetters, useOptionals = useOptionals,
+      useDurations = useDurations)
 
     val generator = new JavaGen(genOpts)
 

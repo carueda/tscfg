@@ -152,7 +152,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case DOUBLE   ⇒ "scala.Double"
       case BOOLEAN  ⇒ "scala.Boolean"
       case SIZE     ⇒ "scala.Long"
-      case DURATION(_) ⇒ "scala.Long"
+      case DURATION(_) ⇒ if(genOpts.useDurations) "java.time.Duration" else "scala.Long"
     }))
   }
 }
@@ -196,8 +196,6 @@ object ScalaGen {
     val generator = new ScalaGen(genOpts)
 
     val results = generator.generate(objectType)
-
-    //println("\n" + results.code)
 
     val destFilename  = s"src/test/scala/tscfg/example/$className.scala"
     val destFile = new File(destFilename)
@@ -365,15 +363,16 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
   }
 
   private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
-    val getter = tsConfigUtil.basicGetter(bt, path)
+    val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
       case Some(v) ⇒
-        val value = tsConfigUtil.basicValue(a.t, v)
+        val value = tsConfigUtil.basicValue(a.t, v, useDurations = genOpts.useDurations)
         (bt, value) match {
-          case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
-          case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
-          case _                  ⇒ s"""if(c.$hasPath("$path")) c.$getter else $value"""
+          case (BOOLEAN, "true")    ⇒ s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false")   ⇒ s"""c.$hasPath("$path") && c.$getter"""
+          case (DURATION(qs), duration) if genOpts.useDurations ⇒ s"""if(c.$hasPath("$path")) c.$getter else java.time.Duration.parse("$duration")"""
+          case _                    ⇒ s"""if(c.$hasPath("$path")) c.$getter else $value"""
         }
 
       case None if a.optional ⇒
