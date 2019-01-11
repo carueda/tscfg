@@ -80,19 +80,6 @@ object tsConfigUtil {
       case `day`    =>  "DAYS"
     })
 
-  def temporalUnitString(q: DurationQualification): String = {
-    "java.time.temporal.ChronoUnit." + (q match {
-      case `ns`     => "NANOS"
-      case `us`     => "MICROS"
-      case `ms`     => "MILLIS"
-      case `second` => "SECONDS"
-      case `minute` => "MINUTES"
-      case `hour`   => "HOURS"
-      case `day`    => "DAYS"
-    })
-  }
-
-
   private def timeUnitParam(q: DurationQualification): TimeUnit = q match {
     case `ns`     =>  TimeUnit.NANOSECONDS
     case `us`     =>  TimeUnit.MICROSECONDS
