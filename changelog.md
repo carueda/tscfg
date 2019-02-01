@@ -1,3 +1,9 @@
+2019-02-01 - 0.9.8
+
+- publish v0.9.8 with new `--durations` flag to generate
+  `java.time.Duration` as base type for duration instead of `long`.
+  Thanks @qux42!
+
 2019-01-09 - 0.9.7
 
 - publish v0.9.7 with new `--java:optionals` option to generate
