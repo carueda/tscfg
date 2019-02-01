@@ -1,5 +1,8 @@
 package tscfg.generators.scala
 
+import java.time.Duration
+import java.time.temporal.ChronoUnit.MICROS
+
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example.{ScalaDurationCfg, _}
@@ -7,6 +10,7 @@ import tscfg.generators.GenOpts
 import tscfg.model
 import tscfg.model._
 import model.implicits._
+import tscfg.generators.java.JavaGen
 
 
 class ScalaMainSpec extends Specification {
@@ -301,6 +305,51 @@ class ScalaMainSpec extends Specification {
       )
     }
   }
+
+  "duration2" should {
+    "generate code" in {
+      val r = JavaGen.generate("example/duration2.spec.conf", useDurations = true)
+      r.classNames === Set("JavaDuration2Cfg", "Durations")
+      r.fields.keySet === Set("durations", "days", "hours", "millis",
+        "duration_ns",
+        "duration_µs",
+        "duration_ms",
+        "duration_se",
+        "duration_mi",
+        "duration_hr",
+        "duration_dy"
+      )
+    }
+
+    "example 1" in {
+      val c = ScalaDuration2Cfg(ConfigFactory.parseString(
+        """
+          |durations {
+          |  days  = "10d"
+          |  hours = "24h"
+          |  duration_ns = "7ns"
+          |  duration_µs = "7us"
+          |  duration_ms = "7ms"
+          |  duration_se = "7s"
+          |  duration_mi = "7m"
+          |  duration_hr = "7h"
+          |  duration_dy = "7d"
+          |}
+          |""".stripMargin
+      ))
+      c.durations.days === Some(Duration.ofDays(10))
+      c.durations.hours === Duration.ofHours(24)
+      c.durations.millis === Duration.ofMillis(550000)
+      c.durations.duration_ns === Duration.ofNanos(7)
+      c.durations.duration_µs === Duration.of(7, MICROS)
+      c.durations.duration_ms === Duration.ofMillis(7)
+      c.durations.duration_se === Duration.ofSeconds(7)
+      c.durations.duration_mi === Duration.ofMinutes(7)
+      c.durations.duration_hr === Duration.ofHours(7)
+      c.durations.duration_dy === Duration.ofDays(7)
+    }
+  }
+
 
   "issue19" should {
     """put underscores for key having $""" in {

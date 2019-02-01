@@ -33,6 +33,7 @@ object gen4tests {
         case "--scala:bt"      ⇒ genOpts = genOpts.copy(useBackticks = true)
         case "--java:getters"  ⇒ genOpts = genOpts.copy(genGetters = true)
         case "--java:optionals"  ⇒ genOpts = genOpts.copy(useOptionals = true)
+        case "--durations"     ⇒ genOpts = genOpts.copy(useDurations = true)
 
         // $COVERAGE-OFF$
         case opt ⇒ println(s"WARN: $confFile: unrecognized GenOpts argument: `$opt'")

@@ -29,7 +29,8 @@ case class GenOpts(packageName: String,
                    reportFullPath: Boolean = false,
                    useBackticks: Boolean = false,
                    genGetters: Boolean = false,
-                   useOptionals: Boolean = false
+                   useOptionals: Boolean = false,
+                   useDurations: Boolean = false
                   )
 
 case class GenResult(code: String = "?",

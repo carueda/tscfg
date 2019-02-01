@@ -1,6 +1,9 @@
 package tscfg.generators.java
 
 import java.util.Optional
+import java.time.Duration
+import java.time.temporal.ChronoUnit.MICROS
+
 import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import tscfg.example._
@@ -296,6 +299,94 @@ class JavaMainSpec extends Specification {
       c.durations.duration_mi === 7
       c.durations.duration_hr === 7
       c.durations.duration_dy === 7
+    }
+  }
+
+  "duration2" should {
+    "generate code" in {
+      val r = JavaGen.generate("example/duration2.spec.conf", useDurations = true)
+      r.classNames === Set("JavaDuration2Cfg", "Durations")
+      r.fields.keySet === Set("durations", "days", "hours", "millis",
+        "duration_ns",
+        "duration_µs",
+        "duration_ms",
+        "duration_se",
+        "duration_mi",
+        "duration_hr",
+        "duration_dy"
+      )
+    }
+
+    "example 1" in {
+      val c = new JavaDuration2Cfg(ConfigFactory.parseString(
+        """
+          |durations {
+          |  days  = "10d"
+          |  hours = "24h"
+          |  duration_ns = "7ns"
+          |  duration_µs = "7us"
+          |  duration_ms = "7ms"
+          |  duration_se = "7s"
+          |  duration_mi = "7m"
+          |  duration_hr = "7h"
+          |  duration_dy = "7d"
+          |}
+          |""".stripMargin
+      ))
+      c.durations.days === Duration.ofDays(10)
+      c.durations.hours === Duration.ofHours(24)
+      c.durations.millis === Duration.ofMillis(550000)
+      c.durations.duration_ns === Duration.ofNanos(7)
+      c.durations.duration_µs === Duration.of(7, MICROS)
+      c.durations.duration_ms === Duration.ofMillis(7)
+      c.durations.duration_se === Duration.ofSeconds(7)
+      c.durations.duration_mi === Duration.ofMinutes(7)
+      c.durations.duration_hr === Duration.ofHours(7)
+      c.durations.duration_dy === Duration.ofDays(7)
+    }
+  }
+
+  "duration3" should {
+    "generate code" in {
+      val r = JavaGen.generate("example/duration3.spec.conf", useDurations = true, genGetters = true)
+      r.classNames === Set("JavaDuration3Cfg", "Durations")
+      r.fields.keySet === Set("durations", "days", "hours", "millis",
+        "duration_ns",
+        "duration_µs",
+        "duration_ms",
+        "duration_se",
+        "duration_mi",
+        "duration_hr",
+        "duration_dy"
+      )
+    }
+
+    "example 1" in {
+      val c = new JavaDuration3Cfg(ConfigFactory.parseString(
+        """
+          |durations {
+          |  days  = "10d"
+          |  hours = "24h"
+          |  duration_ns = "7ns"
+          |  duration_µs = "7us"
+          |  duration_ms = "7ms"
+          |  duration_se = "7s"
+          |  duration_mi = "7m"
+          |  duration_hr = "7h"
+          |  duration_dy = "7d"
+          |}
+          |""".stripMargin
+      ))
+      c.durations.getDays === Duration.ofDays(10)
+      c.durations.getHours === Duration.ofHours(24)
+      c.durations.getMillis === Duration.ofMillis(550000)
+      c.durations.getDuration_ns === Duration.ofNanos(7)
+      c.durations.getDuration_µs === Duration.of(7, MICROS)
+      c.durations.getDuration_ms === Duration.ofMillis(7)
+      c.durations.getDuration_se === Duration.ofSeconds(7)
+      c.durations.getDuration_mi === Duration.ofMinutes(7)
+      c.durations.getDuration_hr === Duration.ofHours(7)
+      c.durations.getDuration_dy === Duration.ofDays(7)
     }
   }
 

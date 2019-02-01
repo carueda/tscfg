@@ -197,6 +197,7 @@ Options (default):
   --java                generate java code               (the default)
   --java:getters        generate getters (see #31)       (false)
   --java:optionals      use Optional instead of null     (false)
+  --durations           use java.time.Duration           (false)
   --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
   --tpl.cp <string>     prefix for template comments     ("##")
@@ -277,18 +278,21 @@ and an example of use [like this](https://github.com/carueda/tscfg/blob/master/s
 
 The following basic types are supported:
 
-| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt
-|---------------|---------------------|--------------------------
-| `string`      | `String`  / `String`    | `String`  / `Option[String]`
-| `int`         | `int`     / `Integer`   | `Int`     / `Option[Int]`
-| `long`        | `long`    / `Long`      | `Long`    / `Option[Long]`
-| `double`      | `double`  / `Double`    | `Double`  / `Option[Double]`
-| `boolean`     | `boolean` / `Boolean`   | `Boolean` / `Option[Boolean]`
-| `size`        | `long`    / `Long`      | `Long`    / `Option[Long]`
-| `duration`    | `long`    / `Long`      | `Long`    / `Option[Long]`
+| type in spec                         | java type:<br /> req / opt  | scala type:<br /> req / opt
+|--------------------------------------|--------------------------|---------------------------------
+| `string`                             | `String`   / `String`    | `String`   / `Option[String]`
+| `int`                                | `int`      / `Integer`   | `Int`      / `Option[Int]`
+| `long`                               | `long`     / `Long`      | `Long`     / `Option[Long]`
+| `double`                             | `double`   / `Double`    | `Double`   / `Option[Double]`
+| `boolean`                            | `boolean`  / `Boolean`   | `Boolean`  / `Option[Boolean]`
+| `size`                               | `long`     / `Long`      | `Long`     / `Option[Long]`
+| `duration`                           | `long`     / `Long`      | `Long`     / `Option[Long]`
+| `duration` (using `--duration` flag) | `Duration` / `Duration`  | `Duration` / `Option[Duration]`
 
-> Note: please read `Optional<T>` instead of the `T` values in the
-java "opt" column above if using the `--java:optionals` flag.
+> **NOTE**
+> - please read `Optional<T>` instead of the `T` values in the
+    java "opt" column above if using the `--java:optionals` flag.
+> - using the `--duration` flag, `java.time.Duration` is used instead of `long` / `Long`. See [durations](#durations) for further information. 
 
 
 #### size-in-bytes
@@ -328,6 +332,9 @@ durations {
   ...
 }
 ```
+Using the `--duration` flag, the reported value will be a `java.time.Duration` instead of a `long` / `Long` and the suffix will be ignored:
+`"duration:hours | 3day"` is `java.time.Duration.ofDays(3)` if value is missing or whatever is provided converted to a `java.time.Duration` 
+
 
 ### list type
 

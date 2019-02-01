@@ -39,6 +39,7 @@ object Main {
        |  --java                generate java code               (the default)
        |  --java:getters        generate getters (see #31)       (false)
        |  --java:optionals      use optionals                    (false)
+       |  --durations           use java.time.Duration           (false)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
        |  --tpl.cp <string>     prefix for template comments     ("${templateOpts.commentPrefix}")
@@ -57,6 +58,7 @@ object Main {
                          useBackticks: Boolean = false,
                          genGetters: Boolean = false,
                          useOptionals: Boolean = false,
+                         useDurations: Boolean = false,
                          tplFilename: Option[String] = None
                         )
 
@@ -111,6 +113,9 @@ object Main {
         case "--java:optionals" ::rest =>
           traverseList(rest, opts.copy(useOptionals = true))
 
+        case "--durations" :: rest =>
+          traverseList(rest, opts.copy(useDurations = true))
+
         case "--tpl" :: filename :: rest =>
           traverseList(rest, opts.copy(tplFilename = Some(filename)))
 
@@ -153,7 +158,8 @@ object Main {
                           reportFullPath = opts.reportFullPath,
                           useBackticks = opts.useBackticks,
                           genGetters = opts.genGetters,
-                          useOptionals = opts.useOptionals)
+                          useOptionals = opts.useOptionals,
+                          useDurations = opts.useDurations)
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim
