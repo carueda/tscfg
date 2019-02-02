@@ -1,6 +1,6 @@
-2019-02-01 - 0.9.8
+2019-02-01 - 0.9.9
 
-- publish v0.9.8 with new `--durations` flag to generate
+- publish v0.9.9 with new `--durations` flag to generate
   `java.time.Duration` as base type for duration instead of `long`.
   Thanks @qux42!
 
