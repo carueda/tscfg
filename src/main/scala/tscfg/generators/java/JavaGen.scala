@@ -194,6 +194,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def objectInstance(a: AnnType, res: Res, path: String): String = {
     val className = res.javaType.toString
+
+    if (genOpts.assumeAllRequired)
+      s"""new $className(c.getConfig("$path"))"""
+    else
     if (a.optional) {
       if (genOpts.useOptionals) {
         s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path"))) : java.util.Optional.empty()"""
@@ -329,6 +333,8 @@ object JavaGen {
 
   // $COVERAGE-OFF$
   def generate(filename: String, showOut: Boolean = false,
+               j7: Boolean = false,
+               assumeAllRequired: Boolean = false,
                genGetters: Boolean = false, useOptionals:Boolean = false,
                useDurations:Boolean = false): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
@@ -344,7 +350,7 @@ object JavaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
-    val buildResult = ModelBuilder(source)
+    val buildResult = ModelBuilder(source, assumeAllRequired = assumeAllRequired)
     val objectType = buildResult.objectType
     if (showOut) {
       println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
@@ -354,8 +360,9 @@ object JavaGen {
       }
     }
 
-    val genOpts = GenOpts("tscfg.example", className, j7 = false,
+    val genOpts = GenOpts("tscfg.example", className, j7 = j7,
                           genGetters = genGetters, useOptionals = useOptionals,
+                          assumeAllRequired = assumeAllRequired,
       useDurations = useDurations)
 
     val generator = new JavaGen(genOpts)

@@ -18,14 +18,11 @@ abstract class Generator(genOpts: GenOpts) {
 
 /**
   * Generation options
-  *
-  * @param packageName  package name
-  * @param className    class name
-  * @param j7           true to generate code for Typesafe Config v &lt;= 1.2.1
   */
 case class GenOpts(packageName: String,
                    className: String,
-                   j7: Boolean,
+                   assumeAllRequired: Boolean = false,
+                   j7: Boolean = false,
                    reportFullPath: Boolean = false,
                    useBackticks: Boolean = false,
                    genGetters: Boolean = false,

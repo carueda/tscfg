@@ -16,8 +16,7 @@ object Main {
 
   val defaultGenOpts = GenOpts(
     packageName = "tscfg.example",
-    className = "ExampleCfg",
-    j7 = false
+    className = "ExampleCfg"
   )
 
   val defaultDestDir: String = "/tmp"
@@ -32,13 +31,14 @@ object Main {
        |  --pn <packageName>                                     (${defaultGenOpts.packageName})
        |  --cn <className>                                       (${defaultGenOpts.className})
        |  --dd <destDir>                                         ($defaultDestDir)
+       |  --all-required        assume all properties are required (see #47)
+       |  --java                generate java code               (the default)
        |  --j7                  generate code for java <= 7      (8)
+       |  --java:getters        generate getters (see #31)       (false)
+       |  --java:optionals      use optionals                    (false)
        |  --scala               generate scala code              (java)
        |  --scala:bt            use backticks (see #30)          (false)
        |  --scala:fp            report full path (see #36)       (false)
-       |  --java                generate java code               (the default)
-       |  --java:getters        generate getters (see #31)       (false)
-       |  --java:optionals      use optionals                    (false)
        |  --durations           use java.time.Duration           (false)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
@@ -52,6 +52,7 @@ object Main {
                          packageName: String = defaultGenOpts.packageName,
                          className: String =   defaultGenOpts.className,
                          destDir: String = defaultDestDir,
+                         assumeAllRequired: Boolean = false,
                          j7: Boolean = false,
                          language: String = "java",
                          reportFullPath: Boolean = false,
@@ -91,6 +92,9 @@ object Main {
 
         case "--dd" :: destDir :: rest =>
           traverseList(rest, opts.copy(destDir = chkVal(destDir)))
+
+        case "--all-required" :: rest =>
+          traverseList(rest, opts.copy(assumeAllRequired = true))
 
         case "--j7" :: rest =>
           traverseList(rest, opts.copy(j7 = true))
@@ -154,7 +158,9 @@ object Main {
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
 
-    val genOpts = GenOpts(opts.packageName, opts.className, opts.j7,
+    val genOpts = GenOpts(opts.packageName, opts.className,
+                          assumeAllRequired = opts.assumeAllRequired,
+                          j7 = opts.j7,
                           reportFullPath = opts.reportFullPath,
                           useBackticks = opts.useBackticks,
                           genGetters = opts.genGetters,
@@ -164,7 +170,7 @@ object Main {
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename)).mkString.trim
 
-    val buildResult = ModelBuilder(source)
+    val buildResult = ModelBuilder(source, assumeAllRequired = opts.assumeAllRequired)
     val objectType = buildResult.objectType
 
     //println("\nobjectType:\n  |" + objectType.format().replaceAll("\n", "\n  |"))

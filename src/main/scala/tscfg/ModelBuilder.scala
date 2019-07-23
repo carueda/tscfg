@@ -29,7 +29,7 @@ object buildWarnings {
     Warning(ln, default, s"ignoring default value='$default' in list's element type: $elemType")
 }
 
-class ModelBuilder {
+class ModelBuilder(assumeAllRequired: Boolean = false) {
   import collection._
   import buildWarnings._
 
@@ -77,9 +77,21 @@ class ModelBuilder {
       // contains $, otherwise unquote the key in case is quoted.
       val adjName = if (name.contains("$")) name else name.replaceAll("^\"|\"$", "")
 
+      // effective optional and default:
+      val (effOptional, effDefault)  = if (assumeAllRequired)
+        (false, None) // that is, all strictly required.
+        // A possible variation: allow the `@optional` annotation to still take effect:
+        //(optFromComments, if (optFromComments) default else None)
+      else
+        (optional || optFromComments, default)
+
+      //println(s"ModelBuilder: effOptional=$effOptional  effDefault=$effDefault " +
+      //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
+      //  s"adjName=$adjName")
+
       adjName -> model.AnnType(childType,
-        optional      = optional || optFromComments,
-        default       = default,
+        optional      = effOptional,
+        default       = effDefault,
         comments      = commentsOpt
       )
     }.toMap
@@ -257,9 +269,9 @@ object ModelBuilder {
 
   import com.typesafe.config.ConfigFactory
 
-  def apply(source: String): ModelBuildResult = {
+  def apply(source: String, assumeAllRequired: Boolean = false): ModelBuildResult = {
     val config = ConfigFactory.parseString(source).resolve()
-    new ModelBuilder().build(config)
+    new ModelBuilder(assumeAllRequired).build(config)
   }
 
   // $COVERAGE-OFF$
