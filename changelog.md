@@ -1,5 +1,7 @@
 2019-07-22 - 0.9.91
 
+- set openjdk8 for travis ci
+
 - resolve #47 about adding `--all-required` flag.
   The new `--all-required` flag strictly forces all entries (even objects)
   to be required (even the `@optional` annotation is ignored) 
