@@ -182,7 +182,7 @@ from the [releases](https://github.com/carueda/tscfg/releases).
 
 > Or run `sbt assembly` under a clone of this repo to generate the fat jar.
 
-```shell
+```
 $ java -jar tscfg-x.y.z.jar
 
 tscfg x.y.z
@@ -191,14 +191,15 @@ Options (default):
   --pn <packageName>                                     (tscfg.example)
   --cn <className>                                       (ExampleCfg)
   --dd <destDir>                                         (/tmp)
-  --j7                  generate code for java <= 7      (8)
-  --scala               generate scala code              (java)
-  --scala:fp            report full path (see #36)       (false)
-  --scala:bt            use backticks (see #30)          (false)
   --java                generate java code               (the default)
+  --j7                  generate code for java <= 7      (>= 8)
   --java:getters        generate getters (see #31)       (false)
-  --java:optionals      use Optional instead of null     (false)
+  --java:optionals      use optionals                    (false)
+  --scala               generate scala code              (java)
+  --scala:bt            use backticks (see #30)          (false)
+  --scala:fp            report full path (see #36)       (false)
   --durations           use java.time.Duration           (false)
+  --all-required        assume all properties are required (see #47)
   --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
   --tpl.cp <string>     prefix for template comments     ("##")
@@ -446,7 +447,7 @@ and even put them in my own classes**
 Sure. However, as the number of configuration properties and levels of nesting increase,
 the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
-–worth emphasizing– based on an explicit schema for the configuration.
+–worth emphasizing– based on an explicit *schema* for the configuration.
 
 **Any tscfg best practice for my development workflow?**
 
