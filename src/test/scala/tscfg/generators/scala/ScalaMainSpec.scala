@@ -58,6 +58,7 @@ class ScalaMainSpec extends Specification {
       r.fields.keySet === Set("server", "email", "main", "reals", "password", "foo")
     }
 
+/*
     "example 1" in {
       val c = ScalaIssue10Cfg(ConfigFactory.parseString(
         """
@@ -84,6 +85,7 @@ class ScalaMainSpec extends Specification {
       c.main.email must beSome(ScalaIssue10Cfg.Main.Email(password = "pw", server = "foo"))
       c.main.reals must beNone
     }
+*/
   }
 
   "issue11" should {

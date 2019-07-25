@@ -164,6 +164,8 @@ object ScalaGen {
 
   // $COVERAGE-OFF$
   def generate(filename: String,
+               j7: Boolean = false,
+               assumeAllRequired: Boolean = false,
                showOut: Boolean = false,
                useBackticks: Boolean = false
               ): GenResult = {
@@ -180,7 +182,7 @@ object ScalaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
-    val buildResult = ModelBuilder(source)
+    val buildResult = ModelBuilder(source, assumeAllRequired = assumeAllRequired)
     val objectType = buildResult.objectType
     if (showOut) {
       println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
@@ -190,7 +192,7 @@ object ScalaGen {
       }
     }
 
-    val genOpts = GenOpts("tscfg.example", className, j7 = false,
+    val genOpts = GenOpts("tscfg.example", className, j7 = j7,
                           useBackticks = useBackticks)
 
     val generator = new ScalaGen(genOpts)
@@ -347,7 +349,11 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
     }
     else {
       val ppArg = if (genOpts.reportFullPath) s""", s"$${parentPath}$path."""" else ""
-      s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+
+      if (genOpts.assumeAllRequired)
+        s"""$className(c.getConfig("$path")$ppArg)"""
+      else
+        s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
     }
   }
 

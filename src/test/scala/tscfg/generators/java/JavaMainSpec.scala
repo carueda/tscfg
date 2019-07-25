@@ -597,6 +597,7 @@ class JavaMainSpec extends Specification {
       c.i === Optional.empty()
     }
 
+/*
     "example 2" in {
       val c = new JavaIssue41Cfg(ConfigFactory.parseString(
         """
@@ -620,6 +621,47 @@ class JavaMainSpec extends Specification {
       c.c.f.get().g === 5
       c.c.f.get().h === "c.f.h"
       c.i.get() === List(1.0,2.0,3.0).asJava
+    }
+*/
+  }
+
+  "issue47 (assumeAllRequired)" should {
+    "fail with missing service entry" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
+      a must throwA[com.typesafe.config.ConfigException.Missing].like {
+        case e: com.typesafe.config.ConfigException.Missing ⇒
+          e.getMessage must contain(s"No configuration setting found for key 'service'")
+      }
+    }
+    "fail with missing url entry" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  # url = "http://example.net/rest"
+          |  poolSize = 32
+          |  debug = true
+          |  doLog = false
+          |  factor = 0.75
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException.Missing].like {
+        case e: com.typesafe.config.ConfigException.Missing ⇒
+          e.getMessage must contain(s"No configuration setting found for key 'url'")
+      }
+    }
+    "fail with missing poolSize entry" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  url = "http://example.net/rest"
+          |  # poolSize = 32
+          |  debug = true
+          |  doLog = false
+          |  factor = 0.75
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException.Missing].like {
+        case e: com.typesafe.config.ConfigException.Missing ⇒
+          e.getMessage must contain(s"No configuration setting found for key 'poolSize'")
+      }
     }
   }
 }
