@@ -10,6 +10,81 @@ package tscfg.codeDefs;
 public class JavaDefs {
 
   ///////////////////////////////////////////////////////////////////////
+  // definition of methods used to access required paths:
+  
+  //<$_reqStr>
+  private static java.lang.String $_reqStr(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+    try {
+      return c.getString(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      return null;
+    }
+  }
+  //</$_reqStr>
+  
+  //<$_reqInt>
+  private static int $_reqInt(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+    try {
+      return c.getInt(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      return 0;
+    }
+  }
+  //</$_reqInt>
+  
+  //<$_reqBln>
+  private static boolean $_reqBln(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+    try {
+      return c.getBoolean(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      return false;
+    }
+  }
+  //</$_reqBln>
+  
+  //<$_reqDbl>
+  private static double $_reqDbl(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+    try {
+      return c.getDouble(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      return 0;
+    }
+  }
+  //</$_reqDbl>
+  
+  //<$_reqLng>
+  private static long $_reqLng(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+    try {
+      return c.getLong(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      return 0;
+    }
+  }
+  //</$_reqLng>
+  
+  //<$_reqSiz>
+  private static long $_reqSiz(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+    try {
+      return c.getBytes(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      return 0;
+    }
+  }
+  //</$_reqSiz>
+  
+  ///////////////////////////////////////////////////////////////////////
   // definition of methods used to access list's elements of basic type:
   
   //<$_bln>

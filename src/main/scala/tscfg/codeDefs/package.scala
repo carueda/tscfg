@@ -17,10 +17,12 @@ package object codeDefs {
   private def getDef(lang: String, map: Map[String, String], key: String): String = {
     try map(key)
     catch {
+      // $COVERAGE-OFF$
       case NonFatal(e) ⇒
-        val keys = map.keySet.toSeq.sorted
-        val msg = s"Unexpected: undefined key '$key' for $lang. Defined keys: $keys"
+        val keys = map.keySet.toList.sorted
+        val msg = s"Unexpected: undefined key '$key' for $lang. Defined keys: $keys. Please report this bug"
         throw new RuntimeException(msg, e)
+      // $COVERAGE-ON$
     }
   }
 

@@ -643,9 +643,9 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"No configuration setting found for key 'url'")
+      a must throwA[java.lang.RuntimeException].like {
+        case e: java.lang.RuntimeException ⇒
+          e.getMessage must contain(s"Undefined entry for path: 'service.url'")
       }
     }
     "fail with missing poolSize entry" in {
@@ -658,9 +658,18 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"No configuration setting found for key 'poolSize'")
+      a must throwA[java.lang.RuntimeException].like {
+        case e: java.lang.RuntimeException ⇒
+          e.getMessage must contain(s"Undefined entry for path: 'service.poolSize'")
+      }
+    }
+    "fail with all entries missing in service object" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
+      a must throwA[java.lang.RuntimeException].like {
+        case e: java.lang.RuntimeException ⇒
+          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
+            e.getMessage must contain(s"Undefined entry for path: 'service.$k'")
+          }
       }
     }
   }

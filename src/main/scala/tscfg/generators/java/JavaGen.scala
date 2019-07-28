@@ -4,6 +4,7 @@ import tscfg.generators.java.javaUtil._
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
+import tscfg.codeDefs.javaDef
 
 
 class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
@@ -113,12 +114,30 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       objOnes + rootOnes
     }
 
+    val (ctorParams, errHandlingDecl, errHandlingDispatch) = if (isRoot) {
+      ( "com.typesafe.config.Config c",
+        """final java.lang.StringBuilder errors = new java.lang.StringBuilder();
+        |    final java.lang.String parentPath = "";
+        |    """.stripMargin,
+
+        s"""
+           |    if (errors.length() > 0) {
+           |      throw new RuntimeException(errors.toString());
+           |    }""".stripMargin
+      )
+    }
+    else (
+      "com.typesafe.config.Config c, java.lang.String parentPath, java.lang.StringBuilder errors",
+      "",
+      ""
+    )
+
     val classStr = {
       s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted {
          |  $classDeclMembersStr$classMemberGettersStr
          |  $membersStr
-         |  public $classNameAdjusted(com.typesafe.config.Config c) {
-         |    $ctorMembersStr
+         |  public $classNameAdjusted($ctorParams) {
+         |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
          |  }$elemAccessorsStr
          |}
          |""".stripMargin
@@ -195,18 +214,20 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private def objectInstance(a: AnnType, res: Res, path: String): String = {
     val className = res.javaType.toString
 
+    val ppArg = s""", parentPath + "$path.", errors"""
+
     if (genOpts.assumeAllRequired)
-      s"""new $className(c.getConfig("$path"))"""
+      s"""new $className(c.getConfig("$path")$ppArg)"""
     else
     if (a.optional) {
       if (genOpts.useOptionals) {
-        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path"))) : java.util.Optional.empty()"""
+        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path")$ppArg)) : java.util.Optional.empty()"""
       } else {
-        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
+        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : null"""
       }
     }
     else
-      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
+      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
@@ -224,7 +245,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     else base
   }
 
-  private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
+  private def basicInstance(a: AnnType, bt: BasicType, path: String)
+                           (implicit listAccessors: collection.mutable.Map[String, String]): String = {
     val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
@@ -243,7 +265,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         s"""c.$hasPath("$path") ? c.$getter : null"""
 
       case _ ⇒
-        s"""c.$getter"""
+        bt match {
+          case DURATION(_) ⇒ s"""c.$getter"""
+          case _ ⇒
+            val (methodName, methodCall) = tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
+            listAccessors += methodName → javaDef(methodName)
+            methodCall
+        }
     }
   }
 
@@ -253,7 +281,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                             ): String = {
 
     val (_, methodName) = rec(javaType, lt, "")
-      methodName + s"""(c.getList("$path"))"""
+      methodName + s"""(c.getList("$path"), parentPath, errors)"""
   }
 
   private def rec(ljt: ListJavaType, lt: ListType, prefix: String
@@ -304,17 +332,17 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                                   (implicit methodNames: MethodNames): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
-      s"$elemMethodName((com.typesafe.config.ConfigList)cv)"
+      s"$elemMethodName((com.typesafe.config.ConfigList)cv, parentPath, errors)"
     else if (elemMethodName.startsWith("$"))
       s"$elemMethodName(cv)"
     else {
       val adjusted = elemMethodName.replace("_", ".")
-      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig())"
+      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig(), parentPath, errors)"
     }
 
     val methodName = methodNames.listPrefix + elemMethodName
     val methodDef =
-      s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl) {
+      s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl, java.lang.String parentPath, java.lang.StringBuilder errors) {
          |    java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
          |    for (com.typesafe.config.ConfigValue cv: cl) {
          |      al.add($elem);
@@ -423,8 +451,6 @@ private[java] case class MethodNames() {
          """.stripMargin
       )
   }
-
-  import tscfg.codeDefs.javaDef
 
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {

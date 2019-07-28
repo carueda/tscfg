@@ -23,6 +23,21 @@ object tsConfigUtil {
     case DURATION(q)  ⇒  durationGetter(path, q, useDurations)
   }
 
+  def basicRequiredGetter(bt: BasicType, path: String, useDurations:Boolean): (String,String) = {
+    val methodName = bt match {
+      case STRING    ⇒   "$_reqStr"
+      case INTEGER   ⇒   "$_reqInt"
+      case LONG      ⇒   "$_reqLng"
+      case DOUBLE    ⇒   "$_reqDbl"
+      case BOOLEAN   ⇒   "$_reqBln"
+      case SIZE      ⇒   "$_reqSiz"
+      // $COVERAGE-OFF$
+      case _ ⇒ throw new AssertionError("should not happen")
+      // $COVERAGE-ON$
+    }
+    (methodName, s"""$methodName(parentPath, c, "$path", errors)""")
+  }
+
   def basicValue(t: Type, value: String, useDurations: Boolean): String = t match {
     case SIZE        ⇒ sizeValue(value)
     case DURATION(q) ⇒ durationValue(value, q, useDurations)
