@@ -10,7 +10,7 @@ crossScalaVersions := Seq("2.12.2")
 
 libraryDependencies ++= Seq(
   "com.typesafe"          %  "config"         % "1.3.3",
-  "org.specs2"           %%  "specs2-core"    % "4.0.2" % "test",
+  "org.specs2"           %%  "specs2-core"    % "4.6.0" % "test",
   "org.json4s"           %%  "json4s-native"  % "3.5.0",
   "com.google.code.gson"  %  "gson"           % "2.8.0"
 )
@@ -25,17 +25,17 @@ coverageMinimum := 80
 coverageFailOnMinimum := false
 coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
-lazy val codeTemplates = taskKey[Unit]("Copies CodeTemplate sources to resources/")
-codeTemplates := {
-  println(s"Copying code templates")
-  IO.write(file("src/main/resources/codeTemplates/JavaCodeTemplates"),
-    IO.read(file("src/main/java/tscfg/codeTemplates/JavaCodeTemplates.java"))
+lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
+codeDefs := {
+  println(s"Copying auxiliary code definitions")
+  IO.write(file("src/main/resources/codeDefs/JavaDefs"),
+    IO.read(file("src/main/java/tscfg/codeDefs/JavaDefs.java"))
   )
-  IO.write(file("src/main/resources/codeTemplates/ScalaCodeTemplates"),
-    IO.read(file("src/main/scala/tscfg/codeTemplates/ScalaCodeTemplates.scala"))
+  IO.write(file("src/main/resources/codeDefs/ScalaDefs"),
+    IO.read(file("src/main/scala/tscfg/codeDefs/ScalaDefs.scala"))
   )
 }
-(compile in Compile) <<= (compile in Compile) dependsOn codeTemplates
+(compile in Compile) <<= (compile in Compile) dependsOn codeDefs
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")

@@ -1,12 +1,13 @@
-package tscfg.codeTemplates;
+// $COVERAGE-OFF$
+package tscfg.codeDefs;
 
 /**
- * Captures various snippets to be included in the generated wrapper.
+ * Captures various definitions to be included in the generated wrapper.
  * This is not used as compile code in the generator itself but the
  * text of this file is retrieved as a resource at runtime.
  * Capturing this as code helps with validation at compile time.
  */
-public class JavaCodeTemplates {
+public class JavaDefs {
 
   ///////////////////////////////////////////////////////////////////////
   // definition of methods used to access list's elements of basic type:
@@ -77,3 +78,4 @@ public class JavaCodeTemplates {
   //</$_expE>
   
 }
+// $COVERAGE-ON$

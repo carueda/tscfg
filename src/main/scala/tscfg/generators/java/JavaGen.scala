@@ -99,15 +99,15 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n  " + listAccessors.keys.toList.sorted.map { methodName ⇒
-          listAccessors(methodName).replaceAll("\n", "\n  ")
-        }.mkString("\n  ")
+        "\n" + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName)
+        }.mkString("\n")
       }
       val rootOnes = if (!isRoot) "" else {
         if (rootListAccessors.isEmpty) "" else {
-          "\n\n  " + rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            rootListAccessors(methodName).replaceAll("\n", "\n  ")
-          }.mkString("\n  ")
+          "\n\n" + rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            rootListAccessors(methodName)
+          }.mkString("\n")
         }
       }
       objOnes + rootOnes
@@ -314,14 +314,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val methodName = methodNames.listPrefix + elemMethodName
     val methodDef =
-      s"""
-         |private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl) {
-         |  java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
-         |  for (com.typesafe.config.ConfigValue cv: cl) {
-         |    al.add($elem);
-         |  }
-         |  return java.util.Collections.unmodifiableList(al);
-         |}""".stripMargin.trim
+      s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl) {
+         |    java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
+         |    for (com.typesafe.config.ConfigValue cv: cl) {
+         |      al.add($elem);
+         |    }
+         |    return java.util.Collections.unmodifiableList(al);
+         |  }""".stripMargin
     (methodName, methodDef)
   }
 }
@@ -425,14 +424,14 @@ private[java] case class MethodNames() {
       )
   }
 
-  import tscfg.codeTemplates.getJavaTemplate
+  import tscfg.codeDefs.javaDef
 
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
     List(strA, intA, lngA, dblA, blnA, sizA)
-      .map(k ⇒ k → getJavaTemplate(k).trim)
+      .map(k ⇒ k → javaDef(k))
       .toMap
   }
 
-  val expEDef: String = getJavaTemplate("$_expE").trim
+  val expEDef: String = javaDef(expE)
 }

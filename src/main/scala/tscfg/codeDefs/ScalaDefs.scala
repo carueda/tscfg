@@ -1,12 +1,13 @@
-package tscfg.codeTemplates
+// $COVERAGE-OFF$
+package tscfg.codeDefs
 
 /**
-  * Captures various snippets to be included in the generated wrapper.
+  * Captures various definitions to be included in the generated wrapper.
   * This is not used as compile code in the generator itself but the
   * text of this file is retrieved as a resource at runtime.
   * Capturing this as code helps with validation at compile time.
   */
-object ScalaCodeTemplates {
+object ScalaDefs {
 
   ///////////////////////////////////////////////////////////////////////
   // definition of methods used to access list's elements of basic type:
@@ -48,7 +49,7 @@ object ScalaCodeTemplates {
   //</$_lng>
 
   //<$_str>
-  private def $_str(cv:com.typesafe.config.ConfigValue) = {
+  private def $_str(cv:com.typesafe.config.ConfigValue): java.lang.String = {
     java.lang.String.valueOf(cv.unwrapped())
   }
   //</$_str>
@@ -86,3 +87,4 @@ object ScalaCodeTemplates {
   //</$_require>
 
 }
+// $COVERAGE-ON$

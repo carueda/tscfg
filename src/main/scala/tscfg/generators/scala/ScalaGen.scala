@@ -96,18 +96,18 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n  " + listAccessors.keys.toList.sorted.map { methodName ⇒
-          listAccessors(methodName).replaceAll("\n", "\n  ")
-        }.mkString("\n  ")
+        "\n" + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName)
+        }.mkString("\n")
       }
       val rootOnes = if (!isRoot) "" else {
         if (genOpts.reportFullPath) {
           accessors.rootListAccessors += methodNames.requireName → methodNames.requireDef
         }
         if (accessors.rootListAccessors.isEmpty) "" else {
-          "\n\n  " + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            accessors.rootListAccessors(methodName).replaceAll("\n", "\n  ")
-          }.mkString("\n  ")
+          "\n\n" + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            accessors.rootListAccessors(methodName)
+          }.mkString("\n")
         }
       }
       objOnes + rootOnes
@@ -253,18 +253,18 @@ private[scala] case class MethodNames() {
       )
   }
 
-  import tscfg.codeTemplates.getScalaTemplate
+  import tscfg.codeDefs.scalaDef
 
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
     List(strA, intA, lngA, dblA, blnA, sizA)
-      .map(k ⇒ k → getScalaTemplate(k).trim)
+      .map(k ⇒ k → scalaDef(k))
       .toMap
   }
 
-  val expEDef: String = getScalaTemplate("$_expE").trim
+  val expEDef: String = scalaDef(expE)
 
-  val requireDef: String = getScalaTemplate("$_require").trim
+  val requireDef: String = scalaDef(requireName)
 }
 
 private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {
@@ -405,11 +405,10 @@ private[scala] class Accessors {
 
     val methodName = methodNames.listPrefix + elemMethodName
     val methodDef =
-      s"""
-         |private def $methodName(cl:com.typesafe.config.ConfigList): scala.List[$scalaType] = {
-         |  import scala.collection.JavaConverters._
-         |  cl.asScala.map(cv => $elem).toList
-         |}""".stripMargin.trim
+      s"""  private def $methodName(cl:com.typesafe.config.ConfigList): scala.List[$scalaType] = {
+         |    import scala.collection.JavaConverters._
+         |    cl.asScala.map(cv => $elem).toList
+         |  }""".stripMargin
     (methodName, methodDef)
   }
 }

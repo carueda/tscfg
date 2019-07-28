@@ -4,23 +4,32 @@ import java.util.regex.Pattern
 
 import scala.util.control.NonFatal
 
-package object codeTemplates {
+package object codeDefs {
   private val beginTemplatePattern = Pattern.compile("\\s*//<([^>]+)>.*$")
 
-  private val javaMap = getMap("codeTemplates/JavaCodeTemplates")
-  private val scalaMap = getMap("codeTemplates/ScalaCodeTemplates")
+  private val javaMap = getMap("codeDefs/JavaDefs")
+  private val scalaMap = getMap("codeDefs/ScalaDefs")
 
-  def getJavaTemplate(key: String): String = javaMap(key)
+  def javaDef(key: String): String = getDef("java", javaMap, key)
 
-  def getScalaTemplate(key: String): String = scalaMap(key)
+  def scalaDef(key: String): String = getDef("scala", scalaMap, key)
 
-  private def getMap(templateName: String): Map[String, String] = try {
-    //println(s"codeTemplates.getMap $templateName")
+  private def getDef(lang: String, map: Map[String, String], key: String): String = {
+    try map(key)
+    catch {
+      case NonFatal(e) ⇒
+        val keys = map.keySet.toSeq.sorted
+        val msg = s"Unexpected: undefined key '$key' for $lang. Defined keys: $keys"
+        throw new RuntimeException(msg, e)
+    }
+  }
+
+  private def getMap(resourceName: String): Map[String, String] = try {
+    //println(s"codeDefs.getMap $resourceName")
     val map = collection.mutable.HashMap[String, String]()
-    val is = getClass.getClassLoader.getResourceAsStream(templateName)
+    val is = getClass.getClassLoader.getResourceAsStream(resourceName)
     assert(is != null)
     val source = io.Source.fromInputStream(is, "utf-8")
-    assert(source != null)
     var key: String = null
     val template = new StringBuilder
     for (line ← source.getLines()) {
