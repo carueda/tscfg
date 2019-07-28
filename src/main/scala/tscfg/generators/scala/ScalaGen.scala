@@ -231,103 +231,40 @@ private[scala] object defs {
                  definition: String = "")
 }
 
-private[scala] case class MethodNames(prefix: String = "$_") {
-  val strA       = prefix + "str"
-  val intA       = prefix + "int"
-  val lngA       = prefix + "lng"
-  val dblA       = prefix + "dbl"
-  val blnA       = prefix + "bln"
-  val durA       = prefix + "dur"
-  val sizA       = prefix + "siz"
-  val expE       = prefix + "expE"
-  val listPrefix = prefix + "L"
-  val requireName = prefix + "require"
+private[scala] case class MethodNames() {
+  val strA       = "$_str"
+  val intA       = "$_int"
+  val lngA       = "$_lng"
+  val dblA       = "$_dbl"
+  val blnA       = "$_bln"
+  val durA       = "$_dur"
+  val sizA       = "$_siz"
+  val expE       = "$_expE"
+  val listPrefix = "$_L"
+  val requireName = "$_require"
 
   def checkUserSymbol(symbol: String): Unit = {
-    if (symbol.startsWith(prefix))
+    if (symbol.startsWith("$_"))
       println(
         s"""
            |WARNING: Symbol $symbol may cause conflict with generated code.
-           |         Avoid the $prefix prefix in your spec's identifiers.
+           |         Avoid the $$_ prefix in your spec's identifiers.
          """.stripMargin
       )
   }
 
+  import tscfg.codeTemplates.getScalaTemplate
+
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
-    Map(
-      strA → s"""
-                |private def $strA(cv:com.typesafe.config.ConfigValue) =
-                |  java.lang.String.valueOf(cv.unwrapped())
-                |""".stripMargin.trim,
-
-      intA → s"""
-                |private def $intA(cv:com.typesafe.config.ConfigValue): scala.Int = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-                |    !u.isInstanceOf[Integer]) throw $expE(cv, "integer")
-                |  u.asInstanceOf[Integer]
-                |}""".stripMargin.trim,
-
-      lngA → s"""
-                |private def $lngA(cv:com.typesafe.config.ConfigValue): scala.Long = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-                |    !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
-                |  u.asInstanceOf[java.lang.Number].longValue()
-                |}""".stripMargin.trim,
-
-      // since there's no something like cv.getBytes() nor is SimpleConfig.parseBytes visible,
-      // use ConfigFactory.parseString:
-      sizA → s"""
-                |private def $sizA(cv:com.typesafe.config.ConfigValue): scala.Long = {
-                |  val u: Any = cv.unwrapped
-                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.NUMBER ||
-                |     u.isInstanceOf[scala.Long] || u.isInstanceOf[scala.Int])
-                |    u.asInstanceOf[java.lang.Number].longValue()
-                |  else if (cv.valueType() == com.typesafe.config.ConfigValueType.STRING) {
-                |    com.typesafe.config.ConfigFactory.parseString("s = " + '"' + u + '"').getBytes("s")
-                |  }
-                |  else throw $expE(cv, "size")
-                |}
-                |""".stripMargin.trim,
-
-      dblA → s"""
-                |private def $dblA(cv:com.typesafe.config.ConfigValue): scala.Double = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-                |    !u.isInstanceOf[java.lang.Number]) throw $expE(cv, "double")
-                |  u.asInstanceOf[java.lang.Number].doubleValue()
-                |}""".stripMargin.trim,
-
-      blnA → s"""
-                |private def $blnA(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN) ||
-                |    !u.isInstanceOf[java.lang.Boolean]) throw $expE(cv, "boolean")
-                |  u.asInstanceOf[java.lang.Boolean].booleanValue()
-                |}""".stripMargin.trim
-    )
+    List(strA, intA, lngA, dblA, blnA, sizA)
+      .map(k ⇒ k → getScalaTemplate(k).trim)
+      .toMap
   }
 
-  val expEDef: String = {
-    s"""
-       |private def $expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
-       |  val u: Any = cv.unwrapped
-       |  new java.lang.RuntimeException(cv.origin.lineNumber +
-       |    ": expecting: " + exp + " got: " +
-       |    (if (u.isInstanceOf[java.lang.String]) "\\"" + u + "\\"" else u))
-       |}""".stripMargin.trim
-  }
+  val expEDef: String = getScalaTemplate("$_expE").trim
 
-  val requireDef: String =
-    s"""def $requireName[T](parentPath: java.lang.String, path: java.lang.String)(get: ⇒ T): T = {
-       |  import com.typesafe.config.ConfigException.Missing
-       |  try get
-       |  catch {
-       |    case e: Missing ⇒ throw if (parentPath.isEmpty) e else new Missing(parentPath + path, e)
-       |  }
-       |}""".stripMargin
+  val requireDef: String = getScalaTemplate("$_require").trim
 }
 
 private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {

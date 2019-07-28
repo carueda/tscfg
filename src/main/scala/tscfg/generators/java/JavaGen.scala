@@ -404,95 +404,35 @@ private[java] object defs {
                  definition: String = "")
 }
 
-private[java] case class MethodNames(prefix: String = "$_") {
-  val strA = prefix + "str"
-  val intA = prefix + "int"
-  val lngA = prefix + "lng"
-  val dblA = prefix + "dbl"
-  val blnA = prefix + "bln"
-  val durA = prefix + "dur"
-  val sizA = prefix + "siz"
-  val expE = prefix + "expE"
-  val listPrefix = prefix + "L"
+private[java] case class MethodNames() {
+  val strA = "$_str"
+  val intA = "$_int"
+  val lngA = "$_lng"
+  val dblA = "$_dbl"
+  val blnA = "$_bln"
+  val durA = "$_dur" // TODO review this one as it's not actually used
+  val sizA = "$_siz"
+  val expE = "$_expE"
+  val listPrefix = "$_L"
 
   def checkUserSymbol(symbol: String): Unit = {
-    if (symbol.startsWith(prefix))
+    if (symbol.startsWith("$_"))
       println(
         s"""
            |WARNING: Symbol $symbol may cause conflict with generated code.
-           |         Avoid the $prefix prefix in your spec's identifiers.
+           |         Avoid the $$_ prefix in your spec's identifiers.
          """.stripMargin
       )
   }
 
+  import tscfg.codeTemplates.getJavaTemplate
+
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
-    Map(
-      strA → s"""
-                |private static java.lang.String $strA(com.typesafe.config.ConfigValue cv) {
-                |  return java.lang.String.valueOf(cv.unwrapped());
-                |}""".stripMargin.trim,
-
-      intA → s"""
-                |private static java.lang.Integer $intA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                |    !(u instanceof java.lang.Integer)) throw $expE(cv, "integer");
-                |  return (java.lang.Integer) u;
-                |}
-                |""".stripMargin.trim,
-
-      lngA → s"""
-                |private static java.lang.Long $lngA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $expE(cv, "long");
-                |  return ((java.lang.Number) u).longValue();
-                |}
-                |""".stripMargin.trim,
-
-      // since there's no something like cv.getBytes() nor is SimpleConfig.parseBytes visible,
-      // use ConfigFactory.parseString:
-      sizA → s"""
-                |private static java.lang.Long $sizA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.NUMBER ||
-                |     (u instanceof java.lang.Long) || (u instanceof java.lang.Integer))
-                |    return ((java.lang.Number) u).longValue();
-                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.STRING) {
-                |    return com.typesafe.config.ConfigFactory.parseString("s = " + '"' + u + '"').getBytes("s");
-                |  }
-                |  throw $expE(cv, "size");
-                |}
-                |""".stripMargin.trim,
-
-      dblA → s"""
-                |private static java.lang.Double $dblA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                |    !(u instanceof java.lang.Number)) throw $expE(cv, "double");
-                |  return ((java.lang.Number) u).doubleValue();
-                |}
-                |""".stripMargin.trim,
-
-      blnA → s"""
-                |private static java.lang.Boolean $blnA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
-                |    !(u instanceof java.lang.Boolean)) throw $expE(cv, "boolean");
-                |  return (java.lang.Boolean) u;
-                |}
-                |""".stripMargin.trim
-    )
+    List(strA, intA, lngA, dblA, blnA, sizA)
+      .map(k ⇒ k → getJavaTemplate(k).trim)
+      .toMap
   }
 
-  val expEDef: String = {
-    s"""
-       |private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
-       |  java.lang.Object u = cv.unwrapped();
-       |  return new java.lang.RuntimeException(cv.origin().lineNumber()
-       |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\\"" +u+ "\\"" : u));
-       |}
-       |""".stripMargin.trim
-  }
+  val expEDef: String = getJavaTemplate("$_expE").trim
 }

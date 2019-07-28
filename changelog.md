@@ -1,3 +1,8 @@
+2019-07-27 - 0.9.92
+
+- capture java and scala wrapper supporting methods in proper classes 
+  to facilitate validation at compile time.
+
 2019-07-22 - 0.9.91
 
 - set openjdk8 for travis ci

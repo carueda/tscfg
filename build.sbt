@@ -1,4 +1,4 @@
-lazy val tscfgVersion = setVersion("0.9.91")
+lazy val tscfgVersion = setVersion("0.9.92")
 
 organization := "com.github.carueda"
 name := "tscfg"
@@ -24,6 +24,18 @@ coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
 coverageMinimum := 80
 coverageFailOnMinimum := false
 coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
+
+lazy val codeTemplates = taskKey[Unit]("Copies CodeTemplate sources to resources/")
+codeTemplates := {
+  println(s"Copying code templates")
+  IO.write(file("src/main/resources/codeTemplates/JavaCodeTemplates"),
+    IO.read(file("src/main/java/tscfg/codeTemplates/JavaCodeTemplates.java"))
+  )
+  IO.write(file("src/main/resources/codeTemplates/ScalaCodeTemplates"),
+    IO.read(file("src/main/scala/tscfg/codeTemplates/ScalaCodeTemplates.scala"))
+  )
+}
+(compile in Compile) <<= (compile in Compile) dependsOn codeTemplates
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")

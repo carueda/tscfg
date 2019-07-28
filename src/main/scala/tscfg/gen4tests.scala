@@ -13,7 +13,7 @@ object gen4tests {
   }
 
   private def generate(confFile: File): Unit = {
-    println(s"gen4tests: confFile=$confFile")
+    //println(s"gen4tests: confFile=$confFile")
     val source = io.Source.fromFile(confFile).mkString.trim
 
     val baseGenOpts: GenOpts = {
@@ -56,7 +56,7 @@ object gen4tests {
       val fileName = className + "." + lang.toLowerCase
       val targetFile = new File(targetScalaDir, fileName)
       // $COVERAGE-OFF$
-      if (true || confFile.lastModified >= targetFile.lastModified) {
+      if (confFile.lastModified >= targetFile.lastModified) {
         val genOpts = baseGenOpts.copy(className = className)
         println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {
