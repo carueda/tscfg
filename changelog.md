@@ -1,8 +1,8 @@
 2019-07-27 - 0.9.92
 
 - toward #49 "Fully validate given config on construction"
-    - java: collect and report all "missing" errors for basic types
-      TODO handle objects
+    - java: collect and report all "missing" errors for basic types and
+      required objects
     - TODO scala
   
 - capture java and scala wrapper supporting methods in proper classes 

@@ -1,6 +1,9 @@
 // $COVERAGE-OFF$
 package tscfg.codeDefs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Captures various definitions to be included in the generated wrapper.
  * This is not used as compile code in the generator itself but the
@@ -8,77 +11,122 @@ package tscfg.codeDefs;
  * Capturing this as code helps with validation at compile time.
  */
 public class JavaDefs {
-
+  
+  //<$TsCfgValidator>
+  private static final class $TsCfgValidator  {
+    private final java.util.List<java.lang.String> undefinedPaths = new java.util.ArrayList<>();
+    
+    void addUndefinedPath(java.lang.String path) {
+      undefinedPaths.add(path);
+    }
+    
+    void validate() {
+      if (!undefinedPaths.isEmpty()) {
+        java.lang.StringBuilder sb = new java.lang.StringBuilder("Undefined paths in given configuration: ");
+        java.lang.String comma = "";
+        for (java.lang.String path : undefinedPaths) {
+          sb.append(comma).append("`").append(path).append("`");
+          comma = ", ";
+        }
+        throw new java.lang.RuntimeException(sb.toString());
+      }
+    }
+  }
+  //</$TsCfgValidator>
+  
   ///////////////////////////////////////////////////////////////////////
-  // definition of methods used to access required paths:
+  // Definition of methods used to access required paths:
+  //
+  // Note: the various `$_req` methods first do `if (c == null) return <null_value>`
+  // as a way to simplify the logic when "traversing" an undefined config object.
+  //
+  
+  //<$_reqConfig>
+  private static com.typesafe.config.Config $_reqConfig(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return null;
+    try {
+      return c.getConfig(path);
+    }
+    catch(com.typesafe.config.ConfigException.Missing e) {
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
+      return null;
+    }
+  }
+  //</$_reqConfig>
   
   //<$_reqStr>
-  private static java.lang.String $_reqStr(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+  private static java.lang.String $_reqStr(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return null;
     try {
       return c.getString(path);
     }
     catch(com.typesafe.config.ConfigException.Missing e) {
-      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
       return null;
     }
   }
   //</$_reqStr>
   
   //<$_reqInt>
-  private static int $_reqInt(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+  private static int $_reqInt(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return 0;
     try {
       return c.getInt(path);
     }
     catch(com.typesafe.config.ConfigException.Missing e) {
-      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
       return 0;
     }
   }
   //</$_reqInt>
   
   //<$_reqBln>
-  private static boolean $_reqBln(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+  private static boolean $_reqBln(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return false;
     try {
       return c.getBoolean(path);
     }
     catch(com.typesafe.config.ConfigException.Missing e) {
-      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
       return false;
     }
   }
   //</$_reqBln>
   
   //<$_reqDbl>
-  private static double $_reqDbl(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+  private static double $_reqDbl(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return 0;
     try {
       return c.getDouble(path);
     }
     catch(com.typesafe.config.ConfigException.Missing e) {
-      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
       return 0;
     }
   }
   //</$_reqDbl>
   
   //<$_reqLng>
-  private static long $_reqLng(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+  private static long $_reqLng(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return 0;
     try {
       return c.getLong(path);
     }
     catch(com.typesafe.config.ConfigException.Missing e) {
-      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
       return 0;
     }
   }
   //</$_reqLng>
   
   //<$_reqSiz>
-  private static long $_reqSiz(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, java.lang.StringBuilder errors) {
+  private static long $_reqSiz(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
+    if (c == null) return 0;
     try {
       return c.getBytes(path);
     }
     catch(com.typesafe.config.ConfigException.Missing e) {
-      errors.append("Undefined entry for path: '").append(parentPath).append(path).append("'\n");
+      $tsCfgValidator.addUndefinedPath(parentPath + path);
       return 0;
     }
   }

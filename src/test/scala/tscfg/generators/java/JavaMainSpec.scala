@@ -628,9 +628,11 @@ class JavaMainSpec extends Specification {
   "issue47 (assumeAllRequired)" should {
     "fail with missing service entry" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"No configuration setting found for key 'service'")
+      a must throwA[java.lang.RuntimeException].like {
+        case e: java.lang.RuntimeException ⇒
+          //e.printStackTrace()
+          e.getMessage must contain(s"Undefined paths in given configuration")
+          e.getMessage must contain(s"`service`")
       }
     }
     "fail with missing url entry" in {
@@ -645,7 +647,8 @@ class JavaMainSpec extends Specification {
           |}""".stripMargin))
       a must throwA[java.lang.RuntimeException].like {
         case e: java.lang.RuntimeException ⇒
-          e.getMessage must contain(s"Undefined entry for path: 'service.url'")
+          e.getMessage must contain(s"Undefined paths in given configuration")
+          e.getMessage must contain(s"`service.url`")
       }
     }
     "fail with missing poolSize entry" in {
@@ -660,15 +663,17 @@ class JavaMainSpec extends Specification {
           |}""".stripMargin))
       a must throwA[java.lang.RuntimeException].like {
         case e: java.lang.RuntimeException ⇒
-          e.getMessage must contain(s"Undefined entry for path: 'service.poolSize'")
+          e.getMessage must contain(s"Undefined paths in given configuration")
+          e.getMessage must contain(s"`service.poolSize`")
       }
     }
     "fail with all entries missing in service object" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
       a must throwA[java.lang.RuntimeException].like {
         case e: java.lang.RuntimeException ⇒
+          e.getMessage must contain(s"Undefined paths in given configuration")
           forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
-            e.getMessage must contain(s"Undefined entry for path: 'service.$k'")
+            e.getMessage must contain(s"`service.$k`")
           }
       }
     }

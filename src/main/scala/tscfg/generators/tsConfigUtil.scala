@@ -35,7 +35,7 @@ object tsConfigUtil {
       case _ ⇒ throw new AssertionError("should not happen")
       // $COVERAGE-ON$
     }
-    (methodName, s"""$methodName(parentPath, c, "$path", errors)""")
+    (methodName, s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)""")
   }
 
   def basicValue(t: Type, value: String, useDurations: Boolean): String = t match {

@@ -114,20 +114,24 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       objOnes + rootOnes
     }
 
+    val rootAuxClasses = if (isRoot) {
+      javaDef("$TsCfgValidator")
+    }
+    else ""
+
     val (ctorParams, errHandlingDecl, errHandlingDispatch) = if (isRoot) {
       ( "com.typesafe.config.Config c",
-        """final java.lang.StringBuilder errors = new java.lang.StringBuilder();
+        """final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
         |    final java.lang.String parentPath = "";
         |    """.stripMargin,
 
         s"""
-           |    if (errors.length() > 0) {
-           |      throw new RuntimeException(errors.toString());
-           |    }""".stripMargin
+           |    $$tsCfgValidator.validate();
+           |""".stripMargin
       )
     }
     else (
-      "com.typesafe.config.Config c, java.lang.String parentPath, java.lang.StringBuilder errors",
+      "com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator",
       "",
       ""
     )
@@ -139,7 +143,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |  public $classNameAdjusted($ctorParams) {
          |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
          |  }$elemAccessorsStr
-         |}
+         |$rootAuxClasses}
          |""".stripMargin
     }
 
@@ -211,23 +215,28 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }
   }
 
-  private def objectInstance(a: AnnType, res: Res, path: String): String = {
+  private def objectInstance(a: AnnType, res: Res, path: String)
+                            (implicit listAccessors: collection.mutable.Map[String, String]): String = {
     val className = res.javaType.toString
 
-    val ppArg = s""", parentPath + "$path.", errors"""
+    val ppArg = s""", parentPath + "$path.", $$tsCfgValidator"""
+
+    val methodName = "$_reqConfig"
+    val reqConfigCall = s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
+    listAccessors += methodName → javaDef(methodName)
 
     if (genOpts.assumeAllRequired)
-      s"""new $className(c.getConfig("$path")$ppArg)"""
+      s"""new $className($reqConfigCall$ppArg)"""
     else
     if (a.optional) {
       if (genOpts.useOptionals) {
-        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path")$ppArg)) : java.util.Optional.empty()"""
+        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className($reqConfigCall$ppArg)) : java.util.Optional.empty()"""
       } else {
-        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : null"""
+        s"""c.$hasPath("$path") ? new $className($reqConfigCall$ppArg) : null"""
       }
     }
     else
-      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+      s"""c.$hasPath("$path") ? new $className($reqConfigCall$ppArg) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
@@ -281,7 +290,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                             ): String = {
 
     val (_, methodName) = rec(javaType, lt, "")
-      methodName + s"""(c.getList("$path"), parentPath, errors)"""
+      methodName + s"""(c.getList("$path"), parentPath, $$tsCfgValidator)"""
   }
 
   private def rec(ljt: ListJavaType, lt: ListType, prefix: String
@@ -332,17 +341,17 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                                   (implicit methodNames: MethodNames): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
-      s"$elemMethodName((com.typesafe.config.ConfigList)cv, parentPath, errors)"
+      s"$elemMethodName((com.typesafe.config.ConfigList)cv, parentPath, $$tsCfgValidator)"
     else if (elemMethodName.startsWith("$"))
       s"$elemMethodName(cv)"
     else {
       val adjusted = elemMethodName.replace("_", ".")
-      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig(), parentPath, errors)"
+      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig(), parentPath, $$tsCfgValidator)"
     }
 
     val methodName = methodNames.listPrefix + elemMethodName
     val methodDef =
-      s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl, java.lang.String parentPath, java.lang.StringBuilder errors) {
+      s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl, java.lang.String parentPath, $$TsCfgValidator $$tsCfgValidator) {
          |    java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
          |    for (com.typesafe.config.ConfigValue cv: cl) {
          |      al.add($elem);
