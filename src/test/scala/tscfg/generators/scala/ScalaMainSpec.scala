@@ -519,9 +519,10 @@ class ScalaMainSpec extends Specification {
   "issue 36" should {
     def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
     "report full path for missing required parameter 'obj.foo.bar'" in {
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"key 'obj.foo.bar'")
+      a must throwA[java.lang.RuntimeException].like {
+        case e: java.lang.RuntimeException ⇒
+          e.getMessage must contain(s"Undefined paths in given configuration")
+          e.getMessage must contain(s"`obj.foo.bar`")
       }
     }
   }

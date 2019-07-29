@@ -3,7 +3,9 @@
 - toward #49 "Fully validate given config on construction"
     - java: collect and report all "missing" errors for basic types and
       required objects
-    - TODO scala
+    - scala: done as well but TODO needs cleanup (check that $_reqConfig
+      is only output if called) 
+      Note: option `scala:fp` removed: full paths always reported
   
 - capture java and scala wrapper supporting methods in proper classes 
   to facilitate validation at compile time.

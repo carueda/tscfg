@@ -26,7 +26,6 @@ object gen4tests {
       }
 
       opts foreach {
-        case "--scala:fp"      ⇒ genOpts = genOpts.copy(reportFullPath = true)
         case "--scala:bt"      ⇒ genOpts = genOpts.copy(useBackticks = true)
         case "--java:getters"  ⇒ genOpts = genOpts.copy(genGetters = true)
         case "--java:optionals"  ⇒ genOpts = genOpts.copy(useOptionals = true)
@@ -56,7 +55,7 @@ object gen4tests {
       val fileName = className + "." + lang.toLowerCase
       val targetFile = new File(targetScalaDir, fileName)
       // $COVERAGE-OFF$
-      if (confFile.lastModified >= targetFile.lastModified) {
+      if (true||confFile.lastModified >= targetFile.lastModified) {
         val genOpts = baseGenOpts.copy(className = className)
         println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {

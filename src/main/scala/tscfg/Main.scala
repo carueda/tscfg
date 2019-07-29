@@ -37,7 +37,6 @@ object Main {
        |  --java:optionals      use optionals                    (false)
        |  --scala               generate scala code              (java)
        |  --scala:bt            use backticks (see #30)          (false)
-       |  --scala:fp            report full path (see #36)       (false)
        |  --durations           use java.time.Duration           (false)
        |  --all-required        assume all properties are required (see #47)
        |  --tpl <filename>      generate config template         (no default)
@@ -55,7 +54,6 @@ object Main {
                          assumeAllRequired: Boolean = false,
                          j7: Boolean = false,
                          language: String = "java",
-                         reportFullPath: Boolean = false,
                          useBackticks: Boolean = false,
                          genGetters: Boolean = false,
                          useOptionals: Boolean = false,
@@ -101,9 +99,6 @@ object Main {
 
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
-
-        case "--scala:fp" :: rest =>
-          traverseList(rest, opts.copy(reportFullPath = true))
 
         case "--scala:bt" :: rest =>
           traverseList(rest, opts.copy(useBackticks = true))
@@ -161,7 +156,6 @@ object Main {
     val genOpts = GenOpts(opts.packageName, opts.className,
                           assumeAllRequired = opts.assumeAllRequired,
                           j7 = opts.j7,
-                          reportFullPath = opts.reportFullPath,
                           useBackticks = opts.useBackticks,
                           genGetters = opts.genGetters,
                           useOptionals = opts.useOptionals,

@@ -9,6 +9,118 @@ package tscfg.codeDefs
   */
 object ScalaDefs {
 
+  //<$TsCfgValidator>
+  private final class $TsCfgValidator {
+    private val undefinedPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
+
+    def addUndefinedPath(path: java.lang.String): Unit = {
+      undefinedPaths += path
+    }
+
+    def validate(): Unit = {
+      if (undefinedPaths.nonEmpty) {
+        throw new RuntimeException(
+          undefinedPaths.map(path ⇒ s"`$path`").mkString(
+            "Undefined paths in given configuration: ",
+            ", ", ""
+          )
+        )
+      }
+    }
+  }
+  //</$TsCfgValidator>
+
+  ///////////////////////////////////////////////////////////////////////
+  // Definition of methods used to access required paths:
+  //
+  // Note: the various `$_req` methods first do `if (c == null) return <null_value>`
+  // as a way to simplify the logic when "traversing" an undefined config object.
+  //
+
+  //<$_reqConfig>
+  private def $_reqConfig(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): com.typesafe.config.Config = {
+    if (c == null) null
+    else try c.getConfig(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        null
+    }
+  }
+  //</$_reqConfig>
+
+  //<$_reqStr>
+  private def $_reqStr(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): java.lang.String = {
+    if (c == null) null
+    else try c.getString(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        null
+    }
+  }
+  //</$_reqStr>
+
+  //<$_reqInt>
+  private def $_reqInt(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Int = {
+    if (c == null) 0
+    else try c.getInt(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        0
+    }
+  }
+  //</$_reqInt>
+
+  //<$_reqBln>
+  private def $_reqBln(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Boolean = {
+    if (c == null) false
+    else try c.getBoolean(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        false
+    }
+  }
+  //</$_reqBln>
+
+  //<$_reqDbl>
+  private def $_reqDbl(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Double = {
+    if (c == null) 0
+    else try c.getDouble(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        0
+    }
+  }
+  //</$_reqDbl>
+
+  //<$_reqLng>
+  private def $_reqLng(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Long = {
+    if (c == null) 0
+    else try c.getLong(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        0
+    }
+  }
+  //</$_reqLng>
+
+  //<$_reqSiz>
+  private def $_reqSiz(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Long = {
+    if (c == null) 0
+    else try c.getBytes(path)
+    catch {
+      case _:com.typesafe.config.ConfigException.Missing ⇒
+        $tsCfgValidator.addUndefinedPath(parentPath + path)
+        0
+    }
+  }
+  //</$_reqSiz>
+
   ///////////////////////////////////////////////////////////////////////
   // definition of methods used to access list's elements of basic type:
 
