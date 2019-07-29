@@ -27,15 +27,18 @@ coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
 lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
 codeDefs := {
-  println(s"Copying auxiliary code definitions")
-  IO.write(file("src/main/resources/codeDefs/JavaDefs"),
-    IO.read(file("src/main/java/tscfg/codeDefs/JavaDefs.java"))
-  )
-  IO.write(file("src/main/resources/codeDefs/ScalaDefs"),
-    IO.read(file("src/main/scala/tscfg/codeDefs/ScalaDefs.scala"))
-  )
+  for (lang ← Seq("Java", "Scala")) {
+    val ext = lang.toLowerCase
+    val filename = s"${lang}Defs.$ext"
+    val src = s"src/main/$ext/tscfg/codeDefs/$filename"
+    val dst = s"src/main/resources/codeDefs/$filename"
+    println(s"Copying $src to $dst")
+    IO.write(file(dst), IO.read(file(src)))
+  }
 }
 (compile in Compile) <<= (compile in Compile) dependsOn codeDefs
+// TODO why is not `compile` by itself completely running `codeDefs`, that is,
+//  actually making the resources available at compile time?
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")

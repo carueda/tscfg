@@ -7,8 +7,8 @@ import scala.util.control.NonFatal
 package object codeDefs {
   private val beginTemplatePattern = Pattern.compile("\\s*//<([^>]+)>.*$")
 
-  private val javaMap = getMap("codeDefs/JavaDefs")
-  private val scalaMap = getMap("codeDefs/ScalaDefs")
+  private val javaMap = getMap("codeDefs/JavaDefs.java")
+  private val scalaMap = getMap("codeDefs/ScalaDefs.scala")
 
   def javaDef(key: String): String = getDef("java", javaMap, key)
 
@@ -53,6 +53,8 @@ package object codeDefs {
   }
   catch {
     case NonFatal(ex) ⇒
-      throw new RuntimeException("Unexpected exception. Please report this bug.", ex)
+      throw new RuntimeException(
+        s"Unexpected exception in getMap(resourceName=$resourceName)." +
+        " Please report this bug.", ex)
   }
 }
