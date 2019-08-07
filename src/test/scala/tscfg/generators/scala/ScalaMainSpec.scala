@@ -519,10 +519,9 @@ class ScalaMainSpec extends Specification {
   "issue 36" should {
     def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
     "report full path for missing required parameter 'obj.foo.bar'" in {
-      a must throwA[java.lang.RuntimeException].like {
-        case e: java.lang.RuntimeException ⇒
-          e.getMessage must contain(s"Undefined paths in given configuration")
-          e.getMessage must contain(s"`obj.foo.bar`")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'obj.foo.bar': com.typesafe.config.ConfigException$Missing")
       }
     }
   }
@@ -532,6 +531,82 @@ class ScalaMainSpec extends Specification {
       val c = ScalaIssue40Cfg(ConfigFactory.parseString(""))
       // well, the actual test is that the generated class compiles
       c.memory === 53687091200L
+    }
+  }
+
+  "issue 49 (using issue47.spec.conf --all-required)" should {
+    "fail with missing service entry" in {
+      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(""))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
+      }
+    }
+    "fail with missing url entry" in {
+      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  # url = "http://example.net/rest"
+          |  poolSize = 32
+          |  debug = true
+          |  doLog = false
+          |  factor = 0.75
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
+      }
+    }
+    "fail with missing poolSize entry" in {
+      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  url = "http://example.net/rest"
+          |  # poolSize = 32
+          |  debug = true
+          |  doLog = false
+          |  factor = 0.75
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
+      }
+    }
+    "fail with all entries missing in service object" in {
+      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString("service {}"))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
+            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
+          }
+      }
+    }
+    "fail with wrong types" in {
+      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  url = 31  # anything can be a string, so not check on this one.
+          |  poolSize = true
+          |  debug = 3
+          |  doLog = "str"
+          |  factor = false
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          forall(List("poolSize", "debug", "doLog", "factor")) { k ⇒
+            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
+          }
+      }
+    }
+    "fail with wrong type for object" in {
+      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service = 1
+          |""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
+      }
     }
   }
 }

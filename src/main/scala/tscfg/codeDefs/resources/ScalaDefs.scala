@@ -1,5 +1,5 @@
 // $COVERAGE-OFF$
-package tscfg.codeDefs
+package tscfg.codeDefs.resources
 
 /**
   * Captures various definitions to be included in the generated wrapper.
@@ -11,20 +11,17 @@ object ScalaDefs {
 
   //<$TsCfgValidator>
   private final class $TsCfgValidator {
-    private val undefinedPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
+    private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
 
-    def addUndefinedPath(path: java.lang.String): Unit = {
-      undefinedPaths += path
+    def addBadPath(path: java.lang.String, e: com.typesafe.config.ConfigException): Unit = {
+      badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 
     def validate(): Unit = {
-      if (undefinedPaths.nonEmpty) {
-        throw new RuntimeException(
-          undefinedPaths.map(path ⇒ s"`$path`").mkString(
-            "Undefined paths in given configuration: ",
-            ", ", ""
-          )
-        )
+      if (badPaths.nonEmpty) {
+        throw new com.typesafe.config.ConfigException(
+          badPaths.mkString("Invalid configuration:\n    ", "\n    ", "")
+        ){}
       }
     }
   }
@@ -42,8 +39,8 @@ object ScalaDefs {
     if (c == null) null
     else try c.getConfig(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         null
     }
   }
@@ -54,8 +51,8 @@ object ScalaDefs {
     if (c == null) null
     else try c.getString(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         null
     }
   }
@@ -66,8 +63,8 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getInt(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
   }
@@ -78,8 +75,8 @@ object ScalaDefs {
     if (c == null) false
     else try c.getBoolean(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         false
     }
   }
@@ -90,8 +87,8 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getDouble(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
   }
@@ -102,8 +99,8 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getLong(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
   }
@@ -114,8 +111,8 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getBytes(path)
     catch {
-      case _:com.typesafe.config.ConfigException.Missing ⇒
-        $tsCfgValidator.addUndefinedPath(parentPath + path)
+      case e:com.typesafe.config.ConfigException ⇒
+        $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
   }

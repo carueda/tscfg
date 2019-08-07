@@ -597,7 +597,6 @@ class JavaMainSpec extends Specification {
       c.i === Optional.empty()
     }
 
-/*
     "example 2" in {
       val c = new JavaIssue41Cfg(ConfigFactory.parseString(
         """
@@ -622,10 +621,9 @@ class JavaMainSpec extends Specification {
       c.c.f.get().h === "c.f.h"
       c.i.get() === List(1.0,2.0,3.0).asJava
     }
-*/
   }
 
-  "issue47 (assumeAllRequired)" should {
+  "issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
       a must throwA[com.typesafe.config.ConfigException].like {
@@ -684,7 +682,6 @@ class JavaMainSpec extends Specification {
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException ⇒
-          println(s"wrong types message:\n${e.getMessage}\n")
           forall(List("poolSize", "debug", "doLog", "factor")) { k ⇒
             e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
           }
@@ -697,7 +694,6 @@ class JavaMainSpec extends Specification {
           |""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException ⇒
-          println(s"wrong type for object message:\n${e.getMessage}\n")
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
       }
     }

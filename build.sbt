@@ -28,7 +28,7 @@ coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
 codeDefs := {
   for (ext ← Seq("java", "scala")) {
-    val src = s"src/main/$ext/tscfg/codeDefs"
+    val src = s"src/main/$ext/tscfg/codeDefs/resources/"
     val dst = s"src/main/resources/codeDefs/"
     println(s"Copying $src to $dst")
     IO.copyDirectory(file(src), file(dst))

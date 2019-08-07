@@ -1,5 +1,5 @@
 // $COVERAGE-OFF$
-package tscfg.codeDefs;
+package tscfg.codeDefs.resources;
 
 /**
  * Captures various definitions to be included in the generated wrapper.
