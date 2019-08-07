@@ -126,8 +126,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         |    """.stripMargin,
 
         s"""
-           |    $$tsCfgValidator.validate();
-           |""".stripMargin
+           |    $$tsCfgValidator.validate();""".stripMargin
       )
     }
     else (

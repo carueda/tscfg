@@ -1,9 +1,6 @@
 // $COVERAGE-OFF$
 package tscfg.codeDefs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Captures various definitions to be included in the generated wrapper.
  * This is not used as compile code in the generator itself but the
@@ -14,21 +11,19 @@ public class JavaDefs {
   
   //<$TsCfgValidator>
   private static final class $TsCfgValidator  {
-    private final java.util.List<java.lang.String> undefinedPaths = new java.util.ArrayList<>();
+    private final java.util.List<java.lang.String> badPaths = new java.util.ArrayList<>();
     
-    void addUndefinedPath(java.lang.String path) {
-      undefinedPaths.add(path);
+    void addBadPath(java.lang.String path, com.typesafe.config.ConfigException e) {
+      badPaths.add("'" + path + "': " + e.getClass().getName() + "(" + e.getMessage() + ")");
     }
     
     void validate() {
-      if (!undefinedPaths.isEmpty()) {
-        java.lang.StringBuilder sb = new java.lang.StringBuilder("Undefined paths in given configuration: ");
-        java.lang.String comma = "";
-        for (java.lang.String path : undefinedPaths) {
-          sb.append(comma).append("`").append(path).append("`");
-          comma = ", ";
+      if (!badPaths.isEmpty()) {
+        java.lang.StringBuilder sb = new java.lang.StringBuilder("Invalid configuration:");
+        for (java.lang.String path : badPaths) {
+          sb.append("\n    ").append(path);
         }
-        throw new java.lang.RuntimeException(sb.toString());
+        throw new com.typesafe.config.ConfigException(sb.toString()) {};
       }
     }
   }
@@ -47,8 +42,8 @@ public class JavaDefs {
     try {
       return c.getConfig(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return null;
     }
   }
@@ -60,8 +55,8 @@ public class JavaDefs {
     try {
       return c.getString(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return null;
     }
   }
@@ -73,8 +68,8 @@ public class JavaDefs {
     try {
       return c.getInt(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return 0;
     }
   }
@@ -86,8 +81,8 @@ public class JavaDefs {
     try {
       return c.getBoolean(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return false;
     }
   }
@@ -99,8 +94,8 @@ public class JavaDefs {
     try {
       return c.getDouble(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return 0;
     }
   }
@@ -112,8 +107,8 @@ public class JavaDefs {
     try {
       return c.getLong(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return 0;
     }
   }
@@ -125,8 +120,8 @@ public class JavaDefs {
     try {
       return c.getBytes(path);
     }
-    catch(com.typesafe.config.ConfigException.Missing e) {
-      $tsCfgValidator.addUndefinedPath(parentPath + path);
+    catch(com.typesafe.config.ConfigException e) {
+      $tsCfgValidator.addBadPath(parentPath + path, e);
       return 0;
     }
   }

@@ -1,8 +1,8 @@
 2019-07-27 - 0.9.92
 
 - toward #49 "Fully validate given config on construction"
-    - java: collect and report all "missing" errors for basic types and
-      required objects
+    - java: throw a com.typesafe.config.ConfigException with all the
+      com.typesafe.config.ConfigException's collected in its message 
     - scala: done as well but TODO needs cleanup (check that $_reqConfig
       is only output if called) 
       Note: option `scala:fp` removed: full paths always reported

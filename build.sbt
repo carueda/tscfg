@@ -27,13 +27,11 @@ coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
 lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
 codeDefs := {
-  for (lang ← Seq("Java", "Scala")) {
-    val ext = lang.toLowerCase
-    val filename = s"${lang}Defs.$ext"
-    val src = s"src/main/$ext/tscfg/codeDefs/$filename"
-    val dst = s"src/main/resources/codeDefs/$filename"
+  for (ext ← Seq("java", "scala")) {
+    val src = s"src/main/$ext/tscfg/codeDefs"
+    val dst = s"src/main/resources/codeDefs/"
     println(s"Copying $src to $dst")
-    IO.write(file(dst), IO.read(file(src)))
+    IO.copyDirectory(file(src), file(dst))
   }
 }
 (compile in Compile) <<= (compile in Compile) dependsOn codeDefs

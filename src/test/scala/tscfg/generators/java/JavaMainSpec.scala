@@ -628,11 +628,9 @@ class JavaMainSpec extends Specification {
   "issue47 (assumeAllRequired)" should {
     "fail with missing service entry" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
-      a must throwA[java.lang.RuntimeException].like {
-        case e: java.lang.RuntimeException ⇒
-          //e.printStackTrace()
-          e.getMessage must contain(s"Undefined paths in given configuration")
-          e.getMessage must contain(s"`service`")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with missing url entry" in {
@@ -645,10 +643,9 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
-      a must throwA[java.lang.RuntimeException].like {
-        case e: java.lang.RuntimeException ⇒
-          e.getMessage must contain(s"Undefined paths in given configuration")
-          e.getMessage must contain(s"`service.url`")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with missing poolSize entry" in {
@@ -661,20 +658,47 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
-      a must throwA[java.lang.RuntimeException].like {
-        case e: java.lang.RuntimeException ⇒
-          e.getMessage must contain(s"Undefined paths in given configuration")
-          e.getMessage must contain(s"`service.poolSize`")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with all entries missing in service object" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
-      a must throwA[java.lang.RuntimeException].like {
-        case e: java.lang.RuntimeException ⇒
-          e.getMessage must contain(s"Undefined paths in given configuration")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
           forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
-            e.getMessage must contain(s"`service.$k`")
+            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
           }
+      }
+    }
+    "fail with wrong types" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  url = 31  # anything can be a string, so not check on this one.
+          |  poolSize = true
+          |  debug = 3
+          |  doLog = "str"
+          |  factor = false
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          println(s"wrong types message:\n${e.getMessage}\n")
+          forall(List("poolSize", "debug", "doLog", "factor")) { k ⇒
+            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
+          }
+      }
+    }
+    "fail with wrong type for object" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service = 1
+          |""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          println(s"wrong type for object message:\n${e.getMessage}\n")
+          e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
       }
     }
   }
