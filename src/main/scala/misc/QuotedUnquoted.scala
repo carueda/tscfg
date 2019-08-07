@@ -1,3 +1,4 @@
+// $COVERAGE-OFF$
 package misc
 
 import com.typesafe.config.ConfigFactory
@@ -31,3 +32,4 @@ object QuotedUnquoted {
     }
   }
 }
+// $COVERAGE-ON$
