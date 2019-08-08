@@ -13,7 +13,9 @@ import java.io.File;
  */
 public class JavaUse {
   public static void main(String[] args) {
-    File configFile = new File(args[0]);
+    String configFilename = args.length > 0 ? args[0] : "src/main/tscfg/example/example.conf";
+    System.out.println("Loading " + configFilename);
+    File configFile = new File(configFilename);
 
     // usual Typesafe Config mechanism to load the file
     Config tsConfig = ConfigFactory.parseFile(configFile).resolve();

@@ -10,7 +10,9 @@ import com.typesafe.config.{ConfigRenderOptions, ConfigFactory}
 object scalaUse {
 
   def main(args: Array[String]): Unit = {
-    val configFile = new File(args(0))
+    val configFilename = args.headOption.getOrElse("src/main/tscfg/example/example.conf")
+    println(s"Loading $configFilename")
+    val configFile = new File(configFilename)
 
     // usual Typesafe Config mechanism to load the file
     val tsConfig = ConfigFactory.parseFile(configFile).resolve
