@@ -1,4 +1,4 @@
-lazy val tscfgVersion = setVersion("0.9.91")
+lazy val tscfgVersion = setVersion("0.9.92")
 
 organization := "com.github.carueda"
 name := "tscfg"
@@ -10,7 +10,7 @@ crossScalaVersions := Seq("2.12.2")
 
 libraryDependencies ++= Seq(
   "com.typesafe"          %  "config"         % "1.3.3",
-  "org.specs2"           %%  "specs2-core"    % "4.0.2" % "test",
+  "org.specs2"           %%  "specs2-core"    % "4.6.0" % "test",
   "org.json4s"           %%  "json4s-native"  % "3.5.0",
   "com.google.code.gson"  %  "gson"           % "2.8.0"
 )
@@ -24,6 +24,19 @@ coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
 coverageMinimum := 80
 coverageFailOnMinimum := false
 coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
+
+lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
+codeDefs := {
+  for (ext ← Seq("java", "scala")) {
+    val src = s"src/main/$ext/tscfg/codeDefs/resources/"
+    val dst = s"src/main/resources/codeDefs/"
+    println(s"Copying $src to $dst")
+    IO.copyDirectory(file(src), file(dst))
+  }
+}
+(compile in Compile) <<= (compile in Compile) dependsOn codeDefs
+// TODO why is not `compile` by itself completely running `codeDefs`, that is,
+//  actually making the resources available at compile time?
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")

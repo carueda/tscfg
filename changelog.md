@@ -1,3 +1,24 @@
+2019-07-27 - 0.9.92
+
+- resolve #49 "Fully validate given config on construction"
+    - for both java and scala, wrapper construction will now throw a 
+      com.typesafe.config.ConfigException with a summary of all the
+      com.typesafe.config.ConfigException's collected as it traverses
+      the required config entries. Example of such summary:
+      
+            Invalid configuration:
+                'service.poolSize': com.typesafe.config.ConfigException$Missing(No configuration setting found for key 'poolSize')
+                'service.url': com.typesafe.config.ConfigException$Missing(No configuration setting found for key 'url')      
+                'service.debug': com.typesafe.config.ConfigException$WrongType(String: 5: debug has type NUMBER rather than BOOLEAN)
+                'service.doLog': com.typesafe.config.ConfigException$WrongType(String: 6: doLog has type STRING rather than BOOLEAN)
+                'service.factor': com.typesafe.config.ConfigException$WrongType(String: 7: factor has type BOOLEAN rather than NUMBER)
+       
+    - NOTE: option `scala:fp` removed: full paths are now always reported.
+    - `$_reqConfig` now only output in the wrapper if actually called 
+  
+- capture java and scala wrapper supporting methods in proper classes 
+  to facilitate validation at compile time.
+
 2019-07-22 - 0.9.91
 
 - set openjdk8 for travis ci

@@ -4,6 +4,7 @@ import tscfg.generators.java.javaUtil._
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
+import tscfg.codeDefs.javaDef
 
 
 class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
@@ -99,28 +100,49 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n  " + listAccessors.keys.toList.sorted.map { methodName ⇒
-          listAccessors(methodName).replaceAll("\n", "\n  ")
-        }.mkString("\n  ")
+        "\n" + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName)
+        }.mkString("\n")
       }
       val rootOnes = if (!isRoot) "" else {
         if (rootListAccessors.isEmpty) "" else {
-          "\n\n  " + rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            rootListAccessors(methodName).replaceAll("\n", "\n  ")
-          }.mkString("\n  ")
+          "\n\n" + rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            rootListAccessors(methodName)
+          }.mkString("\n")
         }
       }
       objOnes + rootOnes
     }
 
+    val rootAuxClasses = if (isRoot) {
+      javaDef("$TsCfgValidator")
+    }
+    else ""
+
+    val (ctorParams, errHandlingDecl, errHandlingDispatch) = if (isRoot) {
+      ( "com.typesafe.config.Config c",
+        """final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
+        |    final java.lang.String parentPath = "";
+        |    """.stripMargin,
+
+        s"""
+           |    $$tsCfgValidator.validate();""".stripMargin
+      )
+    }
+    else (
+      "com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator",
+      "",
+      ""
+    )
+
     val classStr = {
       s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted {
          |  $classDeclMembersStr$classMemberGettersStr
          |  $membersStr
-         |  public $classNameAdjusted(com.typesafe.config.Config c) {
-         |    $ctorMembersStr
+         |  public $classNameAdjusted($ctorParams) {
+         |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
          |  }$elemAccessorsStr
-         |}
+         |$rootAuxClasses}
          |""".stripMargin
     }
 
@@ -192,21 +214,32 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }
   }
 
-  private def objectInstance(a: AnnType, res: Res, path: String): String = {
+  private def objectInstance(a: AnnType, res: Res, path: String)
+                            (implicit listAccessors: collection.mutable.Map[String, String]): String = {
     val className = res.javaType.toString
 
+    val ppArg = s""", parentPath + "$path.", $$tsCfgValidator"""
+
+    def reqConfigCall = {
+      val methodName = "$_reqConfig"
+      listAccessors += methodName → javaDef(methodName)
+      s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
+    }
+
     if (genOpts.assumeAllRequired)
-      s"""new $className(c.getConfig("$path"))"""
+      s"""new $className($reqConfigCall$ppArg)"""
     else
     if (a.optional) {
       if (genOpts.useOptionals) {
-        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path"))) : java.util.Optional.empty()"""
+        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path")$ppArg)) : java.util.Optional.empty()"""
       } else {
-        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : null"""
+        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : null"""
       }
     }
-    else
-      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}"))"""
+    else {
+      // TODO revisit #33 handling of object as always optional
+      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+    }
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)
@@ -224,7 +257,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     else base
   }
 
-  private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
+  private def basicInstance(a: AnnType, bt: BasicType, path: String)
+                           (implicit listAccessors: collection.mutable.Map[String, String]): String = {
     val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
@@ -243,7 +277,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         s"""c.$hasPath("$path") ? c.$getter : null"""
 
       case _ ⇒
-        s"""c.$getter"""
+        bt match {
+          case DURATION(_) ⇒ s"""c.$getter"""
+          case _ ⇒
+            val (methodName, methodCall) = tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
+            listAccessors += methodName → javaDef(methodName)
+            methodCall
+        }
     }
   }
 
@@ -253,7 +293,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                             ): String = {
 
     val (_, methodName) = rec(javaType, lt, "")
-      methodName + s"""(c.getList("$path"))"""
+      methodName + s"""(c.getList("$path"), parentPath, $$tsCfgValidator)"""
   }
 
   private def rec(ljt: ListJavaType, lt: ListType, prefix: String
@@ -304,24 +344,23 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                                   (implicit methodNames: MethodNames): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
-      s"$elemMethodName((com.typesafe.config.ConfigList)cv)"
+      s"$elemMethodName((com.typesafe.config.ConfigList)cv, parentPath, $$tsCfgValidator)"
     else if (elemMethodName.startsWith("$"))
       s"$elemMethodName(cv)"
     else {
       val adjusted = elemMethodName.replace("_", ".")
-      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig())"
+      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig(), parentPath, $$tsCfgValidator)"
     }
 
     val methodName = methodNames.listPrefix + elemMethodName
     val methodDef =
-      s"""
-         |private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl) {
-         |  java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
-         |  for (com.typesafe.config.ConfigValue cv: cl) {
-         |    al.add($elem);
-         |  }
-         |  return java.util.Collections.unmodifiableList(al);
-         |}""".stripMargin.trim
+      s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl, java.lang.String parentPath, $$TsCfgValidator $$tsCfgValidator) {
+         |    java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
+         |    for (com.typesafe.config.ConfigValue cv: cl) {
+         |      al.add($elem);
+         |    }
+         |    return java.util.Collections.unmodifiableList(al);
+         |  }""".stripMargin
     (methodName, methodDef)
   }
 }
@@ -404,95 +443,33 @@ private[java] object defs {
                  definition: String = "")
 }
 
-private[java] case class MethodNames(prefix: String = "$_") {
-  val strA = prefix + "str"
-  val intA = prefix + "int"
-  val lngA = prefix + "lng"
-  val dblA = prefix + "dbl"
-  val blnA = prefix + "bln"
-  val durA = prefix + "dur"
-  val sizA = prefix + "siz"
-  val expE = prefix + "expE"
-  val listPrefix = prefix + "L"
+private[java] case class MethodNames() {
+  val strA = "$_str"
+  val intA = "$_int"
+  val lngA = "$_lng"
+  val dblA = "$_dbl"
+  val blnA = "$_bln"
+  val durA = "$_dur" // TODO review this one as it's not actually used
+  val sizA = "$_siz"
+  val expE = "$_expE"
+  val listPrefix = "$_L"
 
   def checkUserSymbol(symbol: String): Unit = {
-    if (symbol.startsWith(prefix))
+    if (symbol.startsWith("$_"))
       println(
         s"""
            |WARNING: Symbol $symbol may cause conflict with generated code.
-           |         Avoid the $prefix prefix in your spec's identifiers.
+           |         Avoid the $$_ prefix in your spec's identifiers.
          """.stripMargin
       )
   }
 
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
-    Map(
-      strA → s"""
-                |private static java.lang.String $strA(com.typesafe.config.ConfigValue cv) {
-                |  return java.lang.String.valueOf(cv.unwrapped());
-                |}""".stripMargin.trim,
-
-      intA → s"""
-                |private static java.lang.Integer $intA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                |    !(u instanceof java.lang.Integer)) throw $expE(cv, "integer");
-                |  return (java.lang.Integer) u;
-                |}
-                |""".stripMargin.trim,
-
-      lngA → s"""
-                |private static java.lang.Long $lngA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                |    !(u instanceof java.lang.Long) && !(u instanceof java.lang.Integer)) throw $expE(cv, "long");
-                |  return ((java.lang.Number) u).longValue();
-                |}
-                |""".stripMargin.trim,
-
-      // since there's no something like cv.getBytes() nor is SimpleConfig.parseBytes visible,
-      // use ConfigFactory.parseString:
-      sizA → s"""
-                |private static java.lang.Long $sizA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.NUMBER ||
-                |     (u instanceof java.lang.Long) || (u instanceof java.lang.Integer))
-                |    return ((java.lang.Number) u).longValue();
-                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.STRING) {
-                |    return com.typesafe.config.ConfigFactory.parseString("s = " + '"' + u + '"').getBytes("s");
-                |  }
-                |  throw $expE(cv, "size");
-                |}
-                |""".stripMargin.trim,
-
-      dblA → s"""
-                |private static java.lang.Double $dblA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.NUMBER ||
-                |    !(u instanceof java.lang.Number)) throw $expE(cv, "double");
-                |  return ((java.lang.Number) u).doubleValue();
-                |}
-                |""".stripMargin.trim,
-
-      blnA → s"""
-                |private static java.lang.Boolean $blnA(com.typesafe.config.ConfigValue cv) {
-                |  java.lang.Object u = cv.unwrapped();
-                |  if (cv.valueType() != com.typesafe.config.ConfigValueType.BOOLEAN ||
-                |    !(u instanceof java.lang.Boolean)) throw $expE(cv, "boolean");
-                |  return (java.lang.Boolean) u;
-                |}
-                |""".stripMargin.trim
-    )
+    List(strA, intA, lngA, dblA, blnA, sizA)
+      .map(k ⇒ k → javaDef(k))
+      .toMap
   }
 
-  val expEDef: String = {
-    s"""
-       |private static java.lang.RuntimeException $expE(com.typesafe.config.ConfigValue cv, java.lang.String exp) {
-       |  java.lang.Object u = cv.unwrapped();
-       |  return new java.lang.RuntimeException(cv.origin().lineNumber()
-       |    + ": expecting: " +exp + " got: " + (u instanceof java.lang.String ? "\\"" +u+ "\\"" : u));
-       |}
-       |""".stripMargin.trim
-  }
+  val expEDef: String = javaDef(expE)
 }

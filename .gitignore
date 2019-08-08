@@ -1,3 +1,4 @@
+src/main/resources/codeDefs/
 ### Scala template
 *.class
 *.log

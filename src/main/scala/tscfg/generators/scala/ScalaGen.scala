@@ -4,6 +4,8 @@ import tscfg.{ModelBuilder, model}
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
+import tscfg.codeDefs.scalaDef
+
 
 
 class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
@@ -96,33 +98,51 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n  " + listAccessors.keys.toList.sorted.map { methodName ⇒
-          listAccessors(methodName).replaceAll("\n", "\n  ")
-        }.mkString("\n  ")
+        "\n" + listAccessors.keys.toList.sorted.map { methodName ⇒
+          listAccessors(methodName)
+        }.mkString("\n")
       }
       val rootOnes = if (!isRoot) "" else {
-        if (genOpts.reportFullPath) {
-          accessors.rootListAccessors += methodNames.requireName → methodNames.requireDef
-        }
         if (accessors.rootListAccessors.isEmpty) "" else {
-          "\n\n  " + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
-            accessors.rootListAccessors(methodName).replaceAll("\n", "\n  ")
-          }.mkString("\n  ")
+          "\n\n" + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
+            accessors.rootListAccessors(methodName)
+          }.mkString("\n")
         }
       }
       objOnes + rootOnes
     }
 
+    val rootAuxClasses = if (isRoot) {
+      scalaDef("$TsCfgValidator")
+    }
+    else ""
+
+    val (ctorParams, errHandlingDecl, errHandlingDispatch) = if (isRoot) {
+      ( "c: com.typesafe.config.Config",
+        """val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
+          |    val parentPath: java.lang.String = ""
+          |    val $result = """.stripMargin,
+
+        s"""
+           |    $$tsCfgValidator.validate()
+           |    $$result""".stripMargin
+      )
+    }
+    else (
+      "c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator",
+      "",
+      ""
+    )
+
     val fullClassName = classNamesPrefix.reverse.mkString + className
     val objectString = {
-      val ppParam = if (genOpts.reportFullPath) """, parentPath:java.lang.String=""""" else ""
       s"""object $className {$innerClassesStr
-         |  def apply(c: com.typesafe.config.Config$ppParam): $fullClassName = {
-         |    $fullClassName(
+         |  def apply($ctorParams): $fullClassName = {
+         |    $errHandlingDecl$fullClassName(
          |      $objectMembersStr
-         |    )
+         |    )$errHandlingDispatch
          |  }$elemAccessorsStr
-         |}
+         |$rootAuxClasses}
       """.stripMargin
     }
 
@@ -231,103 +251,38 @@ private[scala] object defs {
                  definition: String = "")
 }
 
-private[scala] case class MethodNames(prefix: String = "$_") {
-  val strA       = prefix + "str"
-  val intA       = prefix + "int"
-  val lngA       = prefix + "lng"
-  val dblA       = prefix + "dbl"
-  val blnA       = prefix + "bln"
-  val durA       = prefix + "dur"
-  val sizA       = prefix + "siz"
-  val expE       = prefix + "expE"
-  val listPrefix = prefix + "L"
-  val requireName = prefix + "require"
+private[scala] case class MethodNames() {
+  val strA       = "$_str"
+  val intA       = "$_int"
+  val lngA       = "$_lng"
+  val dblA       = "$_dbl"
+  val blnA       = "$_bln"
+  val durA       = "$_dur"
+  val sizA       = "$_siz"
+  val expE       = "$_expE"
+  val listPrefix = "$_L"
+  val requireName = "$_require"
 
   def checkUserSymbol(symbol: String): Unit = {
-    if (symbol.startsWith(prefix))
+    if (symbol.startsWith("$_"))
       println(
         s"""
            |WARNING: Symbol $symbol may cause conflict with generated code.
-           |         Avoid the $prefix prefix in your spec's identifiers.
+           |         Avoid the $$_ prefix in your spec's identifiers.
          """.stripMargin
       )
   }
 
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
-    Map(
-      strA → s"""
-                |private def $strA(cv:com.typesafe.config.ConfigValue) =
-                |  java.lang.String.valueOf(cv.unwrapped())
-                |""".stripMargin.trim,
-
-      intA → s"""
-                |private def $intA(cv:com.typesafe.config.ConfigValue): scala.Int = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-                |    !u.isInstanceOf[Integer]) throw $expE(cv, "integer")
-                |  u.asInstanceOf[Integer]
-                |}""".stripMargin.trim,
-
-      lngA → s"""
-                |private def $lngA(cv:com.typesafe.config.ConfigValue): scala.Long = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-                |    !u.isInstanceOf[java.lang.Integer] && !u.isInstanceOf[java.lang.Long]) throw $expE(cv, "long")
-                |  u.asInstanceOf[java.lang.Number].longValue()
-                |}""".stripMargin.trim,
-
-      // since there's no something like cv.getBytes() nor is SimpleConfig.parseBytes visible,
-      // use ConfigFactory.parseString:
-      sizA → s"""
-                |private def $sizA(cv:com.typesafe.config.ConfigValue): scala.Long = {
-                |  val u: Any = cv.unwrapped
-                |  if (cv.valueType() == com.typesafe.config.ConfigValueType.NUMBER ||
-                |     u.isInstanceOf[scala.Long] || u.isInstanceOf[scala.Int])
-                |    u.asInstanceOf[java.lang.Number].longValue()
-                |  else if (cv.valueType() == com.typesafe.config.ConfigValueType.STRING) {
-                |    com.typesafe.config.ConfigFactory.parseString("s = " + '"' + u + '"').getBytes("s")
-                |  }
-                |  else throw $expE(cv, "size")
-                |}
-                |""".stripMargin.trim,
-
-      dblA → s"""
-                |private def $dblA(cv:com.typesafe.config.ConfigValue): scala.Double = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.NUMBER) ||
-                |    !u.isInstanceOf[java.lang.Number]) throw $expE(cv, "double")
-                |  u.asInstanceOf[java.lang.Number].doubleValue()
-                |}""".stripMargin.trim,
-
-      blnA → s"""
-                |private def $blnA(cv:com.typesafe.config.ConfigValue): scala.Boolean = {
-                |  val u: Any = cv.unwrapped
-                |  if ((cv.valueType != com.typesafe.config.ConfigValueType.BOOLEAN) ||
-                |    !u.isInstanceOf[java.lang.Boolean]) throw $expE(cv, "boolean")
-                |  u.asInstanceOf[java.lang.Boolean].booleanValue()
-                |}""".stripMargin.trim
-    )
+    List(strA, intA, lngA, dblA, blnA, sizA)
+      .map(k ⇒ k → scalaDef(k))
+      .toMap
   }
 
-  val expEDef: String = {
-    s"""
-       |private def $expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
-       |  val u: Any = cv.unwrapped
-       |  new java.lang.RuntimeException(cv.origin.lineNumber +
-       |    ": expecting: " + exp + " got: " +
-       |    (if (u.isInstanceOf[java.lang.String]) "\\"" + u + "\\"" else u))
-       |}""".stripMargin.trim
-  }
+  val expEDef: String = scalaDef(expE)
 
-  val requireDef: String =
-    s"""def $requireName[T](parentPath: java.lang.String, path: java.lang.String)(get: ⇒ T): T = {
-       |  import com.typesafe.config.ConfigException.Missing
-       |  try get
-       |  catch {
-       |    case e: Missing ⇒ throw if (parentPath.isEmpty) e else new Missing(parentPath + path, e)
-       |  }
-       |}""".stripMargin
+  val requireDef: String = scalaDef(requireName)
 }
 
 private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {
@@ -342,18 +297,27 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
     }
   }
 
-  private def objectInstance(a: AnnType, res: Res, path: String): String = {
+  private def objectInstance(a: AnnType, res: Res, path: String)
+                            (implicit listAccessors: collection.mutable.Map[String, String]): String = {
     val className = res.scalaType.toString
-    if (a.optional) {
-      s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path"))) else None"""
+
+    val ppArg = s""", parentPath + "$path.", $$tsCfgValidator"""
+
+    def reqConfigCall = {
+      val methodName = "$_reqConfig"
+      listAccessors += methodName → scalaDef(methodName)
+      s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
+    }
+
+    if (genOpts.assumeAllRequired)
+      s"""$className($reqConfigCall$ppArg)"""
+
+    else if (a.optional) {
+      s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path")$ppArg)) else None"""
     }
     else {
-      val ppArg = if (genOpts.reportFullPath) s""", s"$${parentPath}$path."""" else ""
-
-      if (genOpts.assumeAllRequired)
-        s"""$className(c.getConfig("$path")$ppArg)"""
-      else
-        s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+      // TODO revisit #33 handling of object as always optional
+      s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
     }
   }
 
@@ -368,7 +332,8 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
     else base
   }
 
-  private def basicInstance(a: AnnType, bt: BasicType, path: String): String = {
+  private def basicInstance(a: AnnType, bt: BasicType, path: String)
+                           (implicit listAccessors: collection.mutable.Map[String, String]): String = {
     val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
@@ -384,11 +349,14 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
       case None if a.optional ⇒
         s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
 
-      case _ if genOpts.reportFullPath ⇒
-        s"""${methodNames.requireName}(parentPath, "$path") { c.$getter }"""
-
       case _  ⇒
-        s"""c.$getter"""
+        bt match {
+          case DURATION(_) ⇒ s"""c.$getter"""
+          case _ ⇒
+            val (methodName, methodCall) = tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
+            listAccessors += methodName → scalaDef(methodName)
+            methodCall
+        }
     }
   }
 }
@@ -407,7 +375,7 @@ private[scala] class Accessors {
                     ): String = {
 
     val (_, methodName) = rec(scalaType, lt, "")
-    methodName + s"""(c.getList("$path"))"""
+    methodName + s"""(c.getList("$path"), parentPath, $$tsCfgValidator)"""
   }
 
   private def rec(lst: ListScalaType, lt: ListType, prefix: String
@@ -458,21 +426,20 @@ private[scala] class Accessors {
                           (implicit methodNames: MethodNames): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
-      s"$elemMethodName(cv.asInstanceOf[com.typesafe.config.ConfigList])"
+      s"$elemMethodName(cv.asInstanceOf[com.typesafe.config.ConfigList], parentPath, $$tsCfgValidator)"
     else if (elemMethodName.startsWith("$"))
       s"$elemMethodName(cv)"
     else {
       val adjusted = elemMethodName.replace("_", ".")
-      s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig)"
+      s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig, parentPath, $$tsCfgValidator)"
     }
 
     val methodName = methodNames.listPrefix + elemMethodName
     val methodDef =
-      s"""
-         |private def $methodName(cl:com.typesafe.config.ConfigList): scala.List[$scalaType] = {
-         |  import scala.collection.JavaConverters._
-         |  cl.asScala.map(cv => $elem).toList
-         |}""".stripMargin.trim
+      s"""  private def $methodName(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): scala.List[$scalaType] = {
+         |    import scala.collection.JavaConverters._
+         |    cl.asScala.map(cv => $elem).toList
+         |  }""".stripMargin
     (methodName, methodDef)
   }
 }

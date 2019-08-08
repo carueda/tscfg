@@ -197,7 +197,6 @@ Options (default):
   --java:optionals      use optionals                    (false)
   --scala               generate scala code              (java)
   --scala:bt            use backticks (see #30)          (false)
-  --scala:fp            report full path (see #36)       (false)
   --durations           use java.time.Duration           (false)
   --all-required        assume all properties are required (see #47)
   --tpl <filename>      generate config template         (no default)

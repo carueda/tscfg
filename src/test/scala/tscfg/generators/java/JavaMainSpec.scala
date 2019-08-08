@@ -597,7 +597,6 @@ class JavaMainSpec extends Specification {
       c.i === Optional.empty()
     }
 
-/*
     "example 2" in {
       val c = new JavaIssue41Cfg(ConfigFactory.parseString(
         """
@@ -622,15 +621,14 @@ class JavaMainSpec extends Specification {
       c.c.f.get().h === "c.f.h"
       c.i.get() === List(1.0,2.0,3.0).asJava
     }
-*/
   }
 
-  "issue47 (assumeAllRequired)" should {
+  "issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"No configuration setting found for key 'service'")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with missing url entry" in {
@@ -643,9 +641,9 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"No configuration setting found for key 'url'")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with missing poolSize entry" in {
@@ -658,9 +656,45 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
-      a must throwA[com.typesafe.config.ConfigException.Missing].like {
-        case e: com.typesafe.config.ConfigException.Missing ⇒
-          e.getMessage must contain(s"No configuration setting found for key 'poolSize'")
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
+      }
+    }
+    "fail with all entries missing in service object" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
+            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
+          }
+      }
+    }
+    "fail with wrong types" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service {
+          |  url = 31  # anything can be a string, so not check on this one.
+          |  poolSize = true
+          |  debug = 3
+          |  doLog = "str"
+          |  factor = false
+          |}""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          forall(List("poolSize", "debug", "doLog", "factor")) { k ⇒
+            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
+          }
+      }
+    }
+    "fail with wrong type for object" in {
+      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
+        """
+          |service = 1
+          |""".stripMargin))
+      a must throwA[com.typesafe.config.ConfigException].like {
+        case e: com.typesafe.config.ConfigException ⇒
+          e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
       }
     }
   }
