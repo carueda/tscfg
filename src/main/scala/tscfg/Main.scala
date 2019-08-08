@@ -126,6 +126,10 @@ object Main {
           templateOpts = templateOpts.copy(commentPrefix = prefixComment)
           traverseList(rest, opts)
 
+        case "--scala:fp" :: rest =>
+          println( "ignoring obsolete option: --scala:fp")
+          traverseList(rest, opts)
+
         case opt :: _ =>
           println( s"""missing argument or unknown option: $opt""")
           sys.exit(0)
