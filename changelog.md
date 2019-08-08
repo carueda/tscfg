@@ -14,7 +14,7 @@
                 'service.factor': com.typesafe.config.ConfigException$WrongType(String: 7: factor has type BOOLEAN rather than NUMBER)
        
     - NOTE: option `scala:fp` removed: full paths are now always reported.
-    - TODO some cleanup (check that $_reqConfig is only output if called) 
+    - `$_reqConfig` now only output in the wrapper if actually called 
   
 - capture java and scala wrapper supporting methods in proper classes 
   to facilitate validation at compile time.

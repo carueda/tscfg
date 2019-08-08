@@ -220,22 +220,26 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val ppArg = s""", parentPath + "$path.", $$tsCfgValidator"""
 
-    val methodName = "$_reqConfig"
-    val reqConfigCall = s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
-    listAccessors += methodName → javaDef(methodName)
+    def reqConfigCall = {
+      val methodName = "$_reqConfig"
+      listAccessors += methodName → javaDef(methodName)
+      s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
+    }
 
     if (genOpts.assumeAllRequired)
       s"""new $className($reqConfigCall$ppArg)"""
     else
     if (a.optional) {
       if (genOpts.useOptionals) {
-        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className($reqConfigCall$ppArg)) : java.util.Optional.empty()"""
+        s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path")$ppArg)) : java.util.Optional.empty()"""
       } else {
-        s"""c.$hasPath("$path") ? new $className($reqConfigCall$ppArg) : null"""
+        s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : null"""
       }
     }
-    else
-      s"""c.$hasPath("$path") ? new $className($reqConfigCall$ppArg) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+    else {
+      // TODO revisit #33 handling of object as always optional
+      s"""c.$hasPath("$path") ? new $className(c.getConfig("$path")$ppArg) : new $className(com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
+    }
   }
 
   private def listInstance(a: AnnType, lt: ListType, res: Res, path: String)

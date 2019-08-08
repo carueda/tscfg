@@ -125,8 +125,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
         s"""
            |    $$tsCfgValidator.validate()
-           |    $$result
-           |""".stripMargin
+           |    $$result""".stripMargin
       )
     }
     else (
@@ -304,9 +303,11 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
 
     val ppArg = s""", parentPath + "$path.", $$tsCfgValidator"""
 
-    val methodName = "$_reqConfig"
-    val reqConfigCall = s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
-    listAccessors += methodName → scalaDef(methodName)
+    def reqConfigCall = {
+      val methodName = "$_reqConfig"
+      listAccessors += methodName → scalaDef(methodName)
+      s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
+    }
 
     if (genOpts.assumeAllRequired)
       s"""$className($reqConfigCall$ppArg)"""
@@ -315,6 +316,7 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
       s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path")$ppArg)) else None"""
     }
     else {
+      // TODO revisit #33 handling of object as always optional
       s"""$className(if(c.$hasPath("$path")) c.getConfig("$path") else com.typesafe.config.ConfigFactory.parseString("$path{}")$ppArg)"""
     }
   }
