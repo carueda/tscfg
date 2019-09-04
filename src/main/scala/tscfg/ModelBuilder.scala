@@ -50,7 +50,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       val (childType, optional, default) = {
         if (childStruct.isLeaf) {
           val typ = fromConfigValue(cv)
-          val valueString = cv.unwrapped().toString
+          val valueString = util.escapeValue(cv.unwrapped().toString)
           if (typ == model.STRING) {
             toAnnBasicType(valueString) match {
               case Some(annBasicType) ⇒
@@ -214,7 +214,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     val typ = fromConfigValue(cv0)
 
     val elemType = {
-      val valueString = cv0.unwrapped().toString
+      val valueString = util.escapeValue(cv0.unwrapped().toString)
       if (typ == model.STRING) {
         // see possible type from the string literal:
         toAnnBasicType(valueString) match {

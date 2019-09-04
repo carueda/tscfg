@@ -59,8 +59,8 @@ object tsConfigUtil {
   }
 
   def isDurationValue(value: String): Boolean = {
-    val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
     try {
+      val config: Config = ConfigFactory.parseString(s"""k = "$value"""")
       config.getDuration("k")
       true
     }
@@ -106,8 +106,8 @@ object tsConfigUtil {
   }
 
   def isSizeValue(value: String): Boolean = {
-    val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
     try {
+      val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
       config.getBytes("s")
       true
     }

@@ -1,3 +1,10 @@
+2019-09-03 - 0.9.93
+
+- fix #55 "Regex not properly captured".
+  This was a regression, not sure when it was introduced.
+  The fix is to escape each provided config value. Tests for multiline
+  strings and containing some control chars also added.
+
 2019-07-27 - 0.9.92
 
 - resolve #49 "Fully validate given config on construction"

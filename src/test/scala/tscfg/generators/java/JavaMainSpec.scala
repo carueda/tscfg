@@ -698,4 +698,27 @@ class JavaMainSpec extends Specification {
       }
     }
   }
+
+  "issue 55 - valid regexes" should {
+    "be properly reflected" in {
+      val c = new JavaIssue55Cfg(ConfigFactory.parseString(""))
+      c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
+      c.regex2 === "foo bar: ([\\d]+)"
+      def a: Unit = {
+        java.util.regex.Pattern.compile(c.regex)
+        java.util.regex.Pattern.compile(c.regex2)
+      }
+      a must not(throwA[java.util.regex.PatternSyntaxException])
+    }
+  }
+
+  "multiline strings" should {
+    "be properly reflected" in {
+      val c = new JavaMultilinesCfg(ConfigFactory.parseString(""))
+      c.a === "some\nlines"
+      c.b === "other\n\"quoted\"\nlines"
+      c.c === "'simply quoted' string"
+      c.d === "some \b control \t \\ chars \r\f"
+    }
+  }
 }
