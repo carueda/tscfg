@@ -64,6 +64,8 @@ object model {
     def |(d: String): AnnType = copy(default = Some(d))
 
     def unary_~ : AnnType = copy(optional = true)
+
+    val isDefine: Boolean = comments.exists(_.trim.startsWith("@define"))
   }
 
   case class ObjectType(members: Map[String, AnnType] = Map.empty) extends Type

@@ -1,3 +1,5 @@
+- some very initial adjustments towards #54 "Shared config objects"
+
 2019-09-03 - 0.9.93
 
 - fix #55 "Regex not properly captured".

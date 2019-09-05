@@ -53,11 +53,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         classNamePrefixOpt = Some(classNameAdjusted + "."),
         className = javaUtil.getClassName(symbol)
       )
-      (symbol, res)
+      (symbol, res, a)
     }
 
-    val classDeclMembers = results.map { case (symbol, res) ⇒
-      val a = ot.members(symbol)
+    val classDeclMembers = results.map { case (symbol, res, a) ⇒
       val memberType = res.javaType
       val typ = if (a.optional && a.default.isEmpty) {
         if (genOpts.useOptionals) s"java.util.Optional<${toObjectType(memberType)}>" else s"${toObjectType(memberType)}"
@@ -66,16 +65,19 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         memberType
       }
       val javaId = javaIdentifier(symbol)
-      (typ, javaId)
+      (typ, javaId, a)
     }
 
-    val classDeclMembersStr = classDeclMembers.map{ case (typ, javaId) ⇒
-      genResults = genResults.copy(fields = genResults.fields + (javaId → typ.toString))
-      s"public final $typ $javaId;"
+    val classDeclMembersStr = classDeclMembers.flatMap { case (typ, javaId, a) ⇒
+      if (a.isDefine) None
+      else Some {
+        genResults = genResults.copy(fields = genResults.fields + (javaId → typ.toString))
+        s"public final $typ $javaId;"
+      }
     }.mkString("\n  ")
 
     val classMemberGettersStr = if (genOpts.genGetters) {
-      classDeclMembers.map{ case (typ, javaId) ⇒
+      classDeclMembers.map{ case (typ, javaId, _) ⇒
         val getter = s"get${javaId.capitalize}"
         genResults = genResults.copy(getters = genResults.getters + (getter → typ.toString))
         s"public final $typ $getter() { return $javaId; }"
@@ -92,10 +94,12 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
 
-    val ctorMembersStr = results.map { case (symbol, res) ⇒
-      val a = ot.members(symbol)
-      val javaId = javaIdentifier(symbol)
-      "this." + javaId + " = " + instance(a, res, path = escapeString(symbol)) + ";"
+    val ctorMembersStr = results.flatMap { case (symbol, res, a) ⇒
+      if (a.isDefine) None
+      else Some {
+        val javaId = javaIdentifier(symbol)
+        "this." + javaId + " = " + instance(a, res, path = escapeString(symbol)) + ";"
+      }
     }.mkString("\n    ")
 
     val elemAccessorsStr = {
