@@ -2,7 +2,7 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
-import tscfg.model.{DURATION, SIZE}
+import tscfg.model.{AnnType, DURATION, ObjectType, SIZE}
 import tscfg.model.durations.ms
 
 import scala.collection.JavaConverters._
@@ -35,13 +35,19 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   def build(conf: Config): ModelBuildResult = {
     warns.clear()
-    ModelBuildResult(objectType = fromConfig(conf),
+    ModelBuildResult(objectType = fromConfig(Namespace.root, conf),
       warnings = warns.toList.sortBy(_.line))
   }
 
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
-  private def fromConfig(conf: Config): model.ObjectType = {
+  private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
+    // do two passes as lightbend config does not necessarily preserve member order:
+    val ot = fromConfig1(namespace, conf)
+    fromConfig2(namespace, ot)
+  }
+
+  private def fromConfig1(namespace: Namespace, conf: Config): model.ObjectType = {
     val memberStructs = getMemberStructs(conf)
     val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct ⇒
       val name = childStruct.name
@@ -49,23 +55,33 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
       val (childType, optional, default) = {
         if (childStruct.isLeaf) {
-          val typ = fromConfigValue(cv)
           val valueString = util.escapeValue(cv.unwrapped().toString)
-          if (typ == model.STRING) {
-            toAnnBasicType(valueString) match {
-              case Some(annBasicType) ⇒
-                annBasicType
-              case None ⇒
-                (typ, true, Some(valueString))
-            }
+
+          getTypeFromConfigValue(namespace, cv, valueString) match {
+            case typ: model.STRING.type ⇒
+              namespace.resolveDefine(valueString) match {
+                case Some(ort) ⇒
+                  (ort, false, None)
+
+                case None ⇒
+                  toAnnBasicType(valueString) match {
+                    case Some(annBasicType) ⇒
+                      annBasicType
+
+                    case None ⇒
+                      (typ, true, Some(valueString))
+                  }
+              }
+
+            case typ: model.BasicType ⇒
+              (typ, true, Some(valueString))
+
+            case typ ⇒
+              (typ, false, None)
           }
-          else if (typ.isInstanceOf[model.BasicType])
-            (typ, true, Some(valueString))
-          else
-            (typ, false, None)
         }
         else {
-          (fromConfig(conf.getConfig(name)), false, None)
+          (fromConfig(namespace.extend(name), conf.getConfig(name)), false, None)
         }
       }
 
@@ -89,13 +105,49 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
       //  s"adjName=$adjName")
 
-      adjName -> model.AnnType(childType,
+      val annType = model.AnnType(childType,
         optional      = effOptional,
         default       = effDefault,
         comments      = commentsOpt
       )
+
+      if (annType.isDefine) {
+        namespace.addDefine(name, childType)
+      }
+
+      adjName -> annType
+
     }.toMap
     model.ObjectType(members)
+  }
+
+  private def fromConfig2(namespace: Namespace, ot: model.ObjectType): model.ObjectType = {
+    val resolvedMembers = ot.members.map { case (name, annType) ⇒
+      val modAnnType = annType.t match {
+
+        case _:model.STRING.type ⇒
+          annType.default match {
+            case Some(strValue) ⇒
+              namespace.resolveDefine(strValue) match {
+                case Some(ort) ⇒ AnnType(ort)
+                case _ ⇒ annType
+              }
+
+            case None ⇒ annType
+          }
+
+        //// the following would be part of changes to allow recursive type
+        //case ot:ObjectType ⇒
+        //  val ot2 = fromConfig2(namespace, ot)
+        //  AnnType(ot2)
+
+        case _ ⇒ annType
+      }
+
+      name → modAnnType
+    }
+
+    model.ObjectType(resolvedMembers)
   }
 
   private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
@@ -151,14 +203,14 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     structs("").members.values.toList
   }
 
-  private def fromConfigValue(cv: ConfigValue): model.Type = {
+  private def getTypeFromConfigValue(namespace: Namespace, cv: ConfigValue, valueString: String): model.Type = {
     import ConfigValueType._
     cv.valueType() match {
       case STRING  => model.STRING
       case BOOLEAN => model.BOOLEAN
       case NUMBER  => numberType(cv.unwrapped().toString)
-      case LIST    => listType(cv.asInstanceOf[ConfigList])
-      case OBJECT  => objType(cv.asInstanceOf[ConfigObject])
+      case LIST    => listType(namespace, cv.asInstanceOf[ConfigList])
+      case OBJECT  => objType(namespace, cv.asInstanceOf[ConfigObject])
       case NULL    => throw new AssertionError("null unexpected")
     }
   }
@@ -200,7 +252,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
   }
 
-  private def listType(cv: ConfigList): model.ListType = {
+  private def listType(namespace: Namespace, cv: ConfigList): model.ListType = {
     if (cv.isEmpty) throw new IllegalArgumentException("list with one element expected")
 
     if (cv.size() > 1) {
@@ -211,24 +263,31 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
 
     val cv0: ConfigValue = cv.get(0)
-    val typ = fromConfigValue(cv0)
+    val valueString = util.escapeValue(cv0.unwrapped().toString)
+    val typ = getTypeFromConfigValue(namespace, cv0, valueString)
 
     val elemType = {
-      val valueString = util.escapeValue(cv0.unwrapped().toString)
       if (typ == model.STRING) {
-        // see possible type from the string literal:
-        toAnnBasicType(valueString) match {
-          case Some((basicType, isOpt, defaultValue)) ⇒
-            if (isOpt)
-              warns += OptListElemWarning(cv0.origin().lineNumber(), valueString)
 
-            if (defaultValue.isDefined)
-              warns += DefaultListElemWarning(cv0.origin().lineNumber(), defaultValue.get, valueString)
-
-            basicType
+        namespace.resolveDefine(valueString) match {
+          case Some(ort) ⇒
+            ort
 
           case None ⇒
-            typ
+            // see possible type from the string literal:
+            toAnnBasicType(valueString) match {
+              case Some((basicType, isOpt, defaultValue)) ⇒
+                if (isOpt)
+                  warns += OptListElemWarning(cv0.origin().lineNumber(), valueString)
+
+                if (defaultValue.isDefined)
+                  warns += DefaultListElemWarning(cv0.origin().lineNumber(), defaultValue.get, valueString)
+
+                basicType
+
+              case None ⇒
+                typ
+            }
         }
       }
       else typ
@@ -237,7 +296,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     model.ListType(elemType)
   }
 
-  private def objType(cv: ConfigObject): model.ObjectType = fromConfig(cv.toConfig)
+  private def objType(namespace: Namespace, cv: ConfigObject): model.ObjectType =
+    fromConfig(namespace, cv.toConfig)
 
   private def numberType(valueString: String): model.BasicType = {
     try {
@@ -279,7 +339,7 @@ object ModelBuilder {
     val filename = args(0)
     val file = new File(filename)
     val source = io.Source.fromFile(file).mkString.trim
-    println("source:\n  |" + source.replaceAll("\n", "\n  |"))
+    //println("source:\n  |" + source.replaceAll("\n", "\n  |"))
     val result = ModelBuilder(source)
     println("objectType:")
     println(model.util.format(result.objectType))

@@ -67,6 +67,9 @@ class TemplateGenerator(opts: TemplateOpts) {
     case o:ObjectType ⇒
       (genObjectType(o), abbrevObject)
 
+    case ort:ObjectRefType ⇒
+      (ort.toString, abbrevObjectRef)
+
     case b:BasicType  ⇒
       val lc = b.toString.toLowerCase
       (lc, lc)
@@ -80,6 +83,7 @@ class TemplateGenerator(opts: TemplateOpts) {
     abbrev != abbrevObject && !abbrev.startsWith(abbrevListOf)
 
   private val abbrevObject = "object"
+  private val abbrevObjectRef = "ref to object"
   private val abbrevListOf = "list of"
 
   private val envVarAnn  = "@envvar"

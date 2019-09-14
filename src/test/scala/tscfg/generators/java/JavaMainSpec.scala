@@ -699,6 +699,64 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue 54 - shared config - example1" should {
+    "be handled" in {
+      val c = new JavaIssue54Cfg(ConfigFactory.parseString(
+        """
+          |example {
+          |  a: {
+          |    c = "C1"
+          |    d = 1
+          |  }
+          |  b: [
+          |    {
+          |      c = "C2"
+          |      d = 2
+          |    },
+          |    {
+          |      c = "C3"
+          |      d = 3
+          |    }
+          |  ]
+          |}
+          |
+          |""".stripMargin))
+
+      c.example.a.c === "C1"
+      c.example.a.d === 1
+      c.example.b.size() === 2
+      c.example.b.get(0).c === "C2"
+      c.example.b.get(0).d === 2
+      c.example.b.get(1).c === "C3"
+      c.example.b.get(1).d === 3
+    }
+  }
+
+  "issue 54 - shared config - example2" should {
+    "be handled" in {
+      val c = new JavaIssue54bCfg(ConfigFactory.parseString(
+        """root {
+          |  e: {
+          |    b = "B1"
+          |    c.d = 1
+          |  }
+          |  f: [
+          |    {
+          |      b = "B2"
+          |      c.d = 2
+          |    },
+          |  ]
+          |}
+          |""".stripMargin))
+
+      c.root.e.b === "B1"
+      c.root.e.c.d === 1
+      c.root.f.size() === 1
+      c.root.f.get(0).b === "B2"
+      c.root.f.get(0).c.d === 2
+    }
+  }
+
   "issue 55 - valid regexes" should {
     "be properly reflected" in {
       val c = new JavaIssue55Cfg(ConfigFactory.parseString(""))

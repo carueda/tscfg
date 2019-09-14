@@ -68,7 +68,13 @@ object model {
     val isDefine: Boolean = comments.exists(_.trim.startsWith("@define"))
   }
 
-  case class ObjectType(members: Map[String, AnnType] = Map.empty) extends Type
+  sealed abstract class ObjectAbsType extends Type
+
+  case class ObjectType(members: Map[String, AnnType] = Map.empty) extends ObjectAbsType
+
+  case class ObjectRefType(namespace: Namespace, simpleName: String) extends ObjectAbsType {
+    override def toString: String = s"ObjectRefType(namespace='${namespace.getPathString}', simpleName='$simpleName')"
+  }
 
   object ObjectType {
     def apply(elems: (String, AnnType)*): ObjectType = {
@@ -119,6 +125,8 @@ object model {
         s"""{
            |$ind$IND$membersStr
            |$ind}""".stripMargin
+
+      case o:ObjectRefType ⇒ o.toString
     }
   }
   // $COVERAGE-ON$

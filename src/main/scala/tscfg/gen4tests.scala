@@ -57,7 +57,7 @@ object gen4tests {
       // $COVERAGE-OFF$
       if (true||confFile.lastModified >= targetFile.lastModified) {
         val genOpts = baseGenOpts.copy(className = className)
-        println(s"generating for $name -> $fileName")
+        //println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {
           case "Scala" ⇒ new ScalaGen(genOpts)
           case "Java" ⇒  new JavaGen(genOpts)

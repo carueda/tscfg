@@ -31,6 +31,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, className)
+    case ot: ObjectRefType ⇒ generateForObjRef(ot)
     case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, className)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
@@ -71,8 +72,12 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classDeclMembersStr = classDeclMembers.flatMap { case (typ, javaId, a) ⇒
       if (a.isDefine) None
       else Some {
-        genResults = genResults.copy(fields = genResults.fields + (javaId → typ.toString))
-        s"public final $typ $javaId;"
+        val type_ = a.t match {
+          case ObjectRefType(ns, simpleName) ⇒ simpleName
+          case _ ⇒ typ
+        }
+        genResults = genResults.copy(fields = genResults.fields + (javaId → type_.toString))
+        s"public final $type_ $javaId;" + dbg("<decl>")
       }
     }.mkString("\n  ")
 
@@ -150,9 +155,19 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |""".stripMargin
     }
 
+    val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted + dbg("<Y>")
     Res(ot,
-      javaType = BaseJavaType(classNamePrefixOpt.getOrElse("") + classNameAdjusted),
+      javaType = BaseJavaType(baseType),
       definition = classStr
+    )
+  }
+
+  private def generateForObjRef(ot: ObjectRefType): Res = {
+    val className = ot.simpleName
+    genResults = genResults.copy(classNames = genResults.classNames + className)
+
+    Res(ot,
+      javaType = BaseJavaType(className + dbg("<X>"))
     )
   }
 
@@ -213,7 +228,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
     a.t match {
       case bt:BasicType  ⇒ basicInstance(a, bt, path)
-      case _:ObjectType  ⇒ objectInstance(a, res, path)
+      case _:ObjectAbsType  ⇒ objectInstance(a, res, path)
       case lt:ListType   ⇒ listInstance(a, lt, res, path)
     }
   }
@@ -339,7 +354,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case SIZE     ⇒ methodNames.sizA
     case DURATION(q) ⇒ methodNames.durA
 
-    case _: ObjectType  ⇒ name.replace('.', '_')
+    case _: ObjectAbsType  ⇒ name.replace('.', '_')
 
     case _: ListType ⇒ throw new AssertionError()
   }
