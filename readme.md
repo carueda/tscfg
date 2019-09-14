@@ -26,6 +26,7 @@ The generated code only depends on the Typesafe Config library.
   - [list type](#list-type)
   - [object type](#object-type)
   - [optional object or list](#optional-object-or-list)
+  - [shared object](#shared-object)
 - [configuration template](#configuration-template)
 - [FAQ](#faq)
 - [tests](#tests)
@@ -431,6 +432,31 @@ As with basic types, the meaning of an optional object or list is that the corre
 value will be `null` (or `Optional.empty()`) (`None` in Scala) when the corresponding actual entry is missing in
 a given configuration instance.
 
+### shared object
+
+As of 0.9.94 there's initial, experimental support for shared objects (#54). 
+This is exercised by using the `@define` annotation:
+
+```properties
+#@define
+Struct {
+  c: string
+  d: int
+}
+
+example {
+  a: Struct
+  b: [ Struct ]
+}
+```
+
+In this example, the annotation will only generate the definition of the
+corresponding class `Struct` in the wrapper but not the member of that
+type itself. Then, the type can be referenced for other definitions.
+
+> Note: current support is in terms of the referenced object being always
+> *required*. `a: "Struct?"`, for example, is not supported.
+> Also, `@define` is only supported for an object, not for a basic type or list. 
 
 ## configuration template
 
