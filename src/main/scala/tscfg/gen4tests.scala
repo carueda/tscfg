@@ -9,7 +9,10 @@ import tscfg.generators.scala.ScalaGen
 object gen4tests {
   def main(args: Array[String]): Unit = {
     val sourceDir = new File("src/main/tscfg/example")
-    sourceDir.listFiles().filter(_.getName.endsWith(".spec.conf")) foreach generate
+    sourceDir.listFiles().filter { f ⇒
+      f.getName.endsWith(".spec.conf") &&
+      !f.getName.contains(".SKIP.")
+    } foreach generate
   }
 
   private def generate(confFile: File): Unit = {
