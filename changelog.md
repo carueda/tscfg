@@ -6,6 +6,7 @@
     - scoping should be handled already
     - no support for recursive type
       (example spec would look like issue54c.spec.conf)
+    - skip a test for travis-ci as a class gets wrongly generated only there!
 
 2019-09-03 - 0.9.93
 
