@@ -610,6 +610,62 @@ class ScalaMainSpec extends Specification {
     }
   }
 
+  "issue 54 - shared config - example1" should {
+    "be handled" in {
+      val c = ScalaIssue54Cfg(ConfigFactory.parseString(
+        """example {
+          |  a: {
+          |    c = "C1"
+          |    d = 1
+          |  }
+          |  b: [
+          |    {
+          |      c = "C2"
+          |      d = 2
+          |    },
+          |    {
+          |      c = "C3"
+          |      d = 3
+          |    }
+          |  ]
+          |}
+          |""".stripMargin))
+
+      c.example.a.c === "C1"
+      c.example.a.d === 1
+      c.example.b.length === 2
+      c.example.b.head.c === "C2"
+      c.example.b.head.d === 2
+      c.example.b(1).c === "C3"
+      c.example.b(1).d === 3
+    }
+  }
+
+  "issue 54 - shared config - example2" should {
+    "be handled" in {
+      val c = ScalaIssue54bCfg(ConfigFactory.parseString(
+        """root {
+          |  e: {
+          |    b = "B1"
+          |    c.d = 1
+          |  }
+          |  f: [
+          |    {
+          |      b = "B2"
+          |      c.d = 2
+          |    },
+          |  ]
+          |}
+          |""".stripMargin))
+
+      c.root.e.b === "B1"
+      c.root.e.c.d === 1
+      c.root.f.length === 1
+      c.root.f.head.b === "B2"
+      c.root.f.head.c.d === 2
+    }
+  }
+
   "issue 55 - valid regexes" should {
     "be properly reflected" in {
       val c = ScalaIssue55Cfg(ConfigFactory.parseString(""))

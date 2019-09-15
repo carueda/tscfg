@@ -1,3 +1,12 @@
+2019-09-14 - 0.9.94
+
+- resolve #54 "Shared config objects"
+    - initial implementation
+    - only exercised with the explicit use of `@define` annotation
+    - scoping should be handled already
+    - no support for recursive type
+      (example spec would look like issue54c.spec.conf)
+
 2019-09-03 - 0.9.93
 
 - fix #55 "Regex not properly captured".

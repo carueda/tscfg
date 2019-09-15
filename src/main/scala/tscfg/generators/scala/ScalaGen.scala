@@ -37,6 +37,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType ⇒ generateForObj(ot, classNamesPrefix, className)
+    case ot: ObjectRefType ⇒ generateForObjRef(ot, classNamesPrefix)
     case lt: ListType   ⇒ generateForList(lt,classNamesPrefix, className)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
@@ -62,16 +63,23 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         classNamesPrefix = className+"." :: classNamesPrefix,
         className = getClassName(symbol)
       )
-      (symbol, res)
+      (symbol, res, a)
     }
 
-    val classMembersStr = results.map { case (symbol, res) ⇒
-      val a = ot.members(symbol)
-      val memberType = res.scalaType
-      val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
-      val scalaId = scalaIdentifier(symbol)
-      genResults = genResults.copy(fields = genResults.fields + (scalaId → typ.toString))
-      padId(scalaId) + " : " + typ
+    val classMembersStr = results.flatMap { case (symbol, res, a) ⇒
+      if (a.isDefine) None
+      else Some {
+        val memberType = res.scalaType
+        val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
+        val scalaId = scalaIdentifier(symbol)
+        val type_ = a.t match {
+          case ot:ObjectRefType ⇒
+            getClassNameForObjectRefType(ot)
+          case _ ⇒ typ
+        }
+        genResults = genResults.copy(fields = genResults.fields + (scalaId → type_.toString))
+        padId(scalaId) + " : " + type_
+      }
     }.mkString(",\n  ")
 
     val classStr = {
@@ -83,10 +91,12 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
 
-    val objectMembersStr = results.map { case (symbol, res) ⇒
-      val a = ot.members(symbol)
-      val scalaId = scalaIdentifier(symbol)
-      padId(scalaId) + " = " + getter.instance(a, res, path = escapeString(symbol))
+    val objectMembersStr = results.flatMap { case (symbol, res, a) ⇒
+      if (a.isDefine) None
+      else Some {
+        val scalaId = scalaIdentifier(symbol)
+        padId(scalaId) + " = " + getter.instance(a, res, path = escapeString(symbol))
+      }
     }.mkString(",\n      ")
 
     val innerClassesStr = {
@@ -146,10 +156,30 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       """.stripMargin
     }
 
+    val baseType = classNamesPrefix.reverse.mkString + className
     Res(ot,
-      scalaType = BaseScalaType(classNamesPrefix.reverse.mkString + className),
+      scalaType = BaseScalaType(baseType),
       definition = classStr +  objectString
     )
+  }
+
+  private def generateForObjRef(ot: ObjectRefType,
+                                classNamesPrefix: List[String]): Res = {
+
+    val className = getClassName(ot.simpleName)
+    genResults = genResults.copy(classNames = genResults.classNames + className)
+
+    val fullScalaName = getClassNameForObjectRefType(ot)
+
+    Res(ot,
+      scalaType = BaseScalaType(fullScalaName + dbg("<X>"))
+    )
+  }
+
+  private def getClassNameForObjectRefType(ot: ObjectRefType): String = {
+    val className = getClassName(ot.simpleName)
+    val fullScalaName = (ot.namespace.getPath.map(getClassName) ++ Seq(className)).mkString(".")
+    fullScalaName
   }
 
   private def generateForList(lt: ListType,
@@ -292,7 +322,7 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
               (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
     a.t match {
       case bt:BasicType   ⇒ basicInstance(a, bt, path)
-      case _:ObjectType   ⇒ objectInstance(a, res, path)
+      case _:ObjectAbsType   ⇒ objectInstance(a, res, path)
       case lt:ListType    ⇒ listInstance(a, lt, res, path)
     }
   }
@@ -417,7 +447,7 @@ private[scala] class Accessors {
     case SIZE     ⇒ methodNames.sizA
     case DURATION(_) ⇒ methodNames.durA
 
-    case _: ObjectType  ⇒ name.replace('.', '_')
+    case _: ObjectAbsType  ⇒ name.replace('.', '_')
 
     case _: ListType ⇒ throw new AssertionError()
   }

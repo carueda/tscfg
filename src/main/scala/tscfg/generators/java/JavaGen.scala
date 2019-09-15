@@ -31,6 +31,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, className)
+    case ot: ObjectRefType ⇒ generateForObjRef(ot)
     case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, className)
     case bt: BasicType  ⇒ generateForBasic(bt)
   }
@@ -53,11 +54,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         classNamePrefixOpt = Some(classNameAdjusted + "."),
         className = javaUtil.getClassName(symbol)
       )
-      (symbol, res)
+      (symbol, res, a)
     }
 
-    val classDeclMembers = results.map { case (symbol, res) ⇒
-      val a = ot.members(symbol)
+    val classDeclMembers = results.map { case (symbol, res, a) ⇒
       val memberType = res.javaType
       val typ = if (a.optional && a.default.isEmpty) {
         if (genOpts.useOptionals) s"java.util.Optional<${toObjectType(memberType)}>" else s"${toObjectType(memberType)}"
@@ -66,16 +66,23 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         memberType
       }
       val javaId = javaIdentifier(symbol)
-      (typ, javaId)
+      (typ, javaId, a)
     }
 
-    val classDeclMembersStr = classDeclMembers.map{ case (typ, javaId) ⇒
-      genResults = genResults.copy(fields = genResults.fields + (javaId → typ.toString))
-      s"public final $typ $javaId;"
+    val classDeclMembersStr = classDeclMembers.flatMap { case (typ, javaId, a) ⇒
+      if (a.isDefine) None
+      else Some {
+        val type_ = a.t match {
+          case ObjectRefType(ns, simpleName) ⇒ simpleName
+          case _ ⇒ typ
+        }
+        genResults = genResults.copy(fields = genResults.fields + (javaId → type_.toString))
+        s"public final $type_ $javaId;" + dbg("<decl>")
+      }
     }.mkString("\n  ")
 
     val classMemberGettersStr = if (genOpts.genGetters) {
-      classDeclMembers.map{ case (typ, javaId) ⇒
+      classDeclMembers.map{ case (typ, javaId, _) ⇒
         val getter = s"get${javaId.capitalize}"
         genResults = genResults.copy(getters = genResults.getters + (getter → typ.toString))
         s"public final $typ $getter() { return $javaId; }"
@@ -92,10 +99,12 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
 
-    val ctorMembersStr = results.map { case (symbol, res) ⇒
-      val a = ot.members(symbol)
-      val javaId = javaIdentifier(symbol)
-      "this." + javaId + " = " + instance(a, res, path = escapeString(symbol)) + ";"
+    val ctorMembersStr = results.flatMap { case (symbol, res, a) ⇒
+      if (a.isDefine) None
+      else Some {
+        val javaId = javaIdentifier(symbol)
+        "this." + javaId + " = " + instance(a, res, path = escapeString(symbol)) + ";"
+      }
     }.mkString("\n    ")
 
     val elemAccessorsStr = {
@@ -146,9 +155,19 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |""".stripMargin
     }
 
+    val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted + dbg("<Y>")
     Res(ot,
-      javaType = BaseJavaType(classNamePrefixOpt.getOrElse("") + classNameAdjusted),
+      javaType = BaseJavaType(baseType),
       definition = classStr
+    )
+  }
+
+  private def generateForObjRef(ot: ObjectRefType): Res = {
+    val className = ot.simpleName
+    genResults = genResults.copy(classNames = genResults.classNames + className)
+
+    Res(ot,
+      javaType = BaseJavaType(className + dbg("<X>"))
     )
   }
 
@@ -209,7 +228,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
     a.t match {
       case bt:BasicType  ⇒ basicInstance(a, bt, path)
-      case _:ObjectType  ⇒ objectInstance(a, res, path)
+      case _:ObjectAbsType  ⇒ objectInstance(a, res, path)
       case lt:ListType   ⇒ listInstance(a, lt, res, path)
     }
   }
@@ -335,7 +354,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case SIZE     ⇒ methodNames.sizA
     case DURATION(q) ⇒ methodNames.durA
 
-    case _: ObjectType  ⇒ name.replace('.', '_')
+    case _: ObjectAbsType  ⇒ name.replace('.', '_')
 
     case _: ListType ⇒ throw new AssertionError()
   }
