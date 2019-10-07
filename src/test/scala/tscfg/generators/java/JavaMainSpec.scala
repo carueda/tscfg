@@ -762,7 +762,6 @@ class JavaMainSpec extends Specification {
     }
   }
 
-/* SKIP due to weird travis-ci issue (with the scala version, not the java one)
   "issue 54 - shared config - example2" should {
     "be handled" in {
       val c = new JavaIssue54bCfg(ConfigFactory.parseString(
@@ -787,7 +786,6 @@ class JavaMainSpec extends Specification {
       c.root.f.get(0).c.d === 2
     }
   }
-*/
 
   "issue 55 - valid regexes" should {
     "be properly reflected" in {

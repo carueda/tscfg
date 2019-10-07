@@ -671,13 +671,6 @@ class ScalaMainSpec extends Specification {
     }
   }
 
-  // for some strange reason ScalaIssue54bCfg keeps of getting wrongly generated on travis-ci:
-  //    [error] /home/travis/build/carueda/tscfg/src/test/scala/tscfg/example/ScalaIssue54bCfg.scala:8: not found: type Shared
-  //    [error]     e      : Shared,
-  //    [error]              ^
-  // But this gets correctly generated locally.
-  // So, U guess I'll just skip it so it doesn't affect the build status on github
-/*
   "issue 54 - shared config - example2" should {
     "be handled" in {
       val c = ScalaIssue54bCfg(ConfigFactory.parseString(
@@ -702,7 +695,6 @@ class ScalaMainSpec extends Specification {
       c.root.f.head.c.d === 2
     }
   }
-*/
 
   "issue 55 - valid regexes" should {
     "be properly reflected" in {
