@@ -22,7 +22,7 @@ class NamespaceSpec extends Specification {
     "add and resolve define" in {
       root.addDefine("RootDef1", objectType)
       root.resolveDefine("RootDef1") must beSome
-      Namespace.getAllDefines.keys must_== Set("RootDef1")
+      root.getAllDefines.keys must_== Set("RootDef1")
     }
   }
 
@@ -35,7 +35,7 @@ class NamespaceSpec extends Specification {
       ns00.addDefine("n00def1", objectType)
       ns00.resolveDefine("n00def1") must beSome
 
-      Namespace.getAllDefines.keys must_== Set("RootDef1", "ns00.n00def1")
+      root.getAllDefines.keys must_== Set("RootDef1", "ns00.n00def1")
     }
 
     "resolve define in parent namespace" in {
@@ -52,7 +52,7 @@ class NamespaceSpec extends Specification {
       ns000.addDefine("n000def1", objectType)
       ns000.resolveDefine("n000def1") must beSome
 
-      Namespace.getAllDefines.keys must_== Set(
+      root.getAllDefines.keys must_== Set(
         "RootDef1", "ns00.n00def1", "ns00.ns000.n000def1"
       )
     }
@@ -77,7 +77,7 @@ class NamespaceSpec extends Specification {
 
   "all defines" should {
     "resolve" in {
-      val all = Namespace.getAllDefines
+      val all = root.getAllDefines
       all.size must_== 3
       all.get("RootDef1") must beSome(objectType)
       all.get("ns00.n00def1") must beSome(objectType)

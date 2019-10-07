@@ -641,6 +641,36 @@ class ScalaMainSpec extends Specification {
     }
   }
 
+  "issue 54 - shared config - exampleD" should {
+    "be handled" in {
+      val c = ScalaIssue54exampleDCfg(ConfigFactory.parseString(
+        """
+          |exampleD {
+          |  test {
+          |    a = 1
+          |  }
+          |}
+          |""".stripMargin))
+
+      c.exampleD.test.a === 1
+    }
+  }
+
+  "issue 54 - shared config - exampleE" should {
+    "be handled" in {
+      val c = ScalaIssue54exampleECfg(ConfigFactory.parseString(
+        """
+          |exampleE {
+          |  test {
+          |    a = 1
+          |  }
+          |}
+          |""".stripMargin))
+
+      c.exampleE.test.a === 1
+    }
+  }
+
   // for some strange reason ScalaIssue54bCfg keeps of getting wrongly generated on travis-ci:
   //    [error] /home/travis/build/carueda/tscfg/src/test/scala/tscfg/example/ScalaIssue54bCfg.scala:8: not found: type Shared
   //    [error]     e      : Shared,

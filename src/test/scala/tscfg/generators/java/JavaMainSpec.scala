@@ -732,6 +732,36 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue 54 - shared config - exampleD" should {
+    "be handled" in {
+      val c = new JavaIssue54exampleDCfg(ConfigFactory.parseString(
+        """
+          |exampleD {
+          |  test {
+          |    a = 1
+          |  }
+          |}
+          |""".stripMargin))
+
+      c.exampleD.test.a === 1
+    }
+  }
+
+  "issue 54 - shared config - exampleE" should {
+    "be handled" in {
+      val c = new JavaIssue54exampleECfg(ConfigFactory.parseString(
+        """
+          |exampleE {
+          |  test {
+          |    a = 1
+          |  }
+          |}
+          |""".stripMargin))
+
+      c.exampleE.test.a === 1
+    }
+  }
+
 /* SKIP due to weird travis-ci issue (with the scala version, not the java one)
   "issue 54 - shared config - example2" should {
     "be handled" in {

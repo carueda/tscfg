@@ -3,21 +3,15 @@ package tscfg
 import tscfg.model.{ObjectRefType, Type}
 
 object Namespace {
-  val root: Namespace = new Namespace("", None)
-
-  def getAllDefines: Map[String, Type] = {
-    allDefines.toMap
-  }
-
-  private def addToAllDefines(defineFullPath: String, t: Type): Unit = {
-    allDefines.update(defineFullPath, t)
-  }
-
-  private val allDefines = collection.mutable.HashMap[String, Type]()
+  /** Returns a new, empty root namespace. */
+  def root: Namespace = new Namespace("", None,
+    collection.mutable.HashMap[String, Type]())
 }
 
-class Namespace private(simpleName: String, parent: Option[Namespace]) {
-  import Namespace.addToAllDefines
+class Namespace private(simpleName: String, parent: Option[Namespace],
+                        allDefines: collection.mutable.HashMap[String, Type]) {
+
+  def getAllDefines: Map[String, Type] = allDefines.toMap
 
   def getPath: Seq[String] = parent match {
     case None ⇒ Seq.empty
@@ -26,7 +20,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace]) {
 
   def getPathString: String = getPath.mkString(".")
 
-  def extend(simpleName: String): Namespace = new Namespace(simpleName, Some(this))
+  def extend(simpleName: String): Namespace = new Namespace(simpleName, Some(this), allDefines)
 
   private val defineNames = collection.mutable.HashSet[String]()
 
@@ -35,13 +29,14 @@ class Namespace private(simpleName: String, parent: Option[Namespace]) {
     assert(simpleName.nonEmpty)
 
     if (defineNames.contains(simpleName)) {
-      println(s"WARN: duplicate @define '$simpleName' in namespace $getPathString. Ignoring previous entry")
+      val ns = if (getPath.nonEmpty) s"'$getPathString'" else "(root)"
+      println(s"WARN: duplicate @define '$simpleName' in namespace $ns. Ignoring previous entry")
       // TODO include in build warnings
     }
 
     defineNames.add(simpleName)
 
-    addToAllDefines(resolvedFullPath(simpleName), t)
+    allDefines.update(resolvedFullPath(simpleName), t)
   }
 
   private def resolvedFullPath(simpleName: String): String = parent match {

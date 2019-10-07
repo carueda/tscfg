@@ -2,8 +2,8 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
-import tscfg.model.{AnnType, DURATION, ObjectType, SIZE}
 import tscfg.model.durations.ms
+import tscfg.model.{DURATION, SIZE}
 
 import scala.collection.JavaConverters._
 
@@ -42,13 +42,18 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
-    // do two passes as lightbend config does not necessarily preserve member order:
-    val ot = fromConfig1(namespace, conf)
-    fromConfig2(namespace, ot)
-  }
-
-  private def fromConfig1(namespace: Namespace, conf: Config): model.ObjectType = {
     val memberStructs = getMemberStructs(conf)
+      // have the `@define`s be traversed first:
+      .sortWith { case (childStruct, s2) ⇒
+        if (childStruct.isLeaf) false
+        else if (s2.isLeaf) true
+        else {
+          val cv = conf.getValue(childStruct.name)
+          val comments = cv.origin().comments().asScala.toList
+          comments.exists(_.trim.startsWith("@define"))
+        }
+      }
+
     val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct ⇒
       val name = childStruct.name
       val cv = conf.getValue(name)
@@ -119,35 +124,6 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
     }.toMap
     model.ObjectType(members)
-  }
-
-  private def fromConfig2(namespace: Namespace, ot: model.ObjectType): model.ObjectType = {
-    val resolvedMembers = ot.members.map { case (name, annType) ⇒
-      val modAnnType = annType.t match {
-
-        case _:model.STRING.type ⇒
-          annType.default match {
-            case Some(strValue) ⇒
-              namespace.resolveDefine(strValue) match {
-                case Some(ort) ⇒ AnnType(ort)
-                case _ ⇒ annType
-              }
-
-            case None ⇒ annType
-          }
-
-        //// the following would be part of changes to allow recursive type
-        //case ot:ObjectType ⇒
-        //  val ot2 = fromConfig2(namespace, ot)
-        //  AnnType(ot2)
-
-        case _ ⇒ annType
-      }
-
-      name → modAnnType
-    }
-
-    model.ObjectType(resolvedMembers)
   }
 
   private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {

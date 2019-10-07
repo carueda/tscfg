@@ -1,3 +1,9 @@
+2019-10-07 - 0.9.95
+
+- fix #54 "Shared config objects"
+  https://github.com/carueda/tscfg/issues/54#issuecomment-539096913.
+  In short, the `@define`s are traversed first in ModelBuilder.
+
 2019-09-14 - 0.9.94
 
 - resolve #54 "Shared config objects"
