@@ -39,7 +39,7 @@ object ScalaDefs {
     if (c == null) null
     else try c.getConfig(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         null
     }
@@ -51,7 +51,7 @@ object ScalaDefs {
     if (c == null) null
     else try c.getString(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         null
     }
@@ -63,7 +63,7 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getInt(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
@@ -75,7 +75,7 @@ object ScalaDefs {
     if (c == null) false
     else try c.getBoolean(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         false
     }
@@ -87,7 +87,7 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getDouble(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
@@ -99,7 +99,7 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getLong(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
@@ -111,7 +111,7 @@ object ScalaDefs {
     if (c == null) 0
     else try c.getBytes(path)
     catch {
-      case e:com.typesafe.config.ConfigException ⇒
+      case e:com.typesafe.config.ConfigException =>
         $tsCfgValidator.addBadPath(parentPath + path, e)
         0
     }
@@ -179,18 +179,18 @@ object ScalaDefs {
   //<$_expE>
   private def $_expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {
     val u: Any = cv.unwrapped
-    new java.lang.RuntimeException(cv.origin.lineNumber +
-      ": expecting: " + exp + " got: " +
+    new java.lang.RuntimeException(s"${cv.origin.lineNumber}: " +
+      "expecting: " + exp + " got: " +
       (if (u.isInstanceOf[java.lang.String]) "\"" + u + "\"" else u))
   }
   //</$_expE>
 
   //<$_require>
-  def $_require[T](parentPath: java.lang.String, path: java.lang.String)(get: ⇒ T): T = {
+  def $_require[T](parentPath: java.lang.String, path: java.lang.String)(get: => T): T = {
     import com.typesafe.config.ConfigException.Missing
     try get
     catch {
-      case e: Missing ⇒ throw if (parentPath.isEmpty) e else new Missing(parentPath + path, e)
+      case e: Missing => throw if (parentPath.isEmpty) e else new Missing(parentPath + path, e)
     }
   }
   //</$_require>

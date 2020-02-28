@@ -48,12 +48,12 @@ class ScalaUtil(useBackticks: Boolean = false) {
   def getClassName(symbol: String): String = {
     if (useBackticks) {
       val scalaId = scalaIdentifier(symbol)
-      val search = scalaId.zipWithIndex.find { case (c, _) ⇒ c.toUpper != c }
+      val search = scalaId.zipWithIndex.find { case (c, _) => c.toUpper != c }
       search match {
-        case Some((c, index)) ⇒
+        case Some((c, index)) =>
           scalaId.substring(0, index) + c.toUpper + scalaId.substring(index + 1)
 
-        case None ⇒
+        case None =>
           if (scalaId.head == '`')
             "`U" + scalaId.substring(1)
           else

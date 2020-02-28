@@ -18,7 +18,7 @@ package object codeDefs {
     try map(key)
     catch {
       // $COVERAGE-OFF$
-      case NonFatal(e) ⇒
+      case NonFatal(e) =>
         val keys = map.keySet.toList.sorted
         val msg = s"Unexpected: undefined key '$key' for $lang. Defined keys: $keys. Please report this bug"
         throw new RuntimeException(msg, e)
@@ -34,7 +34,7 @@ package object codeDefs {
     val source = io.Source.fromInputStream(is, "utf-8")
     var key: String = null
     val template = new StringBuilder
-    for (line ← source.getLines()) {
+    for (line <- source.getLines()) {
       if (key == null) {
         val m = beginTemplatePattern.matcher(line)
         if (m.find) {
@@ -52,7 +52,7 @@ package object codeDefs {
     map.toMap
   }
   catch {
-    case NonFatal(ex) ⇒
+    case NonFatal(ex) =>
       throw new RuntimeException(
         s"Unexpected exception in getMap(resourceName=$resourceName)." +
         " Please report this bug.", ex)

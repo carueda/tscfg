@@ -1,3 +1,11 @@
+2020-02-27 - 0.9.96
+
+- some adjustments triggered by #59 "switch to scala 2.13 and remove deprecation warning for JavaConverters"
+    - cross build to 2.13 (besides 2.12)
+    - fix a bunch of warnings in general
+    - TODO generate scala code also for 2.13, unless a new flag is used to continue targetting 2.12
+      as proposed
+
 2019-10-07 - 0.9.95
 
 - fix #54 "Shared config objects"
@@ -23,22 +31,22 @@
 2019-07-27 - 0.9.92
 
 - resolve #49 "Fully validate given config on construction"
-    - for both java and scala, wrapper construction will now throw a 
+    - for both java and scala, wrapper construction will now throw a
       com.typesafe.config.ConfigException with a summary of all the
       com.typesafe.config.ConfigException's collected as it traverses
       the required config entries. Example of such summary:
-      
+
             Invalid configuration:
                 'service.poolSize': com.typesafe.config.ConfigException$Missing(No configuration setting found for key 'poolSize')
-                'service.url': com.typesafe.config.ConfigException$Missing(No configuration setting found for key 'url')      
+                'service.url': com.typesafe.config.ConfigException$Missing(No configuration setting found for key 'url')
                 'service.debug': com.typesafe.config.ConfigException$WrongType(String: 5: debug has type NUMBER rather than BOOLEAN)
                 'service.doLog': com.typesafe.config.ConfigException$WrongType(String: 6: doLog has type STRING rather than BOOLEAN)
                 'service.factor': com.typesafe.config.ConfigException$WrongType(String: 7: factor has type BOOLEAN rather than NUMBER)
-       
+
     - NOTE: option `scala:fp` removed: full paths are now always reported.
-    - `$_reqConfig` now only output in the wrapper if actually called 
-  
-- capture java and scala wrapper supporting methods in proper classes 
+    - `$_reqConfig` now only output in the wrapper if actually called
+
+- capture java and scala wrapper supporting methods in proper classes
   to facilitate validation at compile time.
 
 2019-07-22 - 0.9.91
@@ -47,7 +55,7 @@
 
 - resolve #47 about adding `--all-required` flag.
   The new `--all-required` flag strictly forces all entries (even objects)
-  to be required (even the `@optional` annotation is ignored) 
+  to be required (even the `@optional` annotation is ignored)
 
 2019-02-01 - 0.9.9
 

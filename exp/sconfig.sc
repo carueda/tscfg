@@ -8,7 +8,7 @@ import com.typesafe.config._
 trait SConfig {
   def config: Config
 
-  def configEntry[T](extractor: Config ⇒ String ⇒ T)(implicit valName: sourcecode.Name): T =
+  def configEntry[T](extractor: Config => String => T)(implicit valName: sourcecode.Name): T =
     extractor(config)(valName.value)
 
   class LocalSConfigNode(implicit objName: sourcecode.Name) extends DConfigNode(config)(objName)

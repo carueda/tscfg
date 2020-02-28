@@ -10,7 +10,7 @@ object model {
     implicit def type2ann(t: Type): AnnType = AnnType(t)
 
     implicit class RichString(s: String) {
-      def :=(a: AnnType): (String, AnnType) = s → a
+      def :=(a: AnnType): (String, AnnType) = s -> a
 
       def %(a: AnnType): AnnType = a.copy(comments = Some(s + a.comments.getOrElse("")))
 
@@ -43,14 +43,14 @@ object model {
   case class DURATION(q: DurationQualification) extends BasicType
 
   val recognizedAtomic: Map[String, BasicType] = Map(
-    "string"    → STRING,
-    "int"       → INTEGER,
-    "integer"   → INTEGER,
-    "long"      → LONG,
-    "double"    → DOUBLE,
-    "boolean"   → BOOLEAN,
-    "size"      → SIZE,
-    "duration"  → DURATION(ms)
+    "string"    -> STRING,
+    "int"       -> INTEGER,
+    "integer"   -> INTEGER,
+    "long"      -> LONG,
+    "double"    -> DOUBLE,
+    "boolean"   -> BOOLEAN,
+    "size"      -> SIZE,
+    "duration"  -> DURATION(ms)
   )
 
   case class ListType(t: Type) extends Type
@@ -78,10 +78,10 @@ object model {
 
   object ObjectType {
     def apply(elems: (String, AnnType)*): ObjectType = {
-      val x = elems.groupBy(_._1).mapValues(_.length).filter(_._2 > 1)
+      val x = elems.groupBy(_._1).transform((_, v) => v.length).filter(_._2 > 1)
       if (x.nonEmpty) throw new RuntimeException(s"key repeated in object: ${x.head}")
 
-      val noQuotes = elems map { case (k, v) ⇒
+      val noQuotes = elems map { case (k, v) =>
         // per Lightbend Config restrictions involving $, leave the key alone if
         // contains $, otherwise unquote the key in case is quoted.
         val adjName = if (k.contains("$")) k else k.replaceAll("^\"|\"$", "")
@@ -96,13 +96,13 @@ object model {
     val IND = "    "
 
     def format(typ: Type, ind: String = ""): String = typ match {
-      case b:BasicType ⇒ b.toString
+      case b:BasicType => b.toString
 
-      case ListType(t) ⇒ s"[ ${format(t, ind)} ]"
+      case ListType(t) => s"[ ${format(t, ind)} ]"
 
-      case o:ObjectType ⇒
+      case o:ObjectType =>
         val symbols = o.members.keys.toList.sorted
-        val membersStr = symbols.map { symbol ⇒
+        val membersStr = symbols.map { symbol =>
           val a = o.members(symbol)
 
           val cmn = if (a.comments.isEmpty) "" else {
@@ -126,7 +126,7 @@ object model {
            |$ind$IND$membersStr
            |$ind}""".stripMargin
 
-      case o:ObjectRefType ⇒ o.toString
+      case o:ObjectRefType => o.toString
     }
   }
   // $COVERAGE-ON$

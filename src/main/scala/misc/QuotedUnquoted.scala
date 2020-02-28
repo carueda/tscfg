@@ -26,7 +26,7 @@ object QuotedUnquoted {
 
     println(" %-14s %16s %14s" format("input line", "cv.toString", "cv.valueType"))
     println(" %-14s %16s %14s" format("-"*14, "-"*16, "-"*14))
-    for ((key, inputLine) ← List("sizeU", "sizeQ", "fooU", "fooQ") zip inputLines) {
+    for ((key, inputLine) <- List("sizeU", "sizeQ", "fooU", "fooQ") zip inputLines) {
       val cv = config.getValue(key)
       println(" %-14s %16s %14s" format(inputLine.trim, cv.toString, cv.valueType()))
     }

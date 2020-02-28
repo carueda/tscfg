@@ -27,7 +27,7 @@ object ScalaExampleCfg {
         )
       }
     }
-          
+
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaExampleCfg.Endpoint = {
       ScalaExampleCfg.Endpoint(
         intReq    = $_reqInt(parentPath, c, "intReq", $tsCfgValidator),
@@ -41,24 +41,24 @@ object ScalaExampleCfg {
       if (c == null) 0
       else try c.getInt(path)
       catch {
-        case e:com.typesafe.config.ConfigException ⇒
+        case e:com.typesafe.config.ConfigException =>
           $tsCfgValidator.addBadPath(parentPath + path, e)
           0
       }
     }
-  
+
     private def $_reqStr(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): java.lang.String = {
       if (c == null) null
       else try c.getString(path)
       catch {
-        case e:com.typesafe.config.ConfigException ⇒
+        case e:com.typesafe.config.ConfigException =>
           $tsCfgValidator.addBadPath(parentPath + path, e)
           null
       }
     }
-  
+
   }
-        
+
   def apply(c: com.typesafe.config.Config): ScalaExampleCfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String = ""
@@ -84,4 +84,4 @@ object ScalaExampleCfg {
     }
   }
 }
-      
+

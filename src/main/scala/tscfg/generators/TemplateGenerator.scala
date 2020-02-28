@@ -18,12 +18,12 @@ class TemplateGenerator(opts: TemplateOpts) {
 
   private def genObjectTypeMembers(o: ObjectType): String = {
     val symbols = o.members.keys.toList.sorted
-    symbols.map { symbol ⇒
+    symbols.map { symbol =>
       val a = o.members(symbol)
 
       val (annotations, comments) = a.comments match {
-        case None ⇒ (List.empty, List.empty)
-        case Some(str) ⇒
+        case None => (List.empty, List.empty)
+        case Some(str) =>
           val lines = str.split("\n").toList.filterNot(_.startsWith("!"))
           lines.partition(_.startsWith("@"))
       }
@@ -33,7 +33,7 @@ class TemplateGenerator(opts: TemplateOpts) {
       }
 
       val opt = if (a.optional) "optional" else "required"
-      val dfl = a.default.map(d ⇒ s". Default: $d").getOrElse("")
+      val dfl = a.default.map(d => s". Default: $d").getOrElse("")
       val (typ, abbrev) = gen(a.t)
       val abbrev2 = if (abbrev == abbrevObject) "section" else abbrev
       val decl = opts.commentPrefix + s" '$symbol': $opt $abbrev2$dfl.\n"
@@ -51,8 +51,8 @@ class TemplateGenerator(opts: TemplateOpts) {
       else
         symbol + " = " + typ
 
-      val assignSysProp = sysPropOpt.map(e ⇒ s"\n$symbol = $${$e}").getOrElse("")
-      val assignEnvVar  = envVarOpt.map(e ⇒ s"\n$symbol = $${?$e}").getOrElse("")
+      val assignSysProp = sysPropOpt.map(e => s"\n$symbol = $${$e}").getOrElse("")
+      val assignEnvVar  = envVarOpt.map(e => s"\n$symbol = $${?$e}").getOrElse("")
 
       decl +
         cmn +
@@ -64,17 +64,17 @@ class TemplateGenerator(opts: TemplateOpts) {
   }
 
   private def gen(typ: Type): (String,String) = typ match {
-    case o:ObjectType ⇒
+    case o:ObjectType =>
       (genObjectType(o), abbrevObject)
 
-    case ort:ObjectRefType ⇒
+    case ort:ObjectRefType =>
       (ort.toString, abbrevObjectRef)
 
-    case b:BasicType  ⇒
+    case b:BasicType  =>
       val lc = b.toString.toLowerCase
       (lc, lc)
 
-    case ListType(t)  ⇒
+    case ListType(t)  =>
       val (subTyp, abbrev) = gen(t)
       (s"[$subTyp, ...]", abbrevListOf + " " + abbrev)
   }

@@ -175,7 +175,7 @@ object Main {
 
     if (buildResult.warnings.nonEmpty) {
       println("WARNINGS:")
-      buildResult.warnings.foreach(w ⇒ println(s"   line ${w.line}: ${w.source}: ${w.message}"))
+      buildResult.warnings.foreach(w => println(s"   line ${w.line}: ${w.source}: ${w.message}"))
     }
 
     println(s"generating: $destFile")
@@ -199,7 +199,7 @@ object Main {
 
     out.close()
 
-    opts.tplFilename foreach { filename ⇒
+    opts.tplFilename foreach { filename =>
       println(s"generating template $filename")
       val destFile = new File(filename)
       val out = new PrintWriter(destFile)

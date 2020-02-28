@@ -30,10 +30,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                        className: String
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamePrefixOpt, className)
-    case ot: ObjectRefType ⇒ generateForObjRef(ot)
-    case lt: ListType   ⇒ generateForList(lt, classNamePrefixOpt, className)
-    case bt: BasicType  ⇒ generateForBasic(bt)
+    case ot: ObjectType    => generateForObj(ot, classNamePrefixOpt, className)
+    case ot: ObjectRefType => generateForObjRef(ot)
+    case lt: ListType      => generateForList(lt, classNamePrefixOpt, className)
+    case bt: BasicType     => generateForBasic(bt)
   }
 
   private def generateForObj(ot: ObjectType,
@@ -48,7 +48,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val symbols = ot.members.keys.toList.sorted
     symbols.foreach(methodNames.checkUserSymbol)
 
-    val results = symbols.map { symbol ⇒
+    val results = symbols.map { symbol =>
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamePrefixOpt = Some(classNameAdjusted + "."),
@@ -57,7 +57,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       (symbol, res, a)
     }
 
-    val classDeclMembers = results.map { case (symbol, res, a) ⇒
+    val classDeclMembers = results.map { case (symbol, res, a) =>
       val memberType = res.javaType
       val typ = if (a.optional && a.default.isEmpty) {
         if (genOpts.useOptionals) s"java.util.Optional<${toObjectType(memberType)}>" else s"${toObjectType(memberType)}"
@@ -69,22 +69,22 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       (typ, javaId, a)
     }
 
-    val classDeclMembersStr = classDeclMembers.flatMap { case (typ, javaId, a) ⇒
+    val classDeclMembersStr = classDeclMembers.flatMap { case (typ, javaId, a) =>
       if (a.isDefine) None
       else Some {
         val type_ = a.t match {
-          case ObjectRefType(ns, simpleName) ⇒ simpleName
-          case _ ⇒ typ
+          case ObjectRefType(ns, simpleName) => simpleName
+          case _ => typ
         }
-        genResults = genResults.copy(fields = genResults.fields + (javaId → type_.toString))
+        genResults = genResults.copy(fields = genResults.fields + (javaId -> type_.toString))
         s"public final $type_ $javaId;" + dbg("<decl>")
       }
     }.mkString("\n  ")
 
     val classMemberGettersStr = if (genOpts.genGetters) {
-      classDeclMembers.map{ case (typ, javaId, _) ⇒
+      classDeclMembers.map{ case (typ, javaId, _) =>
         val getter = s"get${javaId.capitalize}"
-        genResults = genResults.copy(getters = genResults.getters + (getter → typ.toString))
+        genResults = genResults.copy(getters = genResults.getters + (getter -> typ.toString))
         s"public final $typ $getter() { return $javaId; }"
       }.mkString("\n  ", "\n  ", "")
     }
@@ -99,7 +99,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
 
-    val ctorMembersStr = results.flatMap { case (symbol, res, a) ⇒
+    val ctorMembersStr = results.flatMap { case (symbol, res, a) =>
       if (a.isDefine) None
       else Some {
         val javaId = javaIdentifier(symbol)
@@ -109,13 +109,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n" + listAccessors.keys.toList.sorted.map { methodName ⇒
+        "\n" + listAccessors.keys.toList.sorted.map { methodName =>
           listAccessors(methodName)
         }.mkString("\n")
       }
       val rootOnes = if (!isRoot) "" else {
         if (rootListAccessors.isEmpty) "" else {
-          "\n\n" + rootListAccessors.keys.toList.sorted.map { methodName ⇒
+          "\n\n" + rootListAccessors.keys.toList.sorted.map { methodName =>
             rootListAccessors(methodName)
           }.mkString("\n")
         }
@@ -185,13 +185,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generateForBasic(b: BasicType): Res = {
     Res(b, javaType = BaseJavaType(name = b match {
-      case STRING    ⇒ "java.lang.String"
-      case INTEGER   ⇒ "int"
-      case LONG      ⇒ "long"
-      case DOUBLE    ⇒ "double"
-      case BOOLEAN   ⇒ "boolean"
-      case SIZE      ⇒ "long"
-      case DURATION(_) ⇒ if(genOpts.useDurations) "java.time.Duration" else "long"
+      case STRING    => "java.lang.String"
+      case INTEGER   => "int"
+      case LONG      => "long"
+      case DOUBLE    => "double"
+      case BOOLEAN   => "boolean"
+      case SIZE      => "long"
+      case DURATION(_) => if(genOpts.useDurations) "java.time.Duration" else "long"
     }))
   }
 
@@ -203,10 +203,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     */
   private def adjustClassName(className: String): String = {
     classNameCounter.get(className) match {
-      case None ⇒
+      case None =>
         classNameCounter.put(className, 1)
         className
-      case Some(counter) ⇒
+      case Some(counter) =>
         classNameCounter.put(className, counter + 1)
         className + (counter + 1)
     }
@@ -214,22 +214,22 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private val classNameCounter = collection.mutable.HashMap[String,Int]()
 
   private def toObjectType(javaType: JavaType): JavaType = javaType match {
-    case BaseJavaType(name) ⇒ name match {
-      case "int"     ⇒ BaseJavaType("java.lang.Integer")
-      case "long"    ⇒ BaseJavaType("java.lang.Long")
-      case "double"  ⇒ BaseJavaType("java.lang.Double")
-      case "boolean" ⇒ BaseJavaType("java.lang.Boolean")
-      case _         ⇒ javaType
+    case BaseJavaType(name) => name match {
+      case "int"     => BaseJavaType("java.lang.Integer")
+      case "long"    => BaseJavaType("java.lang.Long")
+      case "double"  => BaseJavaType("java.lang.Double")
+      case "boolean" => BaseJavaType("java.lang.Boolean")
+      case _         => javaType
     }
-    case other ⇒ other
+    case other => other
   }
 
   private def instance(a: AnnType, res: Res, path: String)
                       (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
     a.t match {
-      case bt:BasicType  ⇒ basicInstance(a, bt, path)
-      case _:ObjectAbsType  ⇒ objectInstance(a, res, path)
-      case lt:ListType   ⇒ listInstance(a, lt, res, path)
+      case bt:BasicType  => basicInstance(a, bt, path)
+      case _:ObjectAbsType  => objectInstance(a, res, path)
+      case lt:ListType   => listInstance(a, lt, res, path)
     }
   }
 
@@ -241,7 +241,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     def reqConfigCall = {
       val methodName = "$_reqConfig"
-      listAccessors += methodName → javaDef(methodName)
+      listAccessors += methodName -> javaDef(methodName)
       s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
     }
 
@@ -281,26 +281,26 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
-      case Some(v) ⇒
+      case Some(v) =>
         val value = tsConfigUtil.basicValue(a.t, v, genOpts.useDurations)
         (bt, value) match {
-          case (BOOLEAN, "true")  ⇒ s"""!c.$hasPath("$path") || c.$getter"""
-          case (BOOLEAN, "false") ⇒ s"""c.$hasPath("$path") && c.$getter"""
-          case (DURATION(_), duration) if genOpts.useDurations ⇒ s"""c.$hasPath("$path") ? c.$getter : java.time.Duration.parse("$duration")"""
-          case _                  ⇒ s"""c.$hasPath("$path") ? c.$getter : $value"""
+          case (BOOLEAN, "true")  => s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false") => s"""c.$hasPath("$path") && c.$getter"""
+          case (DURATION(_), duration) if genOpts.useDurations => s"""c.$hasPath("$path") ? c.$getter : java.time.Duration.parse("$duration")"""
+          case _                  => s"""c.$hasPath("$path") ? c.$getter : $value"""
         }
 
-      case None if a.optional && genOpts.useOptionals ⇒
+      case None if a.optional && genOpts.useOptionals =>
         s"""c.$hasPath("$path") ? java.util.Optional.of(c.$getter) : java.util.Optional.empty()"""
-      case None if a.optional ⇒
+      case None if a.optional =>
         s"""c.$hasPath("$path") ? c.$getter : null"""
 
-      case _ ⇒
+      case _ =>
         bt match {
-          case DURATION(_) ⇒ s"""c.$getter"""
-          case _ ⇒
+          case DURATION(_) => s"""c.$getter"""
+          case _ =>
             val (methodName, methodCall) = tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
-            listAccessors += methodName → javaDef(methodName)
+            listAccessors += methodName -> javaDef(methodName)
             methodCall
         }
     }
@@ -321,42 +321,42 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                  ): (Boolean, String) = {
 
     val (isBasic, elemMethodName) = ljt.jt match {
-      case bst:BaseJavaType ⇒
+      case bst:BaseJavaType =>
         val basic = lt.t.isInstanceOf[BasicType]
         val methodName = baseName(lt.t, bst.toString)
         if (basic) {
-          rootListAccessors += methodName → methodNames.basicElemAccessDefinition(methodName)
-          rootListAccessors += methodNames.expE → methodNames.expEDef
+          rootListAccessors += methodName -> methodNames.basicElemAccessDefinition(methodName)
+          rootListAccessors += methodNames.expE -> methodNames.expEDef
         }
         (basic, methodName)
 
-      case lst:ListJavaType  ⇒
+      case lst:ListJavaType  =>
         rec(lst, lt.t.asInstanceOf[ListType], prefix + methodNames.listPrefix)
     }
 
     val (methodName, methodBody) = listMethodDefinition(elemMethodName, ljt.jt)
 
     if (isBasic)
-      rootListAccessors += methodName → methodBody
+      rootListAccessors += methodName -> methodBody
     else
-      listAccessors += methodName → methodBody
+      listAccessors += methodName -> methodBody
 
     (isBasic, methodName)
   }
 
   private def baseName(t: Type, name: String)
                       (implicit methodNames: MethodNames): String = t match {
-    case STRING   ⇒ methodNames.strA
-    case INTEGER  ⇒ methodNames.intA
-    case LONG     ⇒ methodNames.lngA
-    case DOUBLE   ⇒ methodNames.dblA
-    case BOOLEAN  ⇒ methodNames.blnA
-    case SIZE     ⇒ methodNames.sizA
-    case DURATION(q) ⇒ methodNames.durA
+    case STRING   => methodNames.strA
+    case INTEGER  => methodNames.intA
+    case LONG     => methodNames.lngA
+    case DOUBLE   => methodNames.dblA
+    case BOOLEAN  => methodNames.blnA
+    case SIZE     => methodNames.sizA
+    case DURATION(q) => methodNames.durA
 
-    case _: ObjectAbsType  ⇒ name.replace('.', '_')
+    case _: ObjectAbsType  => name.replace('.', '_')
 
-    case _: ListType ⇒ throw new AssertionError()
+    case _: ListType => throw new AssertionError()
   }
 
   private def listMethodDefinition(elemMethodName: String, javaType: JavaType)
@@ -414,7 +414,7 @@ object JavaGen {
       println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
       if (buildResult.warnings.nonEmpty) {
         println("warnings:")
-        buildResult.warnings.foreach(w ⇒ println(s"   line ${w.line}: ${w.source}: ${w.message}"))
+        buildResult.warnings.foreach(w => println(s"   line ${w.line}: ${w.source}: ${w.message}"))
       }
     }
 
@@ -486,7 +486,7 @@ private[java] case class MethodNames() {
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
     List(strA, intA, lngA, dblA, blnA, sizA)
-      .map(k ⇒ k → javaDef(k))
+      .map(k => k -> javaDef(k))
       .toMap
   }
 

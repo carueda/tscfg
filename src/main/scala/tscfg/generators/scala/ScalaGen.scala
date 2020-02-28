@@ -36,10 +36,10 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
                        className: String
                       ): Res = typ match {
 
-    case ot: ObjectType ⇒ generateForObj(ot, classNamesPrefix, className)
-    case ot: ObjectRefType ⇒ generateForObjRef(ot, classNamesPrefix)
-    case lt: ListType   ⇒ generateForList(lt,classNamesPrefix, className)
-    case bt: BasicType  ⇒ generateForBasic(bt)
+    case ot: ObjectType => generateForObj(ot, classNamesPrefix, className)
+    case ot: ObjectRefType => generateForObjRef(ot, classNamesPrefix)
+    case lt: ListType   => generateForList(lt,classNamesPrefix, className)
+    case bt: BasicType  => generateForBasic(bt)
   }
 
   private def generateForObj(ot: ObjectType,
@@ -57,7 +57,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       symbols.map(scalaIdentifier).maxBy(_.length).length
     def padId(id: String) = id + (" " * (padScalaIdLength - id.length))
 
-    val results = symbols.map { symbol ⇒
+    val results = symbols.map { symbol =>
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamesPrefix = className+"." :: classNamesPrefix,
@@ -66,18 +66,18 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       (symbol, res, a)
     }
 
-    val classMembersStr = results.flatMap { case (symbol, res, a) ⇒
+    val classMembersStr = results.flatMap { case (symbol, res, a) =>
       if (a.isDefine) None
       else Some {
         val memberType = res.scalaType
         val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
         val scalaId = scalaIdentifier(symbol)
         val type_ = a.t match {
-          case ot:ObjectRefType ⇒
+          case ot:ObjectRefType =>
             getClassNameForObjectRefType(ot)
-          case _ ⇒ typ
+          case _ => typ
         }
-        genResults = genResults.copy(fields = genResults.fields + (scalaId → type_.toString))
+        genResults = genResults.copy(fields = genResults.fields + (scalaId -> type_.toString))
         padId(scalaId) + " : " + type_
       }
     }.mkString(",\n  ")
@@ -91,7 +91,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
 
-    val objectMembersStr = results.flatMap { case (symbol, res, a) ⇒
+    val objectMembersStr = results.flatMap { case (symbol, res, a) =>
       if (a.isDefine) None
       else Some {
         val scalaId = scalaIdentifier(symbol)
@@ -108,13 +108,13 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val elemAccessorsStr = {
       val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n" + listAccessors.keys.toList.sorted.map { methodName ⇒
+        "\n" + listAccessors.keys.toList.sorted.map { methodName =>
           listAccessors(methodName)
         }.mkString("\n")
       }
       val rootOnes = if (!isRoot) "" else {
         if (accessors.rootListAccessors.isEmpty) "" else {
-          "\n\n" + accessors.rootListAccessors.keys.toList.sorted.map { methodName ⇒
+          "\n\n" + accessors.rootListAccessors.keys.toList.sorted.map { methodName =>
             accessors.rootListAccessors(methodName)
           }.mkString("\n")
         }
@@ -196,13 +196,13 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generateForBasic(b: BasicType): Res = {
     Res(b, scalaType = BaseScalaType(name = b match {
-      case STRING   ⇒ "java.lang.String"
-      case INTEGER  ⇒ "scala.Int"
-      case LONG     ⇒ "scala.Long"
-      case DOUBLE   ⇒ "scala.Double"
-      case BOOLEAN  ⇒ "scala.Boolean"
-      case SIZE     ⇒ "scala.Long"
-      case DURATION(_) ⇒ if(genOpts.useDurations) "java.time.Duration" else "scala.Long"
+      case STRING   => "java.lang.String"
+      case INTEGER  => "scala.Int"
+      case LONG     => "scala.Long"
+      case DOUBLE   => "scala.Double"
+      case BOOLEAN  => "scala.Boolean"
+      case SIZE     => "scala.Long"
+      case DURATION(_) => if(genOpts.useDurations) "java.time.Duration" else "scala.Long"
     }))
   }
 }
@@ -238,7 +238,7 @@ object ScalaGen {
       println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
       if (buildResult.warnings.nonEmpty) {
         println("warnings:")
-        buildResult.warnings.foreach(w ⇒ println(s"   line ${w.line}: ${w.source}: ${w.message}"))
+        buildResult.warnings.foreach(w => println(s"   line ${w.line}: ${w.source}: ${w.message}"))
       }
     }
 
@@ -306,7 +306,7 @@ private[scala] case class MethodNames() {
   // definition of methods used to access list's elements of basic type
   val basicElemAccessDefinition: Map[String, String] = {
     List(strA, intA, lngA, dblA, blnA, sizA)
-      .map(k ⇒ k → scalaDef(k))
+      .map(k => k -> scalaDef(k))
       .toMap
   }
 
@@ -321,9 +321,9 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
   def instance(a: AnnType, res: Res, path: String)
               (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
     a.t match {
-      case bt:BasicType   ⇒ basicInstance(a, bt, path)
-      case _:ObjectAbsType   ⇒ objectInstance(a, res, path)
-      case lt:ListType    ⇒ listInstance(a, lt, res, path)
+      case bt:BasicType   => basicInstance(a, bt, path)
+      case _:ObjectAbsType   => objectInstance(a, res, path)
+      case lt:ListType    => listInstance(a, lt, res, path)
     }
   }
 
@@ -335,7 +335,7 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
 
     def reqConfigCall = {
       val methodName = "$_reqConfig"
-      listAccessors += methodName → scalaDef(methodName)
+      listAccessors += methodName -> scalaDef(methodName)
       s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)"""
     }
 
@@ -367,24 +367,24 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
     val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
 
     a.default match {
-      case Some(v) ⇒
+      case Some(v) =>
         val value = tsConfigUtil.basicValue(a.t, v, useDurations = genOpts.useDurations)
         (bt, value) match {
-          case (BOOLEAN, "true")    ⇒ s"""!c.$hasPath("$path") || c.$getter"""
-          case (BOOLEAN, "false")   ⇒ s"""c.$hasPath("$path") && c.$getter"""
-          case (DURATION(qs), duration) if genOpts.useDurations ⇒ s"""if(c.$hasPath("$path")) c.$getter else java.time.Duration.parse("$duration")"""
-          case _                    ⇒ s"""if(c.$hasPath("$path")) c.$getter else $value"""
+          case (BOOLEAN, "true")    => s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "false")   => s"""c.$hasPath("$path") && c.$getter"""
+          case (DURATION(qs), duration) if genOpts.useDurations => s"""if(c.$hasPath("$path")) c.$getter else java.time.Duration.parse("$duration")"""
+          case _                    => s"""if(c.$hasPath("$path")) c.$getter else $value"""
         }
 
-      case None if a.optional ⇒
+      case None if a.optional =>
         s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
 
-      case _  ⇒
+      case _  =>
         bt match {
-          case DURATION(_) ⇒ s"""c.$getter"""
-          case _ ⇒
+          case DURATION(_) => s"""c.$getter"""
+          case _ =>
             val (methodName, methodCall) = tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
-            listAccessors += methodName → scalaDef(methodName)
+            listAccessors += methodName -> scalaDef(methodName)
             methodCall
         }
     }
@@ -414,42 +414,42 @@ private[scala] class Accessors {
                  ): (Boolean, String) = {
 
     val (isBasic, elemMethodName) = lst.st match {
-      case bst:BaseScalaType ⇒
+      case bst:BaseScalaType =>
         val basic = lt.t.isInstanceOf[BasicType]
         val methodName = baseName(lt.t, bst.toString)
         if (basic) {
-          rootListAccessors += methodName → methodNames.basicElemAccessDefinition(methodName)
-          rootListAccessors += methodNames.expE → methodNames.expEDef
+          rootListAccessors += methodName -> methodNames.basicElemAccessDefinition(methodName)
+          rootListAccessors += methodNames.expE -> methodNames.expEDef
         }
         (basic, methodName)
 
-      case lst:ListScalaType  ⇒
+      case lst:ListScalaType  =>
         rec(lst, lt.t.asInstanceOf[ListType], prefix + methodNames.listPrefix)
     }
 
     val (methodName, methodBody) = listMethodDefinition(elemMethodName, lst.st)
 
     if (isBasic)
-      rootListAccessors += methodName → methodBody
+      rootListAccessors += methodName -> methodBody
     else
-      listAccessors += methodName → methodBody
+      listAccessors += methodName -> methodBody
 
     (isBasic, methodName)
   }
 
   private def baseName(t: Type, name: String)
                       (implicit methodNames: MethodNames): String = t match {
-    case STRING   ⇒ methodNames.strA
-    case INTEGER  ⇒ methodNames.intA
-    case LONG     ⇒ methodNames.lngA
-    case DOUBLE   ⇒ methodNames.dblA
-    case BOOLEAN  ⇒ methodNames.blnA
-    case SIZE     ⇒ methodNames.sizA
-    case DURATION(_) ⇒ methodNames.durA
+    case STRING   => methodNames.strA
+    case INTEGER  => methodNames.intA
+    case LONG     => methodNames.lngA
+    case DOUBLE   => methodNames.dblA
+    case BOOLEAN  => methodNames.blnA
+    case SIZE     => methodNames.sizA
+    case DURATION(_) => methodNames.durA
 
-    case _: ObjectAbsType  ⇒ name.replace('.', '_')
+    case _: ObjectAbsType  => name.replace('.', '_')
 
-    case _: ListType ⇒ throw new AssertionError()
+    case _: ListType => throw new AssertionError()
   }
 
   def listMethodDefinition(elemMethodName: String, scalaType: ScalaType)

@@ -1,19 +1,23 @@
-lazy val tscfgVersion = setVersion("0.9.95")
+lazy val tscfgVersion = setVersion("0.9.96")
 
 organization := "com.github.carueda"
 name := "tscfg"
 version := tscfgVersion
 
-scalaVersion := "2.12.2"
+scalaVersion := "2.12.10"
 
-crossScalaVersions := Seq("2.12.2")
+crossScalaVersions := Seq("2.12.10", "2.13.1")
 
 libraryDependencies ++= Seq(
   "com.typesafe"          %  "config"         % "1.3.3",
   "org.specs2"           %%  "specs2-core"    % "4.6.0" % "test",
-  "org.json4s"           %%  "json4s-native"  % "3.5.0",
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.4",
+  "org.json4s"           %%  "json4s-native"  % "3.6.7",
   "com.google.code.gson"  %  "gson"           % "2.8.0"
 )
+
+scalacOptions ++= Seq("-deprecation", "-feature")
+
 scalacOptions in Test ++= Seq("-Yrangepos")  // per specs2-core
 
 mainClass in assembly := Some("tscfg.Main")
@@ -27,7 +31,7 @@ coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 
 lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
 codeDefs := {
-  for (ext ← Seq("java", "scala")) {
+  for (ext <- Seq("java", "scala")) {
     val src = s"src/main/$ext/tscfg/codeDefs/resources/"
     val dst = s"src/main/resources/codeDefs/"
     println(s"Copying $src to $dst")

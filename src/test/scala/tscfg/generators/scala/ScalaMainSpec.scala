@@ -20,12 +20,12 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/example0.spec.conf")
       r.classNames === Set("ScalaExample0Cfg", "Service")
       r.fields === Map(
-        "service"  → "ScalaExample0Cfg.Service",
-        "url"      → "java.lang.String",
-        "debug"    → "scala.Boolean",
-        "doLog"    → "scala.Boolean",
-        "factor"   → "scala.Double",
-        "poolSize" → "scala.Int"
+        "service"  -> "ScalaExample0Cfg.Service",
+        "url"      -> "java.lang.String",
+        "debug"    -> "scala.Boolean",
+        "doLog"    -> "scala.Boolean",
+        "factor"   -> "scala.Double",
+        "poolSize" -> "scala.Int"
       )
     }
     "example with missing entries should get their defaults" in {
@@ -358,8 +358,8 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("ScalaIssue19Cfg")
       r.fields === Map(
-        "do_log"  → "scala.Boolean",
-        "_$_foo_" → "java.lang.String"
+        "do_log"  -> "scala.Boolean",
+        "_$_foo_" -> "java.lang.String"
       )
     }
 
@@ -399,9 +399,9 @@ class ScalaMainSpec extends Specification {
 
       r.classNames === Set("Classy", "Other")
       r.fields === Map(
-        "$_baz" → "java.lang.String",
-        "other" → "Classy.Other",
-        "$_foo" → "scala.Double"
+        "$_baz" -> "java.lang.String",
+        "other" -> "Classy.Other",
+        "$_foo" -> "scala.Double"
       )
       // TODO actually verify the generated warnings
     }
@@ -411,7 +411,7 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue22.spec.conf")
       r.classNames === Set("ScalaIssue22Cfg")
       r.fields === Map(
-        "idleTimeout" → "scala.Long"
+        "idleTimeout" -> "scala.Long"
       )
     }
 
@@ -430,11 +430,11 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue23.spec.conf")
       r.classNames === Set("ScalaIssue23Cfg")
       r.fields === Map(
-        "sizeReq"    → "scala.Long",
-        "sizeOpt"    → "scala.Option[scala.Long]",
-        "sizeOptDef" → "scala.Long",
-        "sizes"      → "scala.List[scala.Long]",
-        "sizes2"     → "scala.List[scala.List[scala.Long]]"
+        "sizeReq"    -> "scala.Long",
+        "sizeOpt"    -> "scala.Option[scala.Long]",
+        "sizeOptDef" -> "scala.Long",
+        "sizes"      -> "scala.List[scala.Long]",
+        "sizes2"     -> "scala.List[scala.List[scala.Long]]"
       )
     }
 
@@ -520,7 +520,7 @@ class ScalaMainSpec extends Specification {
     def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
     "report full path for missing required parameter 'obj.foo.bar'" in {
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'obj.foo.bar': com.typesafe.config.ConfigException$Missing")
       }
     }
@@ -538,7 +538,7 @@ class ScalaMainSpec extends Specification {
     "fail with missing service entry" in {
       def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(""))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
       }
     }
@@ -553,7 +553,7 @@ class ScalaMainSpec extends Specification {
           |  factor = 0.75
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
       }
     }
@@ -568,15 +568,15 @@ class ScalaMainSpec extends Specification {
           |  factor = 0.75
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with all entries missing in service object" in {
       def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString("service {}"))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
-          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
+        case e: com.typesafe.config.ConfigException =>
+          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k =>
             e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
           }
       }
@@ -592,8 +592,8 @@ class ScalaMainSpec extends Specification {
           |  factor = false
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
-          forall(List("poolSize", "debug", "doLog", "factor")) { k ⇒
+        case e: com.typesafe.config.ConfigException =>
+          forall(List("poolSize", "debug", "doLog", "factor")) { k =>
             e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
           }
       }
@@ -604,7 +604,7 @@ class ScalaMainSpec extends Specification {
           |service = 1
           |""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
       }
     }

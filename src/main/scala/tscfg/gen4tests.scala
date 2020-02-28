@@ -9,7 +9,7 @@ import tscfg.generators.scala.ScalaGen
 object gen4tests {
   def main(args: Array[String]): Unit = {
     val sourceDir = new File("src/main/tscfg/example")
-    sourceDir.listFiles().filter { f ⇒
+    sourceDir.listFiles().filter { f =>
       f.getName.endsWith(".spec.conf") &&
       !f.getName.contains(".SKIP.")
     } foreach generate
@@ -24,19 +24,19 @@ object gen4tests {
       val opts = {
         val linePat = """\s*//\s*GenOpts:(.*)""".r
         source.split("\n")
-          .collect { case linePat(xs) ⇒ xs.trim }
+          .collect { case linePat(xs) => xs.trim }
           .flatMap(_.split("\\s+"))
       }
 
       opts foreach {
-        case "--scala:bt"      ⇒ genOpts = genOpts.copy(useBackticks = true)
-        case "--java:getters"  ⇒ genOpts = genOpts.copy(genGetters = true)
-        case "--java:optionals"  ⇒ genOpts = genOpts.copy(useOptionals = true)
-        case "--durations"     ⇒ genOpts = genOpts.copy(useDurations = true)
-        case "--all-required"  ⇒ genOpts = genOpts.copy(assumeAllRequired = true)
+        case "--scala:bt"        => genOpts = genOpts.copy(useBackticks = true)
+        case "--java:getters"    => genOpts = genOpts.copy(genGetters = true)
+        case "--java:optionals"  => genOpts = genOpts.copy(useOptionals = true)
+        case "--durations"       => genOpts = genOpts.copy(useDurations = true)
+        case "--all-required"    => genOpts = genOpts.copy(assumeAllRequired = true)
 
         // $COVERAGE-OFF$
-        case opt ⇒ println(s"WARN: $confFile: unrecognized GenOpts argument: `$opt'")
+        case opt => println(s"WARN: $confFile: unrecognized GenOpts argument: `$opt'")
         // $COVERAGE-ON$
       }
       genOpts
@@ -49,7 +49,7 @@ object gen4tests {
     val (base, _) = name.span(_ != '.')
     val classNameSuffix = util.upperFirst(base.replace('-', '_')) + "Cfg"
 
-    List("Scala", "Java") foreach { lang ⇒
+    List("Scala", "Java") foreach { lang =>
       val targetScalaDir = new File("src/test/" + lang.toLowerCase + "/tscfg/example")
       targetScalaDir.mkdirs()
 
@@ -62,8 +62,8 @@ object gen4tests {
         val genOpts = baseGenOpts.copy(className = className)
         //println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {
-          case "Scala" ⇒ new ScalaGen(genOpts)
-          case "Java" ⇒  new JavaGen(genOpts)
+          case "Scala" => new ScalaGen(genOpts)
+          case "Java" =>  new JavaGen(genOpts)
         }
 
         val results = generator.generate(objectType)

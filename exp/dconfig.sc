@@ -20,7 +20,7 @@ trait DConfig {
   def int(implicit valName: sourcecode.Name): Int =
     config.getInt(valName.value)
 
-  def objList[T](implicit valName: sourcecode.Name, ctor: Config ⇒ T): List[T] = {
+  def objList[T](implicit valName: sourcecode.Name, ctor: Config => T): List[T] = {
     config.getObjectList(valName.value).asScala.toList.map(_.toConfig).map(ctor)
   }
 
@@ -30,12 +30,12 @@ trait DConfig {
     config.getObjectList(valName.value).asScala.toList.map(_.toConfig)
   }
 
-  def objList2(extractor: Config ⇒ String ⇒ java.util.List[_ <: ConfigObject])
+  def objList2(extractor: Config => String => java.util.List[_ <: ConfigObject])
              (implicit valName: sourcecode.Name): List[_ <: Config] = {
     extractor(config)(valName.value).asScala.toList.map(_.toConfig)
   }
 
-  def objList3[T](extractor: Config ⇒ String ⇒ T)(implicit valName: sourcecode.Name): T =
+  def objList3[T](extractor: Config => String => T)(implicit valName: sourcecode.Name): T =
     extractor(config)(valName.value)
 
   class LocalDConfigNode(implicit objName: sourcecode.Name) extends DConfigNode(config)(objName)
@@ -60,7 +60,7 @@ class MyDConfig(val config: Config) extends DConfig {
 
       val list1: List[Http] = objList1.map(new Http(_))
       val list2: List[Http] = objList2(_.getObjectList).map(new Http(_))
-      val list3: List[Http] = objList3(_.getObjectList).asScala.toList.map(x ⇒ new Http(x.toConfig))
+      val list3: List[Http] = objList3(_.getObjectList).asScala.toList.map(x => new Http(x.toConfig))
     }
 
     implicit class Http(val config: Config) extends DConfig {

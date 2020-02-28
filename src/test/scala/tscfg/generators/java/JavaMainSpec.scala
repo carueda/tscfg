@@ -21,12 +21,12 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/example0.spec.conf")
       r.classNames === Set("JavaExample0Cfg", "Service")
       r.fields === Map(
-        "service"  → "JavaExample0Cfg.Service",
-        "url"      → "java.lang.String",
-        "debug"    → "boolean",
-        "doLog"    → "boolean",
-        "factor"   → "double",
-        "poolSize" → "int"
+        "service"  -> "JavaExample0Cfg.Service",
+        "url"      -> "java.lang.String",
+        "debug"    -> "boolean",
+        "doLog"    -> "boolean",
+        "factor"   -> "double",
+        "poolSize" -> "int"
       )
     }
 
@@ -395,8 +395,8 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("JavaIssue19Cfg")
       r.fields === Map(
-        "do_log"  → "boolean",
-        "_$_foo_" → "java.lang.String"
+        "do_log"  -> "boolean",
+        "_$_foo_" -> "java.lang.String"
       )
     }
 
@@ -435,9 +435,9 @@ class JavaMainSpec extends Specification {
       val r = new JavaGen(genOpts).generate(objectType)
       r.classNames === Set("Classy", "Other")
       r.fields === Map(
-        "$_baz" → "java.lang.String",
-        "other" → "Classy.Other",
-        "$_foo" → "double"
+        "$_baz" -> "java.lang.String",
+        "other" -> "Classy.Other",
+        "$_foo" -> "double"
       )
       // TODO actually verify the generated warnings
     }
@@ -448,7 +448,7 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/issue22.spec.conf")
       r.classNames === Set("JavaIssue22Cfg")
       r.fields === Map(
-        "idleTimeout" → "long"
+        "idleTimeout" -> "long"
       )
     }
 
@@ -475,11 +475,11 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/issue23.spec.conf")
       r.classNames === Set("JavaIssue23Cfg")
       r.fields === Map(
-        "sizeReq"    → "long",
-        "sizeOpt"    → "java.lang.Long",
-        "sizeOptDef" → "long",
-        "sizes"      → "java.util.List<java.lang.Long>",
-        "sizes2"     → "java.util.List<java.util.List<java.lang.Long>>"
+        "sizeReq"    -> "long",
+        "sizeOpt"    -> "java.lang.Long",
+        "sizeOptDef" -> "long",
+        "sizes"      -> "java.util.List<java.lang.Long>",
+        "sizes2"     -> "java.util.List<java.util.List<java.lang.Long>>"
       )
     }
 
@@ -627,7 +627,7 @@ class JavaMainSpec extends Specification {
     "fail with missing service entry" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
       }
     }
@@ -642,7 +642,7 @@ class JavaMainSpec extends Specification {
           |  factor = 0.75
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
       }
     }
@@ -657,15 +657,15 @@ class JavaMainSpec extends Specification {
           |  factor = 0.75
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
       }
     }
     "fail with all entries missing in service object" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
-          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k ⇒
+        case e: com.typesafe.config.ConfigException =>
+          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k =>
             e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
           }
       }
@@ -681,8 +681,8 @@ class JavaMainSpec extends Specification {
           |  factor = false
           |}""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
-          forall(List("poolSize", "debug", "doLog", "factor")) { k ⇒
+        case e: com.typesafe.config.ConfigException =>
+          forall(List("poolSize", "debug", "doLog", "factor")) { k =>
             e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
           }
       }
@@ -693,7 +693,7 @@ class JavaMainSpec extends Specification {
           |service = 1
           |""".stripMargin))
       a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException ⇒
+        case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
       }
     }

@@ -14,35 +14,35 @@ import com.typesafe.config.{Config, ConfigFactory}
 object tsConfigUtil {
 
   def basicGetter(bt: BasicType, path: String, useDurations:Boolean): String = bt match {
-    case STRING    ⇒  s"""getString("$path")"""
-    case INTEGER   ⇒  s"""getInt("$path")"""
-    case LONG      ⇒  s"""getLong("$path")"""
-    case DOUBLE    ⇒  s"""getDouble("$path")"""
-    case BOOLEAN   ⇒  s"""getBoolean("$path")"""
-    case SIZE      ⇒  s"""getBytes("$path")"""
-    case DURATION(q)  ⇒  durationGetter(path, q, useDurations)
+    case STRING    =>  s"""getString("$path")"""
+    case INTEGER   =>  s"""getInt("$path")"""
+    case LONG      =>  s"""getLong("$path")"""
+    case DOUBLE    =>  s"""getDouble("$path")"""
+    case BOOLEAN   =>  s"""getBoolean("$path")"""
+    case SIZE      =>  s"""getBytes("$path")"""
+    case DURATION(q)  =>  durationGetter(path, q, useDurations)
   }
 
   def basicRequiredGetter(bt: BasicType, path: String, useDurations:Boolean): (String,String) = {
     val methodName = bt match {
-      case STRING    ⇒   "$_reqStr"
-      case INTEGER   ⇒   "$_reqInt"
-      case LONG      ⇒   "$_reqLng"
-      case DOUBLE    ⇒   "$_reqDbl"
-      case BOOLEAN   ⇒   "$_reqBln"
-      case SIZE      ⇒   "$_reqSiz"
+      case STRING    =>   "$_reqStr"
+      case INTEGER   =>   "$_reqInt"
+      case LONG      =>   "$_reqLng"
+      case DOUBLE    =>   "$_reqDbl"
+      case BOOLEAN   =>   "$_reqBln"
+      case SIZE      =>   "$_reqSiz"
       // $COVERAGE-OFF$
-      case _ ⇒ throw new AssertionError("should not happen")
+      case _ => throw new AssertionError("should not happen")
       // $COVERAGE-ON$
     }
     (methodName, s"""$methodName(parentPath, c, "$path", $$tsCfgValidator)""")
   }
 
   def basicValue(t: Type, value: String, useDurations: Boolean): String = t match {
-    case SIZE        ⇒ sizeValue(value)
-    case DURATION(q) ⇒ durationValue(value, q, useDurations)
-    case STRING   ⇒ '"' + escapeString(value) + '"'
-    case _        ⇒ value
+    case SIZE        => sizeValue(value)
+    case DURATION(q) => durationValue(value, q, useDurations)
+    case STRING      => s""""${escapeString(value)}""""
+    case _           => value
   }
 
   // https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
@@ -65,7 +65,7 @@ object tsConfigUtil {
       true
     }
     catch {
-      case NonFatal(_) ⇒ false
+      case NonFatal(_) => false
     }
   }
 
@@ -112,7 +112,7 @@ object tsConfigUtil {
       true
     }
     catch {
-      case NonFatal(_) ⇒ false
+      case NonFatal(_) => false
     }
   }
 

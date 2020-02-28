@@ -5,7 +5,7 @@ import tscfg.generators.tsConfigUtil
 import tscfg.model.durations.ms
 import tscfg.model.{DURATION, SIZE}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class ModelBuildResult(objectType: model.ObjectType,
                             warnings: List[buildWarnings.Warning])
@@ -44,7 +44,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
     val memberStructs = getMemberStructs(conf)
       // have the `@define`s be traversed first:
-      .sortWith { case (childStruct, s2) ⇒
+      .sortWith { case (childStruct, s2) =>
         if (childStruct.isLeaf) false
         else if (s2.isLeaf) true
         else {
@@ -54,7 +54,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         }
       }
 
-    val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct ⇒
+    val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct =>
       val name = childStruct.name
       val cv = conf.getValue(name)
 
@@ -63,25 +63,25 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
           val valueString = util.escapeValue(cv.unwrapped().toString)
 
           getTypeFromConfigValue(namespace, cv, valueString) match {
-            case typ: model.STRING.type ⇒
+            case typ: model.STRING.type =>
               namespace.resolveDefine(valueString) match {
-                case Some(ort) ⇒
+                case Some(ort) =>
                   (ort, false, None)
 
-                case None ⇒
+                case None =>
                   toAnnBasicType(valueString) match {
-                    case Some(annBasicType) ⇒
+                    case Some(annBasicType) =>
                       annBasicType
 
-                    case None ⇒
+                    case None =>
                       (typ, true, Some(valueString))
                   }
               }
 
-            case typ: model.BasicType ⇒
+            case typ: model.BasicType =>
               (typ, true, Some(valueString))
 
-            case typ ⇒
+            case typ =>
               (typ, false, None)
           }
         }
@@ -134,19 +134,19 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         name
       else
         s"$name:\n" +
-          members.map(e ⇒ indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
+          members.map(e => indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
     }
     // $COVERAGE-ON$
   }
 
   private def getMemberStructs(conf: Config): List[Struct] = {
-    val structs = mutable.HashMap[String, Struct]("" → Struct(""))
+    val structs = mutable.HashMap[String, Struct]("" -> Struct(""))
     def resolve(key: String): Struct = {
       if (!structs.contains(key)) structs.put(key, Struct(getSimple(key)))
       structs(key)
     }
 
-    conf.entrySet().asScala foreach { e ⇒
+    conf.entrySet().asScala foreach { e =>
       val path = e.getKey
       val leaf = Struct(path)
       doAncestorsOf(path, leaf)
@@ -218,11 +218,11 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         (parts(0), Some(parts(1)))
     }
 
-    model.recognizedAtomic.get(base) map { bt ⇒
+    model.recognizedAtomic.get(base) map { bt =>
       val basicType = bt match {
-        case DURATION(_) if qualification.isDefined ⇒
+        case DURATION(_) if qualification.isDefined =>
           DURATION(tsConfigUtil.unifyDuration(qualification.get))
-        case _ ⇒ bt
+        case _ => bt
       }
       (basicType, isOpt, defaultValue)
     }
@@ -246,13 +246,13 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       if (typ == model.STRING) {
 
         namespace.resolveDefine(valueString) match {
-          case Some(ort) ⇒
+          case Some(ort) =>
             ort
 
-          case None ⇒
+          case None =>
             // see possible type from the string literal:
             toAnnBasicType(valueString) match {
-              case Some((basicType, isOpt, defaultValue)) ⇒
+              case Some((basicType, isOpt, defaultValue)) =>
                 if (isOpt)
                   warns += OptListElemWarning(cv0.origin().lineNumber(), valueString)
 
@@ -261,7 +261,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
                 basicType
 
-              case None ⇒
+              case None =>
                 typ
             }
         }

@@ -14,8 +14,8 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   def getAllDefines: Map[String, Type] = allDefines.toMap
 
   def getPath: Seq[String] = parent match {
-    case None ⇒ Seq.empty
-    case Some(ns) ⇒ ns.getPath ++ Seq(simpleName)
+    case None => Seq.empty
+    case Some(ns) => ns.getPath ++ Seq(simpleName)
   }
 
   def getPathString: String = getPath.mkString(".")
@@ -40,8 +40,8 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   }
 
   private def resolvedFullPath(simpleName: String): String = parent match {
-    case None ⇒ simpleName
-    case Some(_) ⇒ s"$getPathString.$simpleName"
+    case None => simpleName
+    case Some(_) => s"$getPathString.$simpleName"
   }
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
