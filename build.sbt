@@ -69,7 +69,7 @@ pomExtra :=
       <name>Carlos Rueda</name>
       <url>http://carueda.info</url>
     </developer>
-  </developers>;
+  </developers>
 
 sonatypeProfileName := "com.github.carueda"
 
