@@ -12,9 +12,10 @@ import tscfg.util
   * backticks instead of replacing or removing the characters that would
   * make the resulting identifiers invalid.
   *
-  * @param useBackticks  False by default
+  * @param useBackticks False by default
   */
 class ScalaUtil(useBackticks: Boolean = false) {
+
   import ScalaUtil._
 
   /**
@@ -39,8 +40,8 @@ class ScalaUtil(useBackticks: Boolean = false) {
   /**
     * Returns a class name from the given symbol.
     * If useBackticks:
-    *   This is basically capitalizing the first character that
-    *   can be capitalized. If none, then a `U` is prepended.
+    * This is basically capitalizing the first character that
+    * can be capitalized. If none, then a `U` is prepended.
     * Otherwise:
     * Since underscores are specially used in generated code,
     * this method camelizes the symbol in case of any underscores.
@@ -79,23 +80,23 @@ object ScalaUtil {
     */
   val scalaReservedWords: List[String] = List(
     "_",
-    "abstract", "case",     "catch",   "class",   "def",
-    "do",       "else",     "extends", "false",   "final",
-    "finally",  "for",      "forSome", "if",      "implicit",
-    "import",   "lazy",     "match",   "new",     "null",
-    "object",   "override", "package", "private", "protected",
-    "return",   "sealed",   "super",   "this",    "throw",
-    "trait",    "try",      "true",    "type",    "val",
-    "var",      "while",    "with",    "yield"
+    "abstract", "case", "catch", "class", "def",
+    "do", "else", "extends", "false", "final",
+    "finally", "for", "forSome", "if", "implicit",
+    "import", "lazy", "match", "new", "null",
+    "object", "override", "package", "private", "protected",
+    "return", "sealed", "super", "this", "throw",
+    "trait", "try", "true", "type", "val",
+    "var", "while", "with", "yield"
   )
 
   val noArgMethodInScope: List[String] = List(
-      "clone",
-      "finalize",
-      "getClass",
-      "notify",
-      "notifyAll",
-      "toString",
-      "wait"
+    "clone",
+    "finalize",
+    "getClass",
+    "notify",
+    "notifyAll",
+    "toString",
+    "wait"
   )
 }

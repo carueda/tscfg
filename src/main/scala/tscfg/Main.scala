@@ -36,6 +36,7 @@ object Main {
        |  --java:getters        generate getters (see #31)       (false)
        |  --java:optionals      use optionals                    (false)
        |  --scala               generate scala code              (java)
+       |  --scala:2.12          generate code for scala 2.12     (2.13)
        |  --scala:bt            use backticks (see #30)          (false)
        |  --durations           use java.time.Duration           (false)
        |  --all-required        assume all properties are required (see #47)
@@ -49,11 +50,12 @@ object Main {
 
   case class CmdLineOpts(inputFilename: Option[String] = None,
                          packageName: String = defaultGenOpts.packageName,
-                         className: String =   defaultGenOpts.className,
+                         className: String = defaultGenOpts.className,
                          destDir: String = defaultDestDir,
                          assumeAllRequired: Boolean = false,
                          j7: Boolean = false,
                          language: String = "java",
+                         s12: Boolean = false,
                          useBackticks: Boolean = false,
                          genGetters: Boolean = false,
                          useOptionals: Boolean = false,
@@ -70,14 +72,16 @@ object Main {
       println(usage)
       sys.exit(0)
     }
+
     def traverseList(list: List[String], opts: CmdLineOpts = CmdLineOpts()): CmdLineOpts = {
       def chkVal(v: String): String = {
         if (!v.startsWith("-")) v
         else {
-          println( s"""error: argument looks like a switch: $v""")
+          println(s"""error: argument looks like a switch: $v""")
           sys.exit(0)
         }
       }
+
       list match {
         case "--spec" :: filename :: rest =>
           traverseList(rest, opts.copy(inputFilename = Some(chkVal(filename))))
@@ -100,6 +104,9 @@ object Main {
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
 
+        case "--scala:2.12" :: rest =>
+          traverseList(rest, opts.copy(s12 = true))
+
         case "--scala:bt" :: rest =>
           traverseList(rest, opts.copy(useBackticks = true))
 
@@ -109,7 +116,7 @@ object Main {
         case "--java:getters" :: rest =>
           traverseList(rest, opts.copy(genGetters = true))
 
-        case "--java:optionals" ::rest =>
+        case "--java:optionals" :: rest =>
           traverseList(rest, opts.copy(useOptionals = true))
 
         case "--durations" :: rest =>
@@ -127,11 +134,11 @@ object Main {
           traverseList(rest, opts)
 
         case "--scala:fp" :: rest =>
-          println( "ignoring obsolete option: --scala:fp")
+          println("ignoring obsolete option: --scala:fp")
           traverseList(rest, opts)
 
         case opt :: _ =>
-          println( s"""missing argument or unknown option: $opt""")
+          println(s"""missing argument or unknown option: $opt""")
           sys.exit(0)
 
         case Nil => opts
@@ -153,17 +160,18 @@ object Main {
     val ext = opts.language
 
     val inputFilename = opts.inputFilename.get
-    val destFilename  = s"${opts.destDir}/${opts.className}.$ext"
+    val destFilename = s"${opts.destDir}/${opts.className}.$ext"
     val destFile = new File(destFilename)
     val out = new PrintWriter(destFile)
 
     val genOpts = GenOpts(opts.packageName, opts.className,
-                          assumeAllRequired = opts.assumeAllRequired,
-                          j7 = opts.j7,
-                          useBackticks = opts.useBackticks,
-                          genGetters = opts.genGetters,
-                          useOptionals = opts.useOptionals,
-                          useDurations = opts.useDurations)
+      assumeAllRequired = opts.assumeAllRequired,
+      j7 = opts.j7,
+      s12 = opts.s12,
+      useBackticks = opts.useBackticks,
+      genGetters = opts.genGetters,
+      useOptionals = opts.useOptionals,
+      useDurations = opts.useDurations)
 
     println(s"parsing: $inputFilename")
     val source = io.Source.fromFile(new File(inputFilename))
@@ -187,7 +195,7 @@ object Main {
       case w => new PrintWriter(w)
     }
     val generator: Generator = opts.language match {
-      case "java"  => new JavaGen(genOpts)
+      case "java" => new JavaGen(genOpts)
       case "scala" => new ScalaGen(genOpts)
     }
     val results = generator.generate(objectType)
