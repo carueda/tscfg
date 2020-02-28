@@ -166,9 +166,12 @@ object Main {
                           useDurations = opts.useDurations)
 
     println(s"parsing: $inputFilename")
-    val source = io.Source.fromFile(new File(inputFilename)).mkString.trim
+    val source = io.Source.fromFile(new File(inputFilename))
+    val sourceStr = source.mkString.trim
 
-    val buildResult = ModelBuilder(source, assumeAllRequired = opts.assumeAllRequired)
+    source.close()
+
+    val buildResult = ModelBuilder(sourceStr, assumeAllRequired = opts.assumeAllRequired)
     val objectType = buildResult.objectType
 
     //println("\nobjectType:\n  |" + objectType.format().replaceAll("\n", "\n  |"))
