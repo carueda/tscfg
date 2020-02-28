@@ -1,10 +1,10 @@
-2020-02-27 - 0.9.96
+2020-02-28 - 0.9.96
+
+- publish v0.9.96 with new `--scala:2.12` flag. Thanks @johanneshiry!
 
 - some adjustments triggered by #59 "switch to scala 2.13 and remove deprecation warning for JavaConverters"
     - cross build to 2.13 (besides 2.12)
     - fix a bunch of warnings in general
-    - TODO generate scala code also for 2.13, unless a new flag is used to continue targetting 2.12
-      as proposed
 
 2019-10-07 - 0.9.95
 

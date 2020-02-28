@@ -484,7 +484,7 @@ private[scala] class Accessors {
     val scalaCollectionConverter = if (s12) "scala.collection.JavaConverters._" else "scala.jdk.CollectionConverters._"
     val methodDef =
       s"""  private def $methodName(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): scala.List[$scalaType] = {
-         |  import $scalaCollectionConverter
+         |    import $scalaCollectionConverter
          |    cl.asScala.map(cv => $elem).toList
          |  }""".stripMargin
     (methodName, methodDef)
