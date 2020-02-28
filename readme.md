@@ -197,6 +197,7 @@ Options (default):
   --java:getters        generate getters (see #31)       (false)
   --java:optionals      use optionals                    (false)
   --scala               generate scala code              (java)
+  --scala:2.12          generate code for scala 2.12     (2.13)
   --scala:bt            use backticks (see #30)          (false)
   --durations           use java.time.Duration           (false)
   --all-required        assume all properties are required (see #47)
@@ -294,7 +295,7 @@ The following basic types are supported:
 > **NOTE**
 > - please read `Optional<T>` instead of the `T` values in the
     java "opt" column above if using the `--java:optionals` flag.
-> - using the `--duration` flag, `java.time.Duration` is used instead of `long` / `Long`. See [durations](#durations) for further information. 
+> - using the `--duration` flag, `java.time.Duration` is used instead of `long` / `Long`. See [durations](#durations) for further information.
 
 
 #### size-in-bytes
@@ -335,7 +336,7 @@ durations {
 }
 ```
 Using the `--duration` flag, the reported value will be a `java.time.Duration` instead of a `long` / `Long` and the suffix will be ignored:
-`"duration:hours | 3day"` is `java.time.Duration.ofDays(3)` if value is missing or whatever is provided converted to a `java.time.Duration` 
+`"duration:hours | 3day"` is `java.time.Duration.ofDays(3)` if value is missing or whatever is provided converted to a `java.time.Duration`
 
 
 ### list type
@@ -434,7 +435,7 @@ a given configuration instance.
 
 ### shared object
 
-As of 0.9.94 there's initial, experimental support for shared objects (#54). 
+As of 0.9.94 there's initial, experimental support for shared objects (#54).
 This is exercised by using the `@define` annotation:
 
 ```properties
@@ -456,7 +457,7 @@ type itself. Then, the type can be referenced for other definitions.
 
 > Note: current support is in terms of the referenced object being always
 > *required*. `a: "Struct?"`, for example, is not supported.
-> Also, `@define` is only supported for an object, not for a basic type or list. 
+> Also, `@define` is only supported for an object, not for a basic type or list.
 
 ## configuration template
 

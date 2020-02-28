@@ -20,11 +20,11 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/example0.spec.conf")
       r.classNames === Set("ScalaExample0Cfg", "Service")
       r.fields === Map(
-        "service"  -> "ScalaExample0Cfg.Service",
-        "url"      -> "java.lang.String",
-        "debug"    -> "scala.Boolean",
-        "doLog"    -> "scala.Boolean",
-        "factor"   -> "scala.Double",
+        "service" -> "ScalaExample0Cfg.Service",
+        "url" -> "java.lang.String",
+        "debug" -> "scala.Boolean",
+        "doLog" -> "scala.Boolean",
+        "factor" -> "scala.Double",
         "poolSize" -> "scala.Int"
       )
     }
@@ -35,11 +35,11 @@ class ScalaMainSpec extends Specification {
           |}
         """.stripMargin
       ))
-      c.service.url      === "http://example.net/rest"
+      c.service.url === "http://example.net/rest"
       c.service.poolSize === 32
-      c.service.debug    === true
-      c.service.doLog    === false
-      c.service.factor   === 0.75
+      c.service.debug === true
+      c.service.doLog === false
+      c.service.factor === 0.75
     }
   }
 
@@ -58,34 +58,34 @@ class ScalaMainSpec extends Specification {
       r.fields.keySet === Set("server", "email", "main", "reals", "password", "foo")
     }
 
-/*
-    "example 1" in {
-      val c = ScalaIssue10Cfg(ConfigFactory.parseString(
-        """
-          |main = {
-          |  reals = [ { foo: 3.14 } ]
-          |}
-        """.stripMargin
-      ))
-      c.main.email must beNone
-      c.main.reals must beSome(List(ScalaIssue10Cfg.Main.Reals$Elm(foo = 3.14)))
-    }
+    /*
+        "example 1" in {
+          val c = ScalaIssue10Cfg(ConfigFactory.parseString(
+            """
+              |main = {
+              |  reals = [ { foo: 3.14 } ]
+              |}
+            """.stripMargin
+          ))
+          c.main.email must beNone
+          c.main.reals must beSome(List(ScalaIssue10Cfg.Main.Reals$Elm(foo = 3.14)))
+        }
 
-    "example 2" in {
-      val c = ScalaIssue10Cfg(ConfigFactory.parseString(
-        """
-          |main = {
-          |  email = {
-          |    server = "foo"
-          |    password = "pw"
-          |  }
-          |}
-          |""".stripMargin
-      ))
-      c.main.email must beSome(ScalaIssue10Cfg.Main.Email(password = "pw", server = "foo"))
-      c.main.reals must beNone
-    }
-*/
+        "example 2" in {
+          val c = ScalaIssue10Cfg(ConfigFactory.parseString(
+            """
+              |main = {
+              |  email = {
+              |    server = "foo"
+              |    password = "pw"
+              |  }
+              |}
+              |""".stripMargin
+          ))
+          c.main.email must beSome(ScalaIssue10Cfg.Main.Email(password = "pw", server = "foo"))
+          c.main.reals must beNone
+        }
+    */
   }
 
   "issue11" should {
@@ -163,10 +163,10 @@ class ScalaMainSpec extends Specification {
           |booleans: [true, false]
           |""".stripMargin
       ))
-      c.strings  === List("hello", "world", "true")
+      c.strings === List("hello", "world", "true")
       c.integers === List(List(1, 2, 3), List(4, 5))
-      c.doubles  === List(3.14, 2.7182, 1.618)
-      c.longs    === List(1, 9999999999L)
+      c.doubles === List(3.14, 2.7182, 1.618)
+      c.longs === List(1, 9999999999L)
       c.booleans === List(true, false)
     }
   }
@@ -190,7 +190,7 @@ class ScalaMainSpec extends Specification {
           |}
           |""".stripMargin
       ))
-      c.positions  === List(
+      c.positions === List(
         ScalaIssue15cCfg.Positions$Elm(
           attrs = List(List(ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 99))),
           lat = 1,
@@ -358,7 +358,7 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("ScalaIssue19Cfg")
       r.fields === Map(
-        "do_log"  -> "scala.Boolean",
+        "do_log" -> "scala.Boolean",
         "_$_foo_" -> "java.lang.String"
       )
     }
@@ -370,7 +370,7 @@ class ScalaMainSpec extends Specification {
           |"$_foo"  : some string
         """.stripMargin
       ))
-      c.do_log  === true
+      c.do_log === true
       c._$_foo_ === "some string"
     }
   }
@@ -421,7 +421,7 @@ class ScalaMainSpec extends Specification {
           | idleTimeout = 1 hour
         """.stripMargin
       ))
-      c.idleTimeout === 3600*1000
+      c.idleTimeout === 3600 * 1000
     }
   }
 
@@ -430,11 +430,11 @@ class ScalaMainSpec extends Specification {
       val r = ScalaGen.generate("example/issue23.spec.conf")
       r.classNames === Set("ScalaIssue23Cfg")
       r.fields === Map(
-        "sizeReq"    -> "scala.Long",
-        "sizeOpt"    -> "scala.Option[scala.Long]",
+        "sizeReq" -> "scala.Long",
+        "sizeOpt" -> "scala.Option[scala.Long]",
         "sizeOptDef" -> "scala.Long",
-        "sizes"      -> "scala.List[scala.Long]",
-        "sizes2"     -> "scala.List[scala.List[scala.Long]]"
+        "sizes" -> "scala.List[scala.Long]",
+        "sizes2" -> "scala.List[scala.List[scala.Long]]"
       )
     }
 
@@ -447,26 +447,26 @@ class ScalaMainSpec extends Specification {
           |sizes2  = [[ 1000, "64G" ], [ "16kB" ] ]
         """.stripMargin
       ))
-      c.sizeReq === 2048*1024
+      c.sizeReq === 2048 * 1024
       c.sizeOpt === Some(1024000)
       c.sizeOptDef === 1024
-      c.sizes === List(1000, 64*1024*1024*1024L, 16*1000)
+      c.sizes === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000)
       c.sizes2 === List(
-        List(1000, 64*1024*1024*1024L),
-        List(16*1000))
+        List(1000, 64 * 1024 * 1024 * 1024L),
+        List(16 * 1000))
     }
   }
 
   "issue30" should {
     "generate as indicated for useBackticks" in {
       val r = ScalaGen.generate("example/issue30.spec.conf",
-                                useBackticks = true)
+        useBackticks = true)
 
       r.classNames === Set("ScalaIssue30Cfg", "`Foo-object`")
       r.fields.size === 4
-      r.fields("`foo-object`" ) === "ScalaIssue30Cfg.`Foo-object`"
-      r.fields("`bar-baz`"    ) === "java.lang.String"
-      r.fields("`0`"          ) === "java.lang.String"
+      r.fields("`foo-object`") === "ScalaIssue30Cfg.`Foo-object`"
+      r.fields("`bar-baz`") === "java.lang.String"
+      r.fields("`0`") === "java.lang.String"
       r.fields("`other stuff`") === "scala.Int"
     }
 
@@ -518,6 +518,7 @@ class ScalaMainSpec extends Specification {
 
   "issue 36" should {
     def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
+
     "report full path for missing required parameter 'obj.foo.bar'" in {
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
@@ -537,6 +538,7 @@ class ScalaMainSpec extends Specification {
   "issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
       def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(""))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
@@ -552,6 +554,7 @@ class ScalaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
@@ -567,6 +570,7 @@ class ScalaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
@@ -574,6 +578,7 @@ class ScalaMainSpec extends Specification {
     }
     "fail with all entries missing in service object" in {
       def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString("service {}"))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           forall(List("url", "poolSize", "debug", "doLog", "factor")) { k =>
@@ -591,6 +596,7 @@ class ScalaMainSpec extends Specification {
           |  doLog = "str"
           |  factor = false
           |}""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           forall(List("poolSize", "debug", "doLog", "factor")) { k =>
@@ -603,6 +609,7 @@ class ScalaMainSpec extends Specification {
         """
           |service = 1
           |""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
@@ -701,10 +708,12 @@ class ScalaMainSpec extends Specification {
       val c = ScalaIssue55Cfg(ConfigFactory.parseString(""))
       c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
       c.regex2 === "foo bar: ([\\d]+)"
+
       def a: Unit = {
         java.util.regex.Pattern.compile(c.regex)
         java.util.regex.Pattern.compile(c.regex2)
       }
+
       a must not(throwA[java.util.regex.PatternSyntaxException])
     }
   }
@@ -717,5 +726,19 @@ class ScalaMainSpec extends Specification {
       c.c === "'simply quoted' string"
       c.d === "some \b control \t \\ chars \r\f"
     }
+  }
+
+  "issue 59 - scala 2.12 and 2.13 switch" should {
+    "generate a scala 2.13 config with corresponding imports if not indicated differently" in {
+      val r = ScalaGen.generate("example/issue59.spec.conf")
+      r.code.split("\n")(17).trim == "import scala.jdk.CollectionConverters._"
+    }
+
+    "generate a scala 2.12 config with corresponding imports if --scala:2.12 is provided" in {
+      val r = ScalaGen.generate("example/issue59.spec.conf",
+        s12 = true)
+      r.code.split("\n")(17).trim == "import scala.collection.JavaConverters._"
+    }
+
   }
 }
