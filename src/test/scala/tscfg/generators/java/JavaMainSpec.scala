@@ -14,7 +14,7 @@ import model.implicits._
 
 
 class JavaMainSpec extends Specification {
-  import scala.collection.JavaConverters._
+  import scala.jdk.CollectionConverters._
 
   "literal values as types" should {
     "generate primitive types with given values as defaults" in {
