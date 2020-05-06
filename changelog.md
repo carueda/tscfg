@@ -1,3 +1,9 @@
+2020-05-06
+
+- add a test program re array parsing in LB Config while replying to #61 "Default value for List type"
+
+        > runMain tscfg.example.ConfigArrays
+
 2020-02-28 - 0.9.96
 
 - publish v0.9.96 with new `--scala:2.12` flag. Thanks @johanneshiry!
