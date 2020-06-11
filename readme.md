@@ -204,6 +204,7 @@ Options (default):
   --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
   --tpl.cp <string>     prefix for template comments     ("##")
+  --withoutTimestamp    generate header w/out timestamp  (false)
 Output is written to $destDir/$className.ext
 ```
 
