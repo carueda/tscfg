@@ -1,3 +1,7 @@
+2020-06-11 - 0.9.97
+
+- new `--withoutTimestamp` option, thanks @JustinPihony.
+
 2020-05-06
 
 - add a test program re array parsing in LB Config while replying to #61 "Default value for List type"
