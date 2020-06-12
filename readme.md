@@ -474,7 +474,7 @@ and even put them in my own classes**
 Sure. However, as the number of configuration properties and levels of nesting increase,
 the benefits of automated generation of the typesafe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
-–worth emphasizing– based on an explicit *schema* for the configuration.
+–worth emphasizing– **based on an explicit *schema* for the configuration.**
 
 **Any tscfg best practice for my development workflow?**
 
