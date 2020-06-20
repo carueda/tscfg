@@ -13,6 +13,10 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def getAllDefines: Map[String, Type] = allDefines.toMap
 
+  def getDefine(defineName: String): Option[Type] = allDefines.toMap.get(defineName)
+
+  def isParent(parentName: String): Boolean = defineParents.contains(parentName)
+
   def getPath: Seq[String] = parent match {
     case None => Seq.empty
     case Some(ns) => ns.getPath ++ Seq(simpleName)
@@ -23,17 +27,21 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   def extend(simpleName: String): Namespace = new Namespace(simpleName, Some(this), allDefines)
 
   private val defineNames = collection.mutable.HashSet[String]()
+  private val defineParents = collection.mutable.HashSet[String]()
 
-  def addDefine(simpleName: String, t: Type): Unit = {
+  def addDefine(simpleName: String, t: Type, isParent: Boolean = false): Unit = {
+
+    /* sanity check */
     assert(!simpleName.contains("."))
     assert(simpleName.nonEmpty)
 
-    if (defineNames.contains(simpleName)) {
+    if (defineNames.contains(simpleName) || defineParents.contains(simpleName)) {
       val ns = if (getPath.nonEmpty) s"'$getPathString'" else "(root)"
       println(s"WARN: duplicate @define '$simpleName' in namespace $ns. Ignoring previous entry")
       // TODO include in build warnings
     }
 
+    if (isParent) defineParents.add(simpleName)
     defineNames.add(simpleName)
 
     allDefines.update(resolvedFullPath(simpleName), t)

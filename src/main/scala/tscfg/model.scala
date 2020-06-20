@@ -2,9 +2,12 @@ package tscfg
 
 import tscfg.model.durations._
 
+import scala.util.matching.Regex
+
 object model {
 
   object implicits {
+
     import scala.language.implicitConversions
 
     implicit def type2ann(t: Type): AnnType = AnnType(t)
@@ -16,49 +19,65 @@ object model {
 
       def %(t: Type): AnnType = AnnType(t, comments = Some(s))
     }
+
   }
 
   object durations {
+
     sealed abstract class DurationQualification
 
-    case object ns      extends DurationQualification
-    case object us      extends DurationQualification
-    case object ms      extends DurationQualification
-    case object second  extends DurationQualification
-    case object minute  extends DurationQualification
-    case object hour    extends DurationQualification
-    case object day     extends DurationQualification
+    case object ns extends DurationQualification
+
+    case object us extends DurationQualification
+
+    case object ms extends DurationQualification
+
+    case object second extends DurationQualification
+
+    case object minute extends DurationQualification
+
+    case object hour extends DurationQualification
+
+    case object day extends DurationQualification
+
   }
 
   sealed abstract class Type
 
   sealed abstract class BasicType extends Type
 
-  case object STRING    extends BasicType
-  case object INTEGER   extends BasicType
-  case object LONG      extends BasicType
-  case object DOUBLE    extends BasicType
-  case object BOOLEAN   extends BasicType
-  case object SIZE      extends BasicType
+  case object STRING extends BasicType
+
+  case object INTEGER extends BasicType
+
+  case object LONG extends BasicType
+
+  case object DOUBLE extends BasicType
+
+  case object BOOLEAN extends BasicType
+
+  case object SIZE extends BasicType
+
   case class DURATION(q: DurationQualification) extends BasicType
 
   val recognizedAtomic: Map[String, BasicType] = Map(
-    "string"    -> STRING,
-    "int"       -> INTEGER,
-    "integer"   -> INTEGER,
-    "long"      -> LONG,
-    "double"    -> DOUBLE,
-    "boolean"   -> BOOLEAN,
-    "size"      -> SIZE,
-    "duration"  -> DURATION(ms)
+    "string" -> STRING,
+    "int" -> INTEGER,
+    "integer" -> INTEGER,
+    "long" -> LONG,
+    "double" -> DOUBLE,
+    "boolean" -> BOOLEAN,
+    "size" -> SIZE,
+    "duration" -> DURATION(ms)
   )
 
   case class ListType(t: Type) extends Type
 
   case class AnnType(t: Type,
-                     optional:      Boolean = false,
-                     default:       Option[String] = None,
-                     comments:      Option[String] = None
+                     optional: Boolean = false,
+                     default: Option[String] = None,
+                     comments: Option[String] = None,
+                     parentClassMembers: Option[Map[String, model.AnnType]] = None
                     ) {
 
     def |(d: String): AnnType = copy(default = Some(d))
@@ -66,7 +85,20 @@ object model {
     def unary_~ : AnnType = copy(optional = true)
 
     val isDefine: Boolean = comments.exists(_.trim.startsWith("@define"))
+
+    val isParent: Boolean = comments.exists(_.trim.equals("@define_parent"))
+
+    val extendsPattern: Regex = """@\w+ extends ([a-zA-Z0-9]+)""".r
+
+    val parent: Option[String] = comments.map {
+      case extendsPattern(s) =>
+        s.trim
+      case _ => ""
+    }.map(_.trim).filterNot(_.isEmpty)
+
   }
+
+
 
   sealed abstract class ObjectAbsType extends Type
 
@@ -87,7 +119,7 @@ object model {
         val adjName = if (k.contains("$")) k else k.replaceAll("^\"|\"$", "")
         adjName.replaceAll("^\"|\"$", "") -> v
       }
-      ObjectType(Map(noQuotes : _*))
+      ObjectType(Map(noQuotes: _*))
     }
   }
 
@@ -96,11 +128,11 @@ object model {
     val IND = "    "
 
     def format(typ: Type, ind: String = ""): String = typ match {
-      case b:BasicType => b.toString
+      case b: BasicType => b.toString
 
       case ListType(t) => s"[ ${format(t, ind)} ]"
 
-      case o:ObjectType =>
+      case o: ObjectType =>
         val symbols = o.members.keys.toList.sorted
         val membersStr = symbols.map { symbol =>
           val a = o.members(symbol)
@@ -119,20 +151,22 @@ object model {
           val dfl = if (a.default.nonEmpty) s" default='${a.default.get}'" else ""
 
           cmn +
-          symbol + ": " + opt + typ + dfl
+            symbol + ": " + opt + typ + dfl
         }.mkString("\n" + ind + IND)
 
         s"""{
            |$ind$IND$membersStr
            |$ind}""".stripMargin
 
-      case o:ObjectRefType => o.toString
+      case o: ObjectRefType => o.toString
     }
   }
+
   // $COVERAGE-ON$
 }
 
 object modelMain {
+
   import model._
   import model.implicits._
 
@@ -149,7 +183,7 @@ object modelMain {
         ))
       )),
       "baz" := "comments for baz..." % ~ObjectType(
-        "b" := ~ STRING | "some value",
+        "b" := ~STRING | "some value",
         "a" := LONG | "99999999",
         "i" := "i, an integer" % INTEGER
       ),
@@ -158,5 +192,6 @@ object modelMain {
 
     println(model.util.format(objectType))
   }
+
   // $COVERAGE-ON$
 }

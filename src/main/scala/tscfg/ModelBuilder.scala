@@ -3,7 +3,7 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.durations.ms
-import tscfg.model.{DURATION, SIZE}
+import tscfg.model.{DURATION, ObjectType, SIZE}
 
 import scala.jdk.CollectionConverters._
 
@@ -11,6 +11,7 @@ case class ModelBuildResult(objectType: model.ObjectType,
                             warnings: List[buildWarnings.Warning])
 
 object buildWarnings {
+
   sealed abstract class Warning(ln: Int,
                                 src: String,
                                 msg: String = "") {
@@ -27,9 +28,11 @@ object buildWarnings {
 
   case class DefaultListElemWarning(ln: Int, default: String, elemType: String) extends
     Warning(ln, default, s"ignoring default value='$default' in list's element type: $elemType")
+
 }
 
 class ModelBuilder(assumeAllRequired: Boolean = false) {
+
   import collection._
   import buildWarnings._
 
@@ -99,25 +102,46 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       val adjName = if (name.contains("$")) name else name.replaceAll("^\"|\"$", "")
 
       // effective optional and default:
-      val (effOptional, effDefault)  = if (assumeAllRequired)
+      val (effOptional, effDefault) = if (assumeAllRequired)
         (false, None) // that is, all strictly required.
-        // A possible variation: allow the `@optional` annotation to still take effect:
-        //(optFromComments, if (optFromComments) default else None)
+      // A possible variation: allow the `@optional` annotation to still take effect:
+      //(optFromComments, if (optFromComments) default else None)
       else
-        (optional || optFromComments, default)
+      (optional || optFromComments, default)
 
       //println(s"ModelBuilder: effOptional=$effOptional  effDefault=$effDefault " +
       //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
       //  s"adjName=$adjName")
 
+      /* get the parent class if any*/
+      val parentClassName = commentsOpt.map(_.replaceAll("@define", "")
+        .replaceAll("extends", "")).map(_.trim()).filterNot(_.isEmpty())
+
+      val parentClassMembers: Option[Predef.Map[String, model.AnnType]] = parentClassName.flatMap(
+        parentName => {
+          if(namespace.isParent(parentName)){
+            // valid parent name
+            namespace.getDefine(parentName).map {
+              case objType: ObjectType =>
+                // sanity check to see if this class is defined as parent class
+                objType.members
+              case _ => Map.empty[String, model.AnnType]
+            }
+          } else{
+            // parent class might be defined, but not as parent -> error // todo handling JH
+            None
+          }
+        })
+
       val annType = model.AnnType(childType,
-        optional      = effOptional,
-        default       = effDefault,
-        comments      = commentsOpt
+        optional = effOptional,
+        default = effDefault,
+        comments = commentsOpt,
+        parentClassMembers = parentClassMembers
       )
 
-      if (annType.isDefine) {
-        namespace.addDefine(name, childType)
+      if(annType.isDefine){
+        namespace.addDefine(name, childType, annType.isParent)
       }
 
       adjName -> annType
@@ -128,6 +152,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
     def isLeaf: Boolean = members.isEmpty
+
     // $COVERAGE-OFF$
     def format(indent: String = ""): String = {
       if (members.isEmpty)
@@ -136,11 +161,13 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         s"$name:\n" +
           members.map(e => indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
     }
+
     // $COVERAGE-ON$
   }
 
   private def getMemberStructs(conf: Config): List[Struct] = {
     val structs = mutable.HashMap[String, Struct]("" -> Struct(""))
+
     def resolve(key: String): Struct = {
       if (!structs.contains(key)) structs.put(key, Struct(getSimple(key)))
       structs(key)
@@ -182,12 +209,12 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private def getTypeFromConfigValue(namespace: Namespace, cv: ConfigValue, valueString: String): model.Type = {
     import ConfigValueType._
     cv.valueType() match {
-      case STRING  => model.STRING
+      case STRING => model.STRING
       case BOOLEAN => model.BOOLEAN
-      case NUMBER  => numberType(cv.unwrapped().toString)
-      case LIST    => listType(namespace, cv.asInstanceOf[ConfigList])
-      case OBJECT  => objType(namespace, cv.asInstanceOf[ConfigObject])
-      case NULL    => throw new AssertionError("null unexpected")
+      case NUMBER => numberType(cv.unwrapped().toString)
+      case LIST => listType(namespace, cv.asInstanceOf[ConfigList])
+      case OBJECT => objType(namespace, cv.asInstanceOf[ConfigObject])
+      case NULL => throw new AssertionError("null unexpected")
     }
   }
 
@@ -281,19 +308,19 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       model.INTEGER
     }
     catch {
-      case _:NumberFormatException =>
+      case _: NumberFormatException =>
         try {
           valueString.toLong
           model.LONG
         }
         catch {
-          case _:NumberFormatException =>
+          case _: NumberFormatException =>
             try {
               valueString.toDouble
               model.DOUBLE
             }
             catch {
-              case _:NumberFormatException => throw new AssertionError()
+              case _: NumberFormatException => throw new AssertionError()
             }
         }
     }
@@ -301,6 +328,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 }
 
 object ModelBuilder {
+
   import java.io.File
 
   import com.typesafe.config.ConfigFactory
@@ -320,5 +348,6 @@ object ModelBuilder {
     println("objectType:")
     println(model.util.format(result.objectType))
   }
+
   // $COVERAGE-ON$
 }
