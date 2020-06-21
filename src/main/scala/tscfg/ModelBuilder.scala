@@ -3,7 +3,7 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.durations.ms
-import tscfg.model.{DURATION, ObjectType, SIZE}
+import tscfg.model.{AbstractObjectType, AnnType, DURATION, ObjectType, SIZE}
 
 import scala.jdk.CollectionConverters._
 
@@ -113,41 +113,63 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
       //  s"adjName=$adjName")
 
-      /* get the parent class if any*/
-      val parentClassName = commentsOpt.map(_.replaceAll("@define", "")
-        .replaceAll("extends", "")).map(_.trim()).filterNot(_.isEmpty())
+      /* get the parent class members, if any*/
+      val parentClassMembers = this.parentClassMembers(commentsOpt, namespace)
 
-      val parentClassMembers: Option[Predef.Map[String, model.AnnType]] = parentClassName.flatMap(
-        parentName => {
-          if(namespace.isParent(parentName)){
-            // valid parent name
-            namespace.getDefine(parentName).map {
-              case objType: ObjectType =>
-                // sanity check to see if this class is defined as parent class
-                objType.members
-              case _ => Map.empty[String, model.AnnType]
-            }
-          } else{
-            // parent class might be defined, but not as parent -> error // todo handling JH
-            None
-          }
-        })
+      /* build the annType  */
+      val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, parentClassMembers)
 
-      val annType = model.AnnType(childType,
-        optional = effOptional,
-        default = effDefault,
-        comments = commentsOpt,
-        parentClassMembers = parentClassMembers
-      )
-
-      if(annType.isDefine){
+      if (annType.isDefine) {
         namespace.addDefine(name, childType, annType.isParent)
       }
 
       adjName -> annType
 
     }.toMap
+
     model.ObjectType(members)
+  }
+
+  private def buildAnnType(childType: model.Type, effOptional:Boolean, effDefault:Option[String],
+                           commentsOpt:Option[String],
+                           parentClassMembers:Option[Predef.Map[String, model.AnnType]]):AnnType ={
+
+    // if this class is a parent class (abstract class or interface) this is indicated by the childType object
+    // that is passed into the AnnType instance that is returned
+    val updatedChildType = childType match {
+      case objType: ObjectType =>
+        if(commentsOpt.exists(AnnType.isParent))
+          AbstractObjectType(objType.members) else objType
+      case other => other
+    }
+
+    model.AnnType(
+      updatedChildType,
+      optional = effOptional,
+      default = effDefault,
+      comments = commentsOpt,
+      parentClassMembers = parentClassMembers
+    )
+  }
+
+  private def parentClassMembers(commentsOpt: Option[String], namespace: Namespace):
+  Option[Predef.Map[String, model.AnnType]] = {
+
+    AnnType.parentClassName(commentsOpt).flatMap(
+      parentName => {
+        // sanity check to see if this class is defined as parent class
+        if (namespace.isParent(parentName)) {
+          // valid parent name
+          namespace.getDefine(parentName).map {
+            case objType: ObjectType =>
+              objType.members
+            case _ => Map.empty[String, model.AnnType]
+          }
+        } else {
+          // parent class might be defined, but not as parent -> error // todo handling JH
+          None
+        }
+      })
   }
 
   private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
@@ -213,7 +235,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       case BOOLEAN => model.BOOLEAN
       case NUMBER => numberType(cv.unwrapped().toString)
       case LIST => listType(namespace, cv.asInstanceOf[ConfigList])
-      case OBJECT => objType(namespace, cv.asInstanceOf[ConfigObject])
+      case OBJECT =>
+        objType(namespace, cv.asInstanceOf[ConfigObject])
       case NULL => throw new AssertionError("null unexpected")
     }
   }

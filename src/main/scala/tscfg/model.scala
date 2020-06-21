@@ -73,28 +73,41 @@ object model {
 
   case class ListType(t: Type) extends Type
 
-  case class AnnType(t: Type,
+  final case object AnnType{
+
+    val extendsPattern: Regex = """@\w+ extends ([a-zA-Z0-9]+)""".r
+
+    def isDefine(commentString: String): Boolean = commentString.trim.startsWith("@define")
+
+    def isParent(commentString: String): Boolean = commentString.trim.equals("@define_abstract")
+
+    def parentClassName(comments: Option[String]): Option[String] = {
+      comments.map {
+        case extendsPattern(s) =>
+          s.trim
+        case _ => ""
+      }.map(_.trim).filterNot(_.isEmpty)
+    }
+
+  }
+
+  final case class AnnType(t: Type,
                      optional: Boolean = false,
                      default: Option[String] = None,
                      comments: Option[String] = None,
                      parentClassMembers: Option[Map[String, model.AnnType]] = None
                     ) {
 
+
     def |(d: String): AnnType = copy(default = Some(d))
 
     def unary_~ : AnnType = copy(optional = true)
 
-    val isDefine: Boolean = comments.exists(_.trim.startsWith("@define"))
+    val isDefine: Boolean = comments.exists(AnnType.isDefine)
 
-    val isParent: Boolean = comments.exists(_.trim.equals("@define_parent"))
+    val isParent: Boolean = comments.exists(AnnType.isParent)
 
-    val extendsPattern: Regex = """@\w+ extends ([a-zA-Z0-9]+)""".r
-
-    val parent: Option[String] = comments.map {
-      case extendsPattern(s) =>
-        s.trim
-      case _ => ""
-    }.map(_.trim).filterNot(_.isEmpty)
+    val parent: Option[String] = AnnType.parentClassName(comments) // todo JH rename to parentClassName
 
   }
 
@@ -103,6 +116,8 @@ object model {
   sealed abstract class ObjectAbsType extends Type
 
   case class ObjectType(members: Map[String, AnnType] = Map.empty) extends ObjectAbsType
+
+  case class AbstractObjectType(members:Map[String, AnnType] = Map.empty) extends ObjectAbsType
 
   case class ObjectRefType(namespace: Namespace, simpleName: String) extends ObjectAbsType {
     override def toString: String = s"ObjectRefType(namespace='${namespace.getPathString}', simpleName='$simpleName')"
