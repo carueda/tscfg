@@ -107,7 +107,7 @@ object model {
 
     val isParent: Boolean = comments.exists(AnnType.isParent)
 
-    val parent: Option[String] = AnnType.parentClassName(comments) // todo JH rename to parentClassName
+    val abstractClass: Option[String] = AnnType.parentClassName(comments)
 
   }
 
