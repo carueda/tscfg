@@ -4,6 +4,8 @@ import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, ObjectType, SIZE}
+import tscfg.tmp.TestConfig
+import tscfg.tmp.TestConfig.BaseModelConfig
 
 import scala.jdk.CollectionConverters._
 
@@ -120,25 +122,27 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, parentClassMembers)
 
       if (annType.isDefine) {
-        namespace.addDefine(name, childType, annType.isParent)
+        namespace.addDefine(name, annType.t, annType.isParent)
       }
 
       adjName -> annType
 
     }.toMap
 
-    model.ObjectType(members)
+    /* filter abstract members from root object as they don't require an instantiation */
+    model.ObjectType(members.filterNot(fullPathWithObj =>
+      fullPathWithObj._2.default.exists(namespace.isAbstractClassDefine)))
   }
 
-  private def buildAnnType(childType: model.Type, effOptional:Boolean, effDefault:Option[String],
-                           commentsOpt:Option[String],
-                           parentClassMembers:Option[Predef.Map[String, model.AnnType]]):AnnType ={
+  private def buildAnnType(childType: model.Type, effOptional: Boolean, effDefault: Option[String],
+                           commentsOpt: Option[String],
+                           parentClassMembers: Option[Predef.Map[String, model.AnnType]]): AnnType = {
 
     // if this class is a parent class (abstract class or interface) this is indicated by the childType object
     // that is passed into the AnnType instance that is returned
     val updatedChildType = childType match {
       case objType: ObjectType =>
-        if(commentsOpt.exists(AnnType.isParent))
+        if (commentsOpt.exists(AnnType.isParent))
           AbstractObjectType(objType.members) else objType
       case other => other
     }
@@ -158,10 +162,10 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     AnnType.parentClassName(commentsOpt).flatMap(
       parentName => {
         // sanity check to see if this class is defined as parent class
-        if (namespace.isParent(parentName)) {
+        if (namespace.isAbstractClassDefine(parentName)) {
           // valid parent name
           namespace.getDefine(parentName).map {
-            case objType: ObjectType =>
+            case objType: AbstractObjectType =>
               objType.members
             case _ => Map.empty[String, model.AnnType]
           }
@@ -235,8 +239,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       case BOOLEAN => model.BOOLEAN
       case NUMBER => numberType(cv.unwrapped().toString)
       case LIST => listType(namespace, cv.asInstanceOf[ConfigList])
-      case OBJECT =>
-        objType(namespace, cv.asInstanceOf[ConfigObject])
+      case OBJECT => objType(namespace, cv.asInstanceOf[ConfigObject])
       case NULL => throw new AssertionError("null unexpected")
     }
   }

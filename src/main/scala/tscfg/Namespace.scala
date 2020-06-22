@@ -1,6 +1,6 @@
 package tscfg
 
-import tscfg.model.{ObjectRefType, Type}
+import tscfg.model.{AbstractObjectType, ObjectRefType, Type}
 
 object Namespace {
   /** Returns a new, empty root namespace. */
@@ -15,7 +15,15 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def getDefine(defineName: String): Option[Type] = allDefines.toMap.get(defineName)
 
-  def isParent(parentName: String): Boolean = defineParents.contains(parentName)
+  def isAbstractClassDefine(parentName: String): Boolean = {
+    allDefines.get(parentName) match {
+      case Some(modelType) => modelType match {
+        case _:AbstractObjectType => true
+        case _ => false
+      }
+      case None => false
+    }
+  }
 
   def getPath: Seq[String] = parent match {
     case None => Seq.empty
@@ -27,7 +35,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   def extend(simpleName: String): Namespace = new Namespace(simpleName, Some(this), allDefines)
 
   private val defineNames = collection.mutable.HashSet[String]()
-  private val defineParents = collection.mutable.HashSet[String]()
+  private val defineAbstractClassNames = collection.mutable.HashSet[String]()
 
   def addDefine(simpleName: String, t: Type, isParent: Boolean = false): Unit = {
 
@@ -35,13 +43,14 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
     assert(!simpleName.contains("."))
     assert(simpleName.nonEmpty)
 
-    if (defineNames.contains(simpleName) || defineParents.contains(simpleName)) {
+    if (defineNames.contains(simpleName) || defineAbstractClassNames.contains(simpleName)) {
       val ns = if (getPath.nonEmpty) s"'$getPathString'" else "(root)"
       println(s"WARN: duplicate @define '$simpleName' in namespace $ns. Ignoring previous entry")
       // TODO include in build warnings
     }
 
-    if (isParent) defineParents.add(simpleName)
+    if (isParent)
+      defineAbstractClassNames.add(simpleName)
     defineNames.add(simpleName)
 
     allDefines.update(resolvedFullPath(simpleName), t)
@@ -53,7 +62,9 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   }
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
-    if (defineNames.contains(name))
+    if(defineAbstractClassNames.contains(name))
+        None // if the string nam is an abstract class no ObjectRefType is needed
+    else if (defineNames.contains(name))
       Some(ObjectRefType(this, name))
     else
       parent.flatMap(_.resolveDefine(name))
