@@ -149,7 +149,7 @@ object model {
 
       case ListType(t) => s"[ ${format(t, ind)} ]"
 
-      case o: ObjectType =>
+      case o: ObjectRealType =>
         val symbols = o.members.keys.toList.sorted
         val membersStr = symbols.map { symbol =>
           val a = o.members(symbol)

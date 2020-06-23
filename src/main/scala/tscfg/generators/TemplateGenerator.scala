@@ -9,14 +9,14 @@ case class TemplateOpts(indent:        String = "  ",
 class TemplateGenerator(opts: TemplateOpts) {
   def generate(o: ObjectType): String = genObjectTypeMembers(o)
 
-  private def genObjectType(o: ObjectType): String = {
+  private def genObjectType(o: ObjectRealType): String = {
     val members = opts.indent + genObjectTypeMembers(o).replaceAll("\n", "\n" + opts.indent)
     s"""{
        |$members
        |}""".stripMargin
   }
 
-  private def genObjectTypeMembers(o: ObjectType): String = {
+  private def genObjectTypeMembers(o: ObjectRealType): String = {
     val symbols = o.members.keys.toList.sorted
     symbols.map { symbol =>
       val a = o.members(symbol)
@@ -67,6 +67,9 @@ class TemplateGenerator(opts: TemplateOpts) {
     case o:ObjectType =>
       (genObjectType(o), abbrevObject)
 
+    case aot: AbstractObjectType =>
+      (genObjectType(aot), abbrevAbsObject)
+
     case ort:ObjectRefType =>
       (ort.toString, abbrevObjectRef)
 
@@ -80,9 +83,10 @@ class TemplateGenerator(opts: TemplateOpts) {
   }
 
   private def isBasicAbbrev(abbrev: String): Boolean =
-    abbrev != abbrevObject && !abbrev.startsWith(abbrevListOf)
+    abbrev != abbrevObject && abbrev != abbrevAbsObject  && !abbrev.startsWith(abbrevListOf)
 
   private val abbrevObject = "object"
+  private val abbrevAbsObject = "abstract class"
   private val abbrevObjectRef = "ref to object"
   private val abbrevListOf = "list of"
 
