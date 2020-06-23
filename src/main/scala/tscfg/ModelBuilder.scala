@@ -170,7 +170,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
             case _ => Map.empty[String, model.AnnType]
           }
         } else {
-          // parent class might be defined, but not as parent -> error // todo handling JH
+          // parent class might be defined, but not as parent -> no processing
           None
         }
       })

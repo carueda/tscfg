@@ -26,118 +26,6 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     genResults.copy(code = definition)
   }
 
-  def generateForAbstractObj(aot: AbstractObjectType,
-                             classNamePrefixOpt: Option[String],
-                             className: String): Res = {
-
-    val classNameAdjusted = adjustClassName(className)
-
-    genResults = genResults.copy(classNames = genResults.classNames + classNameAdjusted)
-
-    val symbols = aot.members.keys.toList.sorted
-    symbols.foreach(methodNames.checkUserSymbol)
-
-    val results = symbols.map { symbol =>
-      val a = aot.members(symbol)
-      val res = generate(a.t,
-        classNamePrefixOpt = Some(classNameAdjusted + "."),
-        className = javaUtil.getClassName(symbol),
-        abstractClassName = a.abstractClass
-      )
-      (symbol, res, a)
-    }
-
-    val classDeclMembers = results.map { case (symbol, res, a) =>
-      val memberType = res.javaType
-      val typ = if (a.optional && a.default.isEmpty) {
-        if (genOpts.useOptionals) s"java.util.Optional<${toObjectType(memberType)}>" else s"${toObjectType(memberType)}"
-      }
-      else {
-        memberType
-      }
-      val javaId = javaIdentifier(symbol)
-      (typ, javaId, a)
-    }
-
-    val classDeclMembersStr = classDeclMembers.flatMap { case (typ, javaId, a) =>
-      if (a.isDefine) None
-      else Some {
-        val type_ = a.t match {
-          case ObjectRefType(ns, simpleName) => simpleName
-          case _ => typ
-        }
-        genResults = genResults.copy(fields = genResults.fields + (javaId -> type_.toString))
-        s"public final $type_ $javaId;" + dbg("<decl>")
-      }
-    }.mkString("\n  ")
-
-    val classMemberGettersStr = if (genOpts.genGetters) {
-      classDeclMembers.map { case (typ, javaId, _) =>
-        val getter = s"get${javaId.capitalize}"
-        genResults = genResults.copy(getters = genResults.getters + (getter -> typ.toString))
-        s"public final $typ $getter() { return $javaId; }"
-      }.mkString("\n  ", "\n  ", "")
-    }
-    else ""
-
-    val membersStr = {
-      val defined = results.map(_._2.definition).filter(_.nonEmpty)
-      if (defined.isEmpty) "" else {
-        defined.map(_.replaceAll("\n", "\n  ")).mkString("\n  ")
-      }
-    }
-
-    val (ctorParams, errHandlingDecl, errHandlingDispatch) = (
-      "com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator",
-      "",
-      ""
-    )
-
-    implicit val listAccessors = collection.mutable.LinkedHashMap[String, String]()
-
-    val ctorMembersStr = results.flatMap { case (symbol, res, a) =>
-      if (a.isDefine) None
-      else Some {
-        val javaId = javaIdentifier(symbol)
-        "this." + javaId + " = " + instance(a, res, path = escapeString(symbol)) + ";"
-      }
-    }.mkString("\n    ")
-
-    val elemAccessorsStr = {
-      val objOnes = if (listAccessors.isEmpty) "" else {
-        "\n" + listAccessors.keys.toList.sorted.map { methodName =>
-          listAccessors(methodName)
-        }.mkString("\n")
-      }
-      val rootOnes =
-        if (rootListAccessors.isEmpty) "" else {
-          "\n\n" + rootListAccessors.keys.toList.sorted.map { methodName =>
-            rootListAccessors(methodName)
-          }.mkString("\n")
-        }
-
-      objOnes + rootOnes
-    }
-
-
-    val classStr = {
-      s"""private abstract static class $classNameAdjusted {
-         |  $classDeclMembersStr$classMemberGettersStr
-         |  $membersStr
-         |  public $classNameAdjusted($ctorParams) {
-         |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
-         |  }$elemAccessorsStr
-         |}
-         |""".stripMargin
-    }
-
-    val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted + dbg("<Y>")
-    Res(aot,
-      javaType = BaseJavaType(baseType),
-      definition = classStr
-    )
-  }
-
   private def generate(typ: Type,
                        classNamePrefixOpt: Option[String],
                        className: String,
@@ -145,14 +33,15 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType => generateForObj(ot, classNamePrefixOpt, className, abstractClassName = abstractClassName)
-    case ot: ObjectRefType => generateForObjRef(ot)
     case aot: AbstractObjectType =>
-      generateForAbstractObj(aot, classNamePrefixOpt, className);
+      generateForObj(aot, classNamePrefixOpt, className);
+    case ot: ObjectRefType => generateForObjRef(ot)
     case lt: ListType => generateForList(lt, classNamePrefixOpt, className)
     case bt: BasicType => generateForBasic(bt)
   }
 
-  private def generateForObj(ot: ObjectType,
+
+  private def generateForObj(ot: ObjectRealType,
                              classNamePrefixOpt: Option[String] = None,
                              className: String,
                              isRoot: Boolean = false,
@@ -265,17 +154,31 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val extendsString = abstractClassName.map("extends " + _).getOrElse("")
     val superString = abstractClassName.map(_ => "super(c, parentPath, $tsCfgValidator);").getOrElse("") // if parent class name is defined a super call is needed
 
-    val classStr = {
-      s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted $extendsString {
-         |  $classDeclMembersStr$classMemberGettersStr
-         |  $membersStr
-         |  public $classNameAdjusted($ctorParams) {
-         |    $superString
-         |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
-         |  }$elemAccessorsStr
-         |$rootAuxClasses}
-         |""".stripMargin
-    }
+    val classStr =
+      ot match {
+        case _: ObjectType =>
+          s"""public ${
+            if (isRoot) "" else "static "
+          }class $classNameAdjusted $extendsString {
+             |  $classDeclMembersStr$classMemberGettersStr
+             |  $membersStr
+             |  public $classNameAdjusted($ctorParams) {
+             |    $superString
+             |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
+             |  }$elemAccessorsStr
+             |$rootAuxClasses}
+             |""".stripMargin
+
+        case _: AbstractObjectType =>
+          s"""private abstract static class $classNameAdjusted {
+             |  $classDeclMembersStr$classMemberGettersStr
+             |  $membersStr
+             |  public $classNameAdjusted($ctorParams) {
+             |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
+             |  }$elemAccessorsStr
+             |}
+             |""".stripMargin
+      }
 
     val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted + dbg("<Y>")
     Res(ot,

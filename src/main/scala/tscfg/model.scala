@@ -115,9 +115,11 @@ object model {
 
   sealed abstract class ObjectAbsType extends Type
 
-  case class ObjectType(members: Map[String, AnnType] = Map.empty) extends ObjectAbsType
+  sealed abstract class ObjectRealType(val members: Map[String, AnnType]) extends ObjectAbsType
 
-  case class AbstractObjectType(members:Map[String, AnnType] = Map.empty) extends ObjectAbsType
+  case class ObjectType(override val members: Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
+
+  case class AbstractObjectType(override val members:Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
 
   case class ObjectRefType(namespace: Namespace, simpleName: String) extends ObjectAbsType {
     override def toString: String = s"ObjectRefType(namespace='${namespace.getPathString}', simpleName='$simpleName')"
