@@ -1,5 +1,6 @@
 package tscfg.generators.java
 
+import java.io.File
 import java.util.Optional
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MICROS
@@ -14,6 +15,7 @@ import model.implicits._
 
 
 class JavaMainSpec extends Specification {
+
   import scala.jdk.CollectionConverters._
 
   "literal values as types" should {
@@ -21,11 +23,11 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/example0.spec.conf")
       r.classNames === Set("JavaExample0Cfg", "Service")
       r.fields === Map(
-        "service"  -> "JavaExample0Cfg.Service",
-        "url"      -> "java.lang.String",
-        "debug"    -> "boolean",
-        "doLog"    -> "boolean",
-        "factor"   -> "double",
+        "service" -> "JavaExample0Cfg.Service",
+        "url" -> "java.lang.String",
+        "debug" -> "boolean",
+        "doLog" -> "boolean",
+        "factor" -> "double",
         "poolSize" -> "int"
       )
     }
@@ -37,11 +39,11 @@ class JavaMainSpec extends Specification {
           |}
         """.stripMargin
       ))
-      c.service.url      === "http://example.net/rest"
+      c.service.url === "http://example.net/rest"
       c.service.poolSize === 32
-      c.service.debug    === true
-      c.service.doLog    === false
-      c.service.factor   === 0.75
+      c.service.debug === true
+      c.service.doLog === false
+      c.service.factor === 0.75
     }
   }
 
@@ -165,10 +167,10 @@ class JavaMainSpec extends Specification {
           |booleans: [true, false]
           |""".stripMargin
       ))
-      c.strings .asScala.toList === List("hello", "world", "true")
+      c.strings.asScala.toList === List("hello", "world", "true")
       c.integers.asScala.toList.map(_.asScala.toList) === List(List(1, 2, 3), List(4, 5))
-      c.doubles .asScala.toList === List(3.14, 2.7182, 1.618)
-      c.longs   .asScala.toList === List(1, 9999999999L)
+      c.doubles.asScala.toList === List(3.14, 2.7182, 1.618)
+      c.longs.asScala.toList === List(1, 9999999999L)
       c.booleans.asScala.toList === List(true, false)
     }
   }
@@ -395,7 +397,7 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("JavaIssue19Cfg")
       r.fields === Map(
-        "do_log"  -> "boolean",
+        "do_log" -> "boolean",
         "_$_foo_" -> "java.lang.String"
       )
     }
@@ -407,7 +409,7 @@ class JavaMainSpec extends Specification {
           |"$_foo"  : some string
         """.stripMargin
       ))
-      c.do_log  === true
+      c.do_log === true
       c._$_foo_ === "some string"
     }
   }
@@ -458,7 +460,7 @@ class JavaMainSpec extends Specification {
           |  # empty
         """.stripMargin
       ))
-      c.idleTimeout  === 75000
+      c.idleTimeout === 75000
     }
     "example with new value" in {
       val c = new JavaIssue22Cfg(ConfigFactory.parseString(
@@ -466,7 +468,7 @@ class JavaMainSpec extends Specification {
           | idleTimeout = 1 hour
         """.stripMargin
       ))
-      c.idleTimeout === 3600*1000
+      c.idleTimeout === 3600 * 1000
     }
   }
 
@@ -475,11 +477,11 @@ class JavaMainSpec extends Specification {
       val r = JavaGen.generate("example/issue23.spec.conf")
       r.classNames === Set("JavaIssue23Cfg")
       r.fields === Map(
-        "sizeReq"    -> "long",
-        "sizeOpt"    -> "java.lang.Long",
+        "sizeReq" -> "long",
+        "sizeOpt" -> "java.lang.Long",
         "sizeOptDef" -> "long",
-        "sizes"      -> "java.util.List<java.lang.Long>",
-        "sizes2"     -> "java.util.List<java.util.List<java.lang.Long>>"
+        "sizes" -> "java.util.List<java.lang.Long>",
+        "sizes2" -> "java.util.List<java.util.List<java.lang.Long>>"
       )
     }
 
@@ -492,35 +494,35 @@ class JavaMainSpec extends Specification {
           |sizes2  = [[ 1000, "64G" ], [ "16kB" ] ]
         """.stripMargin
       ))
-      c.sizeReq === 2048*1024
+      c.sizeReq === 2048 * 1024
       c.sizeOpt === 1024000
       c.sizeOptDef === 1024
-      c.sizes.asScala.toList === List(1000, 64*1024*1024*1024L, 16*1000)
+      c.sizes.asScala.toList === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000)
       c.sizes2.asScala.toList.map(_.asScala.toList) === List(
-        List(1000, 64*1024*1024*1024L),
-        List(16*1000))
+        List(1000, 64 * 1024 * 1024 * 1024L),
+        List(16 * 1000))
     }
   }
 
   "issue31" should {
     "generate getters" in {
       val r = JavaGen.generate("example/issue31.spec.conf",
-                               genGetters = true)
+        genGetters = true)
 
       r.classNames === Set("JavaIssue31Cfg", "B", "D")
       r.fields.size === 5
-      r.fields("a" ) === "int"
-      r.fields("b" ) === "JavaIssue31Cfg.B"
-      r.fields("c" ) === "java.lang.String"
-      r.fields("d" ) === "B.D"
-      r.fields("e" ) === "boolean"
+      r.fields("a") === "int"
+      r.fields("b") === "JavaIssue31Cfg.B"
+      r.fields("c") === "java.lang.String"
+      r.fields("d") === "B.D"
+      r.fields("e") === "boolean"
 
       r.getters.size === 5
-      r.getters("getA" ) === "int"
-      r.getters("getB" ) === "JavaIssue31Cfg.B"
-      r.getters("getC" ) === "java.lang.String"
-      r.getters("getD" ) === "B.D"
-      r.getters("getE" ) === "boolean"
+      r.getters("getA") === "int"
+      r.getters("getB") === "JavaIssue31Cfg.B"
+      r.getters("getC") === "java.lang.String"
+      r.getters("getD") === "B.D"
+      r.getters("getE") === "boolean"
     }
 
     "verify generated getters" in {
@@ -619,13 +621,14 @@ class JavaMainSpec extends Specification {
       c.c.e === "c.e"
       c.c.f.get().g === 5
       c.c.f.get().h === "c.f.h"
-      c.i.get() === List(1.0,2.0,3.0).asJava
+      c.i.get() === List(1.0, 2.0, 3.0).asJava
     }
   }
 
   "issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
@@ -641,6 +644,7 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
@@ -656,6 +660,7 @@ class JavaMainSpec extends Specification {
           |  doLog = false
           |  factor = 0.75
           |}""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
@@ -663,6 +668,7 @@ class JavaMainSpec extends Specification {
     }
     "fail with all entries missing in service object" in {
       def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           forall(List("url", "poolSize", "debug", "doLog", "factor")) { k =>
@@ -680,6 +686,7 @@ class JavaMainSpec extends Specification {
           |  doLog = "str"
           |  factor = false
           |}""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           forall(List("poolSize", "debug", "doLog", "factor")) { k =>
@@ -692,6 +699,7 @@ class JavaMainSpec extends Specification {
         """
           |service = 1
           |""".stripMargin))
+
       a must throwA[com.typesafe.config.ConfigException].like {
         case e: com.typesafe.config.ConfigException =>
           e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
@@ -792,10 +800,12 @@ class JavaMainSpec extends Specification {
       val c = new JavaIssue55Cfg(ConfigFactory.parseString(""))
       c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
       c.regex2 === "foo bar: ([\\d]+)"
+
       def a: Unit = {
         java.util.regex.Pattern.compile(c.regex)
         java.util.regex.Pattern.compile(c.regex2)
       }
+
       a must not(throwA[java.util.regex.PatternSyntaxException])
     }
   }
@@ -809,4 +819,29 @@ class JavaMainSpec extends Specification {
       c.d === "some \b control \t \\ chars \r\f"
     }
   }
+
+  "issue 64 - template with defined abstract class" should {
+    def configFromFile = new JavaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
+
+    "result in a valid config for java" in {
+      val r = JavaGen.generate("example/issue64.spec.conf")
+      r.classNames == Set("JavaIssue64Cfg", "BaseModelConfig", "LoadModelConfig", "Test")
+    }
+
+    "be able to process a corresponding configuration correctly" in {
+
+      // be instance of abstract super class
+      configFromFile.test.loadModelConfig match {
+        case _: JavaIssue64Cfg.BaseModelConfig => assert(true)
+        case _ => assert(false)
+      }
+
+      // have the correct values
+      configFromFile.test.loadModelConfig.modelBehaviour == "testBehaviour"
+      configFromFile.test.loadModelConfig.uuids == List("default")
+      configFromFile.test.loadModelConfig.scaling == 1.0
+      configFromFile.test.loadModelConfig.reference == "testReference"
+    }
+  }
+
 }

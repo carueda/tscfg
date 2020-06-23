@@ -1,5 +1,6 @@
 package tscfg.generators.scala
 
+import java.io.File
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MICROS
 
@@ -11,6 +12,7 @@ import tscfg.model
 import tscfg.model._
 import model.implicits._
 import tscfg.generators.java.JavaGen
+import tscfg.tmp.TestConfig.BaseModelConfig
 
 
 class ScalaMainSpec extends Specification {
@@ -739,6 +741,30 @@ class ScalaMainSpec extends Specification {
         s12 = true)
       r.code.split("\n")(17).trim == "import scala.collection.JavaConverters._"
     }
-
   }
+
+  "issue 64 - template with defined abstract class" should {
+    def configFromFile = ScalaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
+
+    "result in a valid config for scala" in {
+      val r = ScalaGen.generate("example/issue64.spec.conf")
+      r.classNames == Set("ScalaIssue64Cfg", "BaseModelConfig", "LoadModelConfig", "Test")
+    }
+
+    "be able to process a corresponding configuration correctly" in {
+
+      // be instance of abstract super class
+      configFromFile.test.loadModelConfig match {
+        case _: ScalaIssue64Cfg.BaseModelConfig => assert(true)
+        case _ => assert(false)
+      }
+
+      // have the correct values
+      configFromFile.test.loadModelConfig.modelBehaviour == "testBehaviour"
+      configFromFile.test.loadModelConfig.uuids == List("default")
+      configFromFile.test.loadModelConfig.scaling == 1.0
+      configFromFile.test.loadModelConfig.reference == "testReference"
+    }
+  }
+
 }

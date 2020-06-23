@@ -37,7 +37,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private def generate(typ: Type,
                        classNamesPrefix: List[String],
                        className: String,
-                       parentClassName: Option[String] = None, // todo put into own object
+                       parentClassName: Option[String] = None,
                        parentClassMembers: Option[Map[String, model.AnnType]] = None,
                       ): Res = typ match {
 
