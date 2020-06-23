@@ -170,7 +170,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
              |""".stripMargin
 
         case _: AbstractObjectType =>
-          s"""private abstract static class $classNameAdjusted {
+          s"""public abstract static class $classNameAdjusted {
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
              |  public $classNameAdjusted($ctorParams) {
