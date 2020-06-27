@@ -4,8 +4,6 @@ import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, ObjectType, SIZE}
-import tscfg.tmp.TestConfig
-import tscfg.tmp.TestConfig.BaseModelConfig
 
 import scala.jdk.CollectionConverters._
 

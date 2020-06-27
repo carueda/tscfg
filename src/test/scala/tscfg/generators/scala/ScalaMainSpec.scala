@@ -12,7 +12,6 @@ import tscfg.model
 import tscfg.model._
 import model.implicits._
 import tscfg.generators.java.JavaGen
-import tscfg.tmp.TestConfig.BaseModelConfig
 
 
 class ScalaMainSpec extends Specification {

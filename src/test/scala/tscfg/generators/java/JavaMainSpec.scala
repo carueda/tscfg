@@ -838,7 +838,7 @@ class JavaMainSpec extends Specification {
 
       // have the correct values
       configFromFile.test.loadModelConfig.modelBehaviour == "testBehaviour"
-      configFromFile.test.loadModelConfig.uuids == List("default")
+      configFromFile.test.loadModelConfig.uuids == List("default").asJava
       configFromFile.test.loadModelConfig.scaling == 1.0
       configFromFile.test.loadModelConfig.reference == "testReference"
     }
