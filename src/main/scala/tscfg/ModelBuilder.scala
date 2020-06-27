@@ -165,7 +165,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
           namespace.getDefine(parentName).map {
             case objType: AbstractObjectType =>
               objType.members
-            case _ => Map.empty[String, model.AnnType]
+            case _ => Predef.Map.empty[String, model.AnnType]
           }
         } else {
           // parent class might be defined, but not as parent -> no processing
