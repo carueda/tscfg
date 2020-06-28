@@ -21,6 +21,12 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   import scalaUtil.{scalaIdentifier, getClassName}
 
+  def padScalaIdLength(implicit symbols:List[String]): Int =
+    if (symbols.isEmpty) 0 else
+      symbols.map(scalaIdentifier).maxBy(_.length).length
+
+  def padId(id: String)(implicit symbols:List[String]): String = id + (" " * (padScalaIdLength - id.length))
+
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
 
@@ -83,13 +89,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    val symbols = ot.members.keys.toList.sorted
+    implicit val symbols = ot.members.keys.toList.sorted
     symbols.foreach(checkUserSymbol)
-
-    val padScalaIdLength = if (symbols.isEmpty) 0 else
-      symbols.map(scalaIdentifier).maxBy(_.length).length
-
-    def padId(id: String): String = id + (" " * (padScalaIdLength - id.length))
 
     val results = symbols.map { symbol =>
       val a = ot.members(symbol)
@@ -207,13 +208,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    val symbols = aot.members.keys.toList.sorted
+    implicit val symbols = aot.members.keys.toList.sorted
     symbols.foreach(checkUserSymbol)
-
-    val padScalaIdLength = if (symbols.isEmpty) 0 else
-      symbols.map(scalaIdentifier).maxBy(_.length).length
-
-    def padId(id: String): String = id + (" " * (padScalaIdLength - id.length))
 
     val results = symbols.map { symbol =>
       val a = aot.members(symbol)
