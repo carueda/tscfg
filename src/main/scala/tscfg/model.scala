@@ -77,14 +77,13 @@ object model {
 
     val DEFINE_STRING = "@define"
 
-    val extendsPattern: Regex = s"""$DEFINE_STRING extends ([a-zA-Z0-9]+)""".r
+    // allow a typical basic java identifier, except `$` chars, as extended name:
+    val extendsPattern: Regex = s"$DEFINE_STRING\\s+extends\\s+([a-zA-Z_][a-zA-Z0-9_]+)".r
 
-    def isDefine(commentString: String): Boolean = commentString.trim.startsWith(DEFINE_STRING)
+    def isDefine(commentString: String): Boolean = commentString.trim.matches(s"$DEFINE_STRING\\b.*")
 
-    def isParent(commentString: String): Boolean = if (isDefine(commentString)) {
-      commentString.replace(DEFINE_STRING, "").trim.equals("abstract")
-    } else
-      false
+    def isParent(commentString: String): Boolean = isDefine(commentString) &&
+      commentString.trim.substring(DEFINE_STRING.length).trim.equals("abstract")
 
     def parentClassName(comments: Option[String]): Option[String] = {
       comments.map {

@@ -1,3 +1,7 @@
+2020-06-28 - 0.9.98
+
+- publish v0.9.98 with "Ability to allow shared object inheritance" #64. Thanks @johanneshiry.
+
 2020-06-11 - 0.9.97
 
 - new `--withoutTimestamp` option, thanks @JustinPihony.

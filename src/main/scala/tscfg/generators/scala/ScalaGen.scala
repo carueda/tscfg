@@ -118,13 +118,13 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val classMembersStr = buildClassMembersString(results ++ parentClassMemberResults, padId)
 
-    val parentClassString = parentClassName.map("extends " + _ + "(" +
+    val parentClassString = parentClassName.map(" extends " + _ + "(" +
       parentClassMemberResults.map(_._1).mkString(",") + ")").getOrElse("")
 
     val classStr =
       s"""final case class $className(
          |  $classMembersStr
-         |) $parentClassString
+         |)$parentClassString
          |""".stripMargin
 
 
