@@ -151,19 +151,18 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       ""
     )
 
-    val extendsString = abstractClassName.map("extends " + _).getOrElse("")
-    val superString = abstractClassName.map(_ => "super(c, parentPath, $tsCfgValidator);").getOrElse("") // if parent class name is defined a super call is needed
+    val extendsString = abstractClassName.map(cn => s"extends $cn ").getOrElse("")
+    val superString = abstractClassName.map(_ => "\n    super(c, parentPath, $tsCfgValidator);").getOrElse("") // if parent class name is defined a super call is needed
 
     val classStr =
       ot match {
         case _: ObjectType =>
           s"""public ${
-            if (isRoot) "" else "static "
+            if (isRoot) "" else "static"
           }class $classNameAdjusted $extendsString {
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
-             |  public $classNameAdjusted($ctorParams) {
-             |    $superString
+             |  public $classNameAdjusted($ctorParams) {$superString
              |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
              |  }$elemAccessorsStr
              |$rootAuxClasses}
