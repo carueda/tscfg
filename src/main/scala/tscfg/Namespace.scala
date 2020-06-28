@@ -15,12 +15,14 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def getDefine(defineName: String): Option[Type] = allDefines.toMap.get(defineName)
 
-  def isAbstractClassDefine(parentName: String): Boolean = {
-    allDefines.get(parentName).exists {
-      case _: AbstractObjectType => true
-      case _ => false
+  def getAbstractDefine(defineName: String): Option[AbstractObjectType] =
+    getDefine(defineName) match {
+      case Some(aot: AbstractObjectType) => Some(aot)
+      case _ => None
     }
-  }
+
+  def isAbstractClassDefine(parentName: String): Boolean =
+    getAbstractDefine(parentName).isDefined
 
   def getPath: Seq[String] = parent match {
     case None => Seq.empty

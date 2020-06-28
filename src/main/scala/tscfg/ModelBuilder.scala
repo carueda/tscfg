@@ -158,21 +158,18 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   Option[Predef.Map[String, model.AnnType]] = {
 
     AnnType.parentClassName(commentsOpt).flatMap(
-      parentName => {
+      parentName =>
         // sanity check to see if this class is defined as parent class
-        if (namespace.isAbstractClassDefine(parentName)) {
-          // valid parent name
-          namespace.getDefine(parentName).map {
-            case objType: AbstractObjectType =>
-              objType.members
-            case _ => Predef.Map.empty[String, model.AnnType]
+          namespace.getAbstractDefine(parentName).map(_.members) match {
+            case Some(parentMembers) =>
+              // valid parent name
+              Some(parentMembers)
+            case None =>
+              // parent class might be defined, but not as parent -> no processing
+              throw new IllegalArgumentException(s"'${commentsOpt.get}' is invalid because $parentName is " +
+              s"neither abstract nor a trait! If you want to make $parentName extendable use '@define abstract'.")
           }
-        } else {
-          // parent class might be defined, but not as parent -> no processing
-          throw new IllegalArgumentException(s"'${commentsOpt.get}' is invalid because $parentName is " +
-            s"neither abstract nor a trait! If you want to make $parentName extendable use '@define abstract'.")
-        }
-      })
+      )
   }
 
   private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
