@@ -73,13 +73,18 @@ object model {
 
   case class ListType(t: Type) extends Type
 
-  final case object AnnType{
+  final case object AnnType {
 
-    val extendsPattern: Regex = """@\w+ extends ([a-zA-Z0-9]+)""".r
+    val DEFINE_STRING = "@define"
 
-    def isDefine(commentString: String): Boolean = commentString.trim.startsWith("@define")
+    val extendsPattern: Regex = s"""$DEFINE_STRING extends ([a-zA-Z0-9]+)""".r
 
-    def isParent(commentString: String): Boolean = commentString.trim.equals("@define_abstract")
+    def isDefine(commentString: String): Boolean = commentString.trim.startsWith(DEFINE_STRING)
+
+    def isParent(commentString: String): Boolean = if (isDefine(commentString)) {
+      commentString.replace(DEFINE_STRING, "").trim.equals("abstract")
+    } else
+      false
 
     def parentClassName(comments: Option[String]): Option[String] = {
       comments.map {
@@ -92,11 +97,11 @@ object model {
   }
 
   final case class AnnType(t: Type,
-                     optional: Boolean = false,
-                     default: Option[String] = None,
-                     comments: Option[String] = None,
-                     parentClassMembers: Option[Map[String, model.AnnType]] = None
-                    ) {
+                           optional: Boolean = false,
+                           default: Option[String] = None,
+                           comments: Option[String] = None,
+                           parentClassMembers: Option[Map[String, model.AnnType]] = None
+                          ) {
 
 
     def |(d: String): AnnType = copy(default = Some(d))
@@ -112,14 +117,13 @@ object model {
   }
 
 
-
   sealed abstract class ObjectAbsType extends Type
 
   sealed abstract class ObjectRealType(val members: Map[String, AnnType]) extends ObjectAbsType
 
   case class ObjectType(override val members: Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
 
-  case class AbstractObjectType(override val members:Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
+  case class AbstractObjectType(override val members: Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
 
   case class ObjectRefType(namespace: Namespace, simpleName: String) extends ObjectAbsType {
     override def toString: String = s"ObjectRefType(namespace='${namespace.getPathString}', simpleName='$simpleName')"

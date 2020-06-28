@@ -53,7 +53,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         else {
           val cv = conf.getValue(childStruct.name)
           val comments = cv.origin().comments().asScala.toList
-          comments.exists(_.trim.startsWith("@define"))
+          comments.exists(_.trim.startsWith(AnnType.DEFINE_STRING))
         }
       }
 

@@ -466,7 +466,7 @@ As of 0.9.97 shared objects now support simple inheritance by an abstract superc
 to define a simple inheritance:
 
 ```properties
-#@define_abstract
+#@define abstract
 BaseStruct {
   a: [string]
   b: double
