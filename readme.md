@@ -26,7 +26,8 @@ The generated code only depends on the Typesafe Config library.
   - [list type](#list-type)
   - [object type](#object-type)
   - [optional object or list](#optional-object-or-list)
-  - [shared objects](#shared-object)
+  - [shared objects](#shared-objects)
+    - [shared object inheritance](#shared-object-inheritance)
 - [configuration template](#configuration-template)
 - [FAQ](#faq)
 - [tests](#tests)
@@ -462,7 +463,7 @@ type itself. Then, the type can be referenced for other definitions.
 
 #### shared object inheritance
 
-As of 0.9.97 shared objects now support simple inheritance by an abstract superclass. The following syntax can be used
+As of 0.9.98 shared objects now support simple inheritance by an abstract superclass. The following syntax can be used
 to define a simple inheritance:
 
 ```properties
