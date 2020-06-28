@@ -169,7 +169,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
           }
         } else {
           // parent class might be defined, but not as parent -> no processing
-          None
+          throw new IllegalArgumentException(s"'${commentsOpt.get}' is invalid because $parentName is " +
+            s"neither abstract nor a trait! If you want to make $parentName extendable use '@define abstract'.")
         }
       })
   }

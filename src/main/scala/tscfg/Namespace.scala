@@ -59,9 +59,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   }
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
-    if(defineAbstractClassNames.contains(name))
-        None // if the string name is an abstract class no ObjectRefType is needed
-    else if (defineNames.contains(name))
+    if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
       Some(ObjectRefType(this, name))
     else
       parent.flatMap(_.resolveDefine(name))

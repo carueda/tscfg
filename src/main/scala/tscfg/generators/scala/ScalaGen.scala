@@ -54,7 +54,6 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case ot: ObjectRefType => generateForObjRef(ot, classNamesPrefix)
     case lt: ListType => generateForList(lt, classNamesPrefix, className)
     case bt: BasicType => generateForBasic(bt)
-    case unknown => throw new RuntimeException("Unknown type reference provided: " + unknown)
   }
 
   def buildClassMembersString(classData: List[(String, Res, AnnType, Boolean)],
