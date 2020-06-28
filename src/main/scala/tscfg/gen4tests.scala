@@ -9,25 +9,31 @@ import tscfg.generators.scala.ScalaGen
 object gen4tests {
   def main(args: Array[String]): Unit = {
     val sourceDir = new File("src/main/tscfg/example")
-    sourceDir.listFiles().filter { f =>
-      f.getName.endsWith(".spec.conf") &&
-      !f.getName.contains(".SKIP.")
+    sourceDir.listFiles().filter {
+      _.getName.endsWith(".spec.conf")
     } foreach generate
   }
 
   private def generate(confFile: File): Unit = {
     //println(s"gen4tests: confFile=$confFile")
-    val source = io.Source.fromFile(confFile).mkString.trim
+
+    val bufSource = io.Source.fromFile(confFile)
+    val source = bufSource.mkString
+    bufSource.close
+
+    val opts = {
+      val linePat = """\s*//\s*GenOpts:(.*)""".r
+      source.split("\n")
+        .collect { case linePat(xs) => xs.trim }
+        .flatMap(_.split("\\s+"))
+    }
+    if (opts.contains("--skip-gen4tests")) {
+      println(s"gen4tests: skipping $confFile")
+      return
+    }
 
     val baseGenOpts: GenOpts = {
       var genOpts = GenOpts("tscfg.example", "?")
-      val opts = {
-        val linePat = """\s*//\s*GenOpts:(.*)""".r
-        source.split("\n")
-          .collect { case linePat(xs) => xs.trim }
-          .flatMap(_.split("\\s+"))
-      }
-
       opts foreach {
         case "--scala:2.12"      => genOpts = genOpts.copy(s12 = true)
         case "--scala:bt"        => genOpts = genOpts.copy(useBackticks = true)

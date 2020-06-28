@@ -1,4 +1,11 @@
-2020-06-28 - 0.9.98
+2020-06-28 - 0.9.981
+
+- add special `--skip-gen4tests` option so the config spec is skipped in the genCode
+  phase prior to the tests. This will help with invalid specs whose attempted code
+  generation is part of the test itself.
+  (in general, we want to KEEP the `*.spec.conf` naming convention for specs)
+
+2020-06-28 - 0.9.981
 
 - publish v0.9.98 with "Ability to allow shared object inheritance" #64. Thanks @johanneshiry.
 
