@@ -158,8 +158,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       ot match {
         case _: ObjectType =>
           s"""public ${
-            if (isRoot) "" else "static"
-          }class $classNameAdjusted $extendsString {
+            if (isRoot) "" else "static "
+          }class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
              |  public $classNameAdjusted($ctorParams) {$superString
