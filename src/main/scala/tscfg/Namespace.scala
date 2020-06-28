@@ -16,12 +16,9 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   def getDefine(defineName: String): Option[Type] = allDefines.toMap.get(defineName)
 
   def isAbstractClassDefine(parentName: String): Boolean = {
-    allDefines.get(parentName) match {
-      case Some(modelType) => modelType match {
-        case _:AbstractObjectType => true
-        case _ => false
-      }
-      case None => false
+    allDefines.get(parentName).exists {
+      case _: AbstractObjectType => true
+      case _ => false
     }
   }
 
