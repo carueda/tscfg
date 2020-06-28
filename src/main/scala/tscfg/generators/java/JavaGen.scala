@@ -10,6 +10,7 @@ import tscfg.codeDefs.javaDef
 class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   import defs._
+
   implicit val methodNames = MethodNames()
 
   def generate(objectType: ObjectType): GenResult = {
@@ -27,19 +28,24 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generate(typ: Type,
                        classNamePrefixOpt: Option[String],
-                       className: String
+                       className: String,
+                       abstractClassName: Option[String] = None
                       ): Res = typ match {
 
-    case ot: ObjectType    => generateForObj(ot, classNamePrefixOpt, className)
+    case ot: ObjectType => generateForObj(ot, classNamePrefixOpt, className, abstractClassName = abstractClassName)
+    case aot: AbstractObjectType =>
+      generateForObj(aot, classNamePrefixOpt, className);
     case ot: ObjectRefType => generateForObjRef(ot)
-    case lt: ListType      => generateForList(lt, classNamePrefixOpt, className)
-    case bt: BasicType     => generateForBasic(bt)
+    case lt: ListType => generateForList(lt, classNamePrefixOpt, className)
+    case bt: BasicType => generateForBasic(bt)
   }
 
-  private def generateForObj(ot: ObjectType,
+
+  private def generateForObj(ot: ObjectRealType,
                              classNamePrefixOpt: Option[String] = None,
                              className: String,
-                             isRoot: Boolean = false
+                             isRoot: Boolean = false,
+                             abstractClassName: Option[String] = None
                             ): Res = {
 
     val classNameAdjusted = adjustClassName(className)
@@ -52,7 +58,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       val a = ot.members(symbol)
       val res = generate(a.t,
         classNamePrefixOpt = Some(classNameAdjusted + "."),
-        className = javaUtil.getClassName(symbol)
+        className = javaUtil.getClassName(symbol),
+        abstractClassName = a.abstractClass
       )
       (symbol, res, a)
     }
@@ -82,7 +89,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }.mkString("\n  ")
 
     val classMemberGettersStr = if (genOpts.genGetters) {
-      classDeclMembers.map{ case (typ, javaId, _) =>
+      classDeclMembers.map { case (typ, javaId, _) =>
         val getter = s"get${javaId.capitalize}"
         genResults = genResults.copy(getters = genResults.getters + (getter -> typ.toString))
         s"public final $typ $getter() { return $javaId; }"
@@ -97,7 +104,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       }
     }
 
-    implicit val listAccessors = collection.mutable.LinkedHashMap[String,String]()
+    implicit val listAccessors = collection.mutable.LinkedHashMap[String, String]()
 
     val ctorMembersStr = results.flatMap { case (symbol, res, a) =>
       if (a.isDefine) None
@@ -129,10 +136,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     else ""
 
     val (ctorParams, errHandlingDecl, errHandlingDispatch) = if (isRoot) {
-      ( "com.typesafe.config.Config c",
+      ("com.typesafe.config.Config c",
         """final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
-        |    final java.lang.String parentPath = "";
-        |    """.stripMargin,
+          |    final java.lang.String parentPath = "";
+          |    """.stripMargin,
 
         s"""
            |    $$tsCfgValidator.validate();""".stripMargin
@@ -144,16 +151,33 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       ""
     )
 
-    val classStr = {
-      s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted {
-         |  $classDeclMembersStr$classMemberGettersStr
-         |  $membersStr
-         |  public $classNameAdjusted($ctorParams) {
-         |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
-         |  }$elemAccessorsStr
-         |$rootAuxClasses}
-         |""".stripMargin
-    }
+    val extendsString = abstractClassName.map(cn => s"extends $cn ").getOrElse("")
+    val superString = abstractClassName.map(_ => "\n    super(c, parentPath, $tsCfgValidator);").getOrElse("") // if parent class name is defined a super call is needed
+
+    val classStr =
+      ot match {
+        case _: ObjectType =>
+          s"""public ${
+            if (isRoot) "" else "static "
+          }class $classNameAdjusted $extendsString{
+             |  $classDeclMembersStr$classMemberGettersStr
+             |  $membersStr
+             |  public $classNameAdjusted($ctorParams) {$superString
+             |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
+             |  }$elemAccessorsStr
+             |$rootAuxClasses}
+             |""".stripMargin
+
+        case _: AbstractObjectType =>
+          s"""public abstract static class $classNameAdjusted {
+             |  $classDeclMembersStr$classMemberGettersStr
+             |  $membersStr
+             |  public $classNameAdjusted($ctorParams) {
+             |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
+             |  }$elemAccessorsStr
+             |}
+             |""".stripMargin
+      }
 
     val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted + dbg("<Y>")
     Res(ot,
@@ -185,17 +209,17 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generateForBasic(b: BasicType): Res = {
     Res(b, javaType = BaseJavaType(name = b match {
-      case STRING    => "java.lang.String"
-      case INTEGER   => "int"
-      case LONG      => "long"
-      case DOUBLE    => "double"
-      case BOOLEAN   => "boolean"
-      case SIZE      => "long"
-      case DURATION(_) => if(genOpts.useDurations) "java.time.Duration" else "long"
+      case STRING => "java.lang.String"
+      case INTEGER => "int"
+      case LONG => "long"
+      case DOUBLE => "double"
+      case BOOLEAN => "boolean"
+      case SIZE => "long"
+      case DURATION(_) => if (genOpts.useDurations) "java.time.Duration" else "long"
     }))
   }
 
-  private val rootListAccessors = collection.mutable.LinkedHashMap[String,String]()
+  private val rootListAccessors = collection.mutable.LinkedHashMap[String, String]()
 
   /**
     * Avoids duplicate class names as they are not supported by Java (the namespaces implied
@@ -211,15 +235,16 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         className + (counter + 1)
     }
   }
-  private val classNameCounter = collection.mutable.HashMap[String,Int]()
+
+  private val classNameCounter = collection.mutable.HashMap[String, Int]()
 
   private def toObjectType(javaType: JavaType): JavaType = javaType match {
     case BaseJavaType(name) => name match {
-      case "int"     => BaseJavaType("java.lang.Integer")
-      case "long"    => BaseJavaType("java.lang.Long")
-      case "double"  => BaseJavaType("java.lang.Double")
+      case "int" => BaseJavaType("java.lang.Integer")
+      case "long" => BaseJavaType("java.lang.Long")
+      case "double" => BaseJavaType("java.lang.Double")
       case "boolean" => BaseJavaType("java.lang.Boolean")
-      case _         => javaType
+      case _ => javaType
     }
     case other => other
   }
@@ -227,9 +252,9 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private def instance(a: AnnType, res: Res, path: String)
                       (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
     a.t match {
-      case bt:BasicType  => basicInstance(a, bt, path)
-      case _:ObjectAbsType  => objectInstance(a, res, path)
-      case lt:ListType   => listInstance(a, lt, res, path)
+      case bt: BasicType => basicInstance(a, bt, path)
+      case _: ObjectAbsType => objectInstance(a, res, path)
+      case lt: ListType => listInstance(a, lt, res, path)
     }
   }
 
@@ -247,8 +272,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     if (genOpts.assumeAllRequired)
       s"""new $className($reqConfigCall$ppArg)"""
-    else
-    if (a.optional) {
+    else if (a.optional) {
       if (genOpts.useOptionals) {
         s"""c.$hasPath("$path") ? java.util.Optional.of(new $className(c.getConfig("$path")$ppArg)) : java.util.Optional.empty()"""
       } else {
@@ -284,10 +308,10 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case Some(v) =>
         val value = tsConfigUtil.basicValue(a.t, v, genOpts.useDurations)
         (bt, value) match {
-          case (BOOLEAN, "true")  => s"""!c.$hasPath("$path") || c.$getter"""
+          case (BOOLEAN, "true") => s"""!c.$hasPath("$path") || c.$getter"""
           case (BOOLEAN, "false") => s"""c.$hasPath("$path") && c.$getter"""
           case (DURATION(_), duration) if genOpts.useDurations => s"""c.$hasPath("$path") ? c.$getter : java.time.Duration.parse("$duration")"""
-          case _                  => s"""c.$hasPath("$path") ? c.$getter : $value"""
+          case _ => s"""c.$hasPath("$path") ? c.$getter : $value"""
         }
 
       case None if a.optional && genOpts.useOptionals =>
@@ -312,7 +336,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                             ): String = {
 
     val (_, methodName) = rec(javaType, lt, "")
-      methodName + s"""(c.getList("$path"), parentPath, $$tsCfgValidator)"""
+    methodName + s"""(c.getList("$path"), parentPath, $$tsCfgValidator)"""
   }
 
   private def rec(ljt: ListJavaType, lt: ListType, prefix: String
@@ -321,7 +345,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                  ): (Boolean, String) = {
 
     val (isBasic, elemMethodName) = ljt.jt match {
-      case bst:BaseJavaType =>
+      case bst: BaseJavaType =>
         val basic = lt.t.isInstanceOf[BasicType]
         val methodName = baseName(lt.t, bst.toString)
         if (basic) {
@@ -330,7 +354,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         }
         (basic, methodName)
 
-      case lst:ListJavaType  =>
+      case lst: ListJavaType =>
         rec(lst, lt.t.asInstanceOf[ListType], prefix + methodNames.listPrefix)
     }
 
@@ -346,15 +370,15 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def baseName(t: Type, name: String)
                       (implicit methodNames: MethodNames): String = t match {
-    case STRING   => methodNames.strA
-    case INTEGER  => methodNames.intA
-    case LONG     => methodNames.lngA
-    case DOUBLE   => methodNames.dblA
-    case BOOLEAN  => methodNames.blnA
-    case SIZE     => methodNames.sizA
+    case STRING => methodNames.strA
+    case INTEGER => methodNames.intA
+    case LONG => methodNames.lngA
+    case DOUBLE => methodNames.dblA
+    case BOOLEAN => methodNames.blnA
+    case SIZE => methodNames.sizA
     case DURATION(q) => methodNames.durA
 
-    case _: ObjectAbsType  => name.replace('.', '_')
+    case _: ObjectAbsType => name.replace('.', '_')
 
     case _: ListType => throw new AssertionError()
   }
@@ -385,6 +409,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 }
 
 object JavaGen {
+
   import _root_.java.io.{File, FileWriter, PrintWriter}
 
   import tscfg.{ModelBuilder, model, util}
@@ -393,8 +418,8 @@ object JavaGen {
   def generate(filename: String, showOut: Boolean = false,
                j7: Boolean = false,
                assumeAllRequired: Boolean = false,
-               genGetters: Boolean = false, useOptionals:Boolean = false,
-               useDurations:Boolean = false): GenResult = {
+               genGetters: Boolean = false, useOptionals: Boolean = false,
+               useDurations: Boolean = false): GenResult = {
     val file = new File("src/main/tscfg/" + filename)
     val source = io.Source.fromFile(file).mkString.trim
 
@@ -419,8 +444,8 @@ object JavaGen {
     }
 
     val genOpts = GenOpts("tscfg.example", className, j7 = j7,
-                          genGetters = genGetters, useOptionals = useOptionals,
-                          assumeAllRequired = assumeAllRequired,
+      genGetters = genGetters, useOptionals = useOptionals,
+      assumeAllRequired = assumeAllRequired,
       useDurations = useDurations)
 
     val generator = new JavaGen(genOpts)
@@ -429,7 +454,7 @@ object JavaGen {
 
     //println("\n" + results.code)
 
-    val destFilename  = s"src/test/java/tscfg/example/$className.java"
+    val destFilename = s"src/test/java/tscfg/example/$className.java"
     val destFile = new File(destFilename)
     val out = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
@@ -444,15 +469,19 @@ object JavaGen {
          |fields    : ${results.fields}
       """.stripMargin)
   }
+
   // $COVERAGE-ON$
 
 }
 
 private[java] object defs {
+
   abstract sealed class JavaType
+
   case class BaseJavaType(name: String) extends JavaType {
     override def toString: String = name
   }
+
   case class ListJavaType(jt: JavaType) extends JavaType {
     override def toString: String = s"java.util.List<$jt>"
   }
@@ -460,6 +489,7 @@ private[java] object defs {
   case class Res(typ: Type,
                  javaType: JavaType,
                  definition: String = "")
+
 }
 
 private[java] case class MethodNames() {

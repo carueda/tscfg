@@ -21,6 +21,12 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   import scalaUtil.{scalaIdentifier, getClassName}
 
+  def padScalaIdLength(implicit symbols:List[String]): Int =
+    if (symbols.isEmpty) 0 else
+      symbols.map(scalaIdentifier).maxBy(_.length).length
+
+  def padId(id: String)(implicit symbols:List[String]): String = id + (" " * (padScalaIdLength - id.length))
+
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
 
@@ -36,66 +42,95 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def generate(typ: Type,
                        classNamesPrefix: List[String],
-                       className: String
+                       className: String,
+                       parentClassName: Option[String] = None,
+                       parentClassMembers: Option[Map[String, model.AnnType]] = None,
                       ): Res = typ match {
 
-    case ot: ObjectType => generateForObj(ot, classNamesPrefix, className)
+    case ot: ObjectType =>
+      generateForObj(ot, classNamesPrefix, className, parentClassName = parentClassName, parentClassMembers = parentClassMembers)
+    case aot: AbstractObjectType =>
+      generateForAbstractObj(aot, classNamesPrefix, className);
     case ot: ObjectRefType => generateForObjRef(ot, classNamesPrefix)
     case lt: ListType => generateForList(lt, classNamesPrefix, className)
     case bt: BasicType => generateForBasic(bt)
   }
 
-  private def generateForObj(ot: ObjectType,
-                             classNamesPrefix: List[String] = List.empty,
-                             className: String,
-                             isRoot: Boolean = false
-                            ): Res = {
-
-    genResults = genResults.copy(classNames = genResults.classNames + className)
-
-    val symbols = ot.members.keys.toList.sorted
-    symbols.foreach(checkUserSymbol)
-
-    val padScalaIdLength = if (symbols.isEmpty) 0 else
-      symbols.map(scalaIdentifier).maxBy(_.length).length
-
-    def padId(id: String) = id + (" " * (padScalaIdLength - id.length))
-
-    val results = symbols.map { symbol =>
-      val a = ot.members(symbol)
-      val res = generate(a.t,
-        classNamesPrefix = className + "." :: classNamesPrefix,
-        className = getClassName(symbol)
-      )
-      (symbol, res, a)
-    }
-
-    val classMembersStr = results.flatMap { case (symbol, res, a) =>
+  def buildClassMembersString(classData: List[(String, Res, AnnType, Boolean)],
+                              padId: String => String,
+                              abstractClass: Boolean = false): String = {
+    classData.flatMap { case (symbol, res, a, parentClassValue) =>
       if (a.isDefine) None
       else Some {
         val memberType = res.scalaType
         val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
         val scalaId = scalaIdentifier(symbol)
+        val overrideMod = if (parentClassValue) "override val " else ""
         val type_ = a.t match {
           case ot: ObjectRefType =>
             getClassNameForObjectRefType(ot)
           case _ => typ
         }
+        val abstractClassFieldVal = if (abstractClass) "val " else ""
         genResults = genResults.copy(fields = genResults.fields + (scalaId -> type_.toString))
-        padId(scalaId) + " : " + type_
+        abstractClassFieldVal + overrideMod + padId(scalaId) + " : " + type_
       }
     }.mkString(",\n  ")
+  }
 
-    val classStr = {
-      s"""case class $className(
-         |  $classMembersStr
-         |)
-         |""".stripMargin
+  private def generateForObj(ot: ObjectType,
+                             classNamesPrefix: List[String] = List.empty,
+                             className: String,
+                             isRoot: Boolean = false,
+                             parentClassName: Option[String] = None,
+                             parentClassMembers: Option[Map[String, model.AnnType]] = None
+                            ): Res = {
+
+    genResults = genResults.copy(classNames = genResults.classNames + className)
+
+    implicit val symbols = ot.members.keys.toList.sorted
+    symbols.foreach(checkUserSymbol)
+
+    val results = symbols.map { symbol =>
+      val a = ot.members(symbol)
+      val res = generate(a.t,
+        classNamesPrefix = className + "." :: classNamesPrefix,
+        className = getClassName(symbol),
+        a.abstractClass,
+        a.parentClassMembers,
+      )
+      (symbol, res, a, false)
     }
+
+    val parentClassMemberResults = parentClassMembers.map(_.keys.toList.sorted).map(parentSymbols => {
+      parentSymbols.foreach(checkUserSymbol)
+      parentSymbols.map { symbol =>
+        val a = parentClassMembers.get(symbol)
+        val res = generate(a.t,
+          classNamesPrefix = className + "." :: classNamesPrefix,
+          className = getClassName(symbol),
+          a.abstractClass,
+          a.parentClassMembers,
+        )
+        (symbol, res, a, true)
+      }
+    }).getOrElse(List.empty)
+
+    val classMembersStr = buildClassMembersString(results ++ parentClassMemberResults, padId)
+
+    val parentClassString = parentClassName.map("extends " + _ + "(" +
+      parentClassMemberResults.map(_._1).mkString(",") + ")").getOrElse("")
+
+    val classStr =
+      s"""final case class $className(
+         |  $classMembersStr
+         |) $parentClassString
+         |""".stripMargin
+
 
     implicit val listAccessors = collection.mutable.LinkedHashMap[String, String]()
 
-    val objectMembersStr = results.flatMap { case (symbol, res, a) =>
+    val objectMembersStr = (results ++ parentClassMemberResults).flatMap { case (symbol, res, a, parentOv) =>
       if (a.isDefine) None
       else Some {
         val scalaId = scalaIdentifier(symbol)
@@ -165,6 +200,42 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       scalaType = BaseScalaType(baseType),
       definition = classStr + objectString
     )
+  }
+
+  private def generateForAbstractObj(aot: AbstractObjectType, classNamesPrefix: List[String],
+                                     className: String): Res = {
+
+    genResults = genResults.copy(classNames = genResults.classNames + className)
+
+    implicit val symbols = aot.members.keys.toList.sorted
+    symbols.foreach(checkUserSymbol)
+
+    val results = symbols.map { symbol =>
+      val a = aot.members(symbol)
+      val res = generate(a.t,
+        classNamesPrefix = className + "." :: classNamesPrefix,
+        className = getClassName(symbol),
+        a.abstractClass,
+        a.parentClassMembers,
+      )
+      (symbol, res, a, false)
+    }
+
+    val abstractClassMembersStr = buildClassMembersString(results, padId, abstractClass = true)
+
+    val abstractClassStr =
+      s"""sealed abstract class $className (
+         | $abstractClassMembersStr
+         |)
+         |""".stripMargin
+
+    val baseType = classNamesPrefix.reverse.mkString + className
+
+    Res(aot,
+      scalaType = BaseScalaType(baseType),
+      definition = abstractClassStr
+    )
+
   }
 
   private def generateForObjRef(ot: ObjectRefType,

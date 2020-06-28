@@ -26,7 +26,7 @@ The generated code only depends on the Typesafe Config library.
   - [list type](#list-type)
   - [object type](#object-type)
   - [optional object or list](#optional-object-or-list)
-  - [shared object](#shared-object)
+  - [shared objects](#shared-object)
 - [configuration template](#configuration-template)
 - [FAQ](#faq)
 - [tests](#tests)
@@ -434,7 +434,7 @@ As with basic types, the meaning of an optional object or list is that the corre
 value will be `null` (or `Optional.empty()`) (`None` in Scala) when the corresponding actual entry is missing in
 a given configuration instance.
 
-### shared object
+### shared objects
 
 As of 0.9.94 there's initial, experimental support for shared objects (#54).
 This is exercised by using the `@define` annotation:
@@ -459,6 +459,40 @@ type itself. Then, the type can be referenced for other definitions.
 > Note: current support is in terms of the referenced object being always
 > *required*. `a: "Struct?"`, for example, is not supported.
 > Also, `@define` is only supported for an object, not for a basic type or list.
+
+#### shared object inheritance
+
+As of 0.9.97 shared objects now support simple inheritance by an abstract superclass. The following syntax can be used
+to define a simple inheritance:
+
+```properties
+#@define abstract
+BaseStruct {
+  a: [string]
+  b: double
+}
+
+#@define extends BaseStruct
+ChildStruct {
+  c: string
+  d: string
+}
+
+example {
+  child: ChildStruct
+}
+```
+
+In this example, the annotation will generate an abstract class definition of the ``BaseStruct`` as well as a definition
+of ``ChildStruct`` which extends ``BaseStruct``. This inheritance structure simplifies processing of the config with
+structs that have multiple common fields.
+
+#### known issues with shared objects
+
+- the current support for shared objects as field types in another shared object is unstable and not yet fully supported
+- empty structs without any fields are treated as strings. Hence, having a child struct without new fields in addition
+to its superclass is not supported yet
+
 
 ## configuration template
 
