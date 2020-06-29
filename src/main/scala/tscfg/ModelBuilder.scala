@@ -166,8 +166,9 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
               Some(parentMembers)
             case None =>
               // parent class might be defined, but not as parent -> no processing
-              throw new IllegalArgumentException(s"'${commentsOpt.get}' is invalid because $parentName is " +
-              s"neither abstract nor a trait! If you want to make $parentName extendable use '@define abstract'.")
+              throw new IllegalArgumentException(
+                s"'${commentsOpt.get}' is invalid because $parentName is not abstract!" +
+                  s" If you want to make $parentName extendable use '${AnnType.DEFINE_STRING} abstract'.")
           }
       )
   }

@@ -767,15 +767,13 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 64b - template with invalid case class extension" should {
-
     "throw an IllegalArgumentException" in {
-
       ScalaGen.generate("example/issue64b.spec.conf") must throwA[IllegalArgumentException].like {
         case e: IllegalArgumentException =>
-          e.getMessage must be equalTo "'@define extends BaseModelConfig' is invalid because BaseModelConfig is neither abstract nor a trait! If you want to make BaseModelConfig extendable use '@define abstract'."
+          e.getMessage must startWith(
+            "'@define extends BaseModelConfig' is invalid because BaseModelConfig is not abstract"
+          )
       }
     }
-
   }
-
 }

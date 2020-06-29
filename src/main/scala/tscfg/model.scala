@@ -74,13 +74,13 @@ object model {
   case class ListType(t: Type) extends Type
 
   final case object AnnType {
-
     val DEFINE_STRING = "@define"
 
     // allow a typical basic java identifier, except `$` chars, as extended name:
     val extendsPattern: Regex = s"$DEFINE_STRING\\s+extends\\s+([a-zA-Z_][a-zA-Z0-9_]+)".r
 
-    def isDefine(commentString: String): Boolean = commentString.trim.matches(s"$DEFINE_STRING\\b.*")
+    private def isDefine(commentString: String): Boolean =
+      commentString.trim.matches(s"$DEFINE_STRING\\b.*")
 
     def isParent(commentString: String): Boolean = isDefine(commentString) &&
       commentString.trim.substring(DEFINE_STRING.length).trim.equals("abstract")
@@ -92,7 +92,6 @@ object model {
         case _ => ""
       }.map(_.trim).filterNot(_.isEmpty)
     }
-
   }
 
   final case class AnnType(t: Type,
@@ -102,17 +101,17 @@ object model {
                            parentClassMembers: Option[Map[String, model.AnnType]] = None
                           ) {
 
+    private val commentString = comments.getOrElse("").trim
+
+    val isDefine: Boolean = AnnType.isDefine(commentString)
+
+    val isParent: Boolean = AnnType.isParent(commentString)
+
+    val abstractClass: Option[String] = AnnType.parentClassName(comments)
 
     def |(d: String): AnnType = copy(default = Some(d))
 
     def unary_~ : AnnType = copy(optional = true)
-
-    val isDefine: Boolean = comments.exists(AnnType.isDefine)
-
-    val isParent: Boolean = comments.exists(AnnType.isParent)
-
-    val abstractClass: Option[String] = AnnType.parentClassName(comments)
-
   }
 
 
