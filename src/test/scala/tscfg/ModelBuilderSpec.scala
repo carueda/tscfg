@@ -145,6 +145,20 @@ class ModelBuilderSpec extends Specification {
     }
   }
 
+  // TODO
+  "with enum" should {
+    val result = build(
+      """#@define enum
+        |FruitType = [apple, banana, pineapple]
+      """.stripMargin)
+
+    "translate member into EnumObjectType" in {
+      val at = result.objectType.members("FruitType")
+      println(s"FruitType = $at")
+      true
+    }
+  }
+
   "with literal duration (issue 22)" should {
     val result = build(
       """

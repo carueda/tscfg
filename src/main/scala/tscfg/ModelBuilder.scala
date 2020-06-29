@@ -4,7 +4,7 @@ import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.model.DefineCase.ExtendsDefineCase
 import tscfg.model.durations.ms
-import tscfg.model.{AbstractObjectType, AnnType, DURATION, ObjectType, SIZE}
+import tscfg.model.{AbstractObjectType, AnnType, DURATION, EnumObjectType, ListType, ObjectType, SIZE}
 
 import scala.jdk.CollectionConverters._
 
@@ -39,7 +39,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   def build(conf: Config): ModelBuildResult = {
     warns.clear()
-    ModelBuildResult(objectType = fromConfig(Namespace.root, conf),
+    ModelBuildResult(
+      objectType = fromConfig(Namespace.root, conf),
       warnings = warns.toList.sortBy(_.line))
   }
 
@@ -143,6 +144,15 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       case objType: ObjectType =>
         if (commentsOpt.exists(AnnType.isParent))
           AbstractObjectType(objType.members) else objType
+
+      case listType: ListType =>
+        if (commentsOpt.exists(AnnType.isEnum)) {
+          println(s"\nWARNING: incomplete enumeration handling. Do not use `@define enum` yet\n")
+          // TODO get given list to reflect it in the EnumObjectType:
+          EnumObjectType(List("TODO", "actual", "members"))
+        }
+        else listType
+
       case other => other
     }
 
@@ -368,10 +378,12 @@ object ModelBuilder {
   def main(args: Array[String]): Unit = {
     val filename = args(0)
     val file = new File(filename)
-    val source = io.Source.fromFile(file).mkString.trim
+    val bufSource = io.Source.fromFile(file)
+    val source = bufSource.mkString.trim
+    bufSource.close()
     //println("source:\n  |" + source.replaceAll("\n", "\n  |"))
     val result = ModelBuilder(source)
-    println("objectType:")
+    println("ModelBuilderResult:")
     println(model.util.format(result.objectType))
   }
 

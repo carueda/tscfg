@@ -9,6 +9,10 @@ case class TemplateOpts(indent:        String = "  ",
 class TemplateGenerator(opts: TemplateOpts) {
   def generate(o: ObjectType): String = genObjectTypeMembers(o)
 
+  private def genEnumType(et: EnumObjectType): String = {
+    s"[${et.members.mkString(",)")}]"
+  }
+
   private def genObjectType(o: ObjectRealType): String = {
     val members = opts.indent + genObjectTypeMembers(o).replaceAll("\n", "\n" + opts.indent)
     s"""{
@@ -80,11 +84,15 @@ class TemplateGenerator(opts: TemplateOpts) {
     case ListType(t)  =>
       val (subTyp, abbrev) = gen(t)
       (s"[$subTyp, ...]", abbrevListOf + " " + abbrev)
+
+    case et:EnumObjectType =>
+      (genEnumType(et), abbrevEnum)
   }
 
   private def isBasicAbbrev(abbrev: String): Boolean =
     abbrev != abbrevObject && abbrev != abbrevAbsObject  && !abbrev.startsWith(abbrevListOf)
 
+  private val abbrevEnum = "enumeration"
   private val abbrevObject = "object"
   private val abbrevAbsObject = "abstract class"
   private val abbrevObjectRef = "ref to object"

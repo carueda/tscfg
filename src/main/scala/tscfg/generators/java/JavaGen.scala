@@ -33,13 +33,18 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                       ): Res = typ match {
 
     case ot: ObjectType => generateForObj(ot, classNamePrefixOpt, className, abstractClassName = abstractClassName)
+
     case aot: AbstractObjectType =>
       generateForObj(aot, classNamePrefixOpt, className);
-    case ot: ObjectRefType => generateForObjRef(ot)
-    case lt: ListType => generateForList(lt, classNamePrefixOpt, className)
-    case bt: BasicType => generateForBasic(bt)
-  }
 
+    case ot: ObjectRefType => generateForObjRef(ot)
+
+    case lt: ListType => generateForList(lt, classNamePrefixOpt, className)
+
+    case bt: BasicType => generateForBasic(bt)
+
+    case et: EnumObjectType => generateForEnum(et, classNamePrefixOpt, className)
+  }
 
   private def generateForObj(ot: ObjectRealType,
                              classNamePrefixOpt: Option[String] = None,
@@ -217,6 +222,26 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case SIZE => "long"
       case DURATION(_) => if (genOpts.useDurations) "java.time.Duration" else "long"
     }))
+  }
+
+  private def generateForEnum(et: EnumObjectType,
+                              classNamePrefixOpt: Option[String] = None,
+                              className: String,
+                             ): Res = {
+
+    val classNameAdjusted = adjustClassName(className)
+    val members = et.members.mkString("", ",\n  ", ";")
+    val str =
+      s"""// NOTE: incomplete #62 implementation
+         |public enum $classNameAdjusted {
+         |  $members
+         |}""".stripMargin
+
+    val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted
+    Res(et,
+      javaType = BaseJavaType(baseType),
+      definition = str
+    )
   }
 
   private val rootListAccessors = collection.mutable.LinkedHashMap[String, String]()

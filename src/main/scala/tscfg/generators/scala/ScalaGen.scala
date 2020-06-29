@@ -49,11 +49,17 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     case ot: ObjectType =>
       generateForObj(ot, classNamesPrefix, className, parentClassName = parentClassName, parentClassMembers = parentClassMembers)
+
     case aot: AbstractObjectType =>
       generateForAbstractObj(aot, classNamesPrefix, className);
+
     case ot: ObjectRefType => generateForObjRef(ot, classNamesPrefix)
+
     case lt: ListType => generateForList(lt, classNamesPrefix, className)
+
     case bt: BasicType => generateForBasic(bt)
+
+    case et: EnumObjectType => generateForEnum(et, classNamesPrefix, className)
   }
 
   def buildClassMembersString(classData: List[(String, Res, AnnType, Boolean)],
@@ -279,6 +285,28 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       case SIZE => "scala.Long"
       case DURATION(_) => if (genOpts.useDurations) "java.time.Duration" else "scala.Long"
     }))
+  }
+
+  // TODO complete impl
+  private def generateForEnum(et: EnumObjectType,
+                              classNamesPrefix: List[String] = List.empty,
+                              className: String,
+                             ): Res = {
+    genResults = genResults.copy(classNames = genResults.classNames + className)
+
+    val members = et.members.map(m => s"object $m extends $className").mkString("\n  ")
+    val str =
+      s"""// NOTE: incomplete #62 implementation
+         |sealed trait $className
+         |object $className {
+         |  $members
+         |}""".stripMargin
+
+    val baseType = classNamesPrefix.reverse.mkString + className
+    Res(et,
+      scalaType = BaseScalaType(baseType),
+      definition = str
+    )
   }
 }
 

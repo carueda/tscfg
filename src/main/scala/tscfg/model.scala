@@ -74,6 +74,7 @@ object model {
 
   sealed abstract class DefineCase {
     val isParent: Boolean = false
+    val isEnum: Boolean = false
   }
 
   object DefineCase {
@@ -85,7 +86,9 @@ object model {
 
     case class ExtendsDefineCase(name: String) extends DefineCase
 
-    case class EnumDefineCase() extends DefineCase
+    case class EnumDefineCase() extends DefineCase {
+      override val isEnum: Boolean = true
+    }
   }
 
   final object AnnType {
@@ -118,6 +121,9 @@ object model {
 
     def isParent(commentString: String): Boolean =
       getDefineCase(commentString).exists(_.isParent)
+
+    def isEnum(commentString: String): Boolean =
+      getDefineCase(commentString).exists(_.isEnum)
   }
 
   final case class AnnType(t: Type,
@@ -143,6 +149,8 @@ object model {
 
 
   sealed abstract class ObjectAbsType extends Type
+
+  case class EnumObjectType(members: List[String]) extends ObjectAbsType
 
   sealed abstract class ObjectRealType(val members: Map[String, AnnType]) extends ObjectAbsType
 
@@ -177,6 +185,8 @@ object model {
       case b: BasicType => b.toString
 
       case ListType(t) => s"[ ${format(t, ind)} ]"
+
+      case EnumObjectType(members) => s"ENUM: ${members.mkString(", ")}"
 
       case o: ObjectRealType =>
         val symbols = o.members.keys.toList.sorted

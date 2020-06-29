@@ -1,5 +1,10 @@
 2020-06-28 - 0.9.981
 
+- toward #62 "Ability to set enums in config"
+    - implement basic scheme to generate the enumeration (both java and scala)
+    - TODO capture the actual list of members for the enumeration
+    - TODO resolve the references to the generated enumeration
+
 - some refact for more general `@define` handling,
   and in preparation for #62 "Ability to set enums in config"
 
