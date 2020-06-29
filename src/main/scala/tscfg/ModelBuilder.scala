@@ -49,15 +49,14 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
     val memberStructs = getMemberStructs(conf)
       // have the `@define`s be traversed first:
-      .sortWith { case (childStruct, s2) =>
-        if (childStruct.isLeaf) false
-        else if (s2.isLeaf) true
-        else {
-          val cv = conf.getValue(childStruct.name)
-          val comments = cv.origin().comments().asScala.toList
-          comments.exists(_.trim.startsWith("@define"))
-        }
+      .sortWith { case (s1, _) =>
+        val cv = conf.getValue(s1.name)
+        val comments = cv.origin().comments().asScala.toList
+        comments.exists(_.trim.startsWith("@define"))
       }
+
+    //println(s"memberStructs:")
+    //memberStructs.foreach(ms => println("  " + ms))
 
     val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct =>
       val name = childStruct.name
