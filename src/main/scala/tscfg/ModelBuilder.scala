@@ -2,6 +2,7 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
+import tscfg.model.DefineCase.ExtendsDefineCase
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, ObjectType, SIZE}
 
@@ -53,7 +54,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         else {
           val cv = conf.getValue(childStruct.name)
           val comments = cv.origin().comments().asScala.toList
-          comments.exists(_.trim.startsWith(AnnType.DEFINE_STRING))
+          comments.exists(_.trim.startsWith("@define"))
         }
       }
 
@@ -119,8 +120,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       /* build the annType  */
       val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, parentClassMembers)
 
-      if (annType.isDefine) {
-        namespace.addDefine(name, annType.t, annType.isParent)
+      annType.defineCase foreach { define =>
+        namespace.addDefine(name, annType.t, define.isParent)
       }
 
       adjName -> annType
@@ -157,8 +158,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private def parentClassMembers(commentsOpt: Option[String], namespace: Namespace):
   Option[Predef.Map[String, model.AnnType]] = {
 
-    AnnType.parentClassName(commentsOpt).flatMap(
-      parentName =>
+    commentsOpt.flatMap(AnnType.getDefineCase).flatMap {
+      case ExtendsDefineCase(parentName) =>
         // sanity check to see if this class is defined as parent class
           namespace.getAbstractDefine(parentName).map(_.members) match {
             case Some(parentMembers) =>
@@ -168,9 +169,11 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
               // parent class might be defined, but not as parent -> no processing
               throw new IllegalArgumentException(
                 s"'${commentsOpt.get}' is invalid because $parentName is not abstract!" +
-                  s" If you want to make $parentName extendable use '${AnnType.DEFINE_STRING} abstract'.")
+                  s" If you want to make $parentName extendable use '@define abstract'.")
           }
-      )
+
+      case _ => None
+    }
   }
 
   private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {

@@ -1,6 +1,7 @@
 2020-06-28 - 0.9.981
 
-- some minor cleanup, and preparations for #62 "Ability to set enums in config"
+- some refact for more general `@define` handling,
+  and in preparation for #62 "Ability to set enums in config"
 
 - add special `--skip-gen4tests` option so the config spec is skipped in the genCode
   phase prior to the tests. This will help with invalid specs whose attempted code

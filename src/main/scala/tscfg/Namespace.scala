@@ -1,6 +1,6 @@
 package tscfg
 
-import tscfg.model.{AbstractObjectType, AnnType, ObjectRefType, Type}
+import tscfg.model.{AbstractObjectType, ObjectRefType, Type}
 
 object Namespace {
   /** Returns a new, empty root namespace. */
@@ -44,7 +44,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
     if (defineNames.contains(simpleName) || defineAbstractClassNames.contains(simpleName)) {
       val ns = if (getPath.nonEmpty) s"'$getPathString'" else "(root)"
-      println(s"WARN: duplicate ${AnnType.DEFINE_STRING} '$simpleName' in namespace $ns. Ignoring previous entry")
+      println(s"WARN: duplicate @define '$simpleName' in namespace $ns. Ignoring previous entry")
       // TODO include in build warnings
     }
 
