@@ -6,6 +6,7 @@ import tscfg.model.DefineCase.ExtendsDefineCase
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, EnumObjectType, ListType, ObjectType, SIZE}
 
+import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 
 case class ModelBuildResult(objectType: model.ObjectType,
@@ -32,6 +33,28 @@ object buildWarnings {
 
 }
 
+private case class Struct(name: String,
+                          members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
+                         ) {
+
+  var isDefine: Boolean = false
+  var isEnum: Boolean = false
+
+  def isLeaf: Boolean = members.isEmpty
+
+  // $COVERAGE-OFF$
+  def format(indent: String = ""): String = {
+    if (members.isEmpty) {
+      name
+    }
+    else {
+      s"$name:\n" +
+        members.map(e => indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
+    }
+  }
+  // $COVERAGE-ON$
+}
+
 class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   import collection._
@@ -47,13 +70,19 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
-    val memberStructs = getMemberStructs(conf)
-      // have the `@define`s be traversed first:
-      .sortWith { case (s1, _) =>
-        val cv = conf.getValue(s1.name)
-        val comments = cv.origin().comments().asScala.toList
-        comments.exists(_.trim.startsWith("@define"))
-      }
+    var memberStructs: List[Struct] = getMemberStructs(conf)
+
+    // set some flags to the structs that are @define
+    // (TODO some future general revision as this is becoming rather ad hoc)
+    memberStructs foreach { s =>
+      val cv = conf.getValue(s.name)
+      val comments = cv.origin().comments().asScala.toList
+      s.isDefine = comments.exists(_.trim.startsWith("@define"))
+      s.isEnum = comments.exists(_.trim.matches("@define\\s+enum\\s*$"))
+    }
+
+    // have the `@define`s be traversed first:
+    memberStructs = memberStructs.sortWith { case (s, _) => s.isDefine }
 
     //println(s"memberStructs:")
     //memberStructs.foreach(ms => println("  " + ms))
@@ -66,7 +95,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         if (childStruct.isLeaf) {
           val valueString = util.escapeValue(cv.unwrapped().toString)
 
-          getTypeFromConfigValue(namespace, cv, valueString) match {
+          getTypeFromConfigValue(namespace, cv, childStruct.isEnum) match {
             case typ: model.STRING.type =>
               namespace.resolveDefine(valueString) match {
                 case Some(ort) =>
@@ -185,21 +214,6 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
   }
 
-  private case class Struct(name: String, members: mutable.HashMap[String, Struct] = mutable.HashMap.empty) {
-    def isLeaf: Boolean = members.isEmpty
-
-    // $COVERAGE-OFF$
-    def format(indent: String = ""): String = {
-      if (members.isEmpty)
-        name
-      else
-        s"$name:\n" +
-          members.map(e => indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
-    }
-
-    // $COVERAGE-ON$
-  }
-
   private def getMemberStructs(conf: Config): List[Struct] = {
     val structs = mutable.HashMap[String, Struct]("" -> Struct(""))
 
@@ -241,14 +255,21 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     structs("").members.values.toList
   }
 
-  private def getTypeFromConfigValue(namespace: Namespace, cv: ConfigValue, valueString: String): model.Type = {
+  private def getTypeFromConfigValue(namespace: Namespace, cv: ConfigValue, isEnum: Boolean): model.Type = {
     import ConfigValueType._
     cv.valueType() match {
       case STRING => model.STRING
+
       case BOOLEAN => model.BOOLEAN
+
       case NUMBER => numberType(cv.unwrapped().toString)
+
+      case LIST if isEnum => enumType(cv.asInstanceOf[ConfigList])
+
       case LIST => listType(namespace, cv.asInstanceOf[ConfigList])
+
       case OBJECT => objType(namespace, cv.asInstanceOf[ConfigObject])
+
       case NULL => throw new AssertionError("null unexpected")
     }
   }
@@ -302,7 +323,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
     val cv0: ConfigValue = cv.get(0)
     val valueString = util.escapeValue(cv0.unwrapped().toString)
-    val typ = getTypeFromConfigValue(namespace, cv0, valueString)
+    val typ = getTypeFromConfigValue(namespace, cv0, isEnum = false)
 
     val elemType = {
       if (typ == model.STRING) {
@@ -332,6 +353,12 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
 
     model.ListType(elemType)
+  }
+
+  private def enumType(cv: ConfigList): model.EnumObjectType = {
+    if (cv.isEmpty) throw new IllegalArgumentException("enumeration with at least one element expected")
+
+    model.EnumObjectType(cv.iterator().asScala.map(_.unwrapped().toString).toList)
   }
 
   private def objType(namespace: Namespace, cv: ConfigObject): model.ObjectType =

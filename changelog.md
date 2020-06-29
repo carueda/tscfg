@@ -2,7 +2,7 @@
 
 - toward #62 "Ability to set enums in config"
     - implement basic scheme to generate the enumeration (both java and scala)
-    - TODO capture the actual list of members for the enumeration
+    - reflect given list of members for enumeration
     - TODO resolve the references to the generated enumeration
 
 - some refact for more general `@define` handling,
