@@ -1,9 +1,22 @@
-2020-06-28 - 0.9.981
+2020-06-29 - 0.9.981
 
-- toward #62 "Ability to set enums in config"
-    - implement basic scheme to generate the enumeration (both java and scala)
-    - reflect given list of members for enumeration
-    - TODO resolve the references to the generated enumeration
+- partial implementation of #62 "Ability to set enums in config"
+  This is initally working in general for java and for references in nested objects for scala.
+  TODO(scala) proper reference at first level. See generated `ScalaIssue62Cfg` upon running:
+
+      > runMain tscfg.Main --spec src/main/tscfg/example/issue62.spec.conf --scala --cn ScalaIssue62Cfg --dd src/test/scala/tscfg/example
+
+    where it should generate:
+
+            final case class ScalaIssue62Cfg(
+              fruit     : ScalaIssue62Cfg.FruitType
+            )
+
+    instead of:
+
+            final case class ScalaIssue62Cfg(
+              fruit     : FruitType
+            )
 
 - some refact for more general `@define` handling,
   and in preparation for #62 "Ability to set enums in config"

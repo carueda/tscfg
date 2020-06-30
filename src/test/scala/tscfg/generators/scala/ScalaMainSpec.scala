@@ -742,6 +742,53 @@ class ScalaMainSpec extends Specification {
     }
   }
 
+  "issue 62 - shared enumeration" should {
+    "62a basic" in {
+      "be handled with correct input" in {
+        val c = ScalaIssue62aCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = pineapple
+            |}
+            |""".stripMargin))
+
+        import ScalaIssue62aCfg.FruitType._
+        c.foo.fruit === pineapple
+      }
+
+      "be handled with invalid enum value" in {
+        def c = ScalaIssue62aCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = invalidFruit
+            |}
+            |""".stripMargin))
+
+        c must throwA[com.typesafe.config.ConfigException].like {
+          case e: com.typesafe.config.ConfigException =>
+            e.getMessage must contain("'foo.fruit': invalid value invalidFruit for enumeration FruitType")
+        }
+      }
+    }
+
+    "62b more complete " in {
+      "be handled with correct input" in {
+        val c = ScalaIssue62bCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = pineapple
+            |  someFruits = [banana, apple]
+            |  other {
+            |    aFruit = apple
+            |  }
+            |}
+            |""".stripMargin))
+
+        import ScalaIssue62bCfg.FruitType._
+        c.foo.fruit === pineapple
+        c.foo.someFruits === List(banana, apple)
+        c.foo.other.aFruit === apple
+      }
+    }
+  }
+
   "issue 64 - template with defined abstract class" should {
     def configFromFile = ScalaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
 

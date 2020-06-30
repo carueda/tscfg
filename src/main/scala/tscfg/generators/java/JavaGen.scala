@@ -32,18 +32,18 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
                        abstractClassName: Option[String] = None
                       ): Res = typ match {
 
+    case et: EnumObjectType => generateForEnum(et, classNamePrefixOpt, className)
+
     case ot: ObjectType => generateForObj(ot, classNamePrefixOpt, className, abstractClassName = abstractClassName)
 
     case aot: AbstractObjectType =>
       generateForObj(aot, classNamePrefixOpt, className);
 
-    case ot: ObjectRefType => generateForObjRef(ot)
+    case ort: ObjectRefType => generateForObjRef(ort)
 
     case lt: ListType => generateForList(lt, classNamePrefixOpt, className)
 
     case bt: BasicType => generateForBasic(bt)
-
-    case et: EnumObjectType => generateForEnum(et, classNamePrefixOpt, className)
   }
 
   private def generateForObj(ot: ObjectRealType,
@@ -191,11 +191,11 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     )
   }
 
-  private def generateForObjRef(ot: ObjectRefType): Res = {
-    val className = ot.simpleName
+  private def generateForObjRef(ort: ObjectRefType): Res = {
+    val className = ort.simpleName
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    Res(ot,
+    Res(ort,
       javaType = BaseJavaType(className + dbg("<X>"))
     )
   }
@@ -276,11 +276,34 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def instance(a: AnnType, res: Res, path: String)
                       (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
-    a.t match {
-      case bt: BasicType => basicInstance(a, bt, path)
-      case _: ObjectAbsType => objectInstance(a, res, path)
-      case lt: ListType => listInstance(a, lt, res, path)
+
+    val objRefResolution: Option[String] = a.t match {
+      case ort: ObjectRefType => objectRefInstance(ort, res, path)
+      case _ => None
     }
+
+    objRefResolution.getOrElse {
+      a.t match {
+        case bt: BasicType => basicInstance(a, bt, path)
+        case _: ObjectAbsType => objectInstance(a, res, path)
+        case lt: ListType => listInstance(a, lt, res, path)
+      }
+    }
+  }
+
+  private def objectRefInstance(ort: ObjectRefType, res: Res, path: String): Option[String] = {
+    ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+      t match {
+        case _: EnumObjectType => Some(enumInstance(res, path))
+        case _ => None
+      }
+    }
+  }
+
+  private def enumInstance(res: Res, path: String): String = {
+    val className = res.javaType.toString
+    // for now, for java, just let `.valueOf` complain if the value is invalid:
+    s"""$className.valueOf(c.getString("$path"))"""
   }
 
   private def objectInstance(a: AnnType, res: Res, path: String)
@@ -383,7 +406,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         rec(lst, lt.t.asInstanceOf[ListType], prefix + methodNames.listPrefix)
     }
 
-    val (methodName, methodBody) = listMethodDefinition(elemMethodName, ljt.jt)
+    val (methodName, methodBody) = listMethodDefinition(elemMethodName, ljt.jt, lt)
 
     if (isBasic)
       rootListAccessors += methodName -> methodBody
@@ -408,16 +431,31 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case _: ListType => throw new AssertionError()
   }
 
-  private def listMethodDefinition(elemMethodName: String, javaType: JavaType)
+  private def listMethodDefinition(elemMethodName: String, javaType: JavaType, lt: ListType)
                                   (implicit methodNames: MethodNames): (String, String) = {
 
-    val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
+    val elem = if (elemMethodName.startsWith(methodNames.listPrefix)) {
       s"$elemMethodName((com.typesafe.config.ConfigList)cv, parentPath, $$tsCfgValidator)"
-    else if (elemMethodName.startsWith("$"))
+    }
+    else if (elemMethodName.startsWith("$")) {
       s"$elemMethodName(cv)"
+    }
     else {
       val adjusted = elemMethodName.replace("_", ".")
-      s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig(), parentPath, $$tsCfgValidator)"
+      val objRefResolution = lt.t match {
+        case ort:ObjectRefType =>
+          ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+            t match {
+              case _: EnumObjectType => Some(s"""$adjusted.valueOf(cv.unwrapped().toString())""")
+              case _ => None
+            }
+          }
+
+        case _ => None
+      }
+      objRefResolution.getOrElse {
+        s"new $adjusted(((com.typesafe.config.ConfigObject)cv).toConfig(), parentPath, $$tsCfgValidator)"
+      }
     }
 
     val methodName = methodNames.listPrefix + elemMethodName

@@ -47,19 +47,19 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
                        parentClassMembers: Option[Map[String, model.AnnType]] = None,
                       ): Res = typ match {
 
+    case et: EnumObjectType => generateForEnum(et, classNamesPrefix, className)
+
     case ot: ObjectType =>
       generateForObj(ot, classNamesPrefix, className, parentClassName = parentClassName, parentClassMembers = parentClassMembers)
 
     case aot: AbstractObjectType =>
       generateForAbstractObj(aot, classNamesPrefix, className);
 
-    case ot: ObjectRefType => generateForObjRef(ot, classNamesPrefix)
+    case ort: ObjectRefType => generateForObjRef(ort, classNamesPrefix)
 
     case lt: ListType => generateForList(lt, classNamesPrefix, className)
 
     case bt: BasicType => generateForBasic(bt)
-
-    case et: EnumObjectType => generateForEnum(et, classNamesPrefix, className)
   }
 
   def buildClassMembersString(classData: List[(String, Res, AnnType, Boolean)],
@@ -244,15 +244,15 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   }
 
-  private def generateForObjRef(ot: ObjectRefType,
+  private def generateForObjRef(ort: ObjectRefType,
                                 classNamesPrefix: List[String]): Res = {
 
-    val className = getClassName(ot.simpleName)
+    val className = getClassName(ort.simpleName)
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    val fullScalaName = getClassNameForObjectRefType(ot)
+    val fullScalaName = getClassNameForObjectRefType(ort)
 
-    Res(ot,
+    Res(ort,
       scalaType = BaseScalaType(fullScalaName + dbg("<X>"))
     )
   }
@@ -287,19 +287,39 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }))
   }
 
-  // TODO complete impl
   private def generateForEnum(et: EnumObjectType,
                               classNamesPrefix: List[String] = List.empty,
                               className: String,
                              ): Res = {
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    val members = et.members.map(m => s"object $m extends $className").mkString("\n  ")
+    /// Example:
+    //  sealed trait FruitType
+    //  object FruitType {
+    //    object apple extends FruitType
+    //    object banana extends FruitType
+    //    object pineapple extends FruitType
+    //    def $resEnum(name: java.lang.String, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): FruitType = name match {
+    //      case "apple" => FruitType.apple
+    //      case "banana" => FruitType.banana
+    //      case "pineapple" => FruitType.pineapple
+    //      case v => $tsCfgValidator.addInvalidEnumValue(path, v, "FruitType")
+    //                null
+    //    }
+    //  }
+
+    val resolve =
+      s"""def $$resEnum(name: java.lang.String, path: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): $className = name match {
+         |  ${et.members.map(m => s"""case "$m" => $className.$m""").mkString("\n  ")}
+         |  case v => $$tsCfgValidator.addInvalidEnumValue(path, v, "$className")
+         |            null
+         |}""".stripMargin
+
     val str =
-      s"""// NOTE: incomplete #62 implementation
-         |sealed trait $className
+      s"""sealed trait $className
          |object $className {
-         |  $members
+         |  ${et.members.map(m => s"object $m extends $className").mkString("\n  ")}
+         |  ${resolve.replaceAll("\n", "\n  ")}
          |}""".stripMargin
 
     val baseType = classNamesPrefix.reverse.mkString + className
@@ -433,11 +453,37 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
 
   def instance(a: AnnType, res: Res, path: String)
               (implicit listAccessors: collection.mutable.LinkedHashMap[String, String]): String = {
-    a.t match {
-      case bt: BasicType => basicInstance(a, bt, path)
-      case _: ObjectAbsType => objectInstance(a, res, path)
-      case lt: ListType => listInstance(a, lt, res, path)
+
+    val objRefResolution: Option[String] = a.t match {
+      case ort: ObjectRefType => objectRefInstance(ort, res, path)
+      case _ => None
     }
+
+    objRefResolution.getOrElse {
+      a.t match {
+        case bt: BasicType => basicInstance(a, bt, path)
+        case _: ObjectAbsType => objectInstance(a, res, path)
+        case lt: ListType => listInstance(a, lt, res, path)
+      }
+    }
+  }
+
+  private def objectRefInstance(ort: ObjectRefType, res: Res, path: String): Option[String] = {
+    ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+      t match {
+        case _: EnumObjectType => Some(enumInstance(res, path))
+        case _ => None
+      }
+    }
+  }
+
+  private def enumInstance(res: Res, path: String): String = {
+    val className = res.scalaType.toString
+
+    //// Example:
+    // fruit = FruitType.$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator)
+
+    s"""$className.$$resEnum(c.getString("$path"), parentPath + "fruit", $$tsCfgValidator)"""
   }
 
   private def objectInstance(a: AnnType, res: Res, path: String)
@@ -542,7 +588,7 @@ private[scala] class Accessors {
         rec(lst, lt.t.asInstanceOf[ListType], prefix + methodNames.listPrefix, s12)
     }
 
-    val (methodName, methodBody) = listMethodDefinition(elemMethodName, lst.st, s12)
+    val (methodName, methodBody) = listMethodDefinition(elemMethodName, lst.st, s12, lt)
 
     if (isBasic)
       rootListAccessors += methodName -> methodBody
@@ -567,16 +613,33 @@ private[scala] class Accessors {
     case _: ListType => throw new AssertionError()
   }
 
-  def listMethodDefinition(elemMethodName: String, scalaType: ScalaType, s12: Boolean)
+  def listMethodDefinition(elemMethodName: String, scalaType: ScalaType, s12: Boolean, lt: ListType)
                           (implicit methodNames: MethodNames): (String, String) = {
 
-    val elem = if (elemMethodName.startsWith(methodNames.listPrefix))
+    val elem = if (elemMethodName.startsWith(methodNames.listPrefix)) {
       s"$elemMethodName(cv.asInstanceOf[com.typesafe.config.ConfigList], parentPath, $$tsCfgValidator)"
-    else if (elemMethodName.startsWith("$"))
+    }
+    else if (elemMethodName.startsWith("$")) {
       s"$elemMethodName(cv)"
+    }
     else {
       val adjusted = elemMethodName.replace("_", ".")
-      s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig, parentPath, $$tsCfgValidator)"
+      val objRefResolution = lt.t match {
+        case ort:ObjectRefType =>
+          ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+            t match {
+              case _: EnumObjectType =>
+              // TODO some more useful path (for now just "?" below)
+                Some(s"""$adjusted.$$resEnum(cv.unwrapped().toString, "?", $$tsCfgValidator)""")
+              case _ => None
+            }
+          }
+
+        case _ => None
+      }
+      objRefResolution.getOrElse {
+        s"$adjusted(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig, parentPath, $$tsCfgValidator)"
+      }
     }
 
     val methodName = methodNames.listPrefix + elemMethodName

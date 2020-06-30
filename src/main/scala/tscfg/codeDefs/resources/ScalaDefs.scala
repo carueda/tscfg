@@ -17,6 +17,10 @@ object ScalaDefs {
       badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 
+    def addInvalidEnumValue(path: java.lang.String, value: java.lang.String, enumName: java.lang.String): Unit = {
+      badPaths += s"'$path': invalid value $value for enumeration $enumName"
+    }
+
     def validate(): Unit = {
       if (badPaths.nonEmpty) {
         throw new com.typesafe.config.ConfigException(

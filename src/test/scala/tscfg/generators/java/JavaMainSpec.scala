@@ -820,6 +820,53 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue 62 - shared enumeration" should {
+    "62a basic" in {
+      "be handled with correct input" in {
+        val c = new JavaIssue62aCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = pineapple
+            |}
+            |""".stripMargin))
+
+        import JavaIssue62aCfg.FruitType._
+        c.foo.fruit === pineapple
+      }
+
+      "be handled with invalid enum value" in {
+        def c = new JavaIssue62aCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = invalidFruit
+            |}
+            |""".stripMargin))
+
+        c must throwA[IllegalArgumentException].like {
+          case e: IllegalArgumentException =>
+            e.getMessage must beMatching("No enum constant .*FruitType.invalidFruit")
+        }
+      }
+    }
+
+    "62b more complete" in {
+      "be handled with correct input" in {
+        val c = new JavaIssue62bCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = pineapple
+            |  someFruits = [banana, apple]
+            |  other {
+            |    aFruit = apple
+            |  }
+            |}
+            |""".stripMargin))
+
+        import JavaIssue62bCfg.FruitType._
+        c.foo.fruit === pineapple
+        c.foo.someFruits.asScala === List(banana, apple)
+        c.foo.other.aFruit === apple
+      }
+    }
+  }
+
   "issue 64 - template with defined abstract class" should {
     def configFromFile = new JavaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
 
