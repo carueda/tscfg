@@ -316,7 +316,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |}""".stripMargin
 
     val str =
-      s"""sealed trait $className
+      s"""// NOTE: incomplete #62 implementation
+         |sealed trait $className
          |object $className {
          |  ${et.members.map(m => s"object $m extends $className").mkString("\n  ")}
          |  ${resolve.replaceAll("\n", "\n  ")}
