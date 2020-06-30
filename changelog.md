@@ -1,7 +1,7 @@
 2020-06-29 - 0.9.981
 
 - partial implementation of #62 "Ability to set enums in config"
-  This is initally working in general for java and for references in nested objects for scala.
+  This is initially working in general for java and for references in nested objects for scala.
   TODO(scala) proper reference at first level. See generated `ScalaIssue62Cfg` upon running:
 
       > runMain tscfg.Main --spec src/main/tscfg/example/issue62.spec.conf --scala --cn ScalaIssue62Cfg --dd src/test/scala/tscfg/example
@@ -26,7 +26,7 @@
   generation is part of the test itself.
   (in general, we want to KEEP the `*.spec.conf` naming convention for specs)
 
-2020-06-28 - 0.9.981
+2020-06-28 - 0.9.98
 
 - publish v0.9.98 with "Ability to allow shared object inheritance" #64. Thanks @johanneshiry.
 
