@@ -1,3 +1,11 @@
+2020-07
+
+- some refact as a bit of cleanup and as preparation for #67
+    - move DefineCase stuff to separate module
+    - add `defineCaseOpt` to `Struct`
+    - this define information should facilitate ordering the
+      traversal with consideration for any `@define` interdependency
+
 2020-06-29 - 0.9.981
 
 - partial implementation of #62 "Ability to set enums in config"

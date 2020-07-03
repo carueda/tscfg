@@ -2,7 +2,7 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
-import tscfg.model.DefineCase.ExtendsDefineCase
+import tscfg.DefineCase._
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, EnumObjectType, ListType, ObjectType, SIZE}
 
@@ -37,8 +37,10 @@ private case class Struct(name: String,
                           members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
                          ) {
 
-  var isDefine: Boolean = false
-  var isEnum: Boolean = false
+  var defineCaseOpt: Option[DefineCase] = None
+
+  def isDefine: Boolean = defineCaseOpt.isDefined
+  def isEnum: Boolean = defineCaseOpt.exists(_.isEnum)
 
   def isLeaf: Boolean = members.isEmpty
 
@@ -69,19 +71,26 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
+  private def setDefineCase(conf: Config)(s: Struct): Unit = {
+    val cv = conf.getValue(s.name)
+    val comments = cv.origin().comments().asScala.toList
+    val defineLines = comments.map(_.trim).filter(_.startsWith("@define"))
+    s.defineCaseOpt = defineLines.length match {
+      case 0 => None
+      case 1 => DefineCase.getDefineCase(defineLines.head)
+      case _ => throw new IllegalArgumentException(s"multiple @define's for ${s.name}.")
+    }
+  }
+
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
     var memberStructs: List[Struct] = getMemberStructs(conf)
 
     // set some flags to the structs that are @define
     // (TODO some future general revision as this is becoming rather ad hoc)
-    memberStructs foreach { s =>
-      val cv = conf.getValue(s.name)
-      val comments = cv.origin().comments().asScala.toList
-      s.isDefine = comments.exists(_.trim.startsWith("@define"))
-      s.isEnum = comments.exists(_.trim.matches("@define\\s+enum\\s*$"))
-    }
+    memberStructs foreach setDefineCase(conf)
 
     // have the `@define`s be traversed first:
+    // FIXME(#67) use any `@define` interdependency info captured above for the ordering below
     memberStructs = memberStructs.sortWith { case (s, _) => s.isDefine }
 
     //println(s"memberStructs:")
@@ -196,7 +205,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private def parentClassMembers(commentsOpt: Option[String], namespace: Namespace):
   Option[Predef.Map[String, model.AnnType]] = {
 
-    commentsOpt.flatMap(AnnType.getDefineCase).flatMap {
+    commentsOpt.flatMap(getDefineCase).flatMap {
       case ExtendsDefineCase(parentName) =>
         // sanity check to see if this class is defined as parent class
           namespace.getAbstractDefine(parentName).map(_.members) match {
@@ -294,7 +303,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       (typePart, hasDefault)
 
     val (base, qualification) = {
-      val parts = baseString.split("""\s*\:\s*""", 2)
+      val parts = baseString.split("""\s*:\s*""", 2)
       if (parts.length == 1)
         (parts(0), None)
       else
