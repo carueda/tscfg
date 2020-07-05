@@ -3,10 +3,10 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.DefineCase._
+import tscfg.Struct.MemberStruct
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, EnumObjectType, ListType, ObjectType, SIZE}
 
-import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 
 case class ModelBuildResult(objectType: model.ObjectType,
@@ -33,30 +33,6 @@ object buildWarnings {
 
 }
 
-private case class Struct(name: String,
-                          members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
-                         ) {
-
-  var defineCaseOpt: Option[DefineCase] = None
-
-  def isDefine: Boolean = defineCaseOpt.isDefined
-  def isEnum: Boolean = defineCaseOpt.exists(_.isEnum)
-
-  def isLeaf: Boolean = members.isEmpty
-
-  // $COVERAGE-OFF$
-  def format(indent: String = ""): String = {
-    if (members.isEmpty) {
-      name
-    }
-    else {
-      s"$name:\n" +
-        members.map(e => indent + e._1 + ": " + e._2.format(indent + "    ")).mkString("\n")
-    }
-  }
-  // $COVERAGE-ON$
-}
-
 class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   import collection._
@@ -71,7 +47,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
-  private def setDefineCase(conf: Config)(s: Struct): Unit = {
+  private def setDefineCase(conf: Config)(s: MemberStruct): Unit = {
     val cv = conf.getValue(s.name)
     val comments = cv.origin().comments().asScala.toList
     val defineLines = comments.map(_.trim).filter(_.startsWith("@define"))
@@ -83,7 +59,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   }
 
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
-    var memberStructs: List[Struct] = getMemberStructs(conf)
+    var memberStructs: List[MemberStruct] = getMemberStructs(conf)
 
     // set some flags to the structs that are @define
     // (TODO some future general revision as this is becoming rather ad hoc)
@@ -223,25 +199,25 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
   }
 
-  private def getMemberStructs(conf: Config): List[Struct] = {
-    val structs = mutable.HashMap[String, Struct]("" -> Struct(""))
+  private def getMemberStructs(conf: Config): List[MemberStruct] = {
+    val structs = mutable.HashMap[String, MemberStruct]("" -> MemberStruct(""))
 
-    def resolve(key: String): Struct = {
-      if (!structs.contains(key)) structs.put(key, Struct(getSimple(key)))
+    def resolve(key: String): MemberStruct = {
+      if (!structs.contains(key)) structs.put(key, MemberStruct(getSimple(key)))
       structs(key)
     }
 
     conf.entrySet().asScala foreach { e =>
       val path = e.getKey
-      val leaf = Struct(path)
+      val leaf = MemberStruct(path)
       doAncestorsOf(path, leaf)
 
-      def doAncestorsOf(childKey: String, childStruct: Struct): Unit = {
+      def doAncestorsOf(childKey: String, childStruct: MemberStruct): Unit = {
         val (parent, simple) = (getParent(childKey), getSimple(childKey))
         createParent(parent, simple, childStruct)
 
         @annotation.tailrec
-        def createParent(parentKey: String, simple: String, child: Struct): Unit = {
+        def createParent(parentKey: String, simple: String, child: MemberStruct): Unit = {
           val parentGroup = resolve(parentKey)
           parentGroup.members.put(simple, child)
           if (parentKey != "") {
