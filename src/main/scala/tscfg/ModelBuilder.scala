@@ -3,7 +3,8 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.DefineCase._
-import tscfg.Struct.MemberStruct
+import tscfg.Struct.{MemberStruct, SharedObjectStruct}
+import tscfg.exceptions.ObjectDefinitionException
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, EnumObjectType, ListType, ObjectType, SIZE}
 
@@ -47,32 +48,59 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
-  private def setDefineCase(conf: Config)(s: MemberStruct): Unit = {
-    val cv = conf.getValue(s.name)
-    val comments = cv.origin().comments().asScala.toList
-    val defineLines = comments.map(_.trim).filter(_.startsWith("@define"))
-    s.defineCaseOpt = defineLines.length match {
-      case 0 => None
-      case 1 => DefineCase.getDefineCase(defineLines.head)
-      case _ => throw new IllegalArgumentException(s"multiple @define's for ${s.name}.")
+  /**
+    * Adds additional information to the object struct provided by prepended comment strings
+    *
+    * @param conf   [[Config]] with basic information
+    * @param struct "Basic" object struct to be enriched
+    * @throws ObjectDefinitionException If for example the additional comment string is malformed
+    * @return An extended [[SharedObjectStruct]] if additional information s available, the untouched [[MemberStruct]]
+    */
+  @throws[ObjectDefinitionException]
+  private def enrichWithAnnotationInformation(conf: Config)(struct: Struct): Struct = {
+    /* Get all comment lines, which denote a shared object definition */
+    val defineLines = conf.getValue(struct.name).origin().comments().asScala.map(_.trim).filter(_.startsWith("@define"))
+    defineLines.length match {
+      case 0 =>
+        /* The given member struct is no shared object definition: Return the struct as it is */
+        struct
+      case 1 =>
+        /* This is a shared object definition: Extract the information and merge them into the basic member struct */
+        val additionalComments = defineLines.headOption match {
+          case Some(comment) => comment
+          case None => throw ObjectDefinitionException("Cannot get first comment line, although exactly one was found.")
+        }
+
+        try {
+          val defineCase = DefineCase.getDefineCase(additionalComments) match {
+            case Some(value) => value
+            case None =>
+              throw ObjectDefinitionException(s"Unable to extract additional information from comment '$additionalComments'")
+          }
+          struct match {
+            case MemberStruct(name, members) => SharedObjectStruct(name, members, defineCase)
+          }
+        } catch {
+          case e: RuntimeException =>
+            throw ObjectDefinitionException(s"Malformed additional information in comment '@define $additionalComments'", e)
+        }
+      case _ => throw ObjectDefinitionException(s"multiple @define's for ${struct.name}.")
     }
   }
 
   private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
-    var memberStructs: List[MemberStruct] = getMemberStructs(conf)
+    /* Get all structs with basic information from config */
+    val memberStructs: List[Struct] = getMemberStructs(conf)
 
-    // set some flags to the structs that are @define
+    // Add some information to the structs that are shared objects and ensure, that `@define`s are traversed first
     // (TODO some future general revision as this is becoming rather ad hoc)
-    memberStructs foreach setDefineCase(conf)
-
-    // have the `@define`s be traversed first:
     // FIXME(#67) use any `@define` interdependency info captured above for the ordering below
-    memberStructs = memberStructs.sortWith { case (s, _) => s.isDefine }
+    val enrichedStructs = memberStructs.map(enrichWithAnnotationInformation(conf)).sortWith {
+      case (_: SharedObjectStruct, _) => true
+      case (_, _) => false
+    }
 
-    //println(s"memberStructs:")
-    //memberStructs.foreach(ms => println("  " + ms))
-
-    val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct =>
+    val members: immutable.Map[String, model.AnnType] = enrichedStructs.map { childStruct =>
       val name = childStruct.name
       val cv = conf.getValue(name)
 
@@ -80,7 +108,12 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         if (childStruct.isLeaf) {
           val valueString = util.escapeValue(cv.unwrapped().toString)
 
-          getTypeFromConfigValue(namespace, cv, childStruct.isEnum) match {
+          val isEnum = childStruct match {
+            case SharedObjectStruct(_, _, defineCase) => defineCase.isInstanceOf[EnumDefineCase]
+            case _ => false
+          }
+
+          getTypeFromConfigValue(namespace, cv, isEnum) match {
             case typ: model.STRING.type =>
               namespace.resolveDefine(valueString) match {
                 case Some(ort) =>
@@ -199,7 +232,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
   }
 
-  private def getMemberStructs(conf: Config): List[MemberStruct] = {
+  private def getMemberStructs(conf: Config): List[Struct] = {
     val structs = mutable.HashMap[String, MemberStruct]("" -> MemberStruct(""))
 
     def resolve(key: String): MemberStruct = {

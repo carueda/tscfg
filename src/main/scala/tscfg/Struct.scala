@@ -9,7 +9,11 @@ import scala.collection.mutable
   * @param name    Name of the config member
   * @param members Nested config definitions
   */
-abstract class Struct(name: String, members: mutable.HashMap[String, _ <: Struct]){
+abstract class Struct(name: String, members: mutable.HashMap[String, _ <: Struct]) {
+
+  def name(): String = name
+
+  def members(): mutable.HashMap[String, _ <: Struct] = members
 
   def isLeaf: Boolean = members.isEmpty
 
@@ -35,20 +39,10 @@ private[tscfg] case object Struct {
     * @param members    Nested config definitions
     * @param defineCase Additional information about the shared object attributes
     */
-  final case class SharedObjectStruct(name: String,
-                                members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
-                                defineCase: DefineCase
+  final case class SharedObjectStruct(override val name: String,
+                                      override val members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
+                                      defineCase: DefineCase
                                ) extends Struct(name, members)
-
-  /**
-    * Implementation of [[Struct]] to identify those using enumerations
-    *
-    * @param name    Name of the config member
-    * @param members Nested config definitions
-    */
-  final case class EnumStruct(name: String,
-                          members: mutable.HashMap[String, Struct] = mutable.HashMap.empty
-                         ) extends Struct(name, members)
 
   /**
     * A 'simple' implementation of [[Struct]] that is used for the actual members of the config
@@ -56,18 +50,7 @@ private[tscfg] case object Struct {
     * @param name    Name of the config member
     * @param members Nested config definitions
     */
-  final case class MemberStruct(name: String,
-                                  members: mutable.HashMap[String, MemberStruct] = mutable.HashMap.empty
-                                 ) extends Struct(name, members) {
-
-    @deprecated("Use children of Struct instead")
-    var defineCaseOpt: Option[DefineCase] = None
-
-    @deprecated("Use children of Struct instead")
-    def isDefine: Boolean = defineCaseOpt.isDefined
-
-    @deprecated("Use children of Struct instead")
-    def isEnum: Boolean = defineCaseOpt.exists(_.isEnum)
-  }
-
+  final case class MemberStruct(override val name: String,
+                                override val members: mutable.HashMap[String, Struct] = mutable.HashMap.empty
+                                 ) extends Struct(name, members)
 }
