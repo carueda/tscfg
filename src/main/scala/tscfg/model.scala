@@ -76,10 +76,10 @@ object model {
   final object AnnType {
 
     def isParent(commentString: String): Boolean =
-      getDefineCase(commentString).exists(_.isParent)
+      parse(commentString).exists(_.isParent)
 
     def isEnum(commentString: String): Boolean =
-      getDefineCase(commentString).exists(_.isEnum)
+      parse(commentString).exists(_.isEnum)
   }
 
   final case class AnnType(t: Type,
@@ -89,12 +89,12 @@ object model {
                            parentClassMembers: Option[Map[String, model.AnnType]] = None
                           ) {
 
-    val defineCase: Option[DefineCase] = comments.flatMap(cs => getDefineCase(cs))
+    val maybeSharedObjectType: Option[DefineCase] = comments.flatMap(cs => parse(cs))
 
-    val isDefine: Boolean = defineCase.isDefined
+    val isDefine: Boolean = maybeSharedObjectType.isDefined
 
-    val abstractClass: Option[String] = defineCase flatMap {
-      case ExtendsDefineCase(name) => Some(name)
+    val abstractClass: Option[String] = maybeSharedObjectType flatMap {
+      case InheritanceSharedObject(_, parentNameOpt @ Some(_)) => parentNameOpt
       case _ => None
     }
 

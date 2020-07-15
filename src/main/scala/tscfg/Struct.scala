@@ -9,11 +9,11 @@ import scala.collection.mutable
   * @param name    Name of the config member
   * @param members Nested config definitions
   */
-abstract class Struct(name: String, members: mutable.HashMap[String, _ <: Struct]) {
+abstract class Struct(name: String, members: mutable.HashMap[String, Struct]) {
 
   def name(): String = name
 
-  def members(): mutable.HashMap[String, _ <: Struct] = members
+  def members(): mutable.HashMap[String, Struct] = members
 
   def isLeaf: Boolean = members.isEmpty
 
@@ -31,18 +31,29 @@ abstract class Struct(name: String, members: mutable.HashMap[String, _ <: Struct
 }
 
 private[tscfg] case object Struct {
-
   /**
-    * [[Struct]] implementation, that is used for defining shared objects
+    * [[Struct]] implementation, that is used for defining shared objects, that may be part of an inheritance tree
     *
-    * @param name       Name of the config member
-    * @param members    Nested config definitions
-    * @param defineCase Additional information about the shared object attributes
+    * @param name           Name of the config member
+    * @param members        Nested config definitions
+    * @param abstractObject true, if this object is abstract
+    * @param maybeParentId  [[Option]] to the name of a parent object
     */
   final case class SharedObjectStruct(override val name: String,
                                       override val members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
-                                      defineCase: DefineCase
+                                      abstractObject: Boolean,
+                                      maybeParentId: Option[String]
                                ) extends Struct(name, members)
+
+  /**
+    * [[Struct]] implementation for a predefined / shared object utilising enumeration values
+    *
+    * @param name    Name of the config member
+    * @param members Nested config definitions
+    */
+  final case class EnumStruct(override val name: String,
+                              override val members: mutable.HashMap[String, Struct] = mutable.HashMap.empty
+                             ) extends Struct(name, members)
 
   /**
     * A 'simple' implementation of [[Struct]] that is used for the actual members of the config
@@ -53,4 +64,11 @@ private[tscfg] case object Struct {
   final case class MemberStruct(override val name: String,
                                 override val members: mutable.HashMap[String, Struct] = mutable.HashMap.empty
                                  ) extends Struct(name, members)
+
+  /**
+    * Comprehensive list ov different struct Types
+    */
+  final case object StructTypes extends Enumeration {
+    val Member, Enum, SharedObject = Value
+  }
 }

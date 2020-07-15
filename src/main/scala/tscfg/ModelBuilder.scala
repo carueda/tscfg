@@ -3,7 +3,8 @@ package tscfg
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
 import tscfg.DefineCase._
-import tscfg.Struct.{MemberStruct, SharedObjectStruct}
+import tscfg.Struct.StructTypes._
+import tscfg.Struct.{EnumStruct, MemberStruct, SharedObjectStruct}
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.model.durations.ms
 import tscfg.model.{AbstractObjectType, AnnType, DURATION, EnumObjectType, ListType, ObjectType, SIZE}
@@ -66,19 +67,20 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
         struct
       case 1 =>
         /* This is a shared object definition: Extract the information and merge them into the basic member struct */
-        val additionalComments = defineLines.headOption match {
-          case Some(comment) => comment
-          case None => throw ObjectDefinitionException("Cannot get first comment line, although exactly one was found.")
-        }
+        val additionalComments = defineLines.headOption.getOrElse(
+          throw ObjectDefinitionException("Cannot get first comment line, although exactly one was found.")
+        )
 
         try {
-          val defineCase = DefineCase.getDefineCase(additionalComments) match {
-            case Some(value) => value
+          val name = struct.name
+          val members = struct.members
+
+          DefineCase.parse(additionalComments) match {
+            case Some(_: SimpleSharedObject) => SharedObjectStruct(name, members, abstractObject = false, None)
+            case Some(InheritanceSharedObject(abstractType, parent)) => SharedObjectStruct(name, members, abstractType, parent)
+            case Some(_: EnumDefineCase) => EnumStruct(name, members)
             case None =>
               throw ObjectDefinitionException(s"Unable to extract additional information from comment '$additionalComments'")
-          }
-          struct match {
-            case MemberStruct(name, members) => SharedObjectStruct(name, members, defineCase)
           }
         } catch {
           case e: RuntimeException =>
@@ -92,26 +94,29 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     /* Get all structs with basic information from config */
     val memberStructs: List[Struct] = getMemberStructs(conf)
 
+    /* Enhance the single structs with additional information from it's comment and group them by their type */
+    val enrichedStructs = memberStructs.map(enrichWithAnnotationInformation(conf)).groupBy {
+      case MemberStruct(_, _)             => Member
+      case EnumStruct(_, _)               => Enum
+      case SharedObjectStruct(_, _, _, _) => SharedObject
+    }
+
     // Add some information to the structs that are shared objects and ensure, that `@define`s are traversed first
     // (TODO some future general revision as this is becoming rather ad hoc)
     // FIXME(#67) use any `@define` interdependency info captured above for the ordering below
-    val enrichedStructs = memberStructs.map(enrichWithAnnotationInformation(conf)).sortWith {
+    val sortedStructs = enrichedStructs.values.flatten.toVector.sortWith {
       case (_: SharedObjectStruct, _) => true
       case (_, _) => false
     }
 
-    val members: immutable.Map[String, model.AnnType] = enrichedStructs.map { childStruct =>
+    val members: immutable.Map[String, model.AnnType] = sortedStructs.map { childStruct =>
       val name = childStruct.name
       val cv = conf.getValue(name)
 
       val (childType, optional, default) = {
         if (childStruct.isLeaf) {
           val valueString = util.escapeValue(cv.unwrapped().toString)
-
-          val isEnum = childStruct match {
-            case SharedObjectStruct(_, _, defineCase) => defineCase.isInstanceOf[EnumDefineCase]
-            case _ => false
-          }
+          val isEnum = childStruct.isInstanceOf[EnumStruct]
 
           getTypeFromConfigValue(namespace, cv, isEnum) match {
             case typ: model.STRING.type =>
@@ -167,7 +172,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       /* build the annType  */
       val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, parentClassMembers)
 
-      annType.defineCase foreach { define =>
+      annType.maybeSharedObjectType foreach { define =>
         namespace.addDefine(name, annType.t, define.isParent)
       }
 
@@ -214,8 +219,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   private def parentClassMembers(commentsOpt: Option[String], namespace: Namespace):
   Option[Predef.Map[String, model.AnnType]] = {
 
-    commentsOpt.flatMap(getDefineCase).flatMap {
-      case ExtendsDefineCase(parentName) =>
+    commentsOpt.flatMap(parse).flatMap {
+      case InheritanceSharedObject(_, Some(parentName)) =>
         // sanity check to see if this class is defined as parent class
           namespace.getAbstractDefine(parentName).map(_.members) match {
             case Some(parentMembers) =>

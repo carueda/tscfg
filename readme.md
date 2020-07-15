@@ -488,6 +488,17 @@ In this example, the annotation will generate an abstract class definition of th
 of ``ChildStruct`` which extends ``BaseStruct``. This inheritance structure simplifies processing of the config with
 structs that have multiple common fields.
 
+Only leaf members of the inheritance tree may be instantiable instances, all other shared objects in between have to be
+abstract classes.
+The following are valid definition comments:
+
+| Comment                          | Meaning                                                                              |
+| :------------------------------- | :----------------------------------------------------------------------------------- |
+| `#@define abstract`              | Root of an inheritance tree                                                          |
+| `#@define abstract extends Foo`   | Intermediate member of the tree, that extends the shared object `Foo`               |
+| `#@define extends Bla`           | Leaf member of the inheritance tree, that extends the (abstract) shared object `Bla` |
+
+
 #### known issues with shared objects
 
 - the current support for shared objects as field types in another shared object is unstable and not yet fully supported
