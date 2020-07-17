@@ -2,7 +2,11 @@ package tscfg
 
 import org.specs2.mutable.Specification
 import model.durations._
+import scalax.collection.Graph
+import scalax.collection.GraphEdge.DiEdge
+import tscfg.Struct.SharedObjectStruct
 import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
+import tscfg.exceptions.LinearizationException
 import tscfg.model._
 
 
@@ -288,6 +292,93 @@ class ModelBuilderSpec extends Specification {
       verify(fooObj, "listBoolean",  ListType(BOOLEAN))
       verify(fooObj, "listDuration", ListType(DURATION(ms)))
       verify(fooObj, "listDuration_se", ListType(DURATION(second)))
+    }
+  }
+
+  "Considering the inheritance structure" should {
+    /* Valid inheritance hierarchy:
+     * A
+     * |- B
+     *    |- D
+     *    |- E
+     * |- C
+     */
+    val a = SharedObjectStruct(name = "a", abstractObject = true, maybeParentId = None)
+    val b = SharedObjectStruct(name = "b", abstractObject = true, maybeParentId = Some("a"))
+    val c = SharedObjectStruct(name = "c", abstractObject = false, maybeParentId = Some("a"))
+    val d = SharedObjectStruct(name = "d", abstractObject = false, maybeParentId = Some("b"))
+    val e = SharedObjectStruct(name = "e", abstractObject = false, maybeParentId = Some("b"))
+    val nodes = Set(a, b, c, d, e)
+    val edges = Set(
+      DiEdge(a, b),
+      DiEdge(a, c),
+      DiEdge(b, d),
+      DiEdge(b, e)
+    )
+    val modelBuilder = new ModelBuilder(false)
+
+    val expectedLinearization = Vector(a, b, c, d, e)
+
+    "traverse a sub graph correctly" in {
+      val graph = Graph.from(nodes, edges)
+
+      /* Get the actual order */
+      val actual = modelBuilder.traverseSubGraph(graph, a)
+
+      actual mustEqual expectedLinearization
+    }
+
+    "correctly builds the inheritance graph from shared object structs" in {
+      val expected = Graph.from(nodes, edges)
+
+      val actual = modelBuilder.buildInheritanceGraph(nodes.toVector)
+
+      actual mustEqual expected
+    }
+
+    "returns an empty Vector, when shared objects to linearize are empty as well" in {
+      val actual = modelBuilder.linearizeSharedObjects(Vector.empty[SharedObjectStruct])
+
+      actual mustEqual Vector.empty[SharedObjectStruct]
+    }
+
+    "returns correct linearization on valid, simple inheritance hierarchy" in {
+      val actual = modelBuilder.linearizeSharedObjects(nodes.toVector)
+
+      actual mustEqual expectedLinearization
+    }
+
+    "returns correct linearization on valid, multiple inheritance hierarchy" in {
+      /*
+       * Second valid hierarchy:
+       *
+       * F
+       * |- G
+       * |- H
+       * |- I
+       */
+      val f = SharedObjectStruct(name = "f", abstractObject = true, maybeParentId = None)
+      val g = SharedObjectStruct(name = "g", abstractObject = false, maybeParentId = Some("f"))
+      val h = SharedObjectStruct(name = "h", abstractObject = false, maybeParentId = Some("f"))
+      val i = SharedObjectStruct(name = "i", abstractObject = false, maybeParentId = Some("f"))
+
+      val structs = nodes.toVector ++ Vector(f, g, h, i)
+
+      val actual = modelBuilder.linearizeSharedObjects(structs)
+
+      actual mustEqual Vector(f, g, h, i) ++ expectedLinearization
+    }
+
+    "throws an Exception, when the hierarchy has a cycle" in {
+      val j = SharedObjectStruct(name = "j", abstractObject = true, maybeParentId = Some("l"))
+      val k = SharedObjectStruct(name = "k", abstractObject = true, maybeParentId = Some("j"))
+      val l = SharedObjectStruct(name = "l", abstractObject = true, maybeParentId = Some("k"))
+
+      val structs = Vector(j, k, l)
+
+      modelBuilder.linearizeSharedObjects(structs) must throwA[LinearizationException].like {
+        case e: LinearizationException => e.getMessage mustEqual "The inheritance graph is cyclic. Make sure there are no cycles in your inheritance structure."
+      }
     }
   }
 }

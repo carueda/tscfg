@@ -11,6 +11,7 @@ import tscfg.generators.GenOpts
 import tscfg.model
 import tscfg.model._
 import model.implicits._
+import tscfg.exceptions.LinearizationException
 import tscfg.generators.java.JavaGen
 
 
@@ -814,11 +815,11 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 64b - template with invalid case class extension" should {
-    "throw an IllegalArgumentException" in {
-      ScalaGen.generate("example/issue64b.spec.conf") must throwA[IllegalArgumentException].like {
-        case e: IllegalArgumentException =>
+    "throw an LinearizationException" in {
+      ScalaGen.generate("example/issue64b.spec.conf") must throwA[LinearizationException].like {
+        case e: LinearizationException =>
           e.getMessage must startWith(
-            "'@define extends BaseModelConfig' is invalid because BaseModelConfig is not abstract"
+            "Struct 'LoadModelConfig''s parent struct is not abstract. Please only inherit from abstract shared objects!"
           )
       }
     }
