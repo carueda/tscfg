@@ -106,6 +106,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
     /* Linearize the structs for traversing and creating */
     val linearlizedStructs = linearize(enrichedStructs)
+    val structByName = linearlizedStructs.map(struct => struct.name -> struct).toMap
 
     val members: immutable.Map[String, model.AnnType] = linearlizedStructs.map { childStruct =>
       val name = childStruct.name
@@ -164,14 +165,14 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
       //  s"adjName=$adjName")
 
-      /* get the parent class members, if any*/
-      val parentClassMembers = this.parentClassMembers(commentsOpt, namespace)
+      /* Get a comprehensive view of members from _all_ ancestors */
+      val ancestorClassMembers = this.ancestorClassMembers(childStruct, structByName, namespace)
 
       /* build the annType  */
-      val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, parentClassMembers)
+      val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, ancestorClassMembers)
 
       annType.maybeSharedObjectType foreach { define =>
-        namespace.addDefine(name, annType.t, define.isParent)
+        namespace.addDefine(name, annType.t, define.isAbstract)
       }
 
       adjName -> annType
@@ -296,7 +297,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     // that is passed into the AnnType instance that is returned
     val updatedChildType = childType match {
       case objType: ObjectType =>
-        if (commentsOpt.exists(AnnType.isParent))
+        if (commentsOpt.exists(AnnType.isAbstract))
           AbstractObjectType(objType.members) else objType
 
       case listType: ListType =>
@@ -319,25 +320,41 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     )
   }
 
-  private def parentClassMembers(commentsOpt: Option[String], namespace: Namespace):
-  Option[Predef.Map[String, model.AnnType]] = {
+  /**
+    * Determines the joint set of all ancestor's members, to allow proper overriding in child structs.
+    * Method is package private for testing reasons.
+    *
+    * @param struct       Current (child) struct to consider
+    * @param structByName Mapping from struct id to known [[Struct]]s
+    * @param namespace    Current known name space
+    * @return Optional mapping from symbol to type definition
+    */
+  private[tscfg] def ancestorClassMembers(
+                                    struct: Struct,
+                                    structByName: Map[String, Struct],
+                                    namespace: Namespace
+                                  ): Option[Predef.Map[String, model.AnnType]] = struct match {
+    case SharedObjectStruct(_, _, _, Some(parentId)) =>
+      /* This struct has a parent struct. Check, if that one is root, otherwise get it's ancestor members as well */
+      val greatAncestorMembers = structByName.getOrElse(parentId,
+        throw ObjectDefinitionException(s"Cannot find definition for parent struct '$parentId', " +
+          s"although it is supposed to be parent of '${struct.name}'")) match {
+        case parentStruct @ SharedObjectStruct(_, _, _, Some(_)) =>
+          /* The parent struct has a parent as well: Get it's parent members as well */
+          ancestorClassMembers(parentStruct, structByName, namespace)
+        case _ => None
+      }
 
-    commentsOpt.flatMap(parse).flatMap {
-      case InheritanceSharedObject(_, Some(parentName)) =>
-        // sanity check to see if this class is defined as parent class
-          namespace.getAbstractDefine(parentName).map(_.members) match {
-            case Some(parentMembers) =>
-              // valid parent name
-              Some(parentMembers)
-            case None =>
-              // parent class might be defined, but not as parent -> no processing
-              throw new IllegalArgumentException(
-                s"'${commentsOpt.get}' is invalid because $parentName is not abstract!" +
-                  s" If you want to make $parentName extendable use '@define abstract'.")
-          }
+      /* Get the parent's members from namespace */
+      val parentMembers = namespace.getAbstractDefine(parentId) match {
+        case Some(AbstractObjectType(members)) => members
+        case None => throw ObjectDefinitionException(s"Unable to find definition for super class '$parentId' in namespace.")
+      }
 
-      case _ => None
-    }
+      /* Join both member maps */
+      Some(greatAncestorMembers.getOrElse(Map.empty[String, model.AnnType]) ++ parentMembers)
+    case _ => None
+    /* This struct has no parent, therefore return None */
   }
 
   private def getMemberStructs(conf: Config): List[Struct] = {

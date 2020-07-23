@@ -75,8 +75,17 @@ object model {
 
   final object AnnType {
 
-    def isParent(commentString: String): Boolean =
-      parse(commentString).exists(_.isParent)
+    /**
+      * Checks, if this comment string denotes an abstract class or not
+      *
+      * @param commentString String to parse
+      * @return True, if the string denotes an abstract object
+      */
+    def isAbstract(commentString: String): Boolean =
+      parse(commentString) match {
+        case Some(InheritanceSharedObject(abstractType, _)) => abstractType
+        case _ => false
+      }
 
     def isEnum(commentString: String): Boolean =
       parse(commentString).exists(_.isEnum)

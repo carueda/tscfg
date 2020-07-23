@@ -891,4 +891,27 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue 67 - template with unintuitive order of shared objects" should {
+    def configFromFile = new JavaIssue67Cfg(
+      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67.example.conf")).resolve()
+    )
+
+    "result in a valid config for scala" in {
+      val r = JavaGen.generate("example/issue67.spec.conf")
+      r.classNames == Set("JavaIssue67Cfg", "AbstractA", "ImplA", "Test")
+    }
+
+
+    "be able to process a corresponding configuration correctly" in {
+      // be instance of abstract super class
+      configFromFile.test.impl match {
+        case _: JavaIssue67Cfg.AbstractA => assert(true)
+        case _ => assert(false)
+      }
+
+      // have the correct values
+      configFromFile.test.impl.a == "hello"
+      configFromFile.test.impl.b == "world"
+    }
+  }
 }

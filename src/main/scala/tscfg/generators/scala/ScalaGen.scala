@@ -53,7 +53,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       generateForObj(ot, classNamesPrefix, className, parentClassName = parentClassName, parentClassMembers = parentClassMembers)
 
     case aot: AbstractObjectType =>
-      generateForAbstractObj(aot, classNamesPrefix, className);
+      generateForAbstractObj(aot, classNamesPrefix, className, parentClassName, parentClassMembers);
 
     case ort: ObjectRefType => generateForObjRef(ort, classNamesPrefix)
 
@@ -64,22 +64,29 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   def buildClassMembersString(classData: List[(String, Res, AnnType, Boolean)],
                               padId: String => String,
-                              abstractClass: Boolean = false): String = {
-    classData.flatMap { case (symbol, res, a, parentClassValue) =>
+                              isAbstractClass: Boolean = false): String = {
+    classData.flatMap { case (symbol, res, a, isChildClass) =>
       if (a.isDefine) None
       else Some {
         val memberType = res.scalaType
         val typ = if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]" else memberType
         val scalaId = scalaIdentifier(symbol)
-        val overrideMod = if (parentClassValue) "override val " else ""
+        val modifiers = (isChildClass, isAbstractClass) match {
+          case (true, _) =>
+            /* The field will be overridden, therefore it needs override modifier and "val" keyword */
+            "override val "
+          case (false, true) =>
+            /* The field does not override anything, but is part of abstract class => needs "val" keyword */
+            "val "
+          case _ => ""
+        }
         val type_ = a.t match {
           case ot: ObjectRefType =>
             getClassNameForObjectRefType(ot)
           case _ => typ
         }
-        val abstractClassFieldVal = if (abstractClass) "val " else ""
         genResults = genResults.copy(fields = genResults.fields + (scalaId -> type_.toString))
-        abstractClassFieldVal + overrideMod + padId(scalaId) + " : " + type_
+        modifiers + padId(scalaId) + " : " + type_
       }
     }.mkString(",\n  ")
   }
@@ -122,7 +129,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       }
     }).getOrElse(List.empty)
 
-    val classMembersStr = buildClassMembersString(results ++ parentClassMemberResults, padId)
+    val classMembersStr = buildClassMembersString(parentClassMemberResults ++ results, padId)
 
     val parentClassString = parentClassName.map(" extends " + _ + "(" +
       parentClassMemberResults.map(_._1).mkString(",") + ")").getOrElse("")
@@ -208,8 +215,11 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     )
   }
 
-  private def generateForAbstractObj(aot: AbstractObjectType, classNamesPrefix: List[String],
-                                     className: String): Res = {
+  private def generateForAbstractObj(aot: AbstractObjectType,
+                                     classNamesPrefix: List[String],
+                                     className: String,
+                                     parentClassName: Option[String] = None,
+                                     parentClassMembers: Option[Map[String, model.AnnType]] = None): Res = {
 
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
@@ -227,12 +237,30 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       (symbol, res, a, false)
     }
 
-    val abstractClassMembersStr = buildClassMembersString(results, padId, abstractClass = true)
+    /* Consider parent abstract classes */
+    val parentClassMemberResults = parentClassMembers.map(_.keys.toList.sorted).map(parentSymbols => {
+      parentSymbols.foreach(checkUserSymbol)
+      parentSymbols.map { symbol =>
+        val a = parentClassMembers.get(symbol)
+        val res = generate(a.t,
+          classNamesPrefix = className + "." :: classNamesPrefix,
+          className = getClassName(symbol),
+          a.abstractClass,
+          a.parentClassMembers,
+        )
+        (symbol, res, a, true)
+      }
+    }).getOrElse(List.empty)
+
+    val abstractClassMembersStr = buildClassMembersString(parentClassMemberResults ++ results, padId, isAbstractClass = true)
+
+    val parentClassString = parentClassName.map(" extends " + _ + "(" +
+      parentClassMemberResults.map(_._1).mkString(",") + ")").getOrElse("")
 
     val abstractClassStr =
       s"""sealed abstract class $className (
          | $abstractClassMembersStr
-         |)
+         |)$parentClassString
          |""".stripMargin
 
     val baseType = classNamesPrefix.reverse.mkString + className

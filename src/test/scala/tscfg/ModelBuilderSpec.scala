@@ -4,10 +4,12 @@ import org.specs2.mutable.Specification
 import model.durations._
 import scalax.collection.Graph
 import scalax.collection.GraphEdge.DiEdge
-import tscfg.Struct.SharedObjectStruct
+import tscfg.Struct.{MemberStruct, SharedObjectStruct}
 import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
-import tscfg.exceptions.LinearizationException
+import tscfg.exceptions.{LinearizationException, ObjectDefinitionException}
 import tscfg.model._
+
+import scala.collection.mutable
 
 
 class ModelBuilderSpec extends Specification {
@@ -379,6 +381,176 @@ class ModelBuilderSpec extends Specification {
       modelBuilder.linearizeSharedObjects(structs) must throwA[LinearizationException].like {
         case e: LinearizationException => e.getMessage mustEqual "The inheritance graph is cyclic. Make sure there are no cycles in your inheritance structure."
       }
+    }
+  }
+
+  "Getting parents' struct members" should {
+    val modelBuilder = new ModelBuilder(assumeAllRequired = false)
+
+    "return None, when a non SharedObjectStruct is passed in" in {
+      val struct = MemberStruct("meh...")
+      val structByName = Map("meh..." -> struct)
+      val namespace = Namespace.root
+
+      modelBuilder.ancestorClassMembers(struct, structByName, namespace) must beNone
+    }
+
+    "return None, when a struct without parent is passed in" in {
+      val struct = SharedObjectStruct("orphan", mutable.HashMap.empty[String, Struct], abstractObject = false, maybeParentId = None)
+      val structByName = Map("orphan" -> struct)
+      val namespace = Namespace.root
+
+      modelBuilder.ancestorClassMembers(struct, structByName, namespace) must beNone
+    }
+
+    val parent = SharedObjectStruct(
+      "parent",
+      mutable.HashMap(
+        "b" -> MemberStruct("b")
+      ),
+      abstractObject = true,
+      None
+    )
+    val child = SharedObjectStruct(
+      "child",
+      mutable.HashMap(
+        "c" -> MemberStruct("c")
+      ),
+      abstractObject = false,
+      Some("parent")
+    )
+    val structByName = Map("parent" -> parent, "child" -> child)
+    val namespace = Namespace.root
+    namespace.addDefine(
+      "parent",
+      AbstractObjectType(
+        Map(
+          "b" -> AnnType(STRING, optional = false, None, None, None)
+        )
+      )
+    )
+    namespace.addDefine(
+      "child",
+      AbstractObjectType(
+        Map(
+          "c" -> AnnType(STRING, optional = false, None, None, Some(
+              Map(
+                "b" -> AnnType(STRING, optional = false, None, None, None)
+              )
+            )
+          )
+        )
+      )
+    )
+
+    "return correct ancestor members on one-level hierarchy" in {
+      val actual = modelBuilder.ancestorClassMembers(child, structByName, namespace)
+      actual must beSome(
+        Map("b" -> AnnType(STRING, optional = false, None, None, None))
+      )
+    }
+
+    "throw an exception, if the parent struct is not among the mapping from id to struct" in {
+      val erroneousStructByName = Map("child" -> child)
+      modelBuilder.ancestorClassMembers(child, erroneousStructByName, namespace) must
+        throwAn[ObjectDefinitionException].like {
+          case e: ObjectDefinitionException => e.getMessage shouldEqual "Cannot find definition for parent struct " +
+            "'parent', although it is supposed to be parent of 'child'"
+        }
+    }
+
+    "throw an exception, if the parent is not among the namespace" in {
+      val erroneousNamespace = Namespace.root
+      erroneousNamespace.addDefine(
+        "child",
+        AbstractObjectType(
+          Map(
+            "c" -> AnnType(STRING, optional = false, None, None,
+              Some(
+                Map(
+                  "b" -> AnnType(STRING, optional = false, None, None, None)
+                )
+              )
+            )
+          )
+        )
+      )
+      modelBuilder.ancestorClassMembers(child, structByName, erroneousNamespace) must
+        throwAn[ObjectDefinitionException].like {
+          case e: ObjectDefinitionException => e.getMessage shouldEqual "Unable to find definition for super class " +
+            "'parent' in namespace."
+        }
+    }
+
+    "return the correct ancestor members on multi level hierarchy" in {
+      val grandParent = SharedObjectStruct(
+        "grandparent",
+        mutable.HashMap(
+          "a" -> MemberStruct("a")
+        ),
+        abstractObject = true,
+        None
+      )
+      val parent = SharedObjectStruct(
+        "parent",
+        mutable.HashMap(
+          "b" -> MemberStruct("b")
+        ),
+        abstractObject = true,
+        Some("grandparent")
+      )
+      val structByName = Map("grandparent" -> grandParent, "parent" -> parent, "child" -> child)
+      val namespace = Namespace.root
+      namespace.addDefine(
+        "grandparent",
+        AbstractObjectType(
+          Map(
+            "a" -> AnnType(STRING, optional = false, None, None, None)
+          )
+        )
+      )
+      namespace.addDefine(
+        "parent",
+        AbstractObjectType(
+          Map(
+            "b" -> AnnType(STRING, optional = false, None, None,
+              Some(
+                Map(
+                  "a" -> AnnType(STRING, optional = false, None, None, None)
+                )
+              )
+            )
+          )
+        )
+      )
+      namespace.addDefine(
+        "child",
+        AbstractObjectType(
+          Map(
+            "c" -> AnnType(STRING, optional = false, None, None,
+              Some(
+                Map(
+                  "b" -> AnnType(STRING, optional = false, None, None, None)
+                )
+              )
+            )
+          )
+        )
+      )
+
+      val actual = modelBuilder.ancestorClassMembers(child, structByName, namespace)
+      actual should beSome(
+        Map(
+          "a" -> AnnType(STRING, optional = false, None, None, None),
+          "b" -> AnnType(STRING, optional = false, None, None,
+            Some(
+              Map(
+                "a" -> AnnType(STRING, optional = false, None, None, None)
+              )
+            )
+          )
+        )
+      )
     }
   }
 }

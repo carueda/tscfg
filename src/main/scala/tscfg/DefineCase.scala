@@ -1,7 +1,7 @@
 package tscfg
 
 sealed abstract class DefineCase {
-  val isParent: Boolean = false
+  val isAbstract: Boolean = false
   val isEnum: Boolean = false
 }
 
@@ -20,7 +20,7 @@ object DefineCase {
     * @param parent       Optional identifier of the referenced parent shared object
     */
   final case class InheritanceSharedObject(abstractType: Boolean, parent: Option[String]) extends DefineCase {
-    override val isParent: Boolean = parent.isEmpty
+    override val isAbstract: Boolean = abstractType
   }
 
   final case class EnumDefineCase() extends DefineCase {
