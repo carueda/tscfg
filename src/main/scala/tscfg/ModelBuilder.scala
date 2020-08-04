@@ -105,7 +105,11 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
 
     /* Linearize the structs for traversing and creating */
-    val linearlizedStructs = linearize(enrichedStructs)
+    val linearlizedStructs = try {
+      linearize(enrichedStructs)
+    } catch {
+      case e: LinearizationException => throw ObjectDefinitionException(s"Cannot build from $conf, as linearization failed", e)
+    }
     val structByName = linearlizedStructs.map(struct => struct.name -> struct).toMap
 
     val members: immutable.Map[String, model.AnnType] = linearlizedStructs.map { childStruct =>

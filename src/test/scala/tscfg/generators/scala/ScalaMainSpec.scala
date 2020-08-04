@@ -11,7 +11,7 @@ import tscfg.generators.GenOpts
 import tscfg.model
 import tscfg.model._
 import model.implicits._
-import tscfg.exceptions.LinearizationException
+import tscfg.exceptions.{LinearizationException, ObjectDefinitionException}
 import tscfg.generators.java.JavaGen
 
 
@@ -815,11 +815,13 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 64b - template with invalid case class extension" should {
-    "throw an LinearizationException" in {
-      ScalaGen.generate("example/issue64b.spec.conf") must throwA[LinearizationException].like {
-        case e: LinearizationException =>
+    "throw an ObjectDefinitionException" in {
+      ScalaGen.generate("example/issue64b.spec.conf") must throwA[ObjectDefinitionException].like {
+        case e: ObjectDefinitionException =>
           e.getMessage must startWith(
-            "Struct 'LoadModelConfig''s parent struct is not abstract. Please only inherit from abstract shared objects!"
+            "Cannot build from Config(SimpleConfigObject({\"BaseModelConfig\":{\"scaling\":\"double\",\"uuids\":" +
+              "[\"string\"]},\"LoadModelConfig\":{\"modelBehaviour\":\"string\",\"reference\":\"string\"},\"test\":" +
+              "{\"loadModelConfig\":\"LoadModelConfig\"}})), as linearization failed"
           )
       }
     }
@@ -914,9 +916,10 @@ class ScalaMainSpec extends Specification {
 
   "issue 67c - template with circular inheritance hierarchy" should {
     "be refused" in {
-      ScalaGen.generate("example/issue67c.spec.conf") should throwA[LinearizationException].like {
-        case e: LinearizationException => e.getMessage mustEqual "The inheritance graph is cyclic. Make sure there are" +
-          " no cycles in your inheritance structure."
+      ScalaGen.generate("example/issue67c.spec.conf") should throwA[ObjectDefinitionException].like {
+        case e: ObjectDefinitionException => e.getMessage mustEqual "Cannot build from Config(SimpleConfigObject(" +
+          "{\"AbstractA\":{\"a\":\"string\"},\"AbstractB\":{\"b\":\"string\"},\"AbstractC\":{\"c\":\"String\"}})), as" +
+          " linearization failed"
       }
     }
   }
