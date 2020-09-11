@@ -1,3 +1,8 @@
+2020-09
+
+- keep generated code under version control to
+  facilitate diff inspection upon changes in the tool
+
 2020-07
 
 - some refact as a bit of cleanup and as preparation for #67

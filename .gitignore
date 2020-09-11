@@ -3,8 +3,9 @@ src/main/resources/codeDefs/
 *.class
 *.log
 
-src/test/scala/tscfg/example/*
-src/test/java/tscfg/example/*
+# keep generated code to facilitate diff inspection upon changes in the tool
+#src/test/scala/tscfg/example/*
+#src/test/java/tscfg/example/*
 
 # sbt specific
 .cache
