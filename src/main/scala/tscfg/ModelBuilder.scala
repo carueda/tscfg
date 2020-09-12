@@ -247,7 +247,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     val edges = sharedObjects.filter {
       case sos: SharedObjectStruct => sos.maybeParentId.isDefined
       case _ => false
-    }.map {
+    }.collect {
       case childStruct @ SharedObjectStruct(name, _, _, Some(parentId)) =>
         /* === For all shared objects, that do have a parent === */
         /* Get the actual parent struct */
