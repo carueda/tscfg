@@ -295,7 +295,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   private def buildAnnType(childType: model.Type, effOptional: Boolean, effDefault: Option[String],
                            commentsOpt: Option[String],
-                           parentClassMembers: Option[Predef.Map[String, model.AnnType]]): AnnType = {
+                           parentClassMembers: Option[Map[String, model.AnnType]]): AnnType = {
 
     // if this class is a parent class (abstract class or interface) this is indicated by the childType object
     // that is passed into the AnnType instance that is returned
@@ -320,7 +320,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       optional = effOptional,
       default = effDefault,
       comments = commentsOpt,
-      parentClassMembers = parentClassMembers
+      parentClassMembers = parentClassMembers.map(_.toMap)
     )
   }
 
@@ -337,7 +337,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
                                     struct: Struct,
                                     structByName: Map[String, Struct],
                                     namespace: Namespace
-                                  ): Option[Predef.Map[String, model.AnnType]] = struct match {
+                                  ): Option[Map[String, model.AnnType]] = struct match {
     case SharedObjectStruct(_, _, _, Some(parentId)) =>
       /* This struct has a parent struct. Check, if that one is root, otherwise get it's ancestor members as well */
       val greatAncestorMembers = structByName.getOrElse(parentId,

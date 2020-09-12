@@ -1,5 +1,7 @@
 2020-09
 
+- set 2.13.3 as default, locally and in ci, and fix compile error
+  TODO some warnings still remaining under 2.13.3
 - keep generated code under version control to
   facilitate diff inspection upon changes in the tool
 
