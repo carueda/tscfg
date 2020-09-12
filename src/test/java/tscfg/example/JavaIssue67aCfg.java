@@ -6,7 +6,6 @@ public class JavaIssue67aCfg {
     public final java.lang.String a;
     
     public AbstractA(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
-      
       this.a = $_reqStr(parentPath, c, "a", $tsCfgValidator);
     }
     private static java.lang.String $_reqStr(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
@@ -26,7 +25,6 @@ public class JavaIssue67aCfg {
     public final java.lang.String b;
     
     public AbstractB(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
-      
       super(c, parentPath, $tsCfgValidator);
       this.b = $_reqStr(parentPath, c, "b", $tsCfgValidator);
     }
@@ -47,7 +45,6 @@ public class JavaIssue67aCfg {
     public final java.lang.String c;
     
     public ImplB(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
-      
       super(c, parentPath, $tsCfgValidator);
       this.c = $_reqStr(parentPath, c, "c", $tsCfgValidator);
     }
@@ -68,13 +65,11 @@ public class JavaIssue67aCfg {
     public final ImplB impl;
     
     public Test(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
-      
       this.impl = c.hasPathOrNull("impl") ? new ImplB(c.getConfig("impl"), parentPath + "impl.", $tsCfgValidator) : new ImplB(com.typesafe.config.ConfigFactory.parseString("impl{}"), parentPath + "impl.", $tsCfgValidator);
     }
   }
   
   public JavaIssue67aCfg(com.typesafe.config.Config c) {
-    
     final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
     final java.lang.String parentPath = "";
     this.test = c.hasPathOrNull("test") ? new JavaIssue67aCfg.Test(c.getConfig("test"), parentPath + "test.", $tsCfgValidator) : new JavaIssue67aCfg.Test(com.typesafe.config.ConfigFactory.parseString("test{}"), parentPath + "test.", $tsCfgValidator);

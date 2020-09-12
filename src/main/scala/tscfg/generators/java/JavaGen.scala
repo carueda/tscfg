@@ -167,8 +167,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
           }class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
-             |  public $classNameAdjusted($ctorParams) {
-             |    $superString
+             |  public $classNameAdjusted($ctorParams) {$superString
              |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
              |  }$elemAccessorsStr
              |$rootAuxClasses}
@@ -178,8 +177,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
           s"""public abstract static class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
-             |  public $classNameAdjusted($ctorParams) {
-             |    $superString
+             |  public $classNameAdjusted($ctorParams) {$superString
              |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
              |  }$elemAccessorsStr
              |}
