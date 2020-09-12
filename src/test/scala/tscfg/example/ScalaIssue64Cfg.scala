@@ -10,10 +10,10 @@ object ScalaIssue64Cfg {
   )
   
   final case class LoadModelConfig(
-    modelBehaviour : java.lang.String,
-    reference      : java.lang.String,
     override val scaling        : scala.Double,
-    override val uuids          : scala.List[java.lang.String]
+    override val uuids          : scala.List[java.lang.String],
+    modelBehaviour : java.lang.String,
+    reference      : java.lang.String
   ) extends BaseModelConfig(scaling,uuids)
   object LoadModelConfig {
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue64Cfg.LoadModelConfig = {
