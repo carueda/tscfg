@@ -37,7 +37,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case ot: ObjectType => generateForObj(ot, classNamePrefixOpt, className, abstractClassName = abstractClassName)
 
     case aot: AbstractObjectType =>
-      generateForObj(aot, classNamePrefixOpt, className);
+      generateForObj(aot, classNamePrefixOpt, className, abstractClassName = abstractClassName);
 
     case ort: ObjectRefType => generateForObjRef(ort)
 
@@ -167,17 +167,19 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
           }class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
-             |  public $classNameAdjusted($ctorParams) {$superString
+             |  public $classNameAdjusted($ctorParams) {
+             |    $superString
              |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
              |  }$elemAccessorsStr
              |$rootAuxClasses}
              |""".stripMargin
 
         case _: AbstractObjectType =>
-          s"""public abstract static class $classNameAdjusted {
+          s"""public abstract static class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
              |  public $classNameAdjusted($ctorParams) {
+             |    $superString
              |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
              |  }$elemAccessorsStr
              |}

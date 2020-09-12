@@ -36,7 +36,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   private val defineNames = collection.mutable.HashSet[String]()
   private val defineAbstractClassNames = collection.mutable.HashSet[String]()
 
-  def addDefine(simpleName: String, t: Type, isParent: Boolean = false): Unit = {
+  def addDefine(simpleName: String, t: Type, isAbstract: Boolean = false): Unit = {
 
     /* sanity check */
     assert(!simpleName.contains("."))
@@ -48,7 +48,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
       // TODO include in build warnings
     }
 
-    if (isParent)
+    if (isAbstract)
       defineAbstractClassNames.add(simpleName)
     defineNames.add(simpleName)
 

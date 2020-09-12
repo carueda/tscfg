@@ -1,32 +1,56 @@
 package tscfg
 
 sealed abstract class DefineCase {
-  val isParent: Boolean = false
+  val isAbstract: Boolean = false
   val isEnum: Boolean = false
 }
 
 object DefineCase {
-  case class SimpleDefineCase() extends DefineCase
 
-  case class AbstractDefineCase() extends DefineCase {
-    override val isParent: Boolean = true
+  /**
+    * Simple shared object type without inheritance or enumeration support
+    */
+  final case class SimpleSharedObject() extends DefineCase
+
+  /**
+    * The targeted shared object ius part of an inheritance structure. This comprises as well the root of an inheritance
+    * tree, something intermediate or the leafs of the hierarchy.
+    *
+    * @param abstractType true. If the targeted shared object is abstract (cannot be instantiated)
+    * @param parent       Optional identifier of the referenced parent shared object
+    */
+  final case class InheritanceSharedObject(abstractType: Boolean, parent: Option[String]) extends DefineCase {
+    override val isAbstract: Boolean = abstractType
   }
 
-  case class ExtendsDefineCase(name: String) extends DefineCase
-
-  case class EnumDefineCase() extends DefineCase {
+  final case class EnumDefineCase() extends DefineCase {
     override val isEnum: Boolean = true
   }
 
-  def getDefineCase(commentString: String): Option[DefineCase] = {
+  /**
+    * Extracts the shared objects' additional information given by a preceding comment string. If the string does not
+    * start with '@define' (it is no shared object), [[None]] is returned.
+    *
+    * @param commentString Comment String to parse for additional information
+    * @throws RuntimeException If the comment string is malformed
+    * @return An [[Option]] on additional information of the shared object
+    */
+    @throws[RuntimeException]
+  def parse(commentString: String): Option[DefineCase] = {
     val str = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
     tokens match {
       case "@define" :: "abstract" :: Nil =>
-        Some(AbstractDefineCase())
+        /* This it the root of an inheritance tree FIXME #66 -- Adapt description */
+        Some(InheritanceSharedObject(abstractType = true, None))
+
+      case "@define" :: "abstract" :: "extends" :: name :: Nil =>
+        /* This is an abstract shared object definition somewhere within the inheritance tree */
+        Some(InheritanceSharedObject(abstractType = true, Some(name)))
 
       case "@define" :: "extends" :: name :: Nil =>
-        Some(ExtendsDefineCase(name))
+        /* This is an (instantiable) shared object definition somewhere within the inheritance tree */
+        Some(InheritanceSharedObject(abstractType = false, Some(name)))
 
       case "@define" :: "extends" :: Nil =>
         throw new RuntimeException(s"Missing name after `extends`")
@@ -35,7 +59,7 @@ object DefineCase {
         Some(EnumDefineCase())
 
       case "@define" :: Nil =>
-        Some(SimpleDefineCase())
+        Some(SimpleSharedObject())
 
       case "@define" :: _ =>
         throw new RuntimeException(s"Unrecognized `@define` construct")

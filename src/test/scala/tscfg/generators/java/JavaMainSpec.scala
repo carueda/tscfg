@@ -12,6 +12,7 @@ import tscfg.generators.GenOpts
 import tscfg.model
 import tscfg.model._
 import model.implicits._
+import tscfg.exceptions.ObjectDefinitionException
 
 
 class JavaMainSpec extends Specification {
@@ -891,4 +892,114 @@ class JavaMainSpec extends Specification {
     }
   }
 
+  "issue 64b - template with invalid case class extension" should {
+    "throw an ObjectDefinitionException" in {
+      JavaGen.generate("example/issue64b.spec.conf") must throwA[ObjectDefinitionException].like {
+        case e: ObjectDefinitionException =>
+          e.getMessage must startWith(
+            "Cannot build from Config(SimpleConfigObject({\"BaseModelConfig\":{\"scaling\":\"double\",\"uuids\":" +
+              "[\"string\"]},\"LoadModelConfig\":{\"modelBehaviour\":\"string\",\"reference\":\"string\"},\"test\":" +
+              "{\"loadModelConfig\":\"LoadModelConfig\"}})), as linearization failed"
+          )
+      }
+    }
+  }
+
+  "issue 67 - template with unintuitive order of shared objects" should {
+    def configFromFile = new JavaIssue67Cfg(
+      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67.example.conf")).resolve()
+    )
+
+    "result in a valid config for scala" in {
+      val r = JavaGen.generate("example/issue67.spec.conf")
+      r.classNames == Set("JavaIssue67Cfg", "AbstractA", "ImplA", "Test")
+    }
+
+
+    "be able to process a corresponding configuration correctly" in {
+      // be instance of abstract super class
+      configFromFile.test.impl match {
+        case _: JavaIssue67Cfg.AbstractA => assert(true)
+        case _ => assert(false)
+      }
+
+      // have the correct values
+      configFromFile.test.impl.a == "hello"
+      configFromFile.test.impl.b == "world"
+    }
+  }
+
+  "issue 67a - template with second inheritance level" should {
+    def configFromFile = new JavaIssue67aCfg(
+      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67a.example.conf")).resolve()
+    )
+
+    "result in a valid config for scala" in {
+      val r = JavaGen.generate("example/issue67a.spec.conf")
+      r.classNames == Set("JavaIssue67aCfg", "AbstractA", "AbstractB", "ImplB", "Test")
+    }
+
+    "be able to process a corresponding configuration correctly" in {
+      // be instance of abstract super class (one level above)
+      configFromFile.test.impl match {
+        case _: JavaIssue67aCfg.AbstractB => assert(true)
+        case _ => assert(false)
+      }
+      // be instance of abstract super class (second level above)
+      configFromFile.test.impl match {
+        case _: JavaIssue67aCfg.AbstractA => assert(true)
+        case _ => assert(false)
+      }
+
+      // have the correct values
+      configFromFile.test.impl.a == "hello"
+      configFromFile.test.impl.b == "world"
+      configFromFile.test.impl.c == "!"
+    }
+  }
+
+  "issue 67b - template with third inheritance level" should {
+    def configFromFile = new JavaIssue67bCfg(
+      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67b.example.conf")).resolve()
+    )
+
+    "result in a valid config for scala" in {
+      val r = JavaGen.generate("example/issue67b.spec.conf")
+      r.classNames == Set("JavaIssue67bCfg", "AbstractA", "AbstractB", "AbstractC", "ImplC", "Test")
+    }
+
+    "be able to process a corresponding configuration correctly" in {
+      // be instance of abstract super class (one level above)
+      configFromFile.test.impl match {
+        case _: JavaIssue67bCfg.AbstractB => assert(true)
+        case _ => assert(false)
+      }
+      // be instance of abstract super class (second level above)
+      configFromFile.test.impl match {
+        case _: JavaIssue67bCfg.AbstractA => assert(true)
+        case _ => assert(false)
+      }
+      // be instance of abstract super class (third level above)
+      configFromFile.test.impl match {
+        case _: JavaIssue67bCfg.AbstractC => assert(true)
+        case _ => assert(false)
+      }
+
+      // have the correct values
+      configFromFile.test.impl.a == "hello"
+      configFromFile.test.impl.b == "world"
+      configFromFile.test.impl.c == "!"
+      configFromFile.test.impl.d == "?"
+    }
+  }
+
+  "issue 67c - template with circular inheritance hierarchy" should {
+    "be refused" in {
+      JavaGen.generate("example/issue67c.spec.conf") should throwA[ObjectDefinitionException].like {
+        case e: ObjectDefinitionException => e.getMessage mustEqual "Cannot build from Config(SimpleConfigObject(" +
+          "{\"AbstractA\":{\"a\":\"string\"},\"AbstractB\":{\"b\":\"string\"},\"AbstractC\":{\"c\":\"String\"}})), as" +
+          " linearization failed"
+      }
+    }
+  }
 }
