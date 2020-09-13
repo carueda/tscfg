@@ -319,8 +319,21 @@ class ModelBuilderSpec extends Specification {
     )
     val modelBuilder = new ModelBuilder(false)
 
+    /*
     val expectedLinearization = Vector(a, b, c, d, e)
+    // (67) Only this one? Unless also including some form of lexicographic ordering on top
+    // of the breadth-first traversal (and noting that I'm not actually sure about the concrete
+    // linearization algorithm that's being used), other possible linearizations would include:
+    //    Vector(a, c, b, d, e), Vector(a, b, c, e, d), Vector(a, c, b, e, d).
+    // So, assertions for equality against only this vector would be incorrect: they may pass
+    // sometimes or fail other times. In fact, I saw that happening under 2.13 (although the
+    // version is irrelevant.  So, I'm commenting out those for now.
+    // Probably a more appropriate representation of the linearization output would be a
+    // Vector (or List) of Sets, so one could indicate the expected output as, e.g.,
+    //      val expectedLinearization = Vector(a, Set(b, c), Set(d, e))
+    */
 
+/*
     "traverse a sub graph correctly" in {
       val graph = Graph.from(nodes, edges)
 
@@ -329,6 +342,7 @@ class ModelBuilderSpec extends Specification {
 
       actual mustEqual expectedLinearization
     }
+*/
 
     "correctly builds the inheritance graph from shared object structs" in {
       val expected = Graph.from(nodes, edges)
@@ -344,12 +358,15 @@ class ModelBuilderSpec extends Specification {
       actual mustEqual Vector.empty[SharedObjectStruct]
     }
 
+/*
     "returns correct linearization on valid, simple inheritance hierarchy" in {
       val actual = modelBuilder.linearizeSharedObjects(nodes.toVector)
 
       actual mustEqual expectedLinearization
     }
+*/
 
+/*
     "returns correct linearization on valid, multiple inheritance hierarchy" in {
       /*
        * Second valid hierarchy:
@@ -370,6 +387,7 @@ class ModelBuilderSpec extends Specification {
 
       actual mustEqual Vector(f, g, h, i) ++ expectedLinearization
     }
+*/
 
     "throws an Exception, when the hierarchy has a cycle" in {
       val j = SharedObjectStruct(name = "j", abstractObject = true, maybeParentId = Some("l"))
