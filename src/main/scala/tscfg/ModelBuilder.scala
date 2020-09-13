@@ -291,8 +291,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     */
   def getRootNodes(graph: Graph[SharedObjectStruct, DiEdge]): Set[SharedObjectStruct] = {
     val childNodes = graph.edges.map(_.edge._2)
-    // TODO :294: method -- in trait SetOps is deprecated (since 2.13.0): Consider requiring an immutable Set
-    (graph.nodes -- childNodes).map(_.toOuter)
+    (graph.nodes.toSet -- childNodes).map(_.toOuter)
   }
 
   private def buildAnnType(childType: model.Type, effOptional: Boolean, effDefault: Option[String],
