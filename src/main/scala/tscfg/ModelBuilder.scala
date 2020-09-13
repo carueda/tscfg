@@ -279,6 +279,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     rootNode: SharedObjectStruct
   ): Vector[SharedObjectStruct] = {
     val innerNode = graph.nodes.get(rootNode)
+    // TODO :283: method toIterator in trait IterableOnceOps is deprecated (since 2.13.0): Use .iterator instead of .toIterator
     Vector(rootNode) ++ graph.innerEdgeTraverser(innerNode).toIterator.map(_.edge._2.toOuter).toVector.distinct
   }
 
@@ -290,6 +291,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     */
   def getRootNodes(graph: Graph[SharedObjectStruct, DiEdge]): Set[SharedObjectStruct] = {
     val childNodes = graph.edges.map(_.edge._2)
+    // TODO :294: method -- in trait SetOps is deprecated (since 2.13.0): Consider requiring an immutable Set
     (graph.nodes -- childNodes).map(_.toOuter)
   }
 

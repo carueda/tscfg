@@ -6,7 +6,7 @@ version := tscfgVersion
 
 scalaVersion := "2.13.3"
 
-crossScalaVersions := Seq("2.12.10", "2.13.3")
+crossScalaVersions := Seq("2.12.12", "2.13.3")
 
 libraryDependencies ++= Seq(
   "com.typesafe"           %  "config"                  % "1.3.3",

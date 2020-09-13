@@ -9,11 +9,7 @@ import scala.collection.mutable
   * @param name    Name of the config member
   * @param members Nested config definitions
   */
-abstract class Struct(name: String, members: mutable.HashMap[String, Struct]) {
-
-  def name(): String = name
-
-  def members(): mutable.HashMap[String, Struct] = members
+abstract class Struct(val name: String, val members: mutable.HashMap[String, Struct]) {
 
   def isLeaf: Boolean = members.isEmpty
 

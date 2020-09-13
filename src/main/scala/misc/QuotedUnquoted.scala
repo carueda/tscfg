@@ -24,11 +24,11 @@ object QuotedUnquoted {
     )
     val config = ConfigFactory.parseString(inputLines.mkString("\n"))
 
-    println(" %-14s %16s %14s" format("input line", "cv.toString", "cv.valueType"))
-    println(" %-14s %16s %14s" format("-"*14, "-"*16, "-"*14))
+    printf(" %-14s %16s %14s\n", "input line", "cv.toString", "cv.valueType")
+    printf(" %-14s %16s %14s\n", "-"*14, "-"*16, "-"*14)
     for ((key, inputLine) <- List("sizeU", "sizeQ", "fooU", "fooQ") zip inputLines) {
       val cv = config.getValue(key)
-      println(" %-14s %16s %14s" format(inputLine.trim, cv.toString, cv.valueType()))
+      printf(" %-14s %16s %14s\n", inputLine.trim, cv.toString, cv.valueType())
     }
   }
 }
