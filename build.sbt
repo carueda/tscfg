@@ -13,6 +13,8 @@ libraryDependencies ++= Seq(
   "org.specs2"             %%  "specs2-core"            % "4.6.0" % "test",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.4",
   "org.json4s"             %%  "json4s-native"          % "3.6.7",
+  "org.scalameta"          %%  "scalafmt-dynamic"       % "2.7.5",
+  "com.google.googlejavaformat" % "google-java-format"  % "1.7",
   "com.google.code.gson"   %  "gson"                    % "2.8.0",
   "org.scala-graph"        %% "graph-core"              % "1.13.1"
 )

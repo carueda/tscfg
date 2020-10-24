@@ -23,7 +23,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val definition = (packageStr + res.definition).trim
     res.copy(definition = res.definition.trim)
-    genResults.copy(code = definition)
+    genResults.copy(code = formatter.format(definition))
   }
 
   private def generate(typ: Type,
