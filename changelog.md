@@ -1,3 +1,9 @@
+2020-10 - 0.9.981
+
+- resolve #69 "Use consistent formatter for the generated code"
+    - scalafmt for scala
+    - google-java-format (v1.7, so tscfg can still run on JRE 8)
+
 2020-09
 
 - comment out some incorrect tests

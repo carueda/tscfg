@@ -733,13 +733,15 @@ class ScalaMainSpec extends Specification {
   "issue 59 - scala 2.12 and 2.13 switch" should {
     "generate a scala 2.13 config with corresponding imports if not indicated differently" in {
       val r = ScalaGen.generate("example/issue59.spec.conf")
-      r.code.split("\n")(17).trim == "import scala.jdk.CollectionConverters._"
+      r.code.contains("import scala.jdk.CollectionConverters._") === true
+      r.code.contains("import scala.collection.JavaConverters._") === false
     }
 
     "generate a scala 2.12 config with corresponding imports if --scala:2.12 is provided" in {
       val r = ScalaGen.generate("example/issue59.spec.conf",
         s12 = true)
-      r.code.split("\n")(17).trim == "import scala.collection.JavaConverters._"
+      r.code.contains("import scala.collection.JavaConverters._") === true
+      r.code.contains("import scala.jdk.CollectionConverters._") === false
     }
   }
 

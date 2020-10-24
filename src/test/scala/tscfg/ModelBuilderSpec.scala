@@ -160,7 +160,7 @@ class ModelBuilderSpec extends Specification {
 
     "translate member into EnumObjectType" in {
       val at = result.objectType.members("FruitType")
-      println(s"FruitType = $at")
+      // println(s"FruitType = $at")
       true
     }
   }
