@@ -292,12 +292,12 @@ The following basic types are supported:
 | `boolean`                            | `boolean`  / `Boolean`   | `Boolean`  / `Option[Boolean]`
 | `size`                               | `long`     / `Long`      | `Long`     / `Option[Long]`
 | `duration`                           | `long`     / `Long`      | `Long`     / `Option[Long]`
-| `duration` (using `--duration` flag) | `Duration` / `Duration`  | `Duration` / `Option[Duration]`
+| `duration` (using `--durations` flag) | `Duration` / `Duration`  | `Duration` / `Option[Duration]`
 
 > **NOTE**
 > - please read `Optional<T>` instead of the `T` values in the
     java "opt" column above if using the `--java:optionals` flag.
-> - using the `--duration` flag, `java.time.Duration` is used instead of `long` / `Long`. See [durations](#durations) for further information.
+> - using the `--durations` flag, `java.time.Duration` is used instead of `long` / `Long`. See [durations](#durations) for further information.
 
 
 #### size-in-bytes
@@ -337,7 +337,7 @@ durations {
   ...
 }
 ```
-Using the `--duration` flag, the reported value will be a `java.time.Duration` instead of a `long` / `Long` and the suffix will be ignored:
+Using the `--durations` flag, the reported value will be a `java.time.Duration` instead of a `long` / `Long` and the suffix will be ignored:
 `"duration:hours | 3day"` is `java.time.Duration.ofDays(3)` if value is missing or whatever is provided converted to a `java.time.Duration`
 
 

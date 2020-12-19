@@ -1,3 +1,7 @@
+2020-12 - 0.9.982
+
+- correct setting in readme is `--durations` not `--duration`
+
 2020-10 - 0.9.981
 
 - resolve #69 "Use consistent formatter for the generated code"
