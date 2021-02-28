@@ -43,4 +43,25 @@ class modelSpec extends Specification {
       a must throwA[RuntimeException]
     }
   }
+
+  "shared class" should {
+    val a = ObjectType(
+      "Shared" := "@define" % ListType(ObjectType(
+        "c" := STRING,
+        "d" := ListType(ObjectType(
+          "e" := INTEGER,
+        ))
+      )),
+      "example" := ObjectType(
+        "a" := ObjectRefType("", "Shared"),
+        "b" := ListType(ObjectRefType("", "Shared"))
+      ),
+    )
+    println("Model:")
+    println(model.util.format(a))
+
+    "be ok" in {
+      true
+    }
+  }
 }

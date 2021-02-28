@@ -3,7 +3,6 @@ package tscfg
 import com.typesafe.config._
 import scalax.collection.Graph
 import scalax.collection.GraphEdge.DiEdge
-import scalax.collection.GraphPredef.EdgeLikeIn
 import tscfg.generators.tsConfigUtil
 import tscfg.DefineCase._
 import tscfg.Struct.StructTypes._
@@ -542,20 +541,32 @@ object ModelBuilder {
 
   import com.typesafe.config.ConfigFactory
 
+  /** build model from string */
   def apply(source: String, assumeAllRequired: Boolean = false): ModelBuildResult = {
     val config = ConfigFactory.parseString(source).resolve()
+    fromConfig(config, assumeAllRequired)
+  }
+
+  /** build model from TS Config object */
+  def fromConfig(config: Config, assumeAllRequired: Boolean = false): ModelBuildResult = {
     new ModelBuilder(assumeAllRequired).build(config)
   }
 
   // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
     val filename = args(0)
+    val showTsConfig = args.length > 1 && "-ts" == args(1)
     val file = new File(filename)
     val bufSource = io.Source.fromFile(file)
     val source = bufSource.mkString.trim
     bufSource.close()
     //println("source:\n  |" + source.replaceAll("\n", "\n  |"))
-    val result = ModelBuilder(source)
+    val config = ConfigFactory.parseString(source).resolve()
+    if (showTsConfig) {
+      val options = ConfigRenderOptions.defaults.setFormatted(true).setComments(true).setOriginComments(false)
+      println(config.root.render(options))
+    }
+    val result = fromConfig(config)
     println("ModelBuilderResult:")
     println(model.util.format(result.objectType))
   }

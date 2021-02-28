@@ -1,6 +1,6 @@
 package tscfg.generators.scala
 
-import tscfg.{ModelBuilder, model}
+import tscfg.{ModelBuilder, Namespace, model}
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
@@ -288,7 +288,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def getClassNameForObjectRefType(ot: ObjectRefType): String = {
     val className = getClassName(ot.simpleName)
-    val fullScalaName = (ot.namespace.getPath.map(getClassName) ++ Seq(className)).mkString(".")
+    val namespace = Namespace.resolve(ot.namespace)
+    val fullScalaName = (namespace.getPath.map(getClassName) ++ Seq(className)).mkString(".")
     fullScalaName
   }
 
@@ -499,7 +500,8 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
   }
 
   private def objectRefInstance(ort: ObjectRefType, res: Res, path: String): Option[String] = {
-    ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+    val namespace = Namespace.resolve(ort.namespace)
+    namespace.getDefine(ort.simpleName) flatMap { t =>
       t match {
         case _: EnumObjectType => Some(enumInstance(res, path))
         case _ => None
@@ -656,7 +658,8 @@ private[scala] class Accessors {
       val adjusted = elemMethodName.replace("_", ".")
       val objRefResolution = lt.t match {
         case ort:ObjectRefType =>
-          ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+          val namespace = Namespace.resolve(ort.namespace)
+          namespace.getDefine(ort.simpleName) flatMap { t =>
             t match {
               case _: EnumObjectType =>
               // TODO some more useful path (for now just "?" below)

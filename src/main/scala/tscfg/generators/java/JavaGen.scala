@@ -1,5 +1,6 @@
 package tscfg.generators.java
 
+import tscfg.Namespace
 import tscfg.generators.java.javaUtil._
 import tscfg.generators._
 import tscfg.model._
@@ -292,7 +293,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
   }
 
   private def objectRefInstance(ort: ObjectRefType, res: Res, path: String): Option[String] = {
-    ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+    val namespace = Namespace.resolve(ort.namespace)
+    namespace.getDefine(ort.simpleName) flatMap { t =>
       t match {
         case _: EnumObjectType => Some(enumInstance(res, path))
         case _ => None
@@ -444,7 +446,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       val adjusted = elemMethodName.replace("_", ".")
       val objRefResolution = lt.t match {
         case ort:ObjectRefType =>
-          ort.namespace.getDefine(ort.simpleName) flatMap { t =>
+          val namespace = Namespace.resolve(ort.namespace)
+          namespace.getDefine(ort.simpleName) flatMap { t =>
             t match {
               case _: EnumObjectType => Some(s"""$adjusted.valueOf(cv.unwrapped().toString())""")
               case _ => None

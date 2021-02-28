@@ -123,8 +123,9 @@ object model {
 
   case class AbstractObjectType(override val members: Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
 
-  case class ObjectRefType(namespace: Namespace, simpleName: String) extends ObjectAbsType {
-    override def toString: String = s"ObjectRefType(namespace='${namespace.getPathString}', simpleName='$simpleName')"
+  case class ObjectRefType(namespace: String, simpleName: String) extends ObjectAbsType {
+    require(Namespace.validName(namespace))
+    override def toString: String = s"ObjectRefType(namespace='$namespace', simpleName='$simpleName')"
   }
 
   object ObjectType {

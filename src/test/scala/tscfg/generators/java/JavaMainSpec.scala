@@ -1002,4 +1002,33 @@ class JavaMainSpec extends Specification {
       }
     }
   }
+
+  "issue 71 - shared object leading to string conversion" should {
+    "71a simplified handled ok" in {
+      val c = new JavaIssue71aCfg(ConfigFactory.parseString(
+        """example {
+          |  a = {
+          |    c = "eac"
+          |    d = {
+          |      e = 10
+          |    }
+          |  }
+          |  b = [
+          |    {
+          |      c = "eb0c"
+          |      d = {
+          |        e = 20
+          |      }
+          |    }
+          |  ]
+          |}
+          |""".stripMargin))
+
+      c.example.a.c === "eac"
+      c.example.a.d.e === 10
+      c.example.b.get(0).c === "eb0c"
+      c.example.b.get(0).d.e === 20
+    }
+
+  }
 }

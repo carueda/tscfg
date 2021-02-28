@@ -1,5 +1,6 @@
 package tscfg
 
+import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
 import model.durations._
 import scalax.collection.Graph
@@ -8,7 +9,9 @@ import tscfg.Struct.{MemberStruct, SharedObjectStruct}
 import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
 import tscfg.exceptions.{LinearizationException, ObjectDefinitionException}
 import tscfg.model._
+import tscfg.model.implicits._
 
+import java.io.File
 import scala.collection.mutable
 
 
@@ -569,6 +572,42 @@ class ModelBuilderSpec extends Specification {
           )
         )
       )
+    }
+  }
+
+  "issue 71" should {
+    "71a - build correctly" in {
+
+      val objectType = ObjectType(
+        "Shared" := "@define" % ListType(ObjectType(
+          "c" := STRING,
+          "d" := ListType(ObjectType(
+            "e" := INTEGER,
+          ))
+        )),
+        "example" := ObjectType(
+          "a" := ObjectRefType("", "Shared"),
+          "b" := ListType(ObjectRefType("", "Shared"))
+        ),
+      )
+
+      val result = ModelBuilder.fromConfig(
+        ConfigFactory.parseFile(
+          new File("src/main/tscfg/example/issue71a.spec.conf")).resolve()
+      )
+
+      println("ModelBuilderResult:")
+      println(model.util.format(result.objectType))
+
+      result.objectType.members.contains("Shared") must beTrue
+      val Shared = result.objectType.members("Shared")
+      Shared.isDefine must beTrue
+
+      result.objectType.members.contains("example") must beTrue
+      val example = result.objectType.members("example")
+      example.isDefine must beFalse
+
+      result.warnings.length === 0
     }
   }
 }

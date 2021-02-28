@@ -1,11 +1,36 @@
 package tscfg
 
+import tscfg.generators.java.javaUtil
 import tscfg.model.{AbstractObjectType, ObjectRefType, Type}
 
 object Namespace {
-  /** Returns a new, empty root namespace. */
-  def root: Namespace = new Namespace("", None,
-    collection.mutable.HashMap[String, Type]())
+  /**
+    * Returns a new, empty root namespace.
+    * This also means a "session reinitialization" in terms of created namespaces.
+    */
+  def root: Namespace = {
+    namespaces.clear()
+    create("", None, collection.mutable.HashMap[String, Type]())
+  }
+  // Checks that it is empty or a period-separated list of java identifiers
+  // TODO could probably be more sophisticated
+  def validName(namespace: String): Boolean = {
+    namespace.isEmpty ||
+    namespace.split('.').toList.forall(javaUtil.isJavaIdentifier)
+  }
+
+  def resolve(namespace: String): Namespace = namespaces(namespace)
+
+  private def create(simpleName: String,
+                     parent: Option[Namespace],
+                     allDefines: collection.mutable.HashMap[String, Type]
+                    ): Namespace = {
+    val ns = new Namespace(simpleName, parent, allDefines)
+    namespaces.put(ns.getPathString, ns)
+    ns
+  }
+
+  private[this] val namespaces = collection.mutable.Map.empty[String, Namespace]
 }
 
 class Namespace private(simpleName: String, parent: Option[Namespace],
@@ -31,7 +56,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def getPathString: String = getPath.mkString(".")
 
-  def extend(simpleName: String): Namespace = new Namespace(simpleName, Some(this), allDefines)
+  def extend(simpleName: String): Namespace = Namespace.create(simpleName, Some(this), allDefines)
 
   private val defineNames = collection.mutable.HashSet[String]()
   private val defineAbstractClassNames = collection.mutable.HashSet[String]()
@@ -62,7 +87,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
     if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
-      Some(ObjectRefType(this, name))
+      Some(ObjectRefType(simpleName, name))
     else
       parent.flatMap(_.resolveDefine(name))
   }

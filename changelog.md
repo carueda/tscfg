@@ -1,3 +1,9 @@
+2021-02 - 0.9.982
+
+- re #71 "Two shared objects leading to string conversion"
+  - add some tests
+  - make `ObjectRefType` more flexible, that is, just in terms of strings
+
 2020-12 - 0.9.982
 
 - correct setting in readme is `--durations` not `--duration`
