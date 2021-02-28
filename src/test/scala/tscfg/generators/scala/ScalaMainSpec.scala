@@ -793,7 +793,8 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 64 - template with defined abstract class" should {
-    def configFromFile = ScalaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
+    val configFromFile = ScalaIssue64Cfg(
+      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue64.spec.conf")
@@ -830,7 +831,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 67 - template with unintuitive order of shared objects" should {
-    def configFromFile = ScalaIssue67Cfg(
+    val configFromFile = ScalaIssue67Cfg(
       ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67.example.conf")).resolve()
     )
 
@@ -853,7 +854,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 67a - template with second inheritance level" should {
-    def configFromFile = ScalaIssue67aCfg(
+    val configFromFile = ScalaIssue67aCfg(
       ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67a.example.conf")).resolve()
     )
 
@@ -882,7 +883,7 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 67b - template with third inheritance level" should {
-    def configFromFile = ScalaIssue67bCfg(
+    val configFromFile = ScalaIssue67bCfg(
       ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67b.example.conf")).resolve()
     )
 
