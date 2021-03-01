@@ -89,13 +89,16 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   }
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
-    if (name.startsWith("Shared")) {
-      scribe.debug(s"resolveDefine: name='$name'")
-      scribe.debug(s"resolveDefine: defineNames=$defineNames\n")
-    }
-    if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
+    val res = if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
       Some(ObjectRefType(simpleName, name))
     else
       parent.flatMap(_.resolveDefine(name))
+
+    if (name.startsWith("Shared")) {
+      scribe.debug(s"resolveDefine: name='$name' => $res" +
+        s"\nresolveDefine: defineNames=$defineNames\n")
+    }
+
+    res
   }
 }

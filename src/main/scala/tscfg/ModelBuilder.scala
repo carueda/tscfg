@@ -96,6 +96,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     /* Get all structs with basic information from config */
     val memberStructs: List[Struct] = getMemberStructs(conf)
 
+    scribe.debug(s"memberStructs=$memberStructs")
+
     /* Enhance the single structs with additional information from it's comment and group them by their type */
     val enrichedStructs = memberStructs.map(enrichWithAnnotationInformation(conf)).groupBy {
       case MemberStruct(_, _)             => Member
@@ -103,12 +105,17 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
       case SharedObjectStruct(_, _, _, _) => SharedObject
     }
 
+    scribe.debug(s"enrichedStructs=$enrichedStructs")
+
     /* Linearize the structs for traversing and creating */
     val linearlizedStructs = try {
       linearize(enrichedStructs)
     } catch {
       case e: LinearizationException => throw ObjectDefinitionException(s"Cannot build from $conf, as linearization failed", e)
     }
+
+    scribe.debug(s"linearlizedStructs=$linearlizedStructs")
+
     val structByName = linearlizedStructs.map(struct => struct.name -> struct).toMap
 
     val members: immutable.Map[String, model.AnnType] = linearlizedStructs.map { childStruct =>
