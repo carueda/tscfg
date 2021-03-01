@@ -96,7 +96,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
     if (name.startsWith("Shared")) {
       scribe.debug(s"resolveDefine: name='$name' => $res" +
-        s"\nresolveDefine: defineNames=$defineNames\n")
+        s" resolveDefine: defineNames=$defineNames")
     }
 
     res

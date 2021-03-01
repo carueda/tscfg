@@ -561,11 +561,15 @@ object ModelBuilder {
 
   // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
+    import scribe.format._
     scribe
       .Logger.root
 //      .Logger("tscfg.Namespace")
       .clearHandlers().clearModifiers()
-      .withHandler(minimumLevel = Some(scribe.Level.Debug))
+      .withHandler(
+        formatter = formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $message$mdc",
+        minimumLevel = Some(scribe.Level.Debug)
+      )
       .replace()
 
     val filename = args(0)
