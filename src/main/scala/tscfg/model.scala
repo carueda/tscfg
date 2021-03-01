@@ -99,6 +99,7 @@ object model {
                           ) {
 
     val maybeSharedObjectType: Option[DefineCase] = comments.flatMap(cs => parse(cs))
+    scribe.debug(s"maybeSharedObjectType=$maybeSharedObjectType t=$t\n")
 
     val isDefine: Boolean = maybeSharedObjectType.isDefined
 

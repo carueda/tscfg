@@ -554,6 +554,13 @@ object ModelBuilder {
 
   // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
+    scribe
+      .Logger.root
+//      .Logger("tscfg.Namespace")
+      .clearHandlers().clearModifiers()
+      .withHandler(minimumLevel = Some(scribe.Level.Debug))
+      .replace()
+
     val filename = args(0)
     val showTsConfig = args.length > 1 && "-ts" == args(1)
     val file = new File(filename)
@@ -567,8 +574,11 @@ object ModelBuilder {
       println(config.root.render(options))
     }
     val result = fromConfig(config)
-    println("ModelBuilderResult:")
-    println(model.util.format(result.objectType))
+    println(
+      s"""ModelBuilderResult:
+         |${model.util.format(result.objectType)}
+         |""".stripMargin
+    )
   }
 
   // $COVERAGE-ON$

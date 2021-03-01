@@ -39,7 +39,7 @@ object DefineCase {
   def parse(commentString: String): Option[DefineCase] = {
     val str = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
-    tokens match {
+    val res = tokens match {
       case "@define" :: "abstract" :: Nil =>
         /* This it the root of an inheritance tree FIXME #66 -- Adapt description */
         Some(InheritanceSharedObject(abstractType = true, None))
@@ -67,5 +67,7 @@ object DefineCase {
       case _ =>
         None
     }
+    scribe.debug(s"parse: commentString='$commentString' => $res")
+    res
   }
 }

@@ -3,6 +3,7 @@
 - re #71 "Two shared objects leading to string conversion"
   - add some tests
   - make `ObjectRefType` more flexible, that is, just in terms of strings
+  - add some debugging
 
 2020-12 - 0.9.982
 

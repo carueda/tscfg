@@ -25,6 +25,9 @@ object Namespace {
                      parent: Option[Namespace],
                      allDefines: collection.mutable.HashMap[String, Type]
                     ): Namespace = {
+    scribe.debug(
+      s"Namespace.create: simpleName='$simpleName' parent=${parent.map(p => "'" + p.getPathString + "'")}"
+    )
     val ns = new Namespace(simpleName, parent, allDefines)
     namespaces.put(ns.getPathString, ns)
     ns
@@ -62,7 +65,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   private val defineAbstractClassNames = collection.mutable.HashSet[String]()
 
   def addDefine(simpleName: String, t: Type, isAbstract: Boolean = false): Unit = {
-
+    scribe.debug(s"addDefine: simpleName='$simpleName' t=$t")
     /* sanity check */
     assert(!simpleName.contains("."))
     assert(simpleName.nonEmpty)
@@ -86,6 +89,10 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   }
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
+    if (name.startsWith("Shared")) {
+      scribe.debug(s"resolveDefine: name='$name'")
+      scribe.debug(s"resolveDefine: defineNames=$defineNames\n")
+    }
     if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
       Some(ObjectRefType(simpleName, name))
     else
