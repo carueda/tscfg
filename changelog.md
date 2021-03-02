@@ -4,6 +4,10 @@
   - add some tests
   - make `ObjectRefType` more flexible, that is, just in terms of strings
   - add some debugging
+  - the recent graph-related stuff is proving hard to follow
+  - noting very slow `> test` completion, reported as 15-21secs by sbt on my mac (after a full compile).  
+    Similar test with commit eccee9a16 (prior to graph stuff) takes 4-6 secs.
+    Of course there's maybe a couple of new tests, but the difference is very significant.
 
 2020-12 - 0.9.982
 
