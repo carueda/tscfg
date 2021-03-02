@@ -36,7 +36,7 @@ object DefineCase {
     * @return An [[Option]] on additional information of the shared object
     */
     @throws[RuntimeException]
-  def parse(commentString: String): Option[DefineCase] = {
+  def parseDefineCase(commentString: String): Option[DefineCase] = {
     val str = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
     val res = tokens match {
@@ -61,8 +61,8 @@ object DefineCase {
       case "@define" :: Nil =>
         Some(SimpleSharedObject())
 
-      case "@define" :: _ =>
-        throw new RuntimeException(s"Unrecognized `@define` construct")
+      case "@define" :: rest =>
+        throw new RuntimeException(s"Unrecognized `@define` construct: unexpected: ${rest.mkString(" ")}")
 
       case _ =>
         None
