@@ -8,6 +8,48 @@
   - noting very slow `> test` completion, reported as 15-21secs by sbt on my mac (after a full compile).  
     Similar test with commit eccee9a16 (prior to graph stuff) takes 4-6 secs.
     Of course there's maybe a couple of new tests, but the difference is very significant.
+  
+  - The issue here is that the model is built incorrectly:
+    
+          > runMain tscfg.ModelBuilder src/main/tscfg/example/issue71.spec.conf
+          ...
+          ModelBuilderResult:
+          {
+              example: {
+                  a: optional STRING default='Shared'
+                  b: [ STRING ]
+                  c: [ STRING ]
+              }
+          }
+      
+      Note, all the `@define`s are lost!
+    
+  - Trying the same with that previous commit eccee9a16 creates the model as expected:
+
+        > runMain tscfg.ModelBuilder src/main/tscfg/example/issue71.spec.conf
+        ModelBuilderResult:
+        {
+            #@define
+            Shared: {
+                c: STRING
+                d: {
+                    e: INTEGER
+                }
+            }
+            #@define
+            Shared2: {
+                dd: STRING
+                dddd: {
+                    eeee: INTEGER
+                }
+            }
+            example: {
+                a: ObjectRefType(namespace='', simpleName='Shared')
+                b: [ ObjectRefType(namespace='', simpleName='Shared') ]
+                c: [ ObjectRefType(namespace='', simpleName='Shared2') ]
+            }
+        }        
+  
 
 2020-12 - 0.9.982
 
