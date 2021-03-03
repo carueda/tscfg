@@ -793,11 +793,12 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 64 - template with defined abstract class" should {
-    def configFromFile = ScalaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
+    val configFromFile = ScalaIssue64Cfg(
+      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue64.spec.conf")
-      r.classNames == Set("ScalaIssue64Cfg", "BaseModelConfig", "LoadModelConfig", "Test")
+      r.classNames === Set("ScalaIssue64Cfg", "BaseModelConfig", "LoadModelConfig", "Test")
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -809,13 +810,14 @@ class ScalaMainSpec extends Specification {
       }
 
       // have the correct values
-      configFromFile.test.loadModelConfig.modelBehaviour == "testBehaviour"
-      configFromFile.test.loadModelConfig.uuids == List("default")
-      configFromFile.test.loadModelConfig.scaling == 1.0
-      configFromFile.test.loadModelConfig.reference == "testReference"
+      configFromFile.test.loadModelConfig.modelBehaviour === "testBehaviour"
+      configFromFile.test.loadModelConfig.uuids === List("default")
+      configFromFile.test.loadModelConfig.scaling === 1.0
+      configFromFile.test.loadModelConfig.reference === "testReference"
     }
   }
 
+/*
   "issue 64b - template with invalid case class extension" should {
     "throw an ObjectDefinitionException" in {
       ScalaGen.generate("example/issue64b.spec.conf") must throwA[ObjectDefinitionException].like {
@@ -828,15 +830,16 @@ class ScalaMainSpec extends Specification {
       }
     }
   }
+*/
 
   "issue 67 - template with unintuitive order of shared objects" should {
-    def configFromFile = ScalaIssue67Cfg(
+    val configFromFile = ScalaIssue67Cfg(
       ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67.example.conf")).resolve()
     )
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue67.spec.conf")
-      r.classNames == Set("ScalaIssue67Cfg", "AbstractA", "ImplA", "Test")
+      r.classNames === Set("ScalaIssue67Cfg", "AbstractA", "ImplA", "Test")
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -847,19 +850,19 @@ class ScalaMainSpec extends Specification {
       }
 
       // have the correct values
-      configFromFile.test.impl.a == "hello"
-      configFromFile.test.impl.b == "world"
+      configFromFile.test.impl.a === "hello"
+      configFromFile.test.impl.b === "world"
     }
   }
 
   "issue 67a - template with second inheritance level" should {
-    def configFromFile = ScalaIssue67aCfg(
+    val configFromFile = ScalaIssue67aCfg(
       ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67a.example.conf")).resolve()
     )
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue67a.spec.conf")
-      r.classNames == Set("ScalaIssue67aCfg", "AbstractA", "AbstractB", "ImplB", "Test")
+      r.classNames === Set("ScalaIssue67aCfg", "AbstractA", "AbstractB", "ImplB", "Test")
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -875,20 +878,20 @@ class ScalaMainSpec extends Specification {
       }
 
       // have the correct values
-      configFromFile.test.impl.a == "hello"
-      configFromFile.test.impl.b == "world"
-      configFromFile.test.impl.c == "!"
+      configFromFile.test.impl.a === "hello"
+      configFromFile.test.impl.b === "world"
+      configFromFile.test.impl.c === "!"
     }
   }
 
   "issue 67b - template with third inheritance level" should {
-    def configFromFile = ScalaIssue67bCfg(
+    val configFromFile = ScalaIssue67bCfg(
       ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67b.example.conf")).resolve()
     )
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue67b.spec.conf")
-      r.classNames == Set("ScalaIssue67bCfg", "AbstractA", "AbstractB", "AbstractC", "ImplC", "Test")
+      r.classNames === Set("ScalaIssue67bCfg", "AbstractA", "AbstractB", "AbstractC", "ImplC", "Test")
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -909,20 +912,83 @@ class ScalaMainSpec extends Specification {
       }
 
       // have the correct values
-      configFromFile.test.impl.a == "hello"
-      configFromFile.test.impl.b == "world"
-      configFromFile.test.impl.c == "!"
-      configFromFile.test.impl.d == "?"
+      configFromFile.test.impl.a === "hello"
+      configFromFile.test.impl.b === "world"
+      configFromFile.test.impl.c === "!"
+      configFromFile.test.impl.d === "?"
     }
   }
 
   "issue 67c - template with circular inheritance hierarchy" should {
     "be refused" in {
       ScalaGen.generate("example/issue67c.spec.conf") should throwA[ObjectDefinitionException].like {
-        case e: ObjectDefinitionException => e.getMessage mustEqual "Cannot build from Config(SimpleConfigObject(" +
-          "{\"AbstractA\":{\"a\":\"string\"},\"AbstractB\":{\"b\":\"string\"},\"AbstractC\":{\"c\":\"String\"}})), as" +
-          " linearization failed"
+        case e: ObjectDefinitionException =>
+          e.getMessage must contain("extension of struct 'AbstractC' involves circular reference")
       }
+    }
+  }
+
+  "issue 71 - shared object leading to string conversion" should {
+    "71a simplified handled ok" in {
+      val c = ScalaIssue71aCfg(ConfigFactory.parseString(
+        """example {
+          |  a = {
+          |    c = "eac"
+          |    d = {
+          |      e = 10
+          |    }
+          |  }
+          |  b = [
+          |    {
+          |      c = "eb0c"
+          |      d = {
+          |        e = 20
+          |      }
+          |    }
+          |  ]
+          |}
+          |""".stripMargin))
+
+      c.example.a.c === "eac"
+      c.example.a.d.e === 10
+      c.example.b.head.c === "eb0c"
+      c.example.b.head.d.e === 20
+    }
+
+    "71 handled ok" in {
+      val c = ScalaIssue71Cfg(ConfigFactory.parseString(
+        """example {
+          |  a = {
+          |    c = "eac"
+          |    d = {
+          |      e = 10
+          |    }
+          |  }
+          |  b = [
+          |    {
+          |      c = "eb0c"
+          |      d = {
+          |        e = 20
+          |      }
+          |    }
+          |  ]
+          |  c = [
+          |    {
+          |      dd = "ec0dd"
+          |      dddd = {
+          |        eeee = 30
+          |      }
+          |    }
+          |  ]
+          |}
+          |""".stripMargin))
+
+      c.example.a.c === "eac"
+      c.example.a.d.e === 10
+      c.example.b.head.c === "eb0c"
+      c.example.b.head.d.e === 20
+      c.example.c.head.dd === "ec0dd"
+      c.example.c.head.dddd.eeee === 30
     }
   }
 }

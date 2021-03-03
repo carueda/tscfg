@@ -4,19 +4,19 @@ organization := "com.github.carueda"
 name := "tscfg"
 version := tscfgVersion
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.5"
 
-crossScalaVersions := Seq("2.12.12", "2.13.3")
+crossScalaVersions := Seq("2.12.12", "2.13.5")
 
 libraryDependencies ++= Seq(
+  "com.outr"               %% "scribe"                  % "3.4.0",
   "com.typesafe"           %  "config"                  % "1.3.3",
   "org.specs2"             %%  "specs2-core"            % "4.6.0" % "test",
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.4",
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.4.2",
   "org.json4s"             %%  "json4s-native"          % "3.6.7",
   "org.scalameta"          %%  "scalafmt-dynamic"       % "2.7.5",
   "com.google.googlejavaformat" % "google-java-format"  % "1.7",
-  "com.google.code.gson"   %  "gson"                    % "2.8.0",
-  "org.scala-graph"        %% "graph-core"              % "1.13.1"
+  "com.google.code.gson"   %  "gson"                    % "2.8.0"
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
