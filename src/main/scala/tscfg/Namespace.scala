@@ -1,19 +1,60 @@
 package tscfg
 
-import tscfg.model.{AbstractObjectType, ObjectRefType, Type}
+import tscfg.DefineCase.SimpleDefineCase
+import tscfg.generators.java.javaUtil
+import tscfg.model.{AbstractObjectType, ObjectRealType, ObjectRefType, Type}
 
 object Namespace {
-  /** Returns a new, empty root namespace. */
-  def root: Namespace = new Namespace("", None,
-    collection.mutable.HashMap[String, Type]())
+  /**
+    * Returns a new, empty root namespace.
+    * This also means a "session reinitialization" in terms of created namespaces.
+    */
+  def root: Namespace = {
+    namespaces.clear()
+    create("", None, collection.mutable.HashMap[String, Type]())
+  }
+  // Checks that it is empty or a period-separated list of java identifiers
+  // TODO could probably be more sophisticated
+  def validName(namespace: String): Boolean = {
+    namespace.isEmpty ||
+    namespace.split('.').toList.forall(javaUtil.isJavaIdentifier)
+  }
+
+  def resolve(namespace: String): Namespace = namespaces(namespace)
+
+  private def create(simpleName: String,
+                     parent: Option[Namespace],
+                     allDefines: collection.mutable.HashMap[String, Type]
+                    ): Namespace = {
+    scribe.debug(
+      s"Namespace.create: simpleName='$simpleName' parent=${parent.map(p => "'" + p.getPathString + "'")}"
+    )
+    val ns = new Namespace(simpleName, parent, allDefines)
+    namespaces.put(ns.getPathString, ns)
+    ns
+  }
+
+  private[this] val namespaces = collection.mutable.Map.empty[String, Namespace]
 }
 
 class Namespace private(simpleName: String, parent: Option[Namespace],
                         allDefines: collection.mutable.HashMap[String, Type]) {
 
+  val isRoot: Boolean = parent.isEmpty
+
   def getAllDefines: Map[String, Type] = allDefines.toMap
 
   def getDefine(defineName: String): Option[Type] = allDefines.toMap.get(defineName)
+
+  def getRealDefine(defineName: String): Option[ObjectRealType] = {
+    val res = getDefine(defineName) match {
+      case Some(o: ObjectRealType) => Some(o)
+      case _ => None
+    }
+    scribe.debug(s"getRealDefine: defineName='$defineName' => $res")
+    scribe.debug(s"allDefines=$allDefines")
+    res
+  }
 
   def getAbstractDefine(defineName: String): Option[AbstractObjectType] =
     getDefine(defineName) match {
@@ -31,13 +72,13 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def getPathString: String = getPath.mkString(".")
 
-  def extend(simpleName: String): Namespace = new Namespace(simpleName, Some(this), allDefines)
+  def extend(simpleName: String): Namespace = Namespace.create(simpleName, Some(this), allDefines)
 
   private val defineNames = collection.mutable.HashSet[String]()
   private val defineAbstractClassNames = collection.mutable.HashSet[String]()
 
-  def addDefine(simpleName: String, t: Type, isAbstract: Boolean = false): Unit = {
-
+  def addDefine(simpleName: String, t: Type, defineCase: DefineCase = SimpleDefineCase): Unit = {
+    scribe.debug(s"addDefine: simpleName='$simpleName' t=$t  defineCase=$defineCase")
     /* sanity check */
     assert(!simpleName.contains("."))
     assert(simpleName.nonEmpty)
@@ -48,6 +89,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
       // TODO include in build warnings
     }
 
+    val isAbstract = defineCase.isAbstract
     if (isAbstract)
       defineAbstractClassNames.add(simpleName)
     defineNames.add(simpleName)
@@ -62,7 +104,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
     if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
-      Some(ObjectRefType(this, name))
+      Some(ObjectRefType(simpleName, name))
     else
       parent.flatMap(_.resolveDefine(name))
   }

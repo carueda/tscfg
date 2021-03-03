@@ -74,21 +74,11 @@ object model {
 
 
   final object AnnType {
-
-    /**
-      * Checks, if this comment string denotes an abstract class or not
-      *
-      * @param commentString String to parse
-      * @return True, if the string denotes an abstract object
-      */
     def isAbstract(commentString: String): Boolean =
-      parse(commentString) match {
-        case Some(InheritanceSharedObject(abstractType, _)) => abstractType
-        case _ => false
-      }
+      getDefineCase(commentString).exists(_.isAbstract)
 
     def isEnum(commentString: String): Boolean =
-      parse(commentString).exists(_.isEnum)
+      getDefineCase(commentString).exists(_.isEnum)
   }
 
   final case class AnnType(t: Type,
@@ -98,12 +88,12 @@ object model {
                            parentClassMembers: Option[Map[String, model.AnnType]] = None
                           ) {
 
-    val maybeSharedObjectType: Option[DefineCase] = comments.flatMap(cs => parse(cs))
+    val defineCase: Option[DefineCase] = comments.flatMap(cs => getDefineCase(cs))
 
-    val isDefine: Boolean = maybeSharedObjectType.isDefined
+    val isDefine: Boolean = defineCase.isDefined
 
-    val abstractClass: Option[String] = maybeSharedObjectType flatMap {
-      case InheritanceSharedObject(_, parentNameOpt @ Some(_)) => parentNameOpt
+    val abstractClass: Option[String] = defineCase flatMap {
+      case ExtendsDefineCase(name, _) => Some(name)
       case _ => None
     }
 
@@ -123,8 +113,9 @@ object model {
 
   case class AbstractObjectType(override val members: Map[String, AnnType] = Map.empty) extends ObjectRealType(members)
 
-  case class ObjectRefType(namespace: Namespace, simpleName: String) extends ObjectAbsType {
-    override def toString: String = s"ObjectRefType(namespace='${namespace.getPathString}', simpleName='$simpleName')"
+  case class ObjectRefType(namespace: String, simpleName: String) extends ObjectAbsType {
+    require(Namespace.validName(namespace))
+    override def toString: String = s"ObjectRefType(namespace='$namespace', simpleName='$simpleName')"
   }
 
   object ObjectType {

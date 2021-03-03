@@ -1,3 +1,35 @@
+2021-03 - 0.9.982
+
+fix #71 "Two shared objects leading to string conversion"
+
+- this was a regression; model built incorrectly:
+  
+        > runMain tscfg.ModelBuilder src/main/tscfg/example/issue71.spec.conf
+        ...
+        ModelBuilderResult:
+        {
+            example: {
+                a: optional STRING default='Shared'
+                b: [ STRING ]
+                c: [ STRING ]
+            }
+        }
+    
+    All the `@define`s lost!
+
+- trying the same with commit eccee9a16 creates the model as expected
+- did a general revision of the model building code
+- simplified handling of the "linearization" of extends given, in particular,
+  that an 'extends' construct is for only one direct parent class (not multiple)
+- ObjectRefType now more flexible, just in terms of strings, so it can
+  be created more directly (e.g., for testing purpose)
+- TODO revisit 64b and re-enable associated direct tests.
+  Note that issue64b.spec.conf has been skipped for genCode for a while.
+  This one generates invalid Scala due to LoadModelConfig extending
+  a final case class BaseModelConfig.
+- TODO some more general revision as the code has become a bit unwieldy
+  
+
 2020-12 - 0.9.982
 
 - correct setting in readme is `--durations` not `--duration`
