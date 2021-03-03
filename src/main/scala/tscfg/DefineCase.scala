@@ -6,24 +6,17 @@ sealed abstract class DefineCase {
 }
 
 object DefineCase {
+  case object SimpleDefineCase extends DefineCase
 
-  /**
-    * Simple shared object type without inheritance or enumeration support
-    */
-  final case class SimpleSharedObject() extends DefineCase
-
-  /**
-    * The targeted shared object ius part of an inheritance structure. This comprises as well the root of an inheritance
-    * tree, something intermediate or the leafs of the hierarchy.
-    *
-    * @param abstractType true. If the targeted shared object is abstract (cannot be instantiated)
-    * @param parent       Optional identifier of the referenced parent shared object
-    */
-  final case class InheritanceSharedObject(abstractType: Boolean, parent: Option[String]) extends DefineCase {
-    override val isAbstract: Boolean = abstractType
+  case object AbstractDefineCase extends DefineCase {
+    override val isAbstract: Boolean = true
   }
 
-  final case class EnumDefineCase() extends DefineCase {
+  case class ExtendsDefineCase(name: String, abs: Boolean) extends DefineCase {
+    override val isAbstract: Boolean = abs
+  }
+
+  final case object EnumDefineCase extends DefineCase {
     override val isEnum: Boolean = true
   }
 
@@ -36,38 +29,36 @@ object DefineCase {
     * @return An [[Option]] on additional information of the shared object
     */
     @throws[RuntimeException]
-  def parseDefineCase(commentString: String): Option[DefineCase] = {
+  def getDefineCase(commentString: String): Option[DefineCase] = {
     val str = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
     val res = tokens match {
       case "@define" :: "abstract" :: Nil =>
-        /* This it the root of an inheritance tree FIXME #66 -- Adapt description */
-        Some(InheritanceSharedObject(abstractType = true, None))
+        Some(AbstractDefineCase)
 
       case "@define" :: "abstract" :: "extends" :: name :: Nil =>
         /* This is an abstract shared object definition somewhere within the inheritance tree */
-        Some(InheritanceSharedObject(abstractType = true, Some(name)))
+        Some(ExtendsDefineCase(name, abs = true))
 
       case "@define" :: "extends" :: name :: Nil =>
-        /* This is an (instantiable) shared object definition somewhere within the inheritance tree */
-        Some(InheritanceSharedObject(abstractType = false, Some(name)))
+        Some(ExtendsDefineCase(name, abs = false))
 
       case "@define" :: "extends" :: Nil =>
         throw new RuntimeException(s"Missing name after `extends`")
 
       case "@define" :: "enum" :: Nil =>
-        Some(EnumDefineCase())
+        Some(EnumDefineCase)
 
       case "@define" :: Nil =>
-        Some(SimpleSharedObject())
+        Some(SimpleDefineCase)
 
       case "@define" :: rest =>
-        throw new RuntimeException(s"Unrecognized `@define` construct: unexpected: ${rest.mkString(" ")}")
+        throw new RuntimeException(s"Unrecognized construct: $str")
 
       case _ =>
         None
     }
-    scribe.debug(s"parse: commentString='$commentString' => $res")
+    scribe.debug(s"getDefineCase: commentString='$commentString' => $res")
     res
   }
 }

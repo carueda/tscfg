@@ -1,7 +1,8 @@
 package tscfg
 
+import tscfg.DefineCase.SimpleDefineCase
 import tscfg.generators.java.javaUtil
-import tscfg.model.{AbstractObjectType, ObjectRefType, Type}
+import tscfg.model.{AbstractObjectType, ObjectRealType, ObjectRefType, Type}
 
 object Namespace {
   /**
@@ -39,9 +40,21 @@ object Namespace {
 class Namespace private(simpleName: String, parent: Option[Namespace],
                         allDefines: collection.mutable.HashMap[String, Type]) {
 
+  val isRoot: Boolean = parent.isEmpty
+
   def getAllDefines: Map[String, Type] = allDefines.toMap
 
   def getDefine(defineName: String): Option[Type] = allDefines.toMap.get(defineName)
+
+  def getRealDefine(defineName: String): Option[ObjectRealType] = {
+    val res = getDefine(defineName) match {
+      case Some(o: ObjectRealType) => Some(o)
+      case _ => None
+    }
+    scribe.debug(s"getRealDefine: defineName='$defineName' => $res")
+    scribe.debug(s"allDefines=$allDefines")
+    res
+  }
 
   def getAbstractDefine(defineName: String): Option[AbstractObjectType] =
     getDefine(defineName) match {
@@ -64,8 +77,8 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   private val defineNames = collection.mutable.HashSet[String]()
   private val defineAbstractClassNames = collection.mutable.HashSet[String]()
 
-  def addDefine(simpleName: String, t: Type, isAbstract: Boolean = false): Unit = {
-    scribe.debug(s"addDefine: simpleName='$simpleName' t=$t")
+  def addDefine(simpleName: String, t: Type, defineCase: DefineCase = SimpleDefineCase): Unit = {
+    scribe.debug(s"addDefine: simpleName='$simpleName' t=$t  defineCase=$defineCase")
     /* sanity check */
     assert(!simpleName.contains("."))
     assert(simpleName.nonEmpty)
@@ -76,6 +89,7 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
       // TODO include in build warnings
     }
 
+    val isAbstract = defineCase.isAbstract
     if (isAbstract)
       defineAbstractClassNames.add(simpleName)
     defineNames.add(simpleName)
@@ -89,16 +103,9 @@ class Namespace private(simpleName: String, parent: Option[Namespace],
   }
 
   def resolveDefine(name: String): Option[ObjectRefType] = {
-    val res = if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
+    if (defineNames.contains(name) && !defineAbstractClassNames.contains(name))
       Some(ObjectRefType(simpleName, name))
     else
       parent.flatMap(_.resolveDefine(name))
-
-    if (name.startsWith("Shared")) {
-      scribe.debug(s"resolveDefine: name='$name' => $res" +
-        s" resolveDefine: defineNames=$defineNames")
-    }
-
-    res
   }
 }

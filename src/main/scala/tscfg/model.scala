@@ -74,21 +74,11 @@ object model {
 
 
   final object AnnType {
-
-    /**
-      * Checks, if this comment string denotes an abstract class or not
-      *
-      * @param commentString String to parse
-      * @return True, if the string denotes an abstract object
-      */
     def isAbstract(commentString: String): Boolean =
-      parseDefineCase(commentString) match {
-        case Some(InheritanceSharedObject(abstractType, _)) => abstractType
-        case _ => false
-      }
+      getDefineCase(commentString).exists(_.isAbstract)
 
     def isEnum(commentString: String): Boolean =
-      parseDefineCase(commentString).exists(_.isEnum)
+      getDefineCase(commentString).exists(_.isEnum)
   }
 
   final case class AnnType(t: Type,
@@ -98,13 +88,12 @@ object model {
                            parentClassMembers: Option[Map[String, model.AnnType]] = None
                           ) {
 
-    val maybeSharedObjectType: Option[DefineCase] = comments.flatMap(cs => parseDefineCase(cs))
-    scribe.debug(s"maybeSharedObjectType=$maybeSharedObjectType t=$t")
+    val defineCase: Option[DefineCase] = comments.flatMap(cs => getDefineCase(cs))
 
-    val isDefine: Boolean = maybeSharedObjectType.isDefined
+    val isDefine: Boolean = defineCase.isDefined
 
-    val abstractClass: Option[String] = maybeSharedObjectType flatMap {
-      case InheritanceSharedObject(_, parentNameOpt @ Some(_)) => parentNameOpt
+    val abstractClass: Option[String] = defineCase flatMap {
+      case ExtendsDefineCase(name, _) => Some(name)
       case _ => None
     }
 
