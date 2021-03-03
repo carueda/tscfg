@@ -36,7 +36,6 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val packageStr = s"package ${genOpts.packageName}\n\n"
 
     val definition = (packageStr + res.definition).trim
-    res.copy(definition = res.definition.trim)
     //genResults.copy(code = definition)
     genResults.copy(code = formatter.format(genOpts.packageName, definition))
   }

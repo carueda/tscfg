@@ -18,7 +18,8 @@ src_managed/
 project/boot/
 project/plugins/project/
 
-# Scala-IDE specific
+# IDE stuff
+.vscode
 .scala_dependencies
 .worksheet
 
