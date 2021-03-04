@@ -28,6 +28,7 @@ The generated code only depends on the Typesafe Config library.
   - [optional object or list](#optional-object-or-list)
   - [shared objects](#shared-objects)
     - [shared object inheritance](#shared-object-inheritance)
+  - [enum](#enum)
 - [configuration template](#configuration-template)
 - [FAQ](#faq)
 - [tests](#tests)
@@ -36,7 +37,7 @@ The generated code only depends on the Typesafe Config library.
 ### status
 
 The tool supports all types handled by Typesafe Config
-(string, int, long, double, boolean, duration, size-in-bytes, list)
+(string, int, long, double, boolean, duration, size-in-bytes, list, object)
 and has great test coverage.
 Possible improvements include a more standard command line interface,
 a proper tscfg library,
@@ -505,6 +506,48 @@ The following are valid definition comments:
 - empty structs without any fields are treated as strings. Hence, having a child struct without new fields in addition
 to its superclass is not supported yet
 
+
+## enum
+
+Enumerations can also be defined and this is done through the
+`@define enum` annotation:
+
+```properties
+#@define enum
+FruitType = [apple, banana, pineapple]
+
+fruit: FruitType
+
+someFruits: [FruitType]
+
+other: {
+  aFruit: FruitType
+}
+```
+
+As with other uses of `@define`, the enumeration annotation will only generate
+the enumeration type itself, but the associated name can then be used for other
+field definitions.
+
+The type defined in the example above basically gets translated into Java and Scala
+as follows:
+
+```java
+public enum FruitType {
+    apple,
+    banana,
+    pineapple;
+}
+```
+
+```scala
+sealed trait FruitType 
+object FruitType {
+  object apple     extends FruitType
+  object banana    extends FruitType
+  object pineapple extends FruitType
+}
+```
 
 ## configuration template
 

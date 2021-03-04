@@ -109,18 +109,15 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
     // if this class is a parent class (abstract class or interface) this is indicated by the childType object
     // that is passed into the AnnType instance that is returned
+
+    // TODO review the following
     val updatedChildType = childType match {
       case objType: ObjectType =>
         if (commentsOpt.exists(AnnType.isAbstract))
           AbstractObjectType(objType.members) else objType
 
       case listType: ListType =>
-        if (commentsOpt.exists(AnnType.isEnum)) {
-          println(s"\nWARNING: incomplete enumeration handling. Do not use `@define enum` yet\n")
-          // TODO get given list to reflect it in the EnumObjectType:
-          EnumObjectType(List("TODO", "actual", "members"))
-        }
-        else listType
+        listType
 
       case other => other
     }
