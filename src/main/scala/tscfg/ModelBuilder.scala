@@ -45,7 +45,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
                   (ort, false, None)
 
                 case None =>
-                  toAnnBasicType(valueString) match {
+                  inferAnnBasicTypeFromString(valueString) match {
                     case Some(annBasicType) =>
                       annBasicType
 
@@ -150,14 +150,11 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
   }
 
-  private def toAnnBasicType(valueString: String):
+  private def inferAnnBasicTypeFromString(valueString: String):
   Option[(model.BasicType, Boolean, Option[String])] = {
 
     if (tsConfigUtil.isDurationValue(valueString))
       return Some((DURATION(ms), true, Some(valueString)))
-
-    if (tsConfigUtil.isSizeValue(valueString))
-      return Some((SIZE, true, Some(valueString)))
 
     val tokens = valueString.split("""\s*\|\s*""")
     val typePart = tokens(0).toLowerCase
@@ -210,7 +207,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
           case None =>
             // see possible type from the string literal:
-            toAnnBasicType(valueString) match {
+            inferAnnBasicTypeFromString(valueString) match {
               case Some((basicType, isOpt, defaultValue)) =>
                 if (isOpt)
                   warns += OptListElemWarning(cv0.origin().lineNumber(), valueString)

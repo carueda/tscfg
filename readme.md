@@ -308,6 +308,12 @@ The `size` type corresponds to the
 supported by the Typesafe library.
 See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
+> NOTE: As of 0.0.984, a setting with a default value like
+> `memory: 50G` (or `memory: "50G"`) will no longer be inferred as with `size` type, but just as a string
+> (with default value `"50G"`). 
+> For the size type effect, you will need to be explicit: `memory: "size | 50G"`.
+> See [#42](https://github.com/carueda/tscfg/issues/42) and [#41](https://github.com/carueda/tscfg/issues/41).
+
 #### durations
 
 A duration type can be further qualified with a suffix consisting of a colon

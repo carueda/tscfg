@@ -1,4 +1,4 @@
-lazy val tscfgVersion = setVersion("0.9.983")
+lazy val tscfgVersion = setVersion("0.9.984")
 
 organization := "com.github.carueda"
 name := "tscfg"
@@ -10,7 +10,7 @@ crossScalaVersions := Seq("2.12.12", "2.13.5")
 
 libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.4.0",
-  "com.typesafe"           %  "config"                  % "1.3.3",
+  "com.typesafe"           %  "config"                  % "1.4.1",
   "org.specs2"             %%  "specs2-core"            % "4.6.0" % "test",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.4.2",
   "org.json4s"             %%  "json4s-native"          % "3.6.7",

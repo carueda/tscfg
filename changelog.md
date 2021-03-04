@@ -1,3 +1,9 @@
+2021-03 - 0.9.984
+
+- resolve #42 "Size-in-bytes should be explicitly indicated in config spec"
+  - updated TS Config to 1.4.1, as a general measure, but also to quickly check about the
+    Quoted vs. Unquoted "issue" demonstrated with `> runMain misc.QuotedUnquoted` => No changes.
+
 2021-03 - 0.9.983
 
 - fix #62 "Ability to set enums in config"

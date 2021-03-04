@@ -105,17 +105,6 @@ object tsConfigUtil {
     case `day`    =>  TimeUnit.DAYS
   }
 
-  def isSizeValue(value: String): Boolean = {
-    try {
-      val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
-      config.getBytes("s")
-      true
-    }
-    catch {
-      case NonFatal(_) => false
-    }
-  }
-
   private def sizeValue(value: String): String = {
     val config: Config = ConfigFactory.parseString(s"""s = "$value"""")
     s"""${config.getBytes("s")}L"""
