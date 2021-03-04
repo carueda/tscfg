@@ -1,3 +1,9 @@
+2021-03 - 0.9.983
+
+- fix #62 "Ability to set enums in config"
+  - completed handling at first level
+  - in general, generated scala class names are now fully qualified
+
 2021-03 - 0.9.982
 
 fix #71 "Two shared objects leading to string conversion"

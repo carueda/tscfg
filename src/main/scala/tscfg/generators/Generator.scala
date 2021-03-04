@@ -15,6 +15,8 @@ abstract class Generator(genOpts: GenOpts) {
   protected val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
   protected var genResults = GenResult()
 
+  // allows to insert special marks in generated code to facilitate debugging.
+  // Keep this as the empty string constant in version control.
   protected def dbg(s: String, in: Boolean = true): String =
     ""
     //if (in) s" /*$s*/ " else s" // $s"

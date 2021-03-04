@@ -36,7 +36,7 @@ object ScalaIssue54exampleECfg {
   }
 
   final case class ExampleE(
-      test: Struct
+      test: ScalaIssue54exampleECfg.Struct
   )
   object ExampleE {
     def apply(
@@ -45,7 +45,7 @@ object ScalaIssue54exampleECfg {
         $tsCfgValidator: $TsCfgValidator
     ): ScalaIssue54exampleECfg.ExampleE = {
       ScalaIssue54exampleECfg.ExampleE(
-        test = Struct(
+        test = ScalaIssue54exampleECfg.Struct(
           if (c.hasPathOrNull("test")) c.getConfig("test")
           else com.typesafe.config.ConfigFactory.parseString("test{}"),
           parentPath + "test.",

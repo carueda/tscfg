@@ -2,7 +2,7 @@ package tscfg.example;
 
 public class JavaIssue62bCfg {
   public final JavaIssue62bCfg.Foo foo;
-  // NOTE: incomplete #62 implementation
+
   public enum FruitType {
     apple,
     banana,

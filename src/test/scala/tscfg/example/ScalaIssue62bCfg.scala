@@ -4,7 +4,6 @@ final case class ScalaIssue62bCfg(
     foo: ScalaIssue62bCfg.Foo
 )
 object ScalaIssue62bCfg {
-  // NOTE: incomplete #62 implementation
   sealed trait FruitType
   object FruitType {
     object apple     extends FruitType
@@ -24,13 +23,13 @@ object ScalaIssue62bCfg {
     }
   }
   final case class Foo(
-      fruit: FruitType,
+      fruit: ScalaIssue62bCfg.FruitType,
       other: ScalaIssue62bCfg.Foo.Other,
-      someFruits: scala.List[FruitType]
+      someFruits: scala.List[ScalaIssue62bCfg.FruitType]
   )
   object Foo {
     final case class Other(
-        aFruit: FruitType
+        aFruit: ScalaIssue62bCfg.FruitType
     )
     object Other {
       def apply(
@@ -39,7 +38,8 @@ object ScalaIssue62bCfg {
           $tsCfgValidator: $TsCfgValidator
       ): ScalaIssue62bCfg.Foo.Other = {
         ScalaIssue62bCfg.Foo.Other(
-          aFruit = FruitType.$resEnum(c.getString("aFruit"), parentPath + "fruit", $tsCfgValidator)
+          aFruit = ScalaIssue62bCfg.FruitType
+            .$resEnum(c.getString("aFruit"), parentPath + "fruit", $tsCfgValidator)
         )
       }
     }
@@ -50,23 +50,29 @@ object ScalaIssue62bCfg {
         $tsCfgValidator: $TsCfgValidator
     ): ScalaIssue62bCfg.Foo = {
       ScalaIssue62bCfg.Foo(
-        fruit = FruitType.$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator),
+        fruit = ScalaIssue62bCfg.FruitType
+          .$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator),
         other = ScalaIssue62bCfg.Foo.Other(
           if (c.hasPathOrNull("other")) c.getConfig("other")
           else com.typesafe.config.ConfigFactory.parseString("other{}"),
           parentPath + "other.",
           $tsCfgValidator
         ),
-        someFruits = $_LFruitType(c.getList("someFruits"), parentPath, $tsCfgValidator)
+        someFruits =
+          $_LScalaIssue62bCfg_FruitType(c.getList("someFruits"), parentPath, $tsCfgValidator)
       )
     }
-    private def $_LFruitType(
+    private def $_LScalaIssue62bCfg_FruitType(
         cl: com.typesafe.config.ConfigList,
         parentPath: java.lang.String,
         $tsCfgValidator: $TsCfgValidator
-    ): scala.List[FruitType] = {
+    ): scala.List[ScalaIssue62bCfg.FruitType] = {
       import scala.jdk.CollectionConverters._
-      cl.asScala.map(cv => FruitType.$resEnum(cv.unwrapped().toString, "?", $tsCfgValidator)).toList
+      cl.asScala
+        .map(cv =>
+          ScalaIssue62bCfg.FruitType.$resEnum(cv.unwrapped().toString, "?", $tsCfgValidator)
+        )
+        .toList
     }
   }
 

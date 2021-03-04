@@ -1,9 +1,10 @@
 package tscfg.example
 
-final case class ScalaIssue62aCfg(
-    foo: ScalaIssue62aCfg.Foo
+final case class ScalaIssue62Cfg(
+    fruit: ScalaIssue62Cfg.FruitType,
+    fruits: scala.List[ScalaIssue62Cfg.FruitType]
 )
-object ScalaIssue62aCfg {
+object ScalaIssue62Cfg {
   sealed trait FruitType
   object FruitType {
     object apple     extends FruitType
@@ -22,35 +23,26 @@ object ScalaIssue62aCfg {
         null
     }
   }
-  final case class Foo(
-      fruit: ScalaIssue62aCfg.FruitType
-  )
-  object Foo {
-    def apply(
-        c: com.typesafe.config.Config,
-        parentPath: java.lang.String,
-        $tsCfgValidator: $TsCfgValidator
-    ): ScalaIssue62aCfg.Foo = {
-      ScalaIssue62aCfg.Foo(
-        fruit = ScalaIssue62aCfg.FruitType
-          .$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator)
-      )
-    }
-  }
-
-  def apply(c: com.typesafe.config.Config): ScalaIssue62aCfg = {
+  def apply(c: com.typesafe.config.Config): ScalaIssue62Cfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String     = ""
-    val $result = ScalaIssue62aCfg(
-      foo = ScalaIssue62aCfg.Foo(
-        if (c.hasPathOrNull("foo")) c.getConfig("foo")
-        else com.typesafe.config.ConfigFactory.parseString("foo{}"),
-        parentPath + "foo.",
-        $tsCfgValidator
-      )
+    val $result = ScalaIssue62Cfg(
+      fruit = ScalaIssue62Cfg.FruitType
+        .$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator),
+      fruits = $_LScalaIssue62Cfg_FruitType(c.getList("fruits"), parentPath, $tsCfgValidator)
     )
     $tsCfgValidator.validate()
     $result
+  }
+  private def $_LScalaIssue62Cfg_FruitType(
+      cl: com.typesafe.config.ConfigList,
+      parentPath: java.lang.String,
+      $tsCfgValidator: $TsCfgValidator
+  ): scala.List[ScalaIssue62Cfg.FruitType] = {
+    import scala.jdk.CollectionConverters._
+    cl.asScala
+      .map(cv => ScalaIssue62Cfg.FruitType.$resEnum(cv.unwrapped().toString, "?", $tsCfgValidator))
+      .toList
   }
   private final class $TsCfgValidator {
     private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()

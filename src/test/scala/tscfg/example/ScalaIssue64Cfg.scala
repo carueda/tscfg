@@ -63,7 +63,7 @@ object ScalaIssue64Cfg {
   }
 
   final case class Test(
-      loadModelConfig: LoadModelConfig
+      loadModelConfig: ScalaIssue64Cfg.LoadModelConfig
   )
   object Test {
     def apply(
@@ -72,7 +72,7 @@ object ScalaIssue64Cfg {
         $tsCfgValidator: $TsCfgValidator
     ): ScalaIssue64Cfg.Test = {
       ScalaIssue64Cfg.Test(
-        loadModelConfig = LoadModelConfig(
+        loadModelConfig = ScalaIssue64Cfg.LoadModelConfig(
           if (c.hasPathOrNull("loadModelConfig")) c.getConfig("loadModelConfig")
           else com.typesafe.config.ConfigFactory.parseString("loadModelConfig{}"),
           parentPath + "loadModelConfig.",

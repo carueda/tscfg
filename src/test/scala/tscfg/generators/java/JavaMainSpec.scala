@@ -866,6 +866,20 @@ class JavaMainSpec extends Specification {
         c.foo.other.aFruit === apple
       }
     }
+
+    "62 enum used at first level " in {
+      "be handled with correct input" in {
+        val c = new JavaIssue62Cfg(ConfigFactory.parseString(
+          """
+            | fruit = apple
+            | fruits = [banana, pineapple]
+            |""".stripMargin))
+
+        import JavaIssue62Cfg.FruitType._
+        c.fruit === apple
+        c.fruits.asScala === List(banana, pineapple)
+      }
+    }
   }
 
   "issue 64 - template with defined abstract class" should {

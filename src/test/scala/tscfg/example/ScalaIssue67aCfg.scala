@@ -49,7 +49,7 @@ object ScalaIssue67aCfg {
   }
 
   final case class Test(
-      impl: ImplB
+      impl: ScalaIssue67aCfg.ImplB
   )
   object Test {
     def apply(
@@ -58,7 +58,7 @@ object ScalaIssue67aCfg {
         $tsCfgValidator: $TsCfgValidator
     ): ScalaIssue67aCfg.Test = {
       ScalaIssue67aCfg.Test(
-        impl = ImplB(
+        impl = ScalaIssue67aCfg.ImplB(
           if (c.hasPathOrNull("impl")) c.getConfig("impl")
           else com.typesafe.config.ConfigFactory.parseString("impl{}"),
           parentPath + "impl.",

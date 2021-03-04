@@ -54,8 +54,8 @@ object ScalaIssue54Cfg {
   }
 
   final case class Example(
-      a: Shared,
-      b: scala.List[Shared]
+      a: ScalaIssue54Cfg.Shared,
+      b: scala.List[ScalaIssue54Cfg.Shared]
   )
   object Example {
     def apply(
@@ -64,24 +64,24 @@ object ScalaIssue54Cfg {
         $tsCfgValidator: $TsCfgValidator
     ): ScalaIssue54Cfg.Example = {
       ScalaIssue54Cfg.Example(
-        a = Shared(
+        a = ScalaIssue54Cfg.Shared(
           if (c.hasPathOrNull("a")) c.getConfig("a")
           else com.typesafe.config.ConfigFactory.parseString("a{}"),
           parentPath + "a.",
           $tsCfgValidator
         ),
-        b = $_LShared(c.getList("b"), parentPath, $tsCfgValidator)
+        b = $_LScalaIssue54Cfg_Shared(c.getList("b"), parentPath, $tsCfgValidator)
       )
     }
-    private def $_LShared(
+    private def $_LScalaIssue54Cfg_Shared(
         cl: com.typesafe.config.ConfigList,
         parentPath: java.lang.String,
         $tsCfgValidator: $TsCfgValidator
-    ): scala.List[Shared] = {
+    ): scala.List[ScalaIssue54Cfg.Shared] = {
       import scala.jdk.CollectionConverters._
       cl.asScala
         .map(cv =>
-          Shared(
+          ScalaIssue54Cfg.Shared(
             cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig,
             parentPath,
             $tsCfgValidator

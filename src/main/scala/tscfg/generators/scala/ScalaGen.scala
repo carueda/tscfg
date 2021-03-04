@@ -86,7 +86,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
           case _ => typ
         }
         genResults = genResults.copy(fields = genResults.fields + (scalaId -> type_.toString))
-        modifiers + padId(scalaId) + " : " + type_
+        modifiers + padId(scalaId) + " : " + type_ + dbg("E")
       }
     }.mkString(",\n  ")
   }
@@ -288,7 +288,15 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   private def getClassNameForObjectRefType(ot: ObjectRefType): String = {
     val className = getClassName(ot.simpleName)
     val namespace = Namespace.resolve(ot.namespace)
-    val fullScalaName = (namespace.getPath.map(getClassName) ++ Seq(className)).mkString(".")
+    val fullScalaName = if (namespace.isRoot)
+      s"${genOpts.className}.$className"
+    else
+      (namespace.getPath.map(getClassName) ++ Seq(className)).mkString(".")
+
+    scribe.debug(s"getClassNameForObjectRefType:" +
+      s" simpleName=${ot.simpleName}" +
+      s" className=$className fullScalaName=$fullScalaName")
+
     fullScalaName
   }
 
@@ -320,6 +328,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
                               classNamesPrefix: List[String] = List.empty,
                               className: String,
                              ): Res = {
+    scribe.debug(s"generateForEnum: className=$className classNamesPrefix=$classNamesPrefix")
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
     /// Example:
@@ -345,8 +354,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |}""".stripMargin
 
     val str =
-      s"""// NOTE: incomplete #62 implementation
-         |sealed trait $className
+      s"""|sealed trait $className
          |object $className {
          |  ${et.members.map(m => s"object $m extends $className").mkString("\n  ")}
          |  ${resolve.replaceAll("\n", "\n  ")}
@@ -354,7 +362,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val baseType = classNamesPrefix.reverse.mkString + className
     Res(et,
-      scalaType = BaseScalaType(baseType),
+      scalaType = BaseScalaType(baseType + dbg("<X>")),
       definition = str
     )
   }

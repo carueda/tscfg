@@ -233,8 +233,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classNameAdjusted = adjustClassName(className)
     val members = et.members.mkString("", ",\n  ", ";")
     val str =
-      s"""// NOTE: incomplete #62 implementation
-         |public enum $classNameAdjusted {
+      s"""|public enum $classNameAdjusted {
          |  $members
          |}""".stripMargin
 
