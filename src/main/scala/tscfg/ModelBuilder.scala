@@ -287,16 +287,7 @@ object ModelBuilder {
 
   // $COVERAGE-OFF$
   def main(args: Array[String]): Unit = {
-    import scribe.format._
-    scribe
-      .Logger.root
-//      .Logger("tscfg.Namespace")
-      .clearHandlers().clearModifiers()
-      .withHandler(
-        formatter = formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $message$mdc",
-        minimumLevel = Some(scribe.Level.Debug)
-      )
-      .replace()
+    tscfg.util.setLogMinLevel()
 
     val filename = args(0)
     val showTsConfig = args.length > 1 && "-ts" == args(1)

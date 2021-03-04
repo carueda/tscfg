@@ -66,7 +66,16 @@ object Main {
                         )
 
   def main(args: Array[String]): Unit = {
-    generate(getOpts(args.toList))
+    val argList = args.toList match {
+      case "--log" :: rest =>
+        tscfg.util.setLogMinLevel(
+          //name = Some("tscfg.generators.scala.ScalaGen")
+        )
+        rest
+      case list =>
+        list
+    }
+    generate(getOpts(argList))
   }
 
   private def getOpts(args: List[String]): CmdLineOpts = {

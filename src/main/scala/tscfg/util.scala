@@ -1,5 +1,8 @@
 package tscfg
 
+import scribe.Logger
+import scribe.format._
+
 object util {
 
   def upperFirst(symbol: String): String = symbol.capitalize
@@ -17,6 +20,19 @@ object util {
       case _    => String.valueOf(c)
     }
     s.flatMap(escapeChar)
+  }
+
+  def setLogMinLevel(name: Option[String] = None,
+               minimumLevel: Option[scribe.Level] = Some(scribe.Level.Debug),
+              ): Unit = {
+    val logger = name.map(Logger(_)).getOrElse(Logger.root)
+    logger
+      .clearHandlers().clearModifiers()
+      .withHandler(
+        formatter = formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $message$mdc",
+        minimumLevel = minimumLevel
+      )
+      .replace()
   }
 
   val TypesafeConfigClassName: String = classOf[com.typesafe.config.Config].getName
