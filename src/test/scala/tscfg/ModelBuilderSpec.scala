@@ -3,6 +3,7 @@ package tscfg
 import org.specs2.mutable.Specification
 import model.durations._
 import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
+import tscfg.exceptions.ObjectDefinitionException
 import tscfg.model._
 
 
@@ -274,6 +275,30 @@ class ModelBuilderSpec extends Specification {
       verify(fooObj, "listBoolean",  ListType(BOOLEAN))
       verify(fooObj, "listDuration", ListType(DURATION(ms)))
       verify(fooObj, "listDuration_se", ListType(DURATION(second)))
+    }
+  }
+
+  "invalid @defines" should {
+    "check Missing name after `extends`" in {
+      def a = build(
+        """#@define extends
+          |foo {x:int}
+          |""".stripMargin)
+      a should throwA[ObjectDefinitionException].like {
+        case e: ObjectDefinitionException =>
+          e.getMessage must contain("Missing name after `extends`")
+      }
+    }
+
+    "check Unrecognized @define construct" in {
+      def a = build(
+        """#@define dummy
+          |foo {x:int}
+          |""".stripMargin)
+      a should throwA[ObjectDefinitionException].like {
+        case e: ObjectDefinitionException =>
+          e.getMessage must contain("Unrecognized @define construct")
+      }
     }
   }
 }

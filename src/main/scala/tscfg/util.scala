@@ -22,6 +22,8 @@ object util {
     s.flatMap(escapeChar)
   }
 
+  // $COVERAGE-OFF$
+  // debugging helper
   def setLogMinLevel(name: Option[String] = None,
                minimumLevel: Option[scribe.Level] = Some(scribe.Level.Debug),
               ): Unit = {
@@ -34,6 +36,7 @@ object util {
       )
       .replace()
   }
+  // $COVERAGE-ON$
 
   val TypesafeConfigClassName: String = classOf[com.typesafe.config.Config].getName
 }

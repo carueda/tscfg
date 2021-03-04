@@ -1,5 +1,7 @@
 package tscfg
 
+import tscfg.exceptions.ObjectDefinitionException
+
 sealed abstract class DefineCase {
   val isAbstract: Boolean = false
   val isEnum: Boolean = false
@@ -25,10 +27,10 @@ object DefineCase {
     * start with '@define' (it is no shared object), [[None]] is returned.
     *
     * @param commentString Comment String to parse for additional information
-    * @throws RuntimeException If the comment string is malformed
+    * @throws ObjectDefinitionException If the comment string is malformed
     * @return An [[Option]] on additional information of the shared object
     */
-    @throws[RuntimeException]
+    @throws[ObjectDefinitionException]
   def getDefineCase(commentString: String): Option[DefineCase] = {
     val str = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
@@ -44,7 +46,7 @@ object DefineCase {
         Some(ExtendsDefineCase(name, abs = false))
 
       case "@define" :: "extends" :: Nil =>
-        throw new RuntimeException(s"Missing name after `extends`")
+        throw ObjectDefinitionException(s"Missing name after `extends`")
 
       case "@define" :: "enum" :: Nil =>
         Some(EnumDefineCase)
@@ -52,8 +54,8 @@ object DefineCase {
       case "@define" :: Nil =>
         Some(SimpleDefineCase)
 
-      case "@define" :: rest =>
-        throw new RuntimeException(s"Unrecognized construct: $str")
+      case "@define" :: _ =>
+        throw ObjectDefinitionException(s"Unrecognized @define construct: $str")
 
       case _ =>
         None

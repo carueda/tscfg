@@ -1,4 +1,4 @@
-lazy val tscfgVersion = setVersion("0.9.984")
+lazy val tscfgVersion = setVersion("0.9.985")
 
 organization := "com.github.carueda"
 name := "tscfg"
