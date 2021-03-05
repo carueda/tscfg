@@ -464,9 +464,10 @@ In this example, the annotation will only generate the definition of the
 corresponding class `Struct` in the wrapper but not the member of that
 type itself. Then, the type can be referenced for other definitions.
 
-> Note: current support is in terms of the referenced object being always
-> *required*. `a: "Struct?"`, for example, is not supported.
-> Also, `@define` is only supported for an object, not for a basic type or list.
+> Note: current support is in terms of the referenced object always being *required*.
+> In other words, `a: "Struct?"`, as an example, is not supported.
+> Also, the `@define` annotation is only supported for objects and enumerations (see below),
+> not for a basic types or lists.
 
 #### shared object inheritance
 
@@ -533,7 +534,7 @@ other: {
 
 As with other uses of `@define`, the enumeration annotation will only generate
 the enumeration type itself, but the associated name can then be used for other
-field definitions.
+field definitions in your configuration schema.
 
 The type defined in the example above basically gets translated into Java and Scala
 as follows:
@@ -557,7 +558,8 @@ object FruitType {
 
 ## configuration template
 
-tscfg can also generate user-oriented configuration templates from given config specs.
+tscfg can also generate user-oriented configuration templates from the given
+configuration schema.
 See [this wiki](https://github.com/carueda/tscfg/wiki/template-generation).
 
 
