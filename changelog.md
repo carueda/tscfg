@@ -1,5 +1,8 @@
 2021-03 - 0.9.985
 
+- env var `NO_FORMATTER` convenience to skip the standard formatting of
+  generated code while speeding up testing a bit
+  
 - adjust template generation
   TODO remove this feature?
   

@@ -6,6 +6,7 @@ import tscfg.generators.java.JavaGen
 import tscfg.generators.{GenOpts, Generator}
 import tscfg.generators.scala.ScalaGen
 
+// $COVERAGE-OFF$
 object gen4tests {
   def main(args: Array[String]): Unit = {
     val sourceDir = new File("src/main/tscfg/example")
@@ -42,9 +43,7 @@ object gen4tests {
         case "--durations"       => genOpts = genOpts.copy(useDurations = true)
         case "--all-required"    => genOpts = genOpts.copy(assumeAllRequired = true)
 
-        // $COVERAGE-OFF$
         case opt => println(s"WARN: $confFile: unrecognized GenOpts argument: `$opt'")
-        // $COVERAGE-ON$
       }
       genOpts
     }
@@ -64,7 +63,6 @@ object gen4tests {
 
       val fileName = className + "." + lang.toLowerCase
       val targetFile = new File(targetScalaDir, fileName)
-      // $COVERAGE-OFF$
       if (true||confFile.lastModified >= targetFile.lastModified) {
         val genOpts = baseGenOpts.copy(className = className)
         //println(s"generating for $name -> $fileName")
@@ -77,7 +75,7 @@ object gen4tests {
         val out = new PrintWriter(new FileWriter(targetFile), true)
         out.println(results.code)
       }
-      // $COVERAGE-ON$
     }
   }
 }
+// $COVERAGE-ON$

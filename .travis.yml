@@ -4,5 +4,5 @@ scala:
 
 jdk: openjdk8
 
-script: "sbt clean coverage codeDefs +test"
+script: "NO_FORMATTER=1 sbt clean coverage codeDefs +test"
 after_success: "sbt coverageReport coveralls"

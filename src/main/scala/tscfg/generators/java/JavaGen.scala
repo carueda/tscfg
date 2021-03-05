@@ -23,8 +23,12 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val packageStr = s"package ${genOpts.packageName};\n\n"
 
     val definition = (packageStr + res.definition).trim
-    //genResults.copy(code = definition)
-    genResults.copy(code = formatter.format(definition))
+    genResults.copy(code = {
+      if (tscfg.util.doFormatting)
+        formatter.format(definition)
+      else
+        definition
+    })
   }
 
   private def generate(typ: Type,
