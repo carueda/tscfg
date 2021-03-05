@@ -10,7 +10,7 @@ class TemplateGenerator(opts: TemplateOpts) {
   def generate(o: ObjectType): String = genObjectTypeMembers(o)
 
   private def genEnumType(et: EnumObjectType): String = {
-    s"[${et.members.mkString(",)")}]"
+    s"[${et.members.mkString(", ")}]"
   }
 
   private def genObjectType(o: ObjectRealType): String = {
@@ -37,32 +37,45 @@ class TemplateGenerator(opts: TemplateOpts) {
       }
 
       val opt = if (a.optional) "optional" else "required"
-      val dfl = a.default.map(d => s". Default: $d").getOrElse("")
-      val (typ, abbrev) = gen(a.t)
-      val abbrev2 = if (abbrev == abbrevObject) "section" else abbrev
-      val decl = opts.commentPrefix + s" '$symbol': $opt $abbrev2$dfl.\n"
 
-      val sysPropOpt: Option[String] = annotations.find(_.startsWith(sysPropAnn))
-        .map(_.substring(sysPropAnn.length).trim)
+      a.t match {
+        case _:EnumObjectType =>
+          val decl = opts.commentPrefix + s" '$symbol': Enumeration.\n"
+          val (typ, _) = gen(a.t)
+          val assign = symbol + " = " + typ
 
-      val envVarOpt: Option[String] = annotations.find(_.startsWith(envVarAnn))
-        .map(_.substring(envVarAnn.length).trim)
+          decl +
+            cmn +
+            assign
 
-      val assign = if (abbrev == abbrevObject)
-        symbol + " " + typ  // do not include `=' for an object
-      else if (isBasicAbbrev(abbrev))
-        symbol + " = " + "?"
-      else
-        symbol + " = " + typ
+        case _ =>
+          val dfl = a.default.map(d => s". Default: $d").getOrElse("")
+          val (typ, abbrev) = gen(a.t)
+          val abbrev2 = if (abbrev == abbrevObject) "section" else abbrev
+          val decl = opts.commentPrefix + s" '$symbol': $opt $abbrev2$dfl.\n"
 
-      val assignSysProp = sysPropOpt.map(e => s"\n$symbol = $${$e}").getOrElse("")
-      val assignEnvVar  = envVarOpt.map(e => s"\n$symbol = $${?$e}").getOrElse("")
+          val sysPropOpt: Option[String] = annotations.find(_.startsWith(sysPropAnn))
+            .map(_.substring(sysPropAnn.length).trim)
 
-      decl +
-        cmn +
-        (if (a.optional) "#" + assign.replaceAll("\n", "\n#") else assign) +
-        assignSysProp +
-        assignEnvVar
+          val envVarOpt: Option[String] = annotations.find(_.startsWith(envVarAnn))
+            .map(_.substring(envVarAnn.length).trim)
+
+          val assign = if (abbrev == abbrevObject)
+            symbol + " " + typ  // do not include `=' for an object
+          else if (isBasicAbbrev(abbrev))
+            symbol + " = " + "?"
+          else
+            symbol + " = " + typ
+
+          val assignSysProp = sysPropOpt.map(e => s"\n$symbol = $${$e}").getOrElse("")
+          val assignEnvVar  = envVarOpt.map(e => s"\n$symbol = $${?$e}").getOrElse("")
+
+          decl +
+            cmn +
+            (if (a.optional) "#" + assign.replaceAll("\n", "\n#") else assign) +
+            assignSysProp +
+            assignEnvVar
+      }
 
     }.mkString("\n\n")
   }
@@ -74,8 +87,8 @@ class TemplateGenerator(opts: TemplateOpts) {
     case aot: AbstractObjectType =>
       (genObjectType(aot), abbrevAbsObject)
 
-    case ort:ObjectRefType =>
-      (ort.toString, abbrevObjectRef)
+    case ObjectRefType(ns, simpleName) =>
+      (simpleName, simpleName)
 
     case b:BasicType  =>
       val lc = b.toString.toLowerCase
@@ -90,12 +103,13 @@ class TemplateGenerator(opts: TemplateOpts) {
   }
 
   private def isBasicAbbrev(abbrev: String): Boolean =
-    abbrev != abbrevObject && abbrev != abbrevAbsObject  && !abbrev.startsWith(abbrevListOf)
+    abbrev != abbrevEnum &&
+      abbrev != abbrevObject && abbrev != abbrevAbsObject &&
+      !abbrev.startsWith(abbrevListOf)
 
   private val abbrevEnum = "enumeration"
   private val abbrevObject = "object"
   private val abbrevAbsObject = "abstract class"
-  private val abbrevObjectRef = "ref to object"
   private val abbrevListOf = "list of"
 
   private val envVarAnn  = "@envvar"

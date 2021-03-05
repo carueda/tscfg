@@ -1,3 +1,8 @@
+2021-03 - 0.9.985
+
+- adjust template generation
+  TODO remove this feature?
+  
 2021-03 - 0.9.984
 
 - resolve #42 "Size-in-bytes should be explicitly indicated in config spec"
