@@ -111,12 +111,12 @@ a string with a simple syntax as follows can be used
 
 | field spec | meaning | java type / default | scala type / default
 |---|---|---|---|
-| "int"          | required integer | `int` / no default | `Int` / no default
-| "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
-| "int?"         | optional integer | `Integer` / `null` | `Option[Int]` / `None`
+| a: "int"          | required integer | `int` / no default | `Int` / no default
+| a: "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
+| a: "int?"         | optional integer | `Integer` / `null`(*) | `Option[Int]` / `None`
 
 > **NOTE**
-> - For java, you can use the `--java:optionals` flag to generate `Optional<T>` instead of `null`.
+> - (*) You can use the `--java:optionals` flag to generate `Optional<T>` instead of `null`.
 > - The type syntax is still subject to change.
 
 The following is a complete example exercising this mechanism.
@@ -211,7 +211,7 @@ Output is written to $destDir/$className.ext
 ```
 
 So, to generate the Java class `tscfg.example.ExampleCfg` with the example above
-saved in a file `example.spec.conf`, we can run:
+saved in a file `example.spec.conf`, you can run:
 
 ```shell
 $ java -jar tscfg-x.y.z.jar --spec example.spec.conf
