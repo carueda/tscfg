@@ -1,4 +1,9 @@
 src/main/resources/codeDefs/
+
+.metals
+metals.sbt
+.bloop
+
 ### Scala template
 *.class
 *.log
