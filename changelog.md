@@ -1,3 +1,7 @@
+2021-07 - 0.9.986
+
+- fix #74 "Hardcoded example code in ScalaGen.scala" 😂  🍌🍎🍍
+  
 2021-03 - 0.9.985
 
 - env var `NO_FORMATTER` convenience to skip the standard formatting of

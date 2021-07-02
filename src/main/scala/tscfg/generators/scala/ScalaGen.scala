@@ -526,7 +526,7 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
     //// Example:
     // fruit = FruitType.$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator)
 
-    s"""$className.$$resEnum(c.getString("$path"), parentPath + "fruit", $$tsCfgValidator)"""
+    s"""$className.$$resEnum(c.getString("$path"), parentPath + "$path", $$tsCfgValidator)"""
   }
 
   private def objectInstance(a: AnnType, res: Res, path: String)

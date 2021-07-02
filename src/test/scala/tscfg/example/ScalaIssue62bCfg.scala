@@ -39,7 +39,7 @@ object ScalaIssue62bCfg {
       ): ScalaIssue62bCfg.Foo.Other = {
         ScalaIssue62bCfg.Foo.Other(
           aFruit = ScalaIssue62bCfg.FruitType
-            .$resEnum(c.getString("aFruit"), parentPath + "fruit", $tsCfgValidator)
+            .$resEnum(c.getString("aFruit"), parentPath + "aFruit", $tsCfgValidator)
         )
       }
     }

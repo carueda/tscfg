@@ -789,6 +789,26 @@ class ScalaMainSpec extends Specification {
         c.foo.someFruits === List(banana, apple)
         c.foo.other.aFruit === apple
       }
+
+      "report correct field name when using incorrect enum value (#74)" in {
+        ScalaIssue62bCfg(ConfigFactory.parseString(
+          """foo {
+            |  fruit = maracuyá
+            |  someFruits = [maracuyá]
+            |  other {
+            |    aFruit = maracuyá
+            |  }
+            |}
+            |""".stripMargin)
+        ) must throwA[com.typesafe.config.ConfigException].like {
+          case e: com.typesafe.config.ConfigException =>
+            val msg = e.getMessage
+            msg must contain("'foo.fruit': invalid value maracuyá")
+            msg must contain("'foo.other.aFruit': invalid value maracuyá")
+            msg must contain("'?': invalid value maracuyá")
+            true === true
+        }
+      }
     }
 
     "62 enum used at first level " in {
