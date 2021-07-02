@@ -805,8 +805,7 @@ class ScalaMainSpec extends Specification {
             val msg = e.getMessage
             msg must contain("'foo.fruit': invalid value maracuyá")
             msg must contain("'foo.other.aFruit': invalid value maracuyá")
-            msg must contain("'?': invalid value maracuyá")
-            true === true
+            msg must contain("'?': invalid value maracuyá") // this one referring to the list member
         }
       }
     }
