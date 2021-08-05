@@ -41,16 +41,14 @@ codeDefs := {
     IO.copyDirectory(file(src), file(dst))
   }
 }
-(compile in Compile) <<= (compile in Compile) dependsOn codeDefs
-// TODO why is not `compile` by itself completely running `codeDefs`, that is,
-//  actually making the resources available at compile time?
+(compile in Compile) := ((compile in Compile) dependsOn codeDefs).value
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")
 fork in genCode := true
 
-(testOnly in Test) <<= (testOnly in Test) dependsOn genCode
-(test in Test)     <<= (test in Test)     dependsOn genCode
+(testOnly in Test) := ((testOnly in Test) dependsOn genCode).evaluated
+(test in Test)     := ((test in Test)     dependsOn genCode).value
 
 publishMavenStyle := true
 publishArtifact in Test := false

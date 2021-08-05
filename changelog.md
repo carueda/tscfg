@@ -1,3 +1,8 @@
+2021-08
+
+- toward a newer sbt version
+  - fix sbt 0.12->0.13 warnings
+
 2021-07 - 0.9.986
 
 - fix #74 "Hardcoded example code in ScalaGen.scala" 😂  🍌🍎🍍
