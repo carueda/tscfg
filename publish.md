@@ -23,4 +23,8 @@ Then:
         > assembly
         > +package
         > +publishSigned
-        > +sonatypeRelease
+        > +sonatypeBundleRelease
+
+Argh, all good upon general upgrade to sbt 1.5.5 and build/release dependencies...
+... but `+sonatypeBundleRelease` is failing, and it's unclear why `:(`.
+Same problem whether with `publishTo := sonatypePublishToBundle.value` or with the traditional `publishTo := {...}`.

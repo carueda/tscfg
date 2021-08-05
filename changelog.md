@@ -1,8 +1,10 @@
-2021-08
+2021-08 - 0.9.99
 
-- toward a newer sbt version
+- use a newer sbt version
   - fix sbt 0.12->0.13 warnings
-
+  - use sbt 1.5.5, while upgrading various build/release dependencies
+  - all good ... but `+sonatypeBundleRelease` is failing `:(`
+   
 2021-07 - 0.9.986
 
 - fix #74 "Hardcoded example code in ScalaGen.scala" 😂  🍌🍎🍍

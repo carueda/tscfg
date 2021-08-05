@@ -1,4 +1,4 @@
-lazy val tscfgVersion = setVersion("0.9.986")
+lazy val tscfgVersion = setVersion("0.9.99")
 
 organization := "com.github.carueda"
 name := "tscfg"
@@ -21,11 +21,11 @@ libraryDependencies ++= Seq(
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
-scalacOptions in Test ++= Seq("-Yrangepos")  // per specs2-core
+(Test / scalacOptions) ++= Seq("-Yrangepos")  // per specs2-core
 
-mainClass in assembly := Some("tscfg.Main")
+(assembly / mainClass) := Some("tscfg.Main")
 
-assemblyJarName in assembly := s"tscfg-$tscfgVersion.jar"
+(assembly / assemblyJarName) := s"tscfg-$tscfgVersion.jar"
 
 coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
 coverageMinimum := 80
@@ -41,17 +41,20 @@ codeDefs := {
     IO.copyDirectory(file(src), file(dst))
   }
 }
-(compile in Compile) := ((compile in Compile) dependsOn codeDefs).value
+(Compile / compile) := ((Compile / compile) dependsOn codeDefs).value
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")
-fork in genCode := true
+(genCode / fork) := true
 
-(testOnly in Test) := ((testOnly in Test) dependsOn genCode).evaluated
-(test in Test)     := ((test in Test)     dependsOn genCode).value
+(Test / testOnly) := ((Test / testOnly) dependsOn genCode).evaluated
+(Test / test)     := ((Test / test)     dependsOn genCode).value
 
 publishMavenStyle := true
-publishArtifact in Test := false
+(Test / publishArtifact) := false
+
+publishTo := sonatypePublishToBundle.value
+/*
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value)
@@ -59,6 +62,7 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
+*/
 pomIncludeRepository := { _ => false }
 homepage := Some(url("https://github.com/carueda/tscfg"))
 licenses := Seq("Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0"))
