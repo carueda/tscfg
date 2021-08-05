@@ -1,9 +1,10 @@
-2021-08 - 0.9.99
+2021-08 - 0.9.992
 
 - use a newer sbt version
   - fix sbt 0.12->0.13 warnings
   - use sbt 1.5.5, while upgrading various build/release dependencies
   - all good ... but `+sonatypeBundleRelease` is failing `:(`
+  - retrying with incremented versions 0.9.991 ... 993
    
 2021-07 - 0.9.986
 
