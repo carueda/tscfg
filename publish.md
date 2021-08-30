@@ -29,5 +29,5 @@ Argh, all good upon general upgrade to sbt 1.5.5 and build/release dependencies.
 ... but `+sonatypeBundleRelease` is failing, and it's unclear why `:(`.
 Same problem whether with `publishTo := sonatypePublishToBundle.value` or with the traditional `publishTo := {...}`.
 
-After a couple of attempts, I got `sonatypeBundleRelease` to complete, but only by itself 
+After a couple of attempts, I got `sonatypeBundleRelease` to complete, but only by itself
 (not with `+`, that is for scala 2.12, which btw seemed to always be associated with the error).
