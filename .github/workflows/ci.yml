@@ -16,7 +16,12 @@ jobs:
         uses: coursier/cache-action@v5
       - name: Build and Test
         run: |
-          sbt coverage +test
+          sbt coverage test
+      - name: Coverage report
+        run: |
+          sbt coverageReport
+
+      # hmm, seems like we better use a diff coverage service -- https://github.com/scoverage/sbt-coveralls/issues/126
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
