@@ -1,0 +1,8 @@
+language: scala
+scala:
+  - "2.13.5"
+
+jdk: openjdk8
+
+script: "sbt clean coverage test"
+after_success: "sbt coverageReport coveralls"
