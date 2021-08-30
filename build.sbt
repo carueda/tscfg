@@ -1,4 +1,4 @@
-lazy val tscfgVersion = setVersion("0.9.993")
+lazy val tscfgVersion = setVersion("0.9.994")
 
 organization := "com.github.carueda"
 name := "tscfg"
@@ -28,7 +28,7 @@ scalacOptions ++= Seq("-deprecation", "-feature")
 (assembly / assemblyJarName) := s"tscfg-$tscfgVersion.jar"
 
 coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
-coverageMinimum := 80
+coverageMinimumStmtTotal := 80
 coverageFailOnMinimum := false
 coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
 

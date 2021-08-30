@@ -1,3 +1,8 @@
+2021-08 - 0.9.994
+
+- use github actions for ci
+- upgrade coverage deps
+
 2021-08 - 0.9.992
 
 - use a newer sbt version
