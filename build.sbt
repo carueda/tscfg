@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
   "org.json4s"             %%  "json4s-native"          % "3.6.7",
   "org.scalameta"          %%  "scalafmt-dynamic"       % "2.7.5",
   "com.google.googlejavaformat" % "google-java-format"  % "1.7", // note: 1.8: "The minimum supported runtime version is now JDK 11"
-  "com.google.code.gson"   %  "gson"                    % "2.8.7"
+  "com.google.code.gson"   %  "gson"                    % "2.8.8"
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
