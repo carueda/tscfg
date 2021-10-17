@@ -4,9 +4,9 @@ organization := "com.github.carueda"
 name := "tscfg"
 version := tscfgVersion
 
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.6"
 
-crossScalaVersions := Seq("2.12.12", "2.13.5")
+crossScalaVersions := Seq("2.12.12", "2.13.6")
 
 libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.4.0",
