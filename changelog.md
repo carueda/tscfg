@@ -1,3 +1,7 @@
+2021-10
+
+- fix setup for tests
+
 2021-08 - 0.9.994
 
 - hmm, sort of revert to travis (will still work?) due to coveralls issue

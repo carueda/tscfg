@@ -47,8 +47,8 @@ lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")
 (genCode / fork) := true
 
-(Test / testOnly) := ((Test / testOnly) dependsOn genCode).evaluated
-(Test / test)     := ((Test / test)     dependsOn genCode).value
+(Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
+(Test / test)     := ((Test / test)     dependsOn (codeDefs, genCode)).value
 
 publishMavenStyle := true
 (Test / publishArtifact) := false
