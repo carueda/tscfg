@@ -9,7 +9,7 @@ scalaVersion := "2.13.6"
 crossScalaVersions := Seq("2.12.15", "2.13.6")
 
 libraryDependencies ++= Seq(
-  "com.outr"               %% "scribe"                  % "3.6.0",
+  "com.outr"               %% "scribe"                  % "3.6.1",
   "com.typesafe"           %  "config"                  % "1.4.1",
   "org.specs2"             %%  "specs2-core"            % "4.13.0" % "test",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0",
