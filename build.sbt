@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "org.specs2"             %%  "specs2-core"            % "4.13.0" % "test",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0",
   "org.json4s"             %%  "json4s-native"          % "4.0.3",
-  "org.scalameta"          %%  "scalafmt-dynamic"       % "3.0.7",
+  "org.scalameta"          %%  "scalafmt-dynamic"       % "3.0.8",
   "com.google.googlejavaformat" % "google-java-format"  % "1.7", // note: 1.8: "The minimum supported runtime version is now JDK 11"
   "com.google.code.gson"   %  "gson"                    % "2.8.8"
 )
