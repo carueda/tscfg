@@ -13,7 +13,7 @@ abstract class Generator(genOpts: GenOpts) {
 
   protected val className: String = genOpts.className
   protected val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
-  protected var genResults = GenResult()
+  protected var genResults: GenResult = GenResult()
 
   // allows to insert special marks in generated code to facilitate debugging.
   // Keep this as the empty string constant in version control.

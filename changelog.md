@@ -1,5 +1,6 @@
 2021-10
 
+- prelims for eventual migration to scala3
 - fix setup for tests
 
 2021-08 - 0.9.994

@@ -14,14 +14,14 @@ import tscfg.generators.{GenOpts, Generator, TemplateOpts, TemplateGenerator}
 object Main {
   val version: String = ConfigFactory.load().getString("tscfg.version")
 
-  val defaultGenOpts = GenOpts(
+  val defaultGenOpts: GenOpts = GenOpts(
     packageName = "tscfg.example",
     className = "ExampleCfg"
   )
 
   val defaultDestDir: String = "/tmp"
 
-  var templateOpts = TemplateOpts()
+  var templateOpts: TemplateOpts = TemplateOpts()
 
   val usage: String =
     s"""

@@ -21,7 +21,9 @@ libraryDependencies ++= Seq(
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
+/*
 (Test / scalacOptions) ++= Seq("-Yrangepos")  // per specs2-core
+*/
 
 (assembly / mainClass) := Some("tscfg.Main")
 

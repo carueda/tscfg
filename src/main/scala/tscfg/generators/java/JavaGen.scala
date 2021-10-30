@@ -12,7 +12,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   import defs._
 
-  implicit val methodNames = MethodNames()
+  implicit val methodNames: MethodNames = MethodNames()
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()

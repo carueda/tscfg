@@ -12,8 +12,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   import defs._
 
-  implicit val methodNames = MethodNames()
-  val getter = Getter(genOpts, hasPath, accessors, methodNames)
+  implicit val methodNames: MethodNames = MethodNames()
+  val getter: Getter = Getter(genOpts, hasPath, accessors, methodNames)
 
   import methodNames._
 
@@ -597,7 +597,7 @@ private[scala] class Accessors {
 
   import defs._
 
-  val rootListAccessors = collection.mutable.LinkedHashMap[String, String]()
+  val rootListAccessors: collection.mutable.LinkedHashMap[String,String] = collection.mutable.LinkedHashMap()
 
   def listMethodName(scalaType: ListScalaType,
                      lt: ListType,
