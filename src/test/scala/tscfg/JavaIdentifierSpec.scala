@@ -1,34 +1,34 @@
 package tscfg
 
-import org.specs2.mutable.Specification
-import org.specs2.specification.core.Fragments
-import tscfg.generators.java.javaUtil.{javaKeywords, javaIdentifier}
+import org.scalatest.wordspec.AnyWordSpec
+import tscfg.generators.java.javaUtil.{javaIdentifier, javaKeywords}
+
 import scala.util.Random
 
-object javaIdentifierSpec extends Specification {
+class JavaIdentifierSpec extends AnyWordSpec {
 
   """javaIdentifier""" should {
 
-    List("foo", "bar_3", "$baz").foldLeft(Fragments.empty) { (res, id) =>
-      res.append(s"""keep valid identifier "$id"""" in {
-        javaIdentifier(id) must_== id
-      })
+    List("foo", "bar_3", "$baz") foreach { id =>
+      s"""keep valid identifier "$id"""" in {
+        javaIdentifier(id) === id
+      }
     }
 
-    Random.shuffle(javaKeywords).take(3).foldLeft(Fragments.empty) { (res, kw) =>
-      res.append(s"""convert java keyword "$kw" to "${kw}_"""" in {
-        javaIdentifier(kw) must_== kw + "_"
-      })
+    Random.shuffle(javaKeywords).take(3) foreach { kw =>
+      s"""convert java keyword "$kw" to "${kw}_"""" in {
+        javaIdentifier(kw) === kw + "_"
+      }
     }
 
-    List("foo-bar", "foo:bar", "foo#bar").foldLeft(Fragments.empty) { (res, id) =>
-      res.append(s"""replace non java id character with '_': "$id" -> "foo_bar"""" in {
-        javaIdentifier(id) must_== "foo_bar"
-      })
+    List("foo-bar", "foo:bar", "foo#bar") foreach { id =>
+      s"""replace non java id character with '_': "$id" -> "foo_bar"""" in {
+        javaIdentifier(id) === "foo_bar"
+      }
     }
 
     s"""prefix with '_' if first character is valid but not at first position: "21" -> "_21"""" in {
-      javaIdentifier("21") must_== "_21"
+      javaIdentifier("21") === "_21"
     }
   }
 }

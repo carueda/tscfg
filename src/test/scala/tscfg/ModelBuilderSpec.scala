@@ -1,13 +1,13 @@
 package tscfg
 
-import org.specs2.mutable.Specification
-import model.durations._
+import org.scalatest.wordspec.AnyWordSpec
 import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.model._
+import tscfg.model.durations._
 
 
-class ModelBuilderSpec extends Specification {
+class ModelBuilderSpec extends AnyWordSpec {
 
   def build(source: String, showOutput: Boolean = false): ModelBuildResult = {
 
@@ -31,7 +31,7 @@ class ModelBuilderSpec extends Specification {
                      optional: Boolean = false,
                      default: Option[String] = None,
                      comments: Option[String] = None
-                    ) = {
+                    ): Unit = {
     val at = objType.members(memberName)
     at.t === t
     at.optional === optional
@@ -47,13 +47,13 @@ class ModelBuilderSpec extends Specification {
   }
 
   "with empty list" should {
-    def a = build(
-      """
-        |my_list: [ ]
-      """.stripMargin)
-
-    "throw IllegalArgumentException" in {
-      a must throwA[IllegalArgumentException]
+    "throw" in {
+      assertThrows[IllegalArgumentException] {
+        build(
+          """
+            |my_list: [ ]
+          """.stripMargin)
+      }
     }
   }
 
@@ -62,7 +62,7 @@ class ModelBuilderSpec extends Specification {
 
     "generate warning" in {
       val warns = result.warnings.filter(_.isInstanceOf[MultElemListWarning])
-      warns.map(_.source) must contain("[true,false]")
+      assert(warns.map(_.source) contains "[true,false]")
     }
   }
 
@@ -71,7 +71,7 @@ class ModelBuilderSpec extends Specification {
 
     "generate warning" in {
       val warns = result.warnings.filter(_.isInstanceOf[OptListElemWarning])
-      warns.map(_.source) must contain("string?")
+      assert(warns.map(_.source) contains "string?")
     }
   }
 
@@ -84,7 +84,7 @@ class ModelBuilderSpec extends Specification {
     "generate warning" in {
       val warns = result.warnings.filter(_.isInstanceOf[DefaultListElemWarning]).
         asInstanceOf[List[DefaultListElemWarning]]
-      warns.map(_.default) must contain("3.14")
+      assert(warns.map(_.default) contains "3.14")
     }
   }
 
@@ -141,8 +141,8 @@ class ModelBuilderSpec extends Specification {
     "translate into ListType(BOOLEAN)" in {
       val at = result.objectType.members("optInt")
       at.t === INTEGER
-      at.optional must beTrue
-      at.default must beSome("21")
+      assert(at.optional)
+      assert(at.default contains "21")
     }
   }
 
@@ -155,8 +155,8 @@ class ModelBuilderSpec extends Specification {
     "translate into DURATION(ms) with given default" in {
       val at = result.objectType.members("idleTimeout")
       at.t === DURATION(ms)
-      at.optional must beTrue
-      at.default must beSome("75 seconds")
+      assert(at.optional)
+      assert(at.default  contains "75 seconds")
     }
   }
 
@@ -205,9 +205,9 @@ class ModelBuilderSpec extends Specification {
       objType.members.keySet === Set("foo")
       val foo = objType.members("foo")
       foo.optional === false
-      foo.default must beNone
-      foo.comments must beNone
-      foo.t must beAnInstanceOf[ObjectType]
+      assert(foo.default.isEmpty)
+      assert(foo.comments.isEmpty)
+      assert(foo.t.isInstanceOf[ObjectType])
       val fooObj = foo.t.asInstanceOf[ObjectType]
       fooObj.members.keySet === Set(
         "reqStr",
@@ -280,25 +280,23 @@ class ModelBuilderSpec extends Specification {
 
   "invalid @defines" should {
     "check Missing name after `extends`" in {
-      def a = build(
-        """#@define extends
-          |foo {x:int}
-          |""".stripMargin)
-      a should throwA[ObjectDefinitionException].like {
-        case e: ObjectDefinitionException =>
-          e.getMessage must contain("Missing name after `extends`")
+      val e = intercept[ObjectDefinitionException] {
+        build(
+          """#@define extends
+            |foo {x:int}
+            |""".stripMargin)
       }
+      assert(e.getMessage contains "Missing name after `extends`")
     }
 
     "check Unrecognized @define construct" in {
-      def a = build(
-        """#@define dummy
-          |foo {x:int}
-          |""".stripMargin)
-      a should throwA[ObjectDefinitionException].like {
-        case e: ObjectDefinitionException =>
-          e.getMessage must contain("Unrecognized @define construct")
+      val e = intercept[ObjectDefinitionException] {
+        build(
+          """#@define dummy
+            |foo {x:int}
+            |""".stripMargin)
       }
+      assert(e.getMessage contains "Unrecognized @define construct")
     }
   }
 }

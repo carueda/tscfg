@@ -1,5 +1,6 @@
 2021-10
 
+- use scalatest (simpler and scala3-ready)
 - prelims for eventual migration to scala3
 - fix setup for tests
 

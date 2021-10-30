@@ -1,10 +1,10 @@
 package tscfg.generators.java
 
 import com.typesafe.config.ConfigFactory
-import org.specs2.mutable.Specification
+import org.scalatest.wordspec.AnyWordSpec
 import tscfg.example.JavaExampleCfg
 
-class JavaExampleSpec extends Specification {
+class JavaExampleSpec extends AnyWordSpec {
 
   """JavaExampleCfg with good input""" should {
     val config = ConfigFactory.parseString("""
@@ -19,18 +19,18 @@ class JavaExampleSpec extends Specification {
     val cfg: JavaExampleCfg = new JavaExampleCfg(config)
 
     "capture given required values" in {
-      cfg.endpoint.path must_== "/var/www"
-      cfg.endpoint.intReq must_== 12
+      cfg.endpoint.path === "/var/www"
+      cfg.endpoint.intReq === 12
     }
 
     "capture given optional values" in {
-      cfg.endpoint.interface_.port must_== 9191
-      cfg.endpoint.interface_.`type` must_== "foo"
+      cfg.endpoint.interface_.port === 9191
+      cfg.endpoint.interface_.`type` === "foo"
     }
 
     "capture default values" in {
-      cfg.endpoint.url must_== "http://example.net"
-      cfg.endpoint.serial must_== null
+      cfg.endpoint.url === "http://example.net"
+      cfg.endpoint.serial === null
     }
   }
 
@@ -38,10 +38,9 @@ class JavaExampleSpec extends Specification {
     val config = ConfigFactory.parseString("")
 
     "throw exception in constructor" in {
-      def a: Unit = {
+      assertThrows[Exception] {
         new JavaExampleCfg(config)
       }
-      a must throwA[Exception]
     }
   }
 
@@ -55,10 +54,9 @@ class JavaExampleSpec extends Specification {
       |""".stripMargin)
 
     "throw exception in constructor" in {
-      def a: Unit = {
+      assertThrows[Exception] {
         new JavaExampleCfg(config)
       }
-      a must throwA[Exception]
     }
   }
 }

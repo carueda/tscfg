@@ -1,8 +1,8 @@
 package tscfg
 
-import org.specs2.mutable.Specification
+import org.scalatest.wordspec.AnyWordSpec
 
-class modelSpec extends Specification {
+class modelSpec extends AnyWordSpec {
   import model._
   import model.implicits._
   import model.durations._
@@ -27,20 +27,20 @@ class modelSpec extends Specification {
 
     "build empty ObjectType" in {
       val baz = objectType.members("baz")
-      baz.optional must beTrue
-      baz.comments must beSome("comments for baz...")
+      assert(baz.optional)
+      assert(baz.comments contains "comments for baz...")
     }
   }
 
   "repeated name" should {
-    def a = ObjectType(
-      "foo" := STRING,
-      "baz" := LONG,
-      "foo" := DOUBLE
-    )
-
-    "throw RuntimeException" in {
-      a must throwA[RuntimeException]
+    "throw exception" in {
+      assertThrows[RuntimeException] {
+        ObjectType(
+          "foo" := STRING,
+          "baz" := LONG,
+          "foo" := DOUBLE
+        )
+      }
     }
   }
 }

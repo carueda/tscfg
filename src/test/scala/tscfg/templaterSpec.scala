@@ -1,8 +1,8 @@
 package tscfg
 
-import org.specs2.mutable.Specification
+import org.scalatest.wordspec.AnyWordSpec
 
-class templaterSpec extends Specification {
+class templaterSpec extends AnyWordSpec {
   import tscfg.generators.{TemplateGenerator, TemplateOpts}
   import tscfg.model.ObjectType
 
@@ -31,13 +31,12 @@ class templaterSpec extends Specification {
            |""".stripMargin
       )
       val template = templater.generate(objectType)
-      template must contain("## 'endpoint': required section")
-      template must contain("path = ?")
-      template must contain("path = ${?ENDPOINT_PATH}")
-
-      template must contain("## 'FruitType': Enumeration")
-      template must contain("FruitType = [apple, banana, pineapple")
-      template must contain("## 'fruit': required FruitType")
+      assert(template contains "## 'endpoint': required section")
+      assert(template contains "path = ?")
+      assert(template contains "path = ${?ENDPOINT_PATH}")
+      assert(template contains "## 'FruitType': Enumeration")
+      assert(template contains "FruitType = [apple, banana, pineapple")
+      assert(template contains "## 'fruit': required FruitType")
     }
   }
 }

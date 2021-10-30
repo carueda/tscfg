@@ -19,7 +19,7 @@ object ScalaIssue59Cfg {
       parentPath: java.lang.String,
       $tsCfgValidator: $TsCfgValidator
   ): scala.List[java.lang.String] = {
-    import scala.jdk.CollectionConverters._
+    import scala.collection.JavaConverters._
     cl.asScala.map(cv => $_str(cv)).toList
   }
   private def $_expE(cv: com.typesafe.config.ConfigValue, exp: java.lang.String) = {

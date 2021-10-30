@@ -4,18 +4,17 @@ import java.io.File
 import java.util.Optional
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MICROS
-
 import com.typesafe.config.ConfigFactory
-import org.specs2.mutable.Specification
 import tscfg.example._
 import tscfg.generators.GenOpts
 import tscfg.model
 import tscfg.model._
 import model.implicits._
+import org.scalatest.wordspec.AnyWordSpec
 import tscfg.exceptions.ObjectDefinitionException
 
 
-class JavaMainSpec extends Specification {
+class JavaMainSpec extends AnyWordSpec {
 
   import scala.jdk.CollectionConverters._
 
@@ -71,7 +70,7 @@ class JavaMainSpec extends Specification {
           |}
         """.stripMargin
       ))
-      c.main.email must beNull
+      c.main.email === null
       c.main.reals.size() === 1
       c.main.reals.get(0).foo === 3.14
     }
@@ -89,7 +88,7 @@ class JavaMainSpec extends Specification {
       ))
       c.main.email.password === "pw"
       c.main.email.server === "foo"
-      c.main.reals must beNull
+      c.main.reals === null
     }
   }
 
@@ -628,83 +627,71 @@ class JavaMainSpec extends Specification {
 
   "issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
-      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(""))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        new JavaIssue47Cfg(ConfigFactory.parseString(""))
       }
+      assert(e.getMessage contains "'service': com.typesafe.config.ConfigException$Missing")
     }
     "fail with missing url entry" in {
-      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service {
-          |  # url = "http://example.net/rest"
-          |  poolSize = 32
-          |  debug = true
-          |  doLog = false
-          |  factor = 0.75
-          |}""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        new JavaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service {
+            |  # url = "http://example.net/rest"
+            |  poolSize = 32
+            |  debug = true
+            |  doLog = false
+            |  factor = 0.75
+            |}""".stripMargin))
       }
+      assert(e.getMessage contains "'service.url': com.typesafe.config.ConfigException$Missing")
     }
     "fail with missing poolSize entry" in {
-      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service {
-          |  url = "http://example.net/rest"
-          |  # poolSize = 32
-          |  debug = true
-          |  doLog = false
-          |  factor = 0.75
-          |}""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        new JavaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service {
+            |  url = "http://example.net/rest"
+            |  # poolSize = 32
+            |  debug = true
+            |  doLog = false
+            |  factor = 0.75
+            |}""".stripMargin))
       }
+      assert(e.getMessage contains "'service.poolSize': com.typesafe.config.ConfigException$Missing")
     }
     "fail with all entries missing in service object" in {
-      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k =>
-            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
-          }
+      val e = intercept[com.typesafe.config.ConfigException] {
+        new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
+      }
+      List("url", "poolSize", "debug", "doLog", "factor") foreach { k =>
+        assert(e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$Missing")
       }
     }
     "fail with wrong types" in {
-      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service {
-          |  url = 31  # anything can be a string, so not check on this one.
-          |  poolSize = true
-          |  debug = 3
-          |  doLog = "str"
-          |  factor = false
-          |}""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          forall(List("poolSize", "debug", "doLog", "factor")) { k =>
-            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
-          }
+      val e = intercept[com.typesafe.config.ConfigException] {
+        new JavaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service {
+            |  url = 31  # anything can be a string, so not check on this one.
+            |  poolSize = true
+            |  debug = 3
+            |  doLog = "str"
+            |  factor = false
+            |}""".stripMargin))
+      }
+      List("poolSize", "debug", "doLog", "factor") foreach { k =>
+        assert(e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
       }
     }
     "fail with wrong type for object" in {
-      def a: Unit = new JavaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service = 1
-          |""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        new JavaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service = 1
+            |""".stripMargin))
       }
+      assert(e.getMessage contains "'service': com.typesafe.config.ConfigException$WrongType")
     }
   }
 
@@ -802,12 +789,8 @@ class JavaMainSpec extends Specification {
       c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
       c.regex2 === "foo bar: ([\\d]+)"
 
-      def a: Unit = {
-        java.util.regex.Pattern.compile(c.regex)
-        java.util.regex.Pattern.compile(c.regex2)
-      }
-
-      a must not(throwA[java.util.regex.PatternSyntaxException])
+      java.util.regex.Pattern.compile(c.regex)
+      java.util.regex.Pattern.compile(c.regex2)
     }
   }
 
@@ -821,8 +804,8 @@ class JavaMainSpec extends Specification {
     }
   }
 
-  "issue 62 - shared enumeration" should {
-    "62a basic" in {
+  "issue 62 - shared enumeration" when {
+    "62a basic" should {
       "be handled with correct input" in {
         val c = new JavaIssue62aCfg(ConfigFactory.parseString(
           """foo {
@@ -835,20 +818,18 @@ class JavaMainSpec extends Specification {
       }
 
       "be handled with invalid enum value" in {
-        def c = new JavaIssue62aCfg(ConfigFactory.parseString(
-          """foo {
-            |  fruit = invalidFruit
-            |}
-            |""".stripMargin))
-
-        c must throwA[IllegalArgumentException].like {
-          case e: IllegalArgumentException =>
-            e.getMessage must beMatching("No enum constant .*FruitType.invalidFruit")
+        val e = intercept[IllegalArgumentException] {
+          new JavaIssue62aCfg(ConfigFactory.parseString(
+            """foo {
+              |  fruit = invalidFruit
+              |}
+              |""".stripMargin))
         }
+        assert(e.getMessage matches "No enum constant .*FruitType.invalidFruit")
       }
     }
 
-    "62b more complete" in {
+    "62b more complete" should {
       "be handled with correct input" in {
         val c = new JavaIssue62bCfg(ConfigFactory.parseString(
           """foo {
@@ -867,7 +848,7 @@ class JavaMainSpec extends Specification {
       }
     }
 
-    "62 enum used at first level " in {
+    "62 enum used at first level " should {
       "be handled with correct input" in {
         val c = new JavaIssue62Cfg(ConfigFactory.parseString(
           """
@@ -1011,10 +992,10 @@ class JavaMainSpec extends Specification {
 
   "issue 67c - template with circular inheritance hierarchy" should {
     "be refused" in {
-      JavaGen.generate("example/issue67c.spec.conf") should throwA[ObjectDefinitionException].like {
-        case e: ObjectDefinitionException =>
-          e.getMessage must contain("extension of struct 'AbstractC' involves circular reference")
+      val e = intercept[ObjectDefinitionException] {
+        JavaGen.generate("example/issue67c.spec.conf")
       }
+      assert(e.getMessage contains "extension of struct 'AbstractC' involves circular reference")
     }
   }
 

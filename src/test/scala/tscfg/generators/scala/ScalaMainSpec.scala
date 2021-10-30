@@ -1,21 +1,20 @@
 package tscfg.generators.scala
 
+import com.typesafe.config.ConfigFactory
+import org.scalatest.wordspec.AnyWordSpec
+import tscfg.example._
+import tscfg.exceptions.ObjectDefinitionException
+import tscfg.generators.GenOpts
+import tscfg.generators.java.JavaGen
+import tscfg.model._
+import tscfg.model.implicits._
+
 import java.io.File
 import java.time.Duration
 import java.time.temporal.ChronoUnit.MICROS
 
-import com.typesafe.config.ConfigFactory
-import org.specs2.mutable.Specification
-import tscfg.example.{ScalaDurationCfg, _}
-import tscfg.generators.GenOpts
-import tscfg.model
-import tscfg.model._
-import model.implicits._
-import tscfg.exceptions.ObjectDefinitionException
-import tscfg.generators.java.JavaGen
 
-
-class ScalaMainSpec extends Specification {
+class ScalaMainSpec extends AnyWordSpec {
 
   "literal values as types" should {
     "generate primitive types with given values as defaults" in {
@@ -519,13 +518,11 @@ class ScalaMainSpec extends Specification {
   }
 
   "issue 36" should {
-    def a = ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
-
     "report full path for missing required parameter 'obj.foo.bar'" in {
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'obj.foo.bar': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException]{
+        ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
       }
+      assert(e.getMessage contains "'obj.foo.bar': com.typesafe.config.ConfigException$Missing")
     }
   }
 
@@ -539,83 +536,71 @@ class ScalaMainSpec extends Specification {
 
   "issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
-      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(""))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        ScalaIssue47Cfg(ConfigFactory.parseString(""))
       }
+      assert(e.getMessage contains "'service': com.typesafe.config.ConfigException$Missing")
     }
     "fail with missing url entry" in {
-      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service {
-          |  # url = "http://example.net/rest"
-          |  poolSize = 32
-          |  debug = true
-          |  doLog = false
-          |  factor = 0.75
-          |}""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service.url': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        ScalaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service {
+            |  # url = "http://example.net/rest"
+            |  poolSize = 32
+            |  debug = true
+            |  doLog = false
+            |  factor = 0.75
+            |}""".stripMargin))
       }
+      assert(e.getMessage contains "'service.url': com.typesafe.config.ConfigException$Missing")
     }
     "fail with missing poolSize entry" in {
-      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service {
-          |  url = "http://example.net/rest"
-          |  # poolSize = 32
-          |  debug = true
-          |  doLog = false
-          |  factor = 0.75
-          |}""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service.poolSize': com.typesafe.config.ConfigException$Missing")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        ScalaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service {
+            |  url = "http://example.net/rest"
+            |  # poolSize = 32
+            |  debug = true
+            |  doLog = false
+            |  factor = 0.75
+            |}""".stripMargin))
       }
+      assert(e.getMessage contains "'service.poolSize': com.typesafe.config.ConfigException$Missing")
     }
     "fail with all entries missing in service object" in {
-      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString("service {}"))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          forall(List("url", "poolSize", "debug", "doLog", "factor")) { k =>
-            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$Missing")
-          }
+      val e = intercept[com.typesafe.config.ConfigException] {
+        ScalaIssue47Cfg(ConfigFactory.parseString("service {}"))
+      }
+      List("url", "poolSize", "debug", "doLog", "factor") foreach { k =>
+        assert(e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$Missing")
       }
     }
     "fail with wrong types" in {
-      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service {
-          |  url = 31  # anything can be a string, so not check on this one.
-          |  poolSize = true
-          |  debug = 3
-          |  doLog = "str"
-          |  factor = false
-          |}""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          forall(List("poolSize", "debug", "doLog", "factor")) { k =>
-            e.getMessage must contain(s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
-          }
+      val e = intercept[com.typesafe.config.ConfigException] {
+        ScalaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service {
+            |  url = 31  # anything can be a string, so not check on this one.
+            |  poolSize = true
+            |  debug = 3
+            |  doLog = "str"
+            |  factor = false
+            |}""".stripMargin))
+      }
+      List("poolSize", "debug", "doLog", "factor") foreach { k =>
+        assert(e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
       }
     }
     "fail with wrong type for object" in {
-      def a: Unit = ScalaIssue47Cfg(ConfigFactory.parseString(
-        """
-          |service = 1
-          |""".stripMargin))
-
-      a must throwA[com.typesafe.config.ConfigException].like {
-        case e: com.typesafe.config.ConfigException =>
-          e.getMessage must contain("'service': com.typesafe.config.ConfigException$WrongType")
+      val e = intercept[com.typesafe.config.ConfigException] {
+        ScalaIssue47Cfg(ConfigFactory.parseString(
+          """
+            |service = 1
+            |""".stripMargin))
       }
+      assert(e.getMessage contains "'service': com.typesafe.config.ConfigException$WrongType")
     }
   }
 
@@ -711,12 +696,8 @@ class ScalaMainSpec extends Specification {
       c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
       c.regex2 === "foo bar: ([\\d]+)"
 
-      def a: Unit = {
-        java.util.regex.Pattern.compile(c.regex)
-        java.util.regex.Pattern.compile(c.regex2)
-      }
-
-      a must not(throwA[java.util.regex.PatternSyntaxException])
+      java.util.regex.Pattern.compile(c.regex)
+      java.util.regex.Pattern.compile(c.regex2)
     }
   }
 
@@ -745,8 +726,8 @@ class ScalaMainSpec extends Specification {
     }
   }
 
-  "issue 62 - shared enumeration" should {
-    "62a basic" in {
+  "issue 62 - shared enumeration" when {
+    "62a basic" should {
       "be handled with correct input" in {
         val c = ScalaIssue62aCfg(ConfigFactory.parseString(
           """foo {
@@ -759,20 +740,18 @@ class ScalaMainSpec extends Specification {
       }
 
       "be handled with invalid enum value" in {
-        def c = ScalaIssue62aCfg(ConfigFactory.parseString(
-          """foo {
-            |  fruit = invalidFruit
-            |}
-            |""".stripMargin))
-
-        c must throwA[com.typesafe.config.ConfigException].like {
-          case e: com.typesafe.config.ConfigException =>
-            e.getMessage must contain("'foo.fruit': invalid value invalidFruit for enumeration FruitType")
+        val e = intercept[com.typesafe.config.ConfigException] {
+          ScalaIssue62aCfg(ConfigFactory.parseString(
+            """foo {
+              |  fruit = invalidFruit
+              |}
+              |""".stripMargin))
         }
+        assert(e.getMessage contains "'foo.fruit': invalid value invalidFruit for enumeration FruitType")
       }
     }
 
-    "62b more complete " in {
+    "62b more complete " should {
       "be handled with correct input" in {
         val c = ScalaIssue62bCfg(ConfigFactory.parseString(
           """foo {
@@ -791,26 +770,26 @@ class ScalaMainSpec extends Specification {
       }
 
       "report correct field name when using incorrect enum value (#74)" in {
-        ScalaIssue62bCfg(ConfigFactory.parseString(
-          """foo {
-            |  fruit = maracuyá
-            |  someFruits = [maracuyá]
-            |  other {
-            |    aFruit = maracuyá
-            |  }
-            |}
-            |""".stripMargin)
-        ) must throwA[com.typesafe.config.ConfigException].like {
-          case e: com.typesafe.config.ConfigException =>
-            val msg = e.getMessage
-            msg must contain("'foo.fruit': invalid value maracuyá")
-            msg must contain("'foo.other.aFruit': invalid value maracuyá")
-            msg must contain("'?': invalid value maracuyá") // this one referring to the list member
+        val e = intercept[com.typesafe.config.ConfigException] {
+          ScalaIssue62bCfg(ConfigFactory.parseString(
+            """foo {
+              |  fruit = maracuyá
+              |  someFruits = [maracuyá]
+              |  other {
+              |    aFruit = maracuyá
+              |  }
+              |}
+              |""".stripMargin)
+          )
         }
+        val msg = e.getMessage
+        assert(msg contains "'foo.fruit': invalid value maracuyá")
+        assert(msg contains "'foo.other.aFruit': invalid value maracuyá")
+        assert(msg contains "'?': invalid value maracuyá") // this one referring to the list member
       }
     }
 
-    "62 enum used at first level " in {
+    "62 enum used at first level " should {
       "be handled with correct input" in {
         val c = ScalaIssue62Cfg(ConfigFactory.parseString(
           """
@@ -954,10 +933,10 @@ class ScalaMainSpec extends Specification {
 
   "issue 67c - template with circular inheritance hierarchy" should {
     "be refused" in {
-      ScalaGen.generate("example/issue67c.spec.conf") should throwA[ObjectDefinitionException].like {
-        case e: ObjectDefinitionException =>
-          e.getMessage must contain("extension of struct 'AbstractC' involves circular reference")
+      val e = intercept[ObjectDefinitionException] {
+        ScalaGen.generate("example/issue67c.spec.conf")
       }
+      assert(e.getMessage contains "extension of struct 'AbstractC' involves circular reference")
     }
   }
 

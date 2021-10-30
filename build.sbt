@@ -11,7 +11,7 @@ crossScalaVersions := Seq("2.12.15", "2.13.6")
 libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.6.3",
   "com.typesafe"           %  "config"                  % "1.4.1",
-  "org.specs2"             %%  "specs2-core"            % "4.13.0" % "test",
+  "org.scalatest"          %%  "scalatest"              % "3.2.10" % Test,
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0",
   "org.json4s"             %%  "json4s-native"          % "4.0.3",
   "org.scalameta"          %%  "scalafmt-dynamic"       % "3.0.8",
