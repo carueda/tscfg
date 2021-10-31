@@ -18,7 +18,7 @@ object DefineCase {
     override val isAbstract: Boolean = abs
   }
 
-  final case object EnumDefineCase extends DefineCase {
+  case object EnumDefineCase extends DefineCase {
     override val isEnum: Boolean = true
   }
 

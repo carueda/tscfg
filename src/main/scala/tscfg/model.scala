@@ -73,7 +73,7 @@ object model {
   case class ListType(t: Type) extends Type
 
 
-  final object AnnType {
+  object AnnType {
     def isAbstract(commentString: String): Boolean =
       getDefineCase(commentString).exists(_.isAbstract)
 

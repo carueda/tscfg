@@ -12,8 +12,9 @@ object ScalaIssue23Cfg {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String     = ""
     val $result = ScalaIssue23Cfg(
-      sizeOpt = if (c.hasPathOrNull("sizeOpt")) Some(c.getBytes("sizeOpt")) else None,
-      sizeOptDef = if (c.hasPathOrNull("sizeOptDef")) c.getBytes("sizeOptDef") else 1024L,
+      sizeOpt = if (c.hasPathOrNull("sizeOpt")) Some(c.getBytes("sizeOpt").longValue()) else None,
+      sizeOptDef =
+        if (c.hasPathOrNull("sizeOptDef")) c.getBytes("sizeOptDef").longValue() else 1024L,
       sizeReq = $_reqSiz(parentPath, c, "sizeReq", $tsCfgValidator),
       sizes = $_L$_siz(c.getList("sizes"), parentPath, $tsCfgValidator),
       sizes2 = $_L$_L$_siz(c.getList("sizes2"), parentPath, $tsCfgValidator)
@@ -78,7 +79,7 @@ object ScalaIssue23Cfg {
     } else throw $_expE(cv, "size")
   }
 
-  private final class $TsCfgValidator {
+  final class $TsCfgValidator {
     private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
 
     def addBadPath(path: java.lang.String, e: com.typesafe.config.ConfigException): Unit = {

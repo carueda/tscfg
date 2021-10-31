@@ -52,7 +52,7 @@ object ScalaIssue62aCfg {
     $tsCfgValidator.validate()
     $result
   }
-  private final class $TsCfgValidator {
+  final class $TsCfgValidator {
     private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
 
     def addBadPath(path: java.lang.String, e: com.typesafe.config.ConfigException): Unit = {

@@ -29,9 +29,8 @@ package object codeDefs {
   private def getMap(resourceName: String): Map[String, String] = try {
     //println(s"codeDefs.getMap $resourceName")
     val map = collection.mutable.HashMap[String, String]()
-    val is = getClass.getClassLoader.getResourceAsStream(resourceName)
-    assert(is != null)
-    val source = io.Source.fromInputStream(is, "utf-8")
+    val source = io.Source.fromResource(resourceName)
+    assert(source != null)
     var key: String = null
     val template = new StringBuilder
     for (line <- source.getLines()) {
@@ -48,7 +47,6 @@ package object codeDefs {
       }
       else template.append(line).append("\n")
     }
-    is.close()
     map.toMap
   }
   catch {

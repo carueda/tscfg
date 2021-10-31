@@ -13,7 +13,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   import defs._
 
   implicit val methodNames: MethodNames = MethodNames()
-  val getter: Getter = Getter(genOpts, hasPath, accessors, methodNames)
+  val getter: Getter = Getter(genOpts, hasPath, accessors)
 
   import methodNames._
 
@@ -105,7 +105,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    implicit val symbols = ot.members.keys.toList.sorted
+    implicit val symbols: List[String] = ot.members.keys.toList.sorted
     symbols.foreach(checkUserSymbol)
 
     val results = symbols.map { symbol =>
@@ -227,7 +227,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    implicit val symbols = aot.members.keys.toList.sorted
+    implicit val symbols: List[String] = aot.members.keys.toList.sorted
     symbols.foreach(checkUserSymbol)
 
     val results = symbols.map { symbol =>
@@ -489,7 +489,7 @@ private[scala] case class MethodNames() {
   val requireDef: String = scalaDef(requireName)
 }
 
-private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: Accessors, implicit val methodNames: MethodNames) {
+private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: Accessors)(implicit val methodNames: MethodNames) {
 
   import defs._
 
@@ -566,7 +566,7 @@ private[scala] case class Getter(genOpts: GenOpts, hasPath: String, accessors: A
 
   private def basicInstance(a: AnnType, bt: BasicType, path: String)
                            (implicit listAccessors: collection.mutable.Map[String, String]): String = {
-    val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations)
+    val getter = tsConfigUtil.basicGetter(bt, path, genOpts.useDurations, forScala = true)
 
     a.default match {
       case Some(v) =>

@@ -13,14 +13,20 @@ import com.typesafe.config.{Config, ConfigFactory}
   */
 object tsConfigUtil {
 
-  def basicGetter(bt: BasicType, path: String, useDurations:Boolean): String = bt match {
-    case STRING    =>  s"""getString("$path")"""
-    case INTEGER   =>  s"""getInt("$path")"""
-    case LONG      =>  s"""getLong("$path")"""
-    case DOUBLE    =>  s"""getDouble("$path")"""
-    case BOOLEAN   =>  s"""getBoolean("$path")"""
-    case SIZE      =>  s"""getBytes("$path")"""
-    case DURATION(q)  =>  durationGetter(path, q, useDurations)
+  def basicGetter(bt: BasicType, path: String,
+                  useDurations: Boolean,
+                  forScala: Boolean = false,
+                 ): String = {
+    def longValue = if (forScala) ".longValue()" else ""
+    bt match {
+      case STRING    =>  s"""getString("$path")"""
+      case INTEGER   =>  s"""getInt("$path")"""
+      case LONG      =>  s"""getLong("$path")$longValue"""
+      case DOUBLE    =>  s"""getDouble("$path")"""
+      case BOOLEAN   =>  s"""getBoolean("$path")"""
+      case SIZE      =>  s"""getBytes("$path")$longValue"""
+      case DURATION(q)  =>  durationGetter(path, q, useDurations)
+    }
   }
 
   def basicRequiredGetter(bt: BasicType, path: String, useDurations:Boolean): (String,String) = {
