@@ -818,7 +818,7 @@ class ScalaMainSpec extends AnyWordSpec {
       // be instance of abstract super class
       configFromFile.test.loadModelConfig match {
         case _: ScalaIssue64Cfg.BaseModelConfig => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values
@@ -858,7 +858,7 @@ class ScalaMainSpec extends AnyWordSpec {
       // be instance of abstract super class
       configFromFile.test.impl match {
         case _: ScalaIssue67Cfg.AbstractA => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values
@@ -881,12 +881,12 @@ class ScalaMainSpec extends AnyWordSpec {
       // be instance of abstract super class (one level above)
       configFromFile.test.impl match {
         case _: ScalaIssue67aCfg.AbstractB => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
       // be instance of abstract super class (second level above)
       configFromFile.test.impl match {
         case _: ScalaIssue67aCfg.AbstractA => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values
@@ -910,17 +910,17 @@ class ScalaMainSpec extends AnyWordSpec {
       // be instance of abstract super class (one level above)
       configFromFile.test.impl match {
         case _: ScalaIssue67bCfg.AbstractB => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
       // be instance of abstract super class (second level above)
       configFromFile.test.impl match {
         case _: ScalaIssue67bCfg.AbstractA => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
       // be instance of abstract super class (third level above)
       configFromFile.test.impl match {
         case _: ScalaIssue67bCfg.AbstractC => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values

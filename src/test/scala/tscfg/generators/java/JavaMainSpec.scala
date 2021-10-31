@@ -876,7 +876,7 @@ class JavaMainSpec extends AnyWordSpec {
       // be instance of abstract super class
       configFromFile.test.loadModelConfig match {
         case _: JavaIssue64Cfg.BaseModelConfig => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values
@@ -917,7 +917,7 @@ class JavaMainSpec extends AnyWordSpec {
       // be instance of abstract super class
       configFromFile.test.impl match {
         case _: JavaIssue67Cfg.AbstractA => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values
@@ -940,12 +940,12 @@ class JavaMainSpec extends AnyWordSpec {
       // be instance of abstract super class (one level above)
       configFromFile.test.impl match {
         case _: JavaIssue67aCfg.AbstractB => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
       // be instance of abstract super class (second level above)
       configFromFile.test.impl match {
         case _: JavaIssue67aCfg.AbstractA => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values
@@ -969,17 +969,17 @@ class JavaMainSpec extends AnyWordSpec {
       // be instance of abstract super class (one level above)
       configFromFile.test.impl match {
         case _: JavaIssue67bCfg.AbstractB => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
       // be instance of abstract super class (second level above)
       configFromFile.test.impl match {
         case _: JavaIssue67bCfg.AbstractA => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
       // be instance of abstract super class (third level above)
       configFromFile.test.impl match {
         case _: JavaIssue67bCfg.AbstractC => assert(true)
-        case _ => assert(false)
+        case null => assert(false)
       }
 
       // have the correct values

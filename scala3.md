@@ -8,16 +8,15 @@ sbt:tscfg> migrate-libs tscfg
 [info] Valid         : Already a valid version for Scala 3
 [info] To be updated : Need to be updated to the following version
 [info]
-[info] "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0" -> Valid
-[info] "org.scalatest" %% "scalatest" % "3.2.10" % "test"              -> Valid
-[info] "com.outr" %% "scribe" % "3.6.3"                                -> Valid
-[info] "org.json4s" %% "json4s-native" % "4.0.3"                       -> Valid
-[info] "com.google.googlejavaformat" % "google-java-format" % "1.7"    -> Valid : Java libraries are compatible.
-[info] "com.google.code.gson" % "gson" % "2.8.9"                       -> Valid : Java libraries are compatible.
-[info] "com.typesafe" % "config" % "1.4.1"                             -> Valid : Java libraries are compatible.
-[info] org.scalameta:scalafmt-dynamic:3.0.8                            -> "org.scalameta" %% "scalafmt-dynamic" % "3.0.8" cross CrossVersion.for3Use2_13 : It's only safe to use the 2.13 version if it's inside an application.```
-
----
+[info] "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0"                -> Valid
+[info] "org.scalatest" %% "scalatest" % "3.2.10" % "test"                             -> Valid
+[info] "org.scalameta" %% "scalafmt-dynamic" % "3.0.8" cross CrossVersion.for3Use2_13 -> Valid
+[info] "com.outr" %% "scribe" % "3.6.3"                                               -> Valid
+[info] "org.json4s" %% "json4s-native" % "4.0.3"                                      -> Valid
+[info] "com.google.googlejavaformat" % "google-java-format" % "1.7"                   -> Valid : Java libraries are compatible.
+[info] "com.google.code.gson" % "gson" % "2.8.9"                                      -> Valid : Java libraries are compatible.
+[info] "com.typesafe" % "config" % "1.4.1"                                            -> Valid : Java libraries are compatible.
+```
 
 ```
 sbt:tscfg> migrate-scalacOptions tscfg
@@ -51,5 +50,7 @@ sbt:tscfg> migrate-scalacOptions tscfg
 
 ```
 sbt:upsilon> migrate-syntax root
-
 ```
+==> no changes.
+
+

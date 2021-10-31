@@ -44,7 +44,7 @@ object ScalaIssue62Cfg {
       .map(cv => ScalaIssue62Cfg.FruitType.$resEnum(cv.unwrapped().toString, "?", $tsCfgValidator))
       .toList
   }
-  private final class $TsCfgValidator {
+  final class $TsCfgValidator {
     private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
 
     def addBadPath(path: java.lang.String, e: com.typesafe.config.ConfigException): Unit = {

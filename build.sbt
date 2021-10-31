@@ -4,9 +4,9 @@ organization := "com.github.carueda"
 name := "tscfg"
 version := tscfgVersion
 
-scalaVersion := "2.13.6"
+scalaVersion := "3.1.0"
 
-crossScalaVersions := Seq("2.12.15", "2.13.6")
+crossScalaVersions := Seq("2.13.6", "3.1.0")
 
 libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.6.3",
@@ -14,16 +14,12 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %%  "scalatest"              % "3.2.10" % Test,
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0",
   "org.json4s"             %%  "json4s-native"          % "4.0.3",
-  "org.scalameta"          %%  "scalafmt-dynamic"       % "3.0.8",
+  "org.scalameta"          %%  "scalafmt-dynamic"       % "3.0.8" cross CrossVersion.for3Use2_13,
   "com.google.googlejavaformat" % "google-java-format"  % "1.7", // note: 1.8: "The minimum supported runtime version is now JDK 11"
   "com.google.code.gson"   %  "gson"                    % "2.8.9"
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
-
-/*
-(Test / scalacOptions) ++= Seq("-Yrangepos")  // per specs2-core
-*/
 
 (assembly / mainClass) := Some("tscfg.Main")
 

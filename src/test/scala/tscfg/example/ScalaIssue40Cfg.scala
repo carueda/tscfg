@@ -8,12 +8,12 @@ object ScalaIssue40Cfg {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String     = ""
     val $result = ScalaIssue40Cfg(
-      memory = if (c.hasPathOrNull("memory")) c.getBytes("memory") else 53687091200L
+      memory = if (c.hasPathOrNull("memory")) c.getBytes("memory").longValue() else 53687091200L
     )
     $tsCfgValidator.validate()
     $result
   }
-  private final class $TsCfgValidator {
+  final class $TsCfgValidator {
     private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
 
     def addBadPath(path: java.lang.String, e: com.typesafe.config.ConfigException): Unit = {
