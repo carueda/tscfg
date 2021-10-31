@@ -1,4 +1,4 @@
-name: tscfg tests/coverage
+name: CI
 
 on: ["push", "pull_request"]
 
@@ -22,9 +22,6 @@ jobs:
         uses: olafurpg/setup-scala@v13
         with:
           java-version: ${{ matrix.jdk }}
-
-      - name: Coursier cache
-        uses: coursier/cache-action@v5
 
       - name: Compile
         run: sbt "++${{ matrix.scala-version }} compile"

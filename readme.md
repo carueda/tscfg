@@ -1,3 +1,4 @@
+[![Build Status]((https://github.com/carueda/tscfg/actions/workflows/ci.yml/badge.svg))](https://github.com/carueda/tscfg/actions)
 [![Build Status](https://travis-ci.org/carueda/tscfg.svg?branch=master)](https://app.travis-ci.com/github/carueda/tscfg)
 [![Coverage Status](https://coveralls.io/repos/github/carueda/tscfg/badge.svg?branch=master)](https://coveralls.io/github/carueda/tscfg?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/carueda/tscfg/badge.svg?targetFile=build.sbt)](https://snyk.io/test/github/carueda/tscfg?targetFile=build.sbt)
