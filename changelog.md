@@ -1,5 +1,6 @@
 2021-10
 
+- avoid migration warning in generated scala code
 - remove travis
 - adjustments to build project with scala3 (3.1.0)
 
