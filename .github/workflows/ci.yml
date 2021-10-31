@@ -1,0 +1,45 @@
+name: tscfg tests/coverage
+
+on: ["push", "pull_request"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: [adopt@1.8]
+        scala: ['2.13', '3.1']
+        include:
+          - scala: '2.13'
+            scala-version: 2.13.6
+          - scala: '3.1'
+            scala-version: 3.1.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v13
+        with:
+          java-version: ${{ matrix.jdk }}
+
+      - name: Coursier cache
+        uses: coursier/cache-action@v5
+
+      - name: Compile
+        run: sbt "++${{ matrix.scala-version }} compile"
+
+      - name: Test
+        run: >
+          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
+            sbt coverage "++${{ matrix.scala-version }} test";
+          else
+            sbt "++${{ matrix.scala-version }} test";
+          fi
+
+      - name: Coveralls
+        if: startsWith(matrix.scala, '2')
+        run: sbt ++${{ matrix.scala-version }} coverageAggregate coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
