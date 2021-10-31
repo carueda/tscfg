@@ -1,16 +1,18 @@
 package tscfg.example;
 
-public class JavaIssue54exampleDCfg {
-  public final JavaIssue54exampleDCfg.ExampleD exampleD;
+public class JavaIssue75aCfg {
+  public final JavaIssue75aCfg.Simple simple;
 
-  public static class Struct {
-    public final int a;
+  public static class Simple {
+    public final java.lang.String foo;
+    public final int int_;
 
-    public Struct(
+    public Simple(
         com.typesafe.config.Config c,
         java.lang.String parentPath,
         $TsCfgValidator $tsCfgValidator) {
-      this.a = $_reqInt(parentPath, c, "a", $tsCfgValidator);
+      this.foo = c.hasPathOrNull("foo") ? c.getString("foo") : "simple";
+      this.int_ = $_reqInt(parentPath, c, "int", $tsCfgValidator);
     }
 
     private static int $_reqInt(
@@ -28,33 +30,15 @@ public class JavaIssue54exampleDCfg {
     }
   }
 
-  public static class ExampleD {
-    public final Struct test;
-
-    public ExampleD(
-        com.typesafe.config.Config c,
-        java.lang.String parentPath,
-        $TsCfgValidator $tsCfgValidator) {
-      this.test =
-          c.hasPathOrNull("test")
-              ? new Struct(c.getConfig("test"), parentPath + "test.", $tsCfgValidator)
-              : new Struct(
-                  com.typesafe.config.ConfigFactory.parseString("test{}"),
-                  parentPath + "test.",
-                  $tsCfgValidator);
-    }
-  }
-
-  public JavaIssue54exampleDCfg(com.typesafe.config.Config c) {
+  public JavaIssue75aCfg(com.typesafe.config.Config c) {
     final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
     final java.lang.String parentPath = "";
-    this.exampleD =
-        c.hasPathOrNull("exampleD")
-            ? new JavaIssue54exampleDCfg.ExampleD(
-                c.getConfig("exampleD"), "exampleD.", $tsCfgValidator)
-            : new JavaIssue54exampleDCfg.ExampleD(
-                com.typesafe.config.ConfigFactory.parseString("exampleD{}"),
-                "exampleD.",
+    this.simple =
+        c.hasPathOrNull("simple")
+            ? new JavaIssue75aCfg.Simple(c.getConfig("simple"), "simple.", $tsCfgValidator)
+            : new JavaIssue75aCfg.Simple(
+                com.typesafe.config.ConfigFactory.parseString("simple{}"),
+                "simple.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

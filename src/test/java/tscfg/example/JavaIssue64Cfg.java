@@ -81,11 +81,9 @@ public class JavaIssue64Cfg {
     final java.lang.String parentPath = "";
     this.test =
         c.hasPathOrNull("test")
-            ? new JavaIssue64Cfg.Test(c.getConfig("test"), parentPath + "test.", $tsCfgValidator)
+            ? new JavaIssue64Cfg.Test(c.getConfig("test"), "test.", $tsCfgValidator)
             : new JavaIssue64Cfg.Test(
-                com.typesafe.config.ConfigFactory.parseString("test{}"),
-                parentPath + "test.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("test{}"), "test.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

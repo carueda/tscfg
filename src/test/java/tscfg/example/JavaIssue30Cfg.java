@@ -37,10 +37,10 @@ public class JavaIssue30Cfg {
     this.foo_object =
         c.hasPathOrNull("foo-object")
             ? new JavaIssue30Cfg.Foo_object(
-                c.getConfig("foo-object"), parentPath + "foo-object.", $tsCfgValidator)
+                c.getConfig("foo-object"), "foo-object.", $tsCfgValidator)
             : new JavaIssue30Cfg.Foo_object(
                 com.typesafe.config.ConfigFactory.parseString("foo-object{}"),
-                parentPath + "foo-object.",
+                "foo-object.",
                 $tsCfgValidator);
     this.other_stuff = $_reqInt(parentPath, c, "other stuff", $tsCfgValidator);
     $tsCfgValidator.validate();

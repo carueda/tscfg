@@ -39,6 +39,7 @@ object gen4tests {
         case "--scala:2.12"      => genOpts = genOpts.copy(s12 = true)
         case "--scala:bt"        => genOpts = genOpts.copy(useBackticks = true)
         case "--java:getters"    => genOpts = genOpts.copy(genGetters = true)
+        case "--java:records"    => genOpts = genOpts.copy(genRecords = true)
         case "--java:optionals"  => genOpts = genOpts.copy(useOptionals = true)
         case "--durations"       => genOpts = genOpts.copy(useDurations = true)
         case "--all-required"    => genOpts = genOpts.copy(assumeAllRequired = true)

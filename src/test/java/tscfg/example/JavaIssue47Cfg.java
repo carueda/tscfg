@@ -83,9 +83,7 @@ public class JavaIssue47Cfg {
     final java.lang.String parentPath = "";
     this.service =
         new JavaIssue47Cfg.Service(
-            $_reqConfig(parentPath, c, "service", $tsCfgValidator),
-            parentPath + "service.",
-            $tsCfgValidator);
+            $_reqConfig(parentPath, c, "service", $tsCfgValidator), "service.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

@@ -64,11 +64,10 @@ public class JavaDurationCfg {
     final java.lang.String parentPath = "";
     this.durations =
         c.hasPathOrNull("durations")
-            ? new JavaDurationCfg.Durations(
-                c.getConfig("durations"), parentPath + "durations.", $tsCfgValidator)
+            ? new JavaDurationCfg.Durations(c.getConfig("durations"), "durations.", $tsCfgValidator)
             : new JavaDurationCfg.Durations(
                 com.typesafe.config.ConfigFactory.parseString("durations{}"),
-                parentPath + "durations.",
+                "durations.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

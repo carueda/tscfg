@@ -75,11 +75,10 @@ public class JavaExampleCfg {
     final java.lang.String parentPath = "";
     this.endpoint =
         c.hasPathOrNull("endpoint")
-            ? new JavaExampleCfg.Endpoint(
-                c.getConfig("endpoint"), parentPath + "endpoint.", $tsCfgValidator)
+            ? new JavaExampleCfg.Endpoint(c.getConfig("endpoint"), "endpoint.", $tsCfgValidator)
             : new JavaExampleCfg.Endpoint(
                 com.typesafe.config.ConfigFactory.parseString("endpoint{}"),
-                parentPath + "endpoint.",
+                "endpoint.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

@@ -158,11 +158,9 @@ public class JavaIssue15cCfg {
         $_LJavaIssue15cCfg_Positions$Elm(c.getList("positions"), parentPath, $tsCfgValidator);
     this.qaz =
         c.hasPathOrNull("qaz")
-            ? new JavaIssue15cCfg.Qaz(c.getConfig("qaz"), parentPath + "qaz.", $tsCfgValidator)
+            ? new JavaIssue15cCfg.Qaz(c.getConfig("qaz"), "qaz.", $tsCfgValidator)
             : new JavaIssue15cCfg.Qaz(
-                com.typesafe.config.ConfigFactory.parseString("qaz{}"),
-                parentPath + "qaz.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("qaz{}"), "qaz.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

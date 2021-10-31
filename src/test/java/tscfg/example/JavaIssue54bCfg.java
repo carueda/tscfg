@@ -98,11 +98,9 @@ public class JavaIssue54bCfg {
     final java.lang.String parentPath = "";
     this.root =
         c.hasPathOrNull("root")
-            ? new JavaIssue54bCfg.Root(c.getConfig("root"), parentPath + "root.", $tsCfgValidator)
+            ? new JavaIssue54bCfg.Root(c.getConfig("root"), "root.", $tsCfgValidator)
             : new JavaIssue54bCfg.Root(
-                com.typesafe.config.ConfigFactory.parseString("root{}"),
-                parentPath + "root.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("root{}"), "root.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

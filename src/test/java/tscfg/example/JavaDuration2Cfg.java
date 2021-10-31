@@ -60,10 +60,10 @@ public class JavaDuration2Cfg {
     this.durations =
         c.hasPathOrNull("durations")
             ? new JavaDuration2Cfg.Durations(
-                c.getConfig("durations"), parentPath + "durations.", $tsCfgValidator)
+                c.getConfig("durations"), "durations.", $tsCfgValidator)
             : new JavaDuration2Cfg.Durations(
                 com.typesafe.config.ConfigFactory.parseString("durations{}"),
-                parentPath + "durations.",
+                "durations.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

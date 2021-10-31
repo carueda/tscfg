@@ -1,5 +1,12 @@
 2021-10
 
+- re #75: initial --java:records handling
+  - but sbt is failing to compile the generated code ;( 
+    For now, commenting out the option in issues75b.spec.conf and the test.
+ 
+- some cleanup in generated java code related with unneeded
+  `final .. parentPath = ""` in root objects;  TODO complete.
+
 - avoid migration warning in generated scala code
 - remove travis
 - adjustments to build project with scala3 (3.1.0)

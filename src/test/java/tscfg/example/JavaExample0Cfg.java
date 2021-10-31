@@ -27,11 +27,10 @@ public class JavaExample0Cfg {
     final java.lang.String parentPath = "";
     this.service =
         c.hasPathOrNull("service")
-            ? new JavaExample0Cfg.Service(
-                c.getConfig("service"), parentPath + "service.", $tsCfgValidator)
+            ? new JavaExample0Cfg.Service(c.getConfig("service"), "service.", $tsCfgValidator)
             : new JavaExample0Cfg.Service(
                 com.typesafe.config.ConfigFactory.parseString("service{}"),
-                parentPath + "service.",
+                "service.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

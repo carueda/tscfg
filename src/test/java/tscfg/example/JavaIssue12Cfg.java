@@ -55,35 +55,30 @@ public class JavaIssue12Cfg {
     final java.lang.String parentPath = "";
     this.Boolean =
         c.hasPathOrNull("Boolean")
-            ? new JavaIssue12Cfg.Boolean(
-                c.getConfig("Boolean"), parentPath + "Boolean.", $tsCfgValidator)
+            ? new JavaIssue12Cfg.Boolean(c.getConfig("Boolean"), "Boolean.", $tsCfgValidator)
             : new JavaIssue12Cfg.Boolean(
                 com.typesafe.config.ConfigFactory.parseString("Boolean{}"),
-                parentPath + "Boolean.",
+                "Boolean.",
                 $tsCfgValidator);
     this.Option =
         c.hasPathOrNull("Option")
-            ? new JavaIssue12Cfg.Option(
-                c.getConfig("Option"), parentPath + "Option.", $tsCfgValidator)
+            ? new JavaIssue12Cfg.Option(c.getConfig("Option"), "Option.", $tsCfgValidator)
             : new JavaIssue12Cfg.Option(
                 com.typesafe.config.ConfigFactory.parseString("Option{}"),
-                parentPath + "Option.",
+                "Option.",
                 $tsCfgValidator);
     this.String =
         c.hasPathOrNull("String")
-            ? new JavaIssue12Cfg.String(
-                c.getConfig("String"), parentPath + "String.", $tsCfgValidator)
+            ? new JavaIssue12Cfg.String(c.getConfig("String"), "String.", $tsCfgValidator)
             : new JavaIssue12Cfg.String(
                 com.typesafe.config.ConfigFactory.parseString("String{}"),
-                parentPath + "String.",
+                "String.",
                 $tsCfgValidator);
     this.int_ =
         c.hasPathOrNull("int")
-            ? new JavaIssue12Cfg.Int_(c.getConfig("int"), parentPath + "int.", $tsCfgValidator)
+            ? new JavaIssue12Cfg.Int_(c.getConfig("int"), "int.", $tsCfgValidator)
             : new JavaIssue12Cfg.Int_(
-                com.typesafe.config.ConfigFactory.parseString("int{}"),
-                parentPath + "int.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("int{}"), "int.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

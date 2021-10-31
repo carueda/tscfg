@@ -74,11 +74,9 @@ public class JavaIssue31Cfg {
     this.a = $_reqInt(parentPath, c, "a", $tsCfgValidator);
     this.b =
         c.hasPathOrNull("b")
-            ? new JavaIssue31Cfg.B(c.getConfig("b"), parentPath + "b.", $tsCfgValidator)
+            ? new JavaIssue31Cfg.B(c.getConfig("b"), "b.", $tsCfgValidator)
             : new JavaIssue31Cfg.B(
-                com.typesafe.config.ConfigFactory.parseString("b{}"),
-                parentPath + "b.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("b{}"), "b.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

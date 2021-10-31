@@ -83,11 +83,9 @@ public class JavaIssue36Cfg {
     final java.lang.String parentPath = "";
     this.obj =
         c.hasPathOrNull("obj")
-            ? new JavaIssue36Cfg.Obj(c.getConfig("obj"), parentPath + "obj.", $tsCfgValidator)
+            ? new JavaIssue36Cfg.Obj(c.getConfig("obj"), "obj.", $tsCfgValidator)
             : new JavaIssue36Cfg.Obj(
-                com.typesafe.config.ConfigFactory.parseString("obj{}"),
-                parentPath + "obj.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("obj{}"), "obj.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

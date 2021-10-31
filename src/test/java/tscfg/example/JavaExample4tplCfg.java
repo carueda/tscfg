@@ -127,11 +127,10 @@ public class JavaExample4tplCfg {
     final java.lang.String parentPath = "";
     this.endpoint =
         c.hasPathOrNull("endpoint")
-            ? new JavaExample4tplCfg.Endpoint(
-                c.getConfig("endpoint"), parentPath + "endpoint.", $tsCfgValidator)
+            ? new JavaExample4tplCfg.Endpoint(c.getConfig("endpoint"), "endpoint.", $tsCfgValidator)
             : new JavaExample4tplCfg.Endpoint(
                 com.typesafe.config.ConfigFactory.parseString("endpoint{}"),
-                parentPath + "endpoint.",
+                "endpoint.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

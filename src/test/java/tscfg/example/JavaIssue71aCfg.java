@@ -98,11 +98,10 @@ public class JavaIssue71aCfg {
     final java.lang.String parentPath = "";
     this.example =
         c.hasPathOrNull("example")
-            ? new JavaIssue71aCfg.Example(
-                c.getConfig("example"), parentPath + "example.", $tsCfgValidator)
+            ? new JavaIssue71aCfg.Example(c.getConfig("example"), "example.", $tsCfgValidator)
             : new JavaIssue71aCfg.Example(
                 com.typesafe.config.ConfigFactory.parseString("example{}"),
-                parentPath + "example.",
+                "example.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

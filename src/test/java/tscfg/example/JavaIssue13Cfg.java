@@ -19,10 +19,10 @@ public class JavaIssue13Cfg {
     final java.lang.String parentPath = "";
     this.issue =
         c.hasPathOrNull("issue")
-            ? new JavaIssue13Cfg.Issue(c.getConfig("issue"), parentPath + "issue.", $tsCfgValidator)
+            ? new JavaIssue13Cfg.Issue(c.getConfig("issue"), "issue.", $tsCfgValidator)
             : new JavaIssue13Cfg.Issue(
                 com.typesafe.config.ConfigFactory.parseString("issue{}"),
-                parentPath + "issue.",
+                "issue.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

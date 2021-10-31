@@ -20,11 +20,9 @@ public class JavaIssue14Cfg {
     final java.lang.String parentPath = "";
     this._0 =
         c.hasPathOrNull("0")
-            ? new JavaIssue14Cfg._0(c.getConfig("0"), parentPath + "0.", $tsCfgValidator)
+            ? new JavaIssue14Cfg._0(c.getConfig("0"), "0.", $tsCfgValidator)
             : new JavaIssue14Cfg._0(
-                com.typesafe.config.ConfigFactory.parseString("0{}"),
-                parentPath + "0.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("0{}"), "0.", $tsCfgValidator);
     this._2 = c.hasPathOrNull("2") ? c.getString("2") : "foo";
     $tsCfgValidator.validate();
   }

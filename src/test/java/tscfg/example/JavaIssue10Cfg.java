@@ -92,11 +92,9 @@ public class JavaIssue10Cfg {
     final java.lang.String parentPath = "";
     this.main =
         c.hasPathOrNull("main")
-            ? new JavaIssue10Cfg.Main(c.getConfig("main"), parentPath + "main.", $tsCfgValidator)
+            ? new JavaIssue10Cfg.Main(c.getConfig("main"), "main.", $tsCfgValidator)
             : new JavaIssue10Cfg.Main(
-                com.typesafe.config.ConfigFactory.parseString("main{}"),
-                parentPath + "main.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("main{}"), "main.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

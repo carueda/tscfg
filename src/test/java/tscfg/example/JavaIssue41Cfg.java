@@ -76,11 +76,9 @@ public class JavaIssue41Cfg {
     this.b = c.hasPathOrNull("b") ? c.getInt("b") : 10;
     this.c =
         c.hasPathOrNull("c")
-            ? new JavaIssue41Cfg.C(c.getConfig("c"), parentPath + "c.", $tsCfgValidator)
+            ? new JavaIssue41Cfg.C(c.getConfig("c"), "c.", $tsCfgValidator)
             : new JavaIssue41Cfg.C(
-                com.typesafe.config.ConfigFactory.parseString("c{}"),
-                parentPath + "c.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("c{}"), "c.", $tsCfgValidator);
     this.i =
         c.hasPathOrNull("i")
             ? java.util.Optional.of($_L$_dbl(c.getList("i"), parentPath, $tsCfgValidator))

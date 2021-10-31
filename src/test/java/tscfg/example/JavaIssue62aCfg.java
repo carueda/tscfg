@@ -25,11 +25,9 @@ public class JavaIssue62aCfg {
     final java.lang.String parentPath = "";
     this.foo =
         c.hasPathOrNull("foo")
-            ? new JavaIssue62aCfg.Foo(c.getConfig("foo"), parentPath + "foo.", $tsCfgValidator)
+            ? new JavaIssue62aCfg.Foo(c.getConfig("foo"), "foo.", $tsCfgValidator)
             : new JavaIssue62aCfg.Foo(
-                com.typesafe.config.ConfigFactory.parseString("foo{}"),
-                parentPath + "foo.",
-                $tsCfgValidator);
+                com.typesafe.config.ConfigFactory.parseString("foo{}"), "foo.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
 

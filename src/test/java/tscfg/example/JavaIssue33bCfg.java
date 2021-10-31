@@ -40,11 +40,10 @@ public class JavaIssue33bCfg {
     final java.lang.String parentPath = "";
     this.endpoint =
         c.hasPathOrNull("endpoint")
-            ? new JavaIssue33bCfg.Endpoint(
-                c.getConfig("endpoint"), parentPath + "endpoint.", $tsCfgValidator)
+            ? new JavaIssue33bCfg.Endpoint(c.getConfig("endpoint"), "endpoint.", $tsCfgValidator)
             : new JavaIssue33bCfg.Endpoint(
                 com.typesafe.config.ConfigFactory.parseString("endpoint{}"),
-                parentPath + "endpoint.",
+                "endpoint.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }

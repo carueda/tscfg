@@ -51,10 +51,10 @@ public class JavaIssue54exampleECfg {
     this.exampleE =
         c.hasPathOrNull("exampleE")
             ? new JavaIssue54exampleECfg.ExampleE(
-                c.getConfig("exampleE"), parentPath + "exampleE.", $tsCfgValidator)
+                c.getConfig("exampleE"), "exampleE.", $tsCfgValidator)
             : new JavaIssue54exampleECfg.ExampleE(
                 com.typesafe.config.ConfigFactory.parseString("exampleE{}"),
-                parentPath + "exampleE.",
+                "exampleE.",
                 $tsCfgValidator);
     $tsCfgValidator.validate();
   }
