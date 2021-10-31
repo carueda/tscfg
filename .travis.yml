@@ -1,9 +1,0 @@
-language: scala
-scala:
-  - "2.13.5"
-
-jdk: openjdk8
-
-# coverage not scala3-ready yet
-script: "sbt ++2.13.5 clean coverage test"
-after_success: "sbt ++2.13.5 coverageReport coveralls"

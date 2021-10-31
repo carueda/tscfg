@@ -1,5 +1,6 @@
 2021-10
 
+- remove travis
 - adjustments to build project with scala3 (3.1.0)
 
 - use scalatest (simpler and scala3-ready)
