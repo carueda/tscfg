@@ -6,7 +6,7 @@ version := tscfgVersion
 
 scalaVersion := "3.1.0"
 
-crossScalaVersions := Seq("2.13.6", "3.1.0")
+crossScalaVersions := Seq("2.13.7", "3.1.0")
 
 libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.6.3",
