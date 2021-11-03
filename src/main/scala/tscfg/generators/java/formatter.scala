@@ -11,7 +11,7 @@ object formatter {
     try formatter.formatSource(source).trim
     catch {
       case NonFatal(e) =>
-        scribe.warn(s"error while running formatter: ${e.getMessage}")
+        scribe.warn(s"error while running formatter: ${e.getMessage}",  e)
         source
     }
   }

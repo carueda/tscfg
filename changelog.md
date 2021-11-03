@@ -1,9 +1,15 @@
 2021-10
 
 - re #75: initial --java:records handling
-  - but sbt is failing to compile the generated code ;( 
+  - but sbt is failing to compile the generated code ;(
     For now, commenting out the option in issues75b.spec.conf and the test.
- 
+
+    [error] -- Error: /Users/carueda/github/carueda/tscfg/src/test/java/tscfg/example/JavaIssue75bCfg.java:3:14
+    [error] 3 |public record JavaIssue75bCfg (
+    [error]   |              ^^^^^^^^^^^^^^^
+    [error]   |              illegal start of type declaration
+
+
 - some cleanup in generated java code related with unneeded
   `final .. parentPath = ""` in root objects;  TODO complete.
 
@@ -29,19 +35,19 @@
   - use sbt 1.5.5, while upgrading various build/release dependencies
   - all good ... but `+sonatypeBundleRelease` is failing `:(`
   - retrying with incremented versions 0.9.991 ... 993
-   
+
 2021-07 - 0.9.986
 
 - fix #74 "Hardcoded example code in ScalaGen.scala" 😂  🍌🍎🍍
-  
+
 2021-03 - 0.9.985
 
 - env var `NO_FORMATTER` convenience to skip the standard formatting of
   generated code while speeding up testing a bit
-  
+
 - adjust template generation
   TODO remove this feature?
-  
+
 2021-03 - 0.9.984
 
 - resolve #42 "Size-in-bytes should be explicitly indicated in config spec"
@@ -59,7 +65,7 @@
 fix #71 "Two shared objects leading to string conversion"
 
 - this was a regression; model built incorrectly:
-  
+
         > runMain tscfg.ModelBuilder src/main/tscfg/example/issue71.spec.conf
         ...
         ModelBuilderResult:
@@ -70,7 +76,7 @@ fix #71 "Two shared objects leading to string conversion"
                 c: [ STRING ]
             }
         }
-    
+
     All the `@define`s lost!
 
 - trying the same with commit eccee9a16 creates the model as expected
@@ -84,7 +90,7 @@ fix #71 "Two shared objects leading to string conversion"
   This one generates invalid Scala due to LoadModelConfig extending
   a final case class BaseModelConfig.
 - TODO some more general revision as the code has become a bit unwieldy
-  
+
 
 2020-12 - 0.9.982
 
