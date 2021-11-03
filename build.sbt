@@ -45,7 +45,7 @@ lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")
 (genCode / fork) := true
 
-Test / javacOptions ++= Seq("-source", "16")
+//Test / javacOptions ++= Seq("-source", "16")
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
 (Test / test)     := ((Test / test)     dependsOn (codeDefs, genCode)).value
