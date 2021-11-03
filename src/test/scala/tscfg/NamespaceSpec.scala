@@ -5,9 +5,9 @@ import tscfg.model.ObjectType
 
 class NamespaceSpec extends AnyWordSpec {
 
-  val root: Namespace = Namespace.root
-  val ns00: Namespace = root.extend("ns00")
-  val ns01: Namespace = root.extend("ns01")
+  val root: Namespace  = Namespace.root
+  val ns00: Namespace  = root.extend("ns00")
+  val ns01: Namespace  = root.extend("ns01")
   val ns000: Namespace = ns00.extend("ns000")
 
   private val objectType = ObjectType()
@@ -51,7 +51,9 @@ class NamespaceSpec extends AnyWordSpec {
       assert(ns000.resolveDefine("n000def1").isDefined)
 
       root.getAllDefines.keys === Set(
-        "RootDef1", "ns00.n00def1", "ns00.ns000.n000def1"
+        "RootDef1",
+        "ns00.n00def1",
+        "ns00.ns000.n000def1"
       )
     }
   }

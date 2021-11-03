@@ -1,11 +1,14 @@
 package tscfg
 
 import org.scalatest.wordspec.AnyWordSpec
-import tscfg.buildWarnings.{DefaultListElemWarning, MultElemListWarning, OptListElemWarning}
+import tscfg.buildWarnings.{
+  DefaultListElemWarning,
+  MultElemListWarning,
+  OptListElemWarning
+}
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.model._
 import tscfg.model.durations._
-
 
 class ModelBuilderSpec extends AnyWordSpec {
 
@@ -14,24 +17,29 @@ class ModelBuilderSpec extends AnyWordSpec {
     if (showOutput)
       println("\nsource:\n  |" + source.replaceAll("\n", "\n  |"))
 
-    val result = ModelBuilder(source)
+    val result     = ModelBuilder(source)
     val objectType = result.objectType
 
     if (showOutput) {
       println("\nobjectType: " + objectType)
-      println("\nobjectType:\n  |" + model.util.format(objectType).replaceAll("\n", "\n  |"))
+      println(
+        "\nobjectType:\n  |" + model.util
+          .format(objectType)
+          .replaceAll("\n", "\n  |")
+      )
     }
 
     result
   }
 
-  private def verify(objType: ObjectType,
-                     memberName: String,
-                     t: Type,
-                     optional: Boolean = false,
-                     default: Option[String] = None,
-                     comments: Option[String] = None
-                    ): Unit = {
+  private def verify(
+      objType: ObjectType,
+      memberName: String,
+      t: Type,
+      optional: Boolean = false,
+      default: Option[String] = None,
+      comments: Option[String] = None
+  ): Unit = {
     val at = objType.members(memberName)
     at.t === t
     at.optional === optional
@@ -49,8 +57,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   "with empty list" should {
     "throw" in {
       assertThrows[IllegalArgumentException] {
-        build(
-          """
+        build("""
             |my_list: [ ]
           """.stripMargin)
       }
@@ -76,21 +83,20 @@ class ModelBuilderSpec extends AnyWordSpec {
   }
 
   "with list element indicating a default value" should {
-    val result = build(
-      """
+    val result = build("""
         |my_list: [ "double | 3.14" ]
       """.stripMargin)
 
     "generate warning" in {
-      val warns = result.warnings.filter(_.isInstanceOf[DefaultListElemWarning]).
-        asInstanceOf[List[DefaultListElemWarning]]
+      val warns = result.warnings
+        .filter(_.isInstanceOf[DefaultListElemWarning])
+        .asInstanceOf[List[DefaultListElemWarning]]
       assert(warns.map(_.default) contains "3.14")
     }
   }
 
   "with list with literal int" should {
-    val result = build(
-      """
+    val result = build("""
         |my_list: [ 99999999 ]
       """.stripMargin)
 
@@ -100,8 +106,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   }
 
   "with list with literal long" should {
-    val result = build(
-      """
+    val result = build("""
         |my_list: [ 99999999999 ]
       """.stripMargin)
 
@@ -111,8 +116,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   }
 
   "with list with literal double" should {
-    val result = build(
-      """
+    val result = build("""
         |my_list: [ 3.14 ]
       """.stripMargin)
 
@@ -122,8 +126,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   }
 
   "with list with literal boolean" should {
-    val result = build(
-      """
+    val result = build("""
         |my_list: [ false ]
       """.stripMargin)
 
@@ -133,8 +136,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   }
 
   "with literal integer" should {
-    val result = build(
-      """
+    val result = build("""
         |optInt: 21
       """.stripMargin)
 
@@ -147,8 +149,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   }
 
   "with literal duration (issue 22)" should {
-    val result = build(
-      """
+    val result = build("""
         |idleTimeout = 75 seconds
       """.stripMargin)
 
@@ -156,13 +157,12 @@ class ModelBuilderSpec extends AnyWordSpec {
       val at = result.objectType.members("idleTimeout")
       at.t === DURATION(ms)
       assert(at.optional)
-      assert(at.default  contains "75 seconds")
+      assert(at.default contains "75 seconds")
     }
   }
 
   "with good input" should {
-    val result = build(
-      """
+    val result = build("""
         |foo {
         |  reqStr        = string
         |  reqInt        = integer
@@ -243,11 +243,11 @@ class ModelBuilderSpec extends AnyWordSpec {
         "listDuration",
         "listDuration_se"
       )
-      verify(fooObj, "reqStr",      STRING)
-      verify(fooObj, "reqInt",      INTEGER)
-      verify(fooObj, "reqLong",     LONG)
-      verify(fooObj, "reqDouble",   DOUBLE)
-      verify(fooObj, "reqBoolean",  BOOLEAN)
+      verify(fooObj, "reqStr", STRING)
+      verify(fooObj, "reqInt", INTEGER)
+      verify(fooObj, "reqLong", LONG)
+      verify(fooObj, "reqDouble", DOUBLE)
+      verify(fooObj, "reqBoolean", BOOLEAN)
       verify(fooObj, "reqDuration", DURATION(ms))
       verify(fooObj, "duration_ns", DURATION(ns))
       verify(fooObj, "duration_µs", DURATION(us))
@@ -255,24 +255,48 @@ class ModelBuilderSpec extends AnyWordSpec {
       verify(fooObj, "duration_se", DURATION(second))
       verify(fooObj, "duration_mi", DURATION(minute))
       verify(fooObj, "duration_hr", DURATION(hour))
-      verify(fooObj, "duration_dy", DURATION(day ))
-      verify(fooObj, "optStr" ,     STRING,   optional = true)
-      verify(fooObj, "optInt" ,     INTEGER,  optional = true)
-      verify(fooObj, "optLong",     LONG,     optional = true)
-      verify(fooObj, "optDouble",   DOUBLE,   optional = true)
-      verify(fooObj, "optBoolean",  BOOLEAN,  optional = true)
+      verify(fooObj, "duration_dy", DURATION(day))
+      verify(fooObj, "optStr", STRING, optional = true)
+      verify(fooObj, "optInt", INTEGER, optional = true)
+      verify(fooObj, "optLong", LONG, optional = true)
+      verify(fooObj, "optDouble", DOUBLE, optional = true)
+      verify(fooObj, "optBoolean", BOOLEAN, optional = true)
       verify(fooObj, "optDuration", DURATION(ms), optional = true)
-      verify(fooObj, "dflStr" ,     STRING,   optional = true, default = Some("hi"))
-      verify(fooObj, "dflInt" ,     INTEGER,  optional = true, default = Some("3"))
-      verify(fooObj, "dflLong",     LONG,     optional = true, default = Some("999999999"))
-      verify(fooObj, "dflDouble",   DOUBLE,   optional = true, default = Some("3.14"))
-      verify(fooObj, "dflBoolean",  BOOLEAN,  optional = true, default = Some("false"))
-      verify(fooObj, "dflDuration", DURATION(ms), optional = true, default = Some("21d"))
-      verify(fooObj, "listStr",      ListType(STRING))
-      verify(fooObj, "listInt",      ListType(INTEGER))
-      verify(fooObj, "listLong",     ListType(LONG))
-      verify(fooObj, "listDouble",   ListType(DOUBLE))
-      verify(fooObj, "listBoolean",  ListType(BOOLEAN))
+      verify(fooObj, "dflStr", STRING, optional = true, default = Some("hi"))
+      verify(fooObj, "dflInt", INTEGER, optional = true, default = Some("3"))
+      verify(
+        fooObj,
+        "dflLong",
+        LONG,
+        optional = true,
+        default = Some("999999999")
+      )
+      verify(
+        fooObj,
+        "dflDouble",
+        DOUBLE,
+        optional = true,
+        default = Some("3.14")
+      )
+      verify(
+        fooObj,
+        "dflBoolean",
+        BOOLEAN,
+        optional = true,
+        default = Some("false")
+      )
+      verify(
+        fooObj,
+        "dflDuration",
+        DURATION(ms),
+        optional = true,
+        default = Some("21d")
+      )
+      verify(fooObj, "listStr", ListType(STRING))
+      verify(fooObj, "listInt", ListType(INTEGER))
+      verify(fooObj, "listLong", ListType(LONG))
+      verify(fooObj, "listDouble", ListType(DOUBLE))
+      verify(fooObj, "listBoolean", ListType(BOOLEAN))
       verify(fooObj, "listDuration", ListType(DURATION(ms)))
       verify(fooObj, "listDuration_se", ListType(DURATION(second)))
     }
@@ -281,8 +305,7 @@ class ModelBuilderSpec extends AnyWordSpec {
   "invalid @defines" should {
     "check Missing name after `extends`" in {
       val e = intercept[ObjectDefinitionException] {
-        build(
-          """#@define extends
+        build("""#@define extends
             |foo {x:int}
             |""".stripMargin)
       }
@@ -291,8 +314,7 @@ class ModelBuilderSpec extends AnyWordSpec {
 
     "check Unrecognized @define construct" in {
       val e = intercept[ObjectDefinitionException] {
-        build(
-          """#@define dummy
+        build("""#@define dummy
             |foo {x:int}
             |""".stripMargin)
       }

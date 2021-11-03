@@ -26,7 +26,10 @@ object formatter {
 
   private lazy val config = {
     val configPath = Files.createTempFile("_tscfg_gen_scalafmt", ".conf")
-    Files.write(configPath, scalaFmtConfig.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    Files.write(
+      configPath,
+      scalaFmtConfig.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+    )
     configPath
   }
 
@@ -37,7 +40,7 @@ object formatter {
     java.lang.System.setErr(devNull)
 
     val filename = s"${packageName.replace(".", "/")}/Dummy.scala"
-    val res = scalaFmt.format(config, Paths.get(filename), source).trim
+    val res      = scalaFmt.format(config, Paths.get(filename), source).trim
 
     java.lang.System.setErr(originalStdErr)
 

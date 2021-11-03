@@ -10,7 +10,8 @@ import com.typesafe.config.{ConfigRenderOptions, ConfigFactory}
 object scalaUse {
 
   def main(args: Array[String]): Unit = {
-    val configFilename = args.headOption.getOrElse("src/main/tscfg/example/example.conf")
+    val configFilename =
+      args.headOption.getOrElse("src/main/tscfg/example/example.conf")
     println(s"Loading $configFilename")
     val configFile = new File(configFilename)
 
@@ -23,11 +24,11 @@ object scalaUse {
 
     // access the configuration properties in a type-safe fashion while also
     // enjoying your IDE features for code completion, navigation, etc:
-    val path: String         = cfg.endpoint.path
-    val url: String          = cfg.endpoint.url
-    val serial: Option[Int]  = cfg.endpoint.serial
-    val port: Int            = cfg.endpoint.interface.port
-    val typ : Option[String] = cfg.endpoint.interface.`type`
+    val path: String        = cfg.endpoint.path
+    val url: String         = cfg.endpoint.url
+    val serial: Option[Int] = cfg.endpoint.serial
+    val port: Int           = cfg.endpoint.interface.port
+    val typ: Option[String] = cfg.endpoint.interface.`type`
 
     println("\n*** tscfg case class structure: *** ")
     println("  " + cfg.toString.replaceAll("\n", "\n  "))
@@ -36,7 +37,9 @@ object scalaUse {
 
     println("\n*** Typesafe rendering of input Config object: *** ")
     val options: ConfigRenderOptions = ConfigRenderOptions.defaults
-      .setFormatted(true).setComments(true).setOriginComments(false)
+      .setFormatted(true)
+      .setComments(true)
+      .setOriginComments(false)
     println("  " + tsConfig.root.render(options).replaceAll("\n", "\n  "))
   }
 

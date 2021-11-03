@@ -12,7 +12,6 @@ class scalaIdentifierSpec extends AnyWordSpec {
     val scalaUtil: ScalaUtil = new ScalaUtil()
     import scalaUtil.scalaIdentifier
 
-
     List("foo", "bar_3", "$baz") foreach { id =>
       s"""keep valid identifier "$id"""" in {
         scalaIdentifier(id) === id
@@ -20,7 +19,7 @@ class scalaIdentifierSpec extends AnyWordSpec {
     }
 
     Random.shuffle(scalaReservedWords).take(3) foreach { w =>
-      val e = "`" +w + "`"
+      val e = "`" + w + "`"
       s"""convert scala reserved word "$w" to "$e"""" in {
         scalaIdentifier(w) === e
       }

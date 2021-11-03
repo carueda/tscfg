@@ -13,7 +13,7 @@ class templaterSpec extends AnyWordSpec {
 
   "basic template generation" should {
     val templateOpts = TemplateOpts()
-    val templater = new TemplateGenerator(templateOpts)
+    val templater    = new TemplateGenerator(templateOpts)
 
     "work" in {
       val objectType = build(

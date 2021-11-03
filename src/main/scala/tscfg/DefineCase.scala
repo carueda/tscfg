@@ -4,7 +4,7 @@ import tscfg.exceptions.ObjectDefinitionException
 
 sealed abstract class DefineCase {
   val isAbstract: Boolean = false
-  val isEnum: Boolean = false
+  val isEnum: Boolean     = false
 }
 
 object DefineCase {
@@ -22,17 +22,20 @@ object DefineCase {
     override val isEnum: Boolean = true
   }
 
-  /**
-    * Extracts the shared objects' additional information given by a preceding comment string. If the string does not
-    * start with '@define' (it is no shared object), [[None]] is returned.
+  /** Extracts the shared objects' additional information given by a preceding
+    * comment string. If the string does not start with '@define' (it is no
+    * shared object), [[None]] is returned.
     *
-    * @param commentString Comment String to parse for additional information
-    * @throws ObjectDefinitionException If the comment string is malformed
-    * @return An [[Option]] on additional information of the shared object
+    * @param commentString
+    *   Comment String to parse for additional information
+    * @throws ObjectDefinitionException
+    *   If the comment string is malformed
+    * @return
+    *   An [[Option]] on additional information of the shared object
     */
-    @throws[ObjectDefinitionException]
+  @throws[ObjectDefinitionException]
   def getDefineCase(commentString: String): Option[DefineCase] = {
-    val str = commentString.trim
+    val str    = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
     val res = tokens match {
       case "@define" :: "abstract" :: Nil =>

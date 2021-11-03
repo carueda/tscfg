@@ -1,4 +1,5 @@
 // $COVERAGE-OFF$
+// @formatter:off
 package tscfg.codeDefs.resources
 
 /**
@@ -200,4 +201,5 @@ object ScalaDefs {
   //</$_require>
 
 }
+// @formatter:off
 // $COVERAGE-ON$

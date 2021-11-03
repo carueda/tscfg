@@ -1,3 +1,7 @@
+2021-11
+
+- add scalafmt to project
+
 2021-10
 
 - avoid migration warning in generated scala code

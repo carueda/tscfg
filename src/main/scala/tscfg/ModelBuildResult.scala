@@ -1,5 +1,6 @@
 package tscfg
 
-case class ModelBuildResult(objectType: model.ObjectType,
-                            warnings: List[buildWarnings.Warning],
-                           )
+case class ModelBuildResult(
+    objectType: model.ObjectType,
+    warnings: List[buildWarnings.Warning],
+)

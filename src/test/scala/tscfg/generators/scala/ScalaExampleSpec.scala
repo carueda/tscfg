@@ -7,8 +7,7 @@ import tscfg.example.ScalaExampleCfg
 class ScalaExampleSpec extends AnyWordSpec {
 
   """ScalaExampleCfg""" when {
-    val config = ConfigFactory.parseString(
-      """
+    val config = ConfigFactory.parseString("""
         |endpoint {
         |  path = "/var/www"
         |  intReq = 12
@@ -46,8 +45,7 @@ class ScalaExampleSpec extends AnyWordSpec {
   }
 
   """ScalaExampleCfg with null given to a field""" should {
-    val config = ConfigFactory.parseString(
-      """
+    val config = ConfigFactory.parseString("""
         |endpoint {
         |  path = "/var/www"
         |  intReq = 12
