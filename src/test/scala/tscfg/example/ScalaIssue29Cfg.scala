@@ -1,14 +1,14 @@
 package tscfg.example
 
 final case class ScalaIssue29Cfg(
-    test: java.lang.String
+  test : java.lang.String
 )
 object ScalaIssue29Cfg {
   def apply(c: com.typesafe.config.Config): ScalaIssue29Cfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
-    val parentPath: java.lang.String     = ""
+    val parentPath: java.lang.String = ""
     val $result = ScalaIssue29Cfg(
-      test = if (c.hasPathOrNull("test")) c.getString("test") else "测试"
+      test = if(c.hasPathOrNull("test")) c.getString("test") else "测试"
     )
     $tsCfgValidator.validate()
     $result
@@ -20,11 +20,7 @@ object ScalaIssue29Cfg {
       badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 
-    def addInvalidEnumValue(
-        path: java.lang.String,
-        value: java.lang.String,
-        enumName: java.lang.String
-    ): Unit = {
+    def addInvalidEnumValue(path: java.lang.String, value: java.lang.String, enumName: java.lang.String): Unit = {
       badPaths += s"'$path': invalid value $value for enumeration $enumName"
     }
 
@@ -32,7 +28,7 @@ object ScalaIssue29Cfg {
       if (badPaths.nonEmpty) {
         throw new com.typesafe.config.ConfigException(
           badPaths.mkString("Invalid configuration:\n    ", "\n    ", "")
-        ) {}
+        ){}
       }
     }
   }

@@ -40,8 +40,6 @@ object util {
       .replace()
   }
 
-  val doFormatting: Boolean = !sys.env.contains("NO_FORMATTER")
-
   // $COVERAGE-ON$
 
   val TypesafeConfigClassName: String =

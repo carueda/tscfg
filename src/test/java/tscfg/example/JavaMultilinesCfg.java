@@ -5,7 +5,7 @@ public class JavaMultilinesCfg {
   public final java.lang.String b;
   public final java.lang.String c;
   public final java.lang.String d;
-
+  
   public JavaMultilinesCfg(com.typesafe.config.Config c) {
     final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
     final java.lang.String parentPath = "";
@@ -15,14 +15,13 @@ public class JavaMultilinesCfg {
     this.d = c.hasPathOrNull("d") ? c.getString("d") : "some \b control \t \\ chars \r\f";
     $tsCfgValidator.validate();
   }
-
-  private static final class $TsCfgValidator {
+  private static final class $TsCfgValidator  {
     private final java.util.List<java.lang.String> badPaths = new java.util.ArrayList<>();
-
+    
     void addBadPath(java.lang.String path, com.typesafe.config.ConfigException e) {
       badPaths.add("'" + path + "': " + e.getClass().getName() + "(" + e.getMessage() + ")");
     }
-
+    
     void validate() {
       if (!badPaths.isEmpty()) {
         java.lang.StringBuilder sb = new java.lang.StringBuilder("Invalid configuration:");

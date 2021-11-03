@@ -1,20 +1,20 @@
 package tscfg.example
 
 final case class ScalaMultilinesCfg(
-    a: java.lang.String,
-    b: java.lang.String,
-    c: java.lang.String,
-    d: java.lang.String
+  a : java.lang.String,
+  b : java.lang.String,
+  c : java.lang.String,
+  d : java.lang.String
 )
 object ScalaMultilinesCfg {
   def apply(c: com.typesafe.config.Config): ScalaMultilinesCfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
-    val parentPath: java.lang.String     = ""
+    val parentPath: java.lang.String = ""
     val $result = ScalaMultilinesCfg(
-      a = if (c.hasPathOrNull("a")) c.getString("a") else "some\nlines",
-      b = if (c.hasPathOrNull("b")) c.getString("b") else "other\n\"quoted\"\nlines",
-      c = if (c.hasPathOrNull("c")) c.getString("c") else "'simply quoted' string",
-      d = if (c.hasPathOrNull("d")) c.getString("d") else "some \b control \t \\ chars \r\f"
+      a = if(c.hasPathOrNull("a")) c.getString("a") else "some\nlines",
+      b = if(c.hasPathOrNull("b")) c.getString("b") else "other\n\"quoted\"\nlines",
+      c = if(c.hasPathOrNull("c")) c.getString("c") else "'simply quoted' string",
+      d = if(c.hasPathOrNull("d")) c.getString("d") else "some \b control \t \\ chars \r\f"
     )
     $tsCfgValidator.validate()
     $result
@@ -26,11 +26,7 @@ object ScalaMultilinesCfg {
       badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 
-    def addInvalidEnumValue(
-        path: java.lang.String,
-        value: java.lang.String,
-        enumName: java.lang.String
-    ): Unit = {
+    def addInvalidEnumValue(path: java.lang.String, value: java.lang.String, enumName: java.lang.String): Unit = {
       badPaths += s"'$path': invalid value $value for enumeration $enumName"
     }
 
@@ -38,7 +34,7 @@ object ScalaMultilinesCfg {
       if (badPaths.nonEmpty) {
         throw new com.typesafe.config.ConfigException(
           badPaths.mkString("Invalid configuration:\n    ", "\n    ", "")
-        ) {}
+        ){}
       }
     }
   }
