@@ -41,16 +41,16 @@ class ModelBuilderSpec extends AnyWordSpec {
       comments: Option[String] = None
   ): Unit = {
     val at = objType.members(memberName)
-    at.t === t
-    at.optional === optional
-    at.default === default
-    at.comments === comments
+    assert(at.t === t)
+    assert(at.optional === optional)
+    assert(at.default === default)
+    assert(at.comments === comments)
   }
 
   "with empty input" should {
     val result = build("")
     "build empty ObjectType" in {
-      result.objectType === ObjectType()
+      assert(result.objectType === ObjectType())
     }
   }
 
@@ -101,7 +101,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       """.stripMargin)
 
     "translate into ListType(INTEGER)" in {
-      result.objectType.members("my_list").t === ListType(INTEGER)
+      assert(result.objectType.members("my_list").t === ListType(INTEGER))
     }
   }
 
@@ -111,7 +111,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       """.stripMargin)
 
     "translate into ListType(LONG)" in {
-      result.objectType.members("my_list").t === ListType(LONG)
+      assert(result.objectType.members("my_list").t === ListType(LONG))
     }
   }
 
@@ -121,7 +121,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       """.stripMargin)
 
     "translate into ListType(DOUBLE)" in {
-      result.objectType.members("my_list").t === ListType(DOUBLE)
+      assert(result.objectType.members("my_list").t === ListType(DOUBLE))
     }
   }
 
@@ -131,7 +131,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       """.stripMargin)
 
     "translate into ListType(BOOLEAN)" in {
-      result.objectType.members("my_list").t === ListType(BOOLEAN)
+      assert(result.objectType.members("my_list").t === ListType(BOOLEAN))
     }
   }
 
@@ -142,7 +142,7 @@ class ModelBuilderSpec extends AnyWordSpec {
 
     "translate into ListType(BOOLEAN)" in {
       val at = result.objectType.members("optInt")
-      at.t === INTEGER
+      assert(at.t === INTEGER)
       assert(at.optional)
       assert(at.default contains "21")
     }
@@ -155,7 +155,7 @@ class ModelBuilderSpec extends AnyWordSpec {
 
     "translate into DURATION(ms) with given default" in {
       val at = result.objectType.members("idleTimeout")
-      at.t === DURATION(ms)
+      assert(at.t === DURATION(ms))
       assert(at.optional)
       assert(at.default contains "75 seconds")
     }
@@ -202,46 +202,48 @@ class ModelBuilderSpec extends AnyWordSpec {
     val objType = result.objectType
 
     "build expected objType" in {
-      objType.members.keySet === Set("foo")
+      assert(objType.members.keySet === Set("foo"))
       val foo = objType.members("foo")
-      foo.optional === false
+      assert(foo.optional === false)
       assert(foo.default.isEmpty)
       assert(foo.comments.isEmpty)
       assert(foo.t.isInstanceOf[ObjectType])
       val fooObj = foo.t.asInstanceOf[ObjectType]
-      fooObj.members.keySet === Set(
-        "reqStr",
-        "reqInt",
-        "reqLong",
-        "reqDouble",
-        "reqBoolean",
-        "reqDuration",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy",
-        "optStr",
-        "optInt",
-        "optLong",
-        "optDouble",
-        "optBoolean",
-        "optDuration",
-        "dflStr",
-        "dflInt",
-        "dflLong",
-        "dflDouble",
-        "dflBoolean",
-        "dflDuration",
-        "listStr",
-        "listInt",
-        "listLong",
-        "listBoolean",
-        "listDouble",
-        "listDuration",
-        "listDuration_se"
+      assert(
+        fooObj.members.keySet === Set(
+          "reqStr",
+          "reqInt",
+          "reqLong",
+          "reqDouble",
+          "reqBoolean",
+          "reqDuration",
+          "duration_ns",
+          "duration_µs",
+          "duration_ms",
+          "duration_se",
+          "duration_mi",
+          "duration_hr",
+          "duration_dy",
+          "optStr",
+          "optInt",
+          "optLong",
+          "optDouble",
+          "optBoolean",
+          "optDuration",
+          "dflStr",
+          "dflInt",
+          "dflLong",
+          "dflDouble",
+          "dflBoolean",
+          "dflDuration",
+          "listStr",
+          "listInt",
+          "listLong",
+          "listBoolean",
+          "listDouble",
+          "listDuration",
+          "listDuration_se"
+        )
       )
       verify(fooObj, "reqStr", STRING)
       verify(fooObj, "reqInt", INTEGER)

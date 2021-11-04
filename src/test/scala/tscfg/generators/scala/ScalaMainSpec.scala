@@ -18,14 +18,16 @@ class ScalaMainSpec extends AnyWordSpec {
   "literal values as types" should {
     "generate primitive types with given values as defaults" in {
       val r = ScalaGen.generate("example/example0.spec.conf")
-      r.classNames === Set("ScalaExample0Cfg", "Service")
-      r.fields === Map(
-        "service"  -> "ScalaExample0Cfg.Service",
-        "url"      -> "java.lang.String",
-        "debug"    -> "scala.Boolean",
-        "doLog"    -> "scala.Boolean",
-        "factor"   -> "scala.Double",
-        "poolSize" -> "scala.Int"
+      assert(r.classNames === Set("ScalaExample0Cfg", "Service"))
+      assert(
+        r.fields === Map(
+          "service"  -> "ScalaExample0Cfg.Service",
+          "url"      -> "java.lang.String",
+          "debug"    -> "scala.Boolean",
+          "doLog"    -> "scala.Boolean",
+          "factor"   -> "scala.Double",
+          "poolSize" -> "scala.Int"
+        )
       )
     }
     "example with missing entries should get their defaults" in {
@@ -37,33 +39,37 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.service.url === "http://example.net/rest"
-      c.service.poolSize === 32
-      c.service.debug === true
-      c.service.doLog === false
-      c.service.factor === 0.75
+      assert(c.service.url === "http://example.net/rest")
+      assert(c.service.poolSize === 32)
+      assert(c.service.debug === true)
+      assert(c.service.doLog === false)
+      assert(c.service.factor === 0.75)
     }
   }
 
   "issue5" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue5.spec.conf")
-      r.classNames === Set("ScalaIssue5Cfg", "Foo", "Config")
-      r.fields.keySet === Set("foo", "config", "bar")
+      assert(r.classNames === Set("ScalaIssue5Cfg", "Foo", "Config"))
+      assert(r.fields.keySet === Set("foo", "config", "bar"))
     }
   }
 
   "issue10" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue10.spec.conf")
-      r.classNames === Set("ScalaIssue10Cfg", "Main", "Email", "Reals$Elm")
-      r.fields.keySet === Set(
-        "server",
-        "email",
-        "main",
-        "reals",
-        "password",
-        "foo"
+      assert(
+        r.classNames === Set("ScalaIssue10Cfg", "Main", "Email", "Reals$Elm")
+      )
+      assert(
+        r.fields.keySet === Set(
+          "server",
+          "email",
+          "main",
+          "reals",
+          "password",
+          "foo"
+        )
       )
     }
 
@@ -100,16 +106,18 @@ class ScalaMainSpec extends AnyWordSpec {
   "issue11" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue11.spec.conf")
-      r.classNames === Set("ScalaIssue11Cfg", "Foo")
-      r.fields.keySet === Set(
-        "notify_",
-        "wait_",
-        "getClass_",
-        "clone_",
-        "finalize_",
-        "notifyAll_",
-        "toString_",
-        "foo"
+      assert(r.classNames === Set("ScalaIssue11Cfg", "Foo"))
+      assert(
+        r.fields.keySet === Set(
+          "notify_",
+          "wait_",
+          "getClass_",
+          "clone_",
+          "finalize_",
+          "notifyAll_",
+          "toString_",
+          "foo"
+        )
       )
     }
   }
@@ -117,38 +125,42 @@ class ScalaMainSpec extends AnyWordSpec {
   "issue12" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue12.spec.conf")
-      r.classNames === Set(
-        "ScalaIssue12Cfg",
-        "String",
-        "Option",
-        "Boolean",
-        "Int"
+      assert(
+        r.classNames === Set(
+          "ScalaIssue12Cfg",
+          "String",
+          "Option",
+          "Boolean",
+          "Int"
+        )
       )
-      r.fields.keySet === Set("String", "Option", "Boolean", "int", "bar")
+      assert(
+        r.fields.keySet === Set("String", "Option", "Boolean", "int", "bar")
+      )
     }
   }
 
   "issue13" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue13.spec.conf")
-      r.classNames === Set("ScalaIssue13Cfg", "Issue")
-      r.fields.keySet === Set("issue", "optionalFoo")
+      assert(r.classNames === Set("ScalaIssue13Cfg", "Issue"))
+      assert(r.fields.keySet === Set("issue", "optionalFoo"))
     }
   }
 
   "issue14" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue14.spec.conf")
-      r.classNames === Set("ScalaIssue14Cfg", "_0")
-      r.fields.keySet === Set("_0", "_1", "_2")
+      assert(r.classNames === Set("ScalaIssue14Cfg", "_0"))
+      assert(r.fields.keySet === Set("_0", "_1", "_2"))
     }
   }
 
   "issue15a" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15a.spec.conf")
-      r.classNames === Set("ScalaIssue15aCfg")
-      r.fields.keySet === Set("ii")
+      assert(r.classNames === Set("ScalaIssue15aCfg"))
+      assert(r.fields.keySet === Set("ii"))
     }
 
     "example 1" in {
@@ -159,7 +171,7 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.ii === List(1, 2, 3)
+      assert(c.ii === List(1, 2, 3))
     }
 
     "example 2" in {
@@ -170,20 +182,22 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.ii === List.empty
+      assert(c.ii === List.empty)
     }
   }
 
   "issue15b" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15b.spec.conf")
-      r.classNames === Set("ScalaIssue15bCfg")
-      r.fields.keySet === Set(
-        "strings",
-        "integers",
-        "doubles",
-        "longs",
-        "booleans"
+      assert(r.classNames === Set("ScalaIssue15bCfg"))
+      assert(
+        r.fields.keySet === Set(
+          "strings",
+          "integers",
+          "doubles",
+          "longs",
+          "booleans"
+        )
       )
     }
 
@@ -199,35 +213,39 @@ class ScalaMainSpec extends AnyWordSpec {
           |""".stripMargin
         )
       )
-      c.strings === List("hello", "world", "true")
-      c.integers === List(List(1, 2, 3), List(4, 5))
-      c.doubles === List(3.14, 2.7182, 1.618)
-      c.longs === List(1, 9999999999L)
-      c.booleans === List(true, false)
+      assert(c.strings === List("hello", "world", "true"))
+      assert(c.integers === List(List(1, 2, 3), List(4, 5)))
+      assert(c.doubles === List(3.14, 2.7182, 1.618))
+      assert(c.longs === List(1, 9999999999L))
+      assert(c.booleans === List(true, false))
     }
   }
 
   "issue15c" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15c.spec.conf")
-      r.classNames === Set(
-        "ScalaIssue15cCfg",
-        "Qaz",
-        "Aa",
-        "Positions$Elm",
-        "Bb$Elm",
-        "Attrs$Elm"
+      assert(
+        r.classNames === Set(
+          "ScalaIssue15cCfg",
+          "Qaz",
+          "Aa",
+          "Positions$Elm",
+          "Bb$Elm",
+          "Attrs$Elm"
+        )
       )
-      r.fields.keySet === Set(
-        "positions",
-        "lat",
-        "lon",
-        "attrs",
-        "foo",
-        "qaz",
-        "aa",
-        "bb",
-        "cc"
+      assert(
+        r.fields.keySet === Set(
+          "positions",
+          "lat",
+          "lon",
+          "attrs",
+          "foo",
+          "qaz",
+          "aa",
+          "bb",
+          "cc"
+        )
       )
     }
 
@@ -245,27 +263,31 @@ class ScalaMainSpec extends AnyWordSpec {
           |""".stripMargin
         )
       )
-      c.positions === List(
-        ScalaIssue15cCfg.Positions$Elm(
-          attrs =
-            List(List(ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 99))),
-          lat = 1,
-          lon = 2
-        ),
-        ScalaIssue15cCfg.Positions$Elm(
-          attrs = List(
-            List(
-              ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 3),
-              ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 0)
-            )
+      assert(
+        c.positions === List(
+          ScalaIssue15cCfg.Positions$Elm(
+            attrs =
+              List(List(ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 99))),
+            lat = 1,
+            lon = 2
           ),
-          lat = 3,
-          lon = 4
+          ScalaIssue15cCfg.Positions$Elm(
+            attrs = List(
+              List(
+                ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 3),
+                ScalaIssue15cCfg.Positions$Elm.Attrs$Elm(foo = 0)
+              )
+            ),
+            lat = 3,
+            lon = 4
+          )
         )
       )
-      c.qaz === ScalaIssue15cCfg.Qaz(
-        aa = ScalaIssue15cCfg.Qaz.Aa(
-          bb = List(ScalaIssue15cCfg.Qaz.Aa.Bb$Elm(cc = "hoho"))
+      assert(
+        c.qaz === ScalaIssue15cCfg.Qaz(
+          aa = ScalaIssue15cCfg.Qaz.Aa(
+            bb = List(ScalaIssue15cCfg.Qaz.Aa.Bb$Elm(cc = "hoho"))
+          )
         )
       )
     }
@@ -274,8 +296,8 @@ class ScalaMainSpec extends AnyWordSpec {
   "issue15d" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15d.spec.conf")
-      r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm")
-      r.fields.keySet === Set("baz", "aa", "dd")
+      assert(r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm"))
+      assert(r.fields.keySet === Set("baz", "aa", "dd"))
     }
 
     "example 1" in {
@@ -286,10 +308,12 @@ class ScalaMainSpec extends AnyWordSpec {
           |""".stripMargin
         )
       )
-      c.baz === List(
-        List(
-          ScalaIssue15dCfg.Baz$Elm(aa = Some(true), dd = 1),
-          ScalaIssue15dCfg.Baz$Elm(aa = None, dd = 2)
+      assert(
+        c.baz === List(
+          List(
+            ScalaIssue15dCfg.Baz$Elm(aa = Some(true), dd = 1),
+            ScalaIssue15dCfg.Baz$Elm(aa = None, dd = 2)
+          )
         )
       )
     }
@@ -298,8 +322,8 @@ class ScalaMainSpec extends AnyWordSpec {
   "issue15" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15.spec.conf")
-      r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm")
-      r.fields.keySet === Set("positions", "numbers", "other", "stuff")
+      assert(r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm"))
+      assert(r.fields.keySet === Set("positions", "numbers", "other", "stuff"))
     }
 
     "example 1" in {
@@ -315,13 +339,15 @@ class ScalaMainSpec extends AnyWordSpec {
           |""".stripMargin
         )
       )
-      c.positions === List(
-        ScalaIssue15Cfg.Positions$Elm(
-          numbers = List(1, 2, 3),
-          positions = List(
-            List(
-              ScalaIssue15Cfg.Positions$Elm
-                .Positions$Elm(other = 33, stuff = "baz")
+      assert(
+        c.positions === List(
+          ScalaIssue15Cfg.Positions$Elm(
+            numbers = List(1, 2, 3),
+            positions = List(
+              List(
+                ScalaIssue15Cfg.Positions$Elm
+                  .Positions$Elm(other = 33, stuff = "baz")
+              )
             )
           )
         )
@@ -332,19 +358,21 @@ class ScalaMainSpec extends AnyWordSpec {
   "duration" should {
     "generate code" in {
       val r = ScalaGen.generate("example/duration.spec.conf")
-      r.classNames === Set("ScalaDurationCfg", "Durations")
-      r.fields.keySet === Set(
-        "durations",
-        "days",
-        "hours",
-        "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
+      assert(r.classNames === Set("ScalaDurationCfg", "Durations"))
+      assert(
+        r.fields.keySet === Set(
+          "durations",
+          "days",
+          "hours",
+          "millis",
+          "duration_ns",
+          "duration_µs",
+          "duration_ms",
+          "duration_se",
+          "duration_mi",
+          "duration_hr",
+          "duration_dy"
+        )
       )
     }
 
@@ -366,17 +394,19 @@ class ScalaMainSpec extends AnyWordSpec {
           |""".stripMargin
         )
       )
-      c.durations === ScalaDurationCfg.Durations(
-        days = Some(10),
-        hours = 24,
-        millis = 550000,
-        duration_ns = 7,
-        duration_µs = 7,
-        duration_ms = 7,
-        duration_se = 7,
-        duration_mi = 7,
-        duration_hr = 7,
-        duration_dy = 7
+      assert(
+        c.durations === ScalaDurationCfg.Durations(
+          days = Some(10),
+          hours = 24,
+          millis = 550000,
+          duration_ns = 7,
+          duration_µs = 7,
+          duration_ms = 7,
+          duration_se = 7,
+          duration_mi = 7,
+          duration_hr = 7,
+          duration_dy = 7
+        )
       )
     }
   }
@@ -385,19 +415,21 @@ class ScalaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r =
         JavaGen.generate("example/duration2.spec.conf", useDurations = true)
-      r.classNames === Set("JavaDuration2Cfg", "Durations")
-      r.fields.keySet === Set(
-        "durations",
-        "days",
-        "hours",
-        "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
+      assert(r.classNames === Set("JavaDuration2Cfg", "Durations"))
+      assert(
+        r.fields.keySet === Set(
+          "durations",
+          "days",
+          "hours",
+          "millis",
+          "duration_ns",
+          "duration_µs",
+          "duration_ms",
+          "duration_se",
+          "duration_mi",
+          "duration_hr",
+          "duration_dy"
+        )
       )
     }
 
@@ -419,26 +451,28 @@ class ScalaMainSpec extends AnyWordSpec {
           |""".stripMargin
         )
       )
-      c.durations.days === Some(Duration.ofDays(10))
-      c.durations.hours === Duration.ofHours(24)
-      c.durations.millis === Duration.ofMillis(550000)
-      c.durations.duration_ns === Duration.ofNanos(7)
-      c.durations.duration_µs === Duration.of(7, MICROS)
-      c.durations.duration_ms === Duration.ofMillis(7)
-      c.durations.duration_se === Duration.ofSeconds(7)
-      c.durations.duration_mi === Duration.ofMinutes(7)
-      c.durations.duration_hr === Duration.ofHours(7)
-      c.durations.duration_dy === Duration.ofDays(7)
+      assert(c.durations.days === Some(Duration.ofDays(10)))
+      assert(c.durations.hours === Duration.ofHours(24))
+      assert(c.durations.millis === Duration.ofMillis(550000))
+      assert(c.durations.duration_ns === Duration.ofNanos(7))
+      assert(c.durations.duration_µs === Duration.of(7, MICROS))
+      assert(c.durations.duration_ms === Duration.ofMillis(7))
+      assert(c.durations.duration_se === Duration.ofSeconds(7))
+      assert(c.durations.duration_mi === Duration.ofMinutes(7))
+      assert(c.durations.duration_hr === Duration.ofHours(7))
+      assert(c.durations.duration_dy === Duration.ofDays(7))
     }
   }
 
   "issue19" should {
     """put underscores for key having $""" in {
       val r = ScalaGen.generate("example/issue19.spec.conf")
-      r.classNames === Set("ScalaIssue19Cfg")
-      r.fields === Map(
-        "do_log"  -> "scala.Boolean",
-        "_$_foo_" -> "java.lang.String"
+      assert(r.classNames === Set("ScalaIssue19Cfg"))
+      assert(
+        r.fields === Map(
+          "do_log"  -> "scala.Boolean",
+          "_$_foo_" -> "java.lang.String"
+        )
       )
     }
 
@@ -451,8 +485,8 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.do_log === true
-      c._$_foo_ === "some string"
+      assert(c.do_log === true)
+      assert(c._$_foo_ === "some string")
     }
   }
 
@@ -460,8 +494,8 @@ class ScalaMainSpec extends AnyWordSpec {
     "generate warning" in {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
       val r       = new ScalaGen(genOpts).generate(ObjectType())
-      r.classNames === Set("Classy")
-      r.fields === Map()
+      assert(r.classNames === Set("Classy"))
+      assert(r.fields === Map())
       // TODO actually verify generated warning
     }
   }
@@ -478,11 +512,13 @@ class ScalaMainSpec extends AnyWordSpec {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
       val r       = new ScalaGen(genOpts).generate(objectType)
 
-      r.classNames === Set("Classy", "Other")
-      r.fields === Map(
-        "$_baz" -> "java.lang.String",
-        "other" -> "Classy.Other",
-        "$_foo" -> "scala.Double"
+      assert(r.classNames === Set("Classy", "Other"))
+      assert(
+        r.fields === Map(
+          "$_baz" -> "java.lang.String",
+          "other" -> "Classy.Other",
+          "$_foo" -> "scala.Double"
+        )
       )
       // TODO actually verify the generated warnings
     }
@@ -490,10 +526,8 @@ class ScalaMainSpec extends AnyWordSpec {
   "issue22" should {
     "generate DURATION type" in {
       val r = ScalaGen.generate("example/issue22.spec.conf")
-      r.classNames === Set("ScalaIssue22Cfg")
-      r.fields === Map(
-        "idleTimeout" -> "scala.Long"
-      )
+      assert(r.classNames === Set("ScalaIssue22Cfg"))
+      assert(r.fields === Map("idleTimeout" -> "scala.Long"))
     }
 
     "example with default value" in {
@@ -504,20 +538,22 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.idleTimeout === 3600 * 1000
+      assert(c.idleTimeout === 3600 * 1000)
     }
   }
 
   "issue23" should {
     "generate SIZE type" in {
       val r = ScalaGen.generate("example/issue23.spec.conf")
-      r.classNames === Set("ScalaIssue23Cfg")
-      r.fields === Map(
-        "sizeReq"    -> "scala.Long",
-        "sizeOpt"    -> "scala.Option[scala.Long]",
-        "sizeOptDef" -> "scala.Long",
-        "sizes"      -> "scala.List[scala.Long]",
-        "sizes2"     -> "scala.List[scala.List[scala.Long]]"
+      assert(r.classNames === Set("ScalaIssue23Cfg"))
+      assert(
+        r.fields === Map(
+          "sizeReq"    -> "scala.Long",
+          "sizeOpt"    -> "scala.Option[scala.Long]",
+          "sizeOptDef" -> "scala.Long",
+          "sizes"      -> "scala.List[scala.Long]",
+          "sizes2"     -> "scala.List[scala.List[scala.Long]]"
+        )
       )
     }
 
@@ -532,11 +568,13 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.sizeReq === 2048 * 1024
-      c.sizeOpt === Some(1024000)
-      c.sizeOptDef === 1024
-      c.sizes === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000)
-      c.sizes2 === List(List(1000, 64 * 1024 * 1024 * 1024L), List(16 * 1000))
+      assert(c.sizeReq === 2048 * 1024)
+      assert(c.sizeOpt === Some(1024000))
+      assert(c.sizeOptDef === 1024)
+      assert(c.sizes === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000))
+      assert(
+        c.sizes2 === List(List(1000, 64 * 1024 * 1024 * 1024L), List(16 * 1000))
+      )
     }
   }
 
@@ -545,12 +583,12 @@ class ScalaMainSpec extends AnyWordSpec {
       val r =
         ScalaGen.generate("example/issue30.spec.conf", useBackticks = true)
 
-      r.classNames === Set("ScalaIssue30Cfg", "`Foo-object`")
-      r.fields.size === 4
-      r.fields("`foo-object`") === "ScalaIssue30Cfg.`Foo-object`"
-      r.fields("`bar-baz`") === "java.lang.String"
-      r.fields("`0`") === "java.lang.String"
-      r.fields("`other stuff`") === "scala.Int"
+      assert(r.classNames === Set("ScalaIssue30Cfg", "`Foo-object`"))
+      assert(r.fields.size === 4)
+      assert(r.fields("`foo-object`") === "ScalaIssue30Cfg.`Foo-object`")
+      assert(r.fields("`bar-baz`") === "java.lang.String")
+      assert(r.fields("`0`") === "java.lang.String")
+      assert(r.fields("`other stuff`") === "scala.Int")
     }
 
     "verify generated backticks" in {
@@ -564,40 +602,40 @@ class ScalaMainSpec extends AnyWordSpec {
         """.stripMargin
         )
       )
-      c.`foo-object`.`bar-baz` === "quz"
-      c.`other stuff` === 142857
+      assert(c.`foo-object`.`bar-baz` === "quz")
+      assert(c.`other stuff` === 142857)
     }
   }
 
   "issue33" should {
     "generate empty config for object level" in {
       val c = ScalaIssue33Cfg(ConfigFactory.parseString(""))
-      c.endpoint.url === "http://example.net"
+      assert(c.endpoint.url === "http://example.net")
     }
 
     "generate empty config for dot notated object level" in {
       val c = ScalaIssue33aCfg(ConfigFactory.parseString(""))
-      c.endpoint.more.url === "http://example.net"
+      assert(c.endpoint.more.url === "http://example.net")
     }
 
     "generate config for object first level" in {
       val c = ScalaIssue33bCfg(ConfigFactory.parseString(""))
-      c.endpoint.url === "http://example.net"
-      c.endpoint.foo === None
-      c.endpoint.baz.key === "bar"
+      assert(c.endpoint.url === "http://example.net")
+      assert(c.endpoint.foo === None)
+      assert(c.endpoint.baz.key === "bar")
     }
 
     "generate config for object nested level" in {
       val c = ScalaIssue33bCfg(ConfigFactory.parseString("endpoint.foo = 1"))
-      c.endpoint.url === "http://example.net"
-      c.endpoint.foo === Some(1)
-      c.endpoint.baz.key === "bar"
+      assert(c.endpoint.url === "http://example.net")
+      assert(c.endpoint.foo === Some(1))
+      assert(c.endpoint.baz.key === "bar")
     }
 
     "generate config for sub-object under required object" in {
       val c = ScalaIssue33cCfg(ConfigFactory.parseString("endpoint.req = foo"))
-      c.endpoint.req === "foo"
-      c.endpoint.optObj.key === "bar"
+      assert(c.endpoint.req === "foo")
+      assert(c.endpoint.optObj.key === "bar")
     }
   }
 
@@ -616,7 +654,7 @@ class ScalaMainSpec extends AnyWordSpec {
     "capture explicit memory size value in spec as a long literal" in {
       val c = ScalaIssue40Cfg(ConfigFactory.parseString(""))
       // well, the actual test is that the generated class compiles
-      c.memory === 53687091200L
+      assert(c.memory === 53687091200L)
     }
   }
 
@@ -718,13 +756,13 @@ class ScalaMainSpec extends AnyWordSpec {
           |}
           |""".stripMargin))
 
-      c.example.a.c === "C1"
-      c.example.a.d === 1
-      c.example.b.length === 2
-      c.example.b.head.c === "C2"
-      c.example.b.head.d === 2
-      c.example.b(1).c === "C3"
-      c.example.b(1).d === 3
+      assert(c.example.a.c === "C1")
+      assert(c.example.a.d === 1)
+      assert(c.example.b.length === 2)
+      assert(c.example.b.head.c === "C2")
+      assert(c.example.b.head.d === 2)
+      assert(c.example.b(1).c === "C3")
+      assert(c.example.b(1).d === 3)
     }
   }
 
@@ -738,7 +776,7 @@ class ScalaMainSpec extends AnyWordSpec {
           |}
           |""".stripMargin))
 
-      c.exampleD.test.a === 1
+      assert(c.exampleD.test.a === 1)
     }
   }
 
@@ -752,7 +790,7 @@ class ScalaMainSpec extends AnyWordSpec {
           |}
           |""".stripMargin))
 
-      c.exampleE.test.a === 1
+      assert(c.exampleE.test.a === 1)
     }
   }
 
@@ -772,19 +810,21 @@ class ScalaMainSpec extends AnyWordSpec {
           |}
           |""".stripMargin))
 
-      c.root.e.b === "B1"
-      c.root.e.c.d === 1
-      c.root.f.length === 1
-      c.root.f.head.b === "B2"
-      c.root.f.head.c.d === 2
+      assert(c.root.e.b === "B1")
+      assert(c.root.e.c.d === 1)
+      assert(c.root.f.length === 1)
+      assert(c.root.f.head.b === "B2")
+      assert(c.root.f.head.c.d === 2)
     }
   }
 
   "issue 55 - valid regexes" should {
     "be properly reflected" in {
       val c = ScalaIssue55Cfg(ConfigFactory.parseString(""))
-      c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
-      c.regex2 === "foo bar: ([\\d]+)"
+      assert(
+        c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
+      )
+      assert(c.regex2 === "foo bar: ([\\d]+)")
 
       java.util.regex.Pattern.compile(c.regex)
       java.util.regex.Pattern.compile(c.regex2)
@@ -794,24 +834,32 @@ class ScalaMainSpec extends AnyWordSpec {
   "multiline strings" should {
     "be properly reflected" in {
       val c = ScalaMultilinesCfg(ConfigFactory.parseString(""))
-      c.a === "some\nlines"
-      c.b === "other\n\"quoted\"\nlines"
-      c.c === "'simply quoted' string"
-      c.d === "some \b control \t \\ chars \r\f"
+      assert(c.a === "some\nlines")
+      assert(c.b === "other\n\"quoted\"\nlines")
+      assert(c.c === "'simply quoted' string")
+      assert(c.d === "some \b control \t \\ chars \r\f")
     }
   }
 
   "issue 59 - scala 2.12 and 2.13 switch" should {
     "generate a scala 2.13 config with corresponding imports if not indicated differently" in {
       val r = ScalaGen.generate("example/issue59.spec.conf")
-      r.code.contains("import scala.jdk.CollectionConverters._") === true
-      r.code.contains("import scala.collection.JavaConverters._") === false
+      assert(
+        r.code.contains("import scala.jdk.CollectionConverters._") === true
+      )
+      assert(
+        r.code.contains("import scala.collection.JavaConverters._") === false
+      )
     }
 
     "generate a scala 2.12 config with corresponding imports if --scala:2.12 is provided" in {
       val r = ScalaGen.generate("example/issue59.spec.conf", s12 = true)
-      r.code.contains("import scala.collection.JavaConverters._") === true
-      r.code.contains("import scala.jdk.CollectionConverters._") === false
+      assert(
+        r.code.contains("import scala.collection.JavaConverters._") === true
+      )
+      assert(
+        r.code.contains("import scala.jdk.CollectionConverters._") === false
+      )
     }
   }
 
@@ -824,7 +872,7 @@ class ScalaMainSpec extends AnyWordSpec {
             |""".stripMargin))
 
         import ScalaIssue62aCfg.FruitType._
-        c.foo.fruit === pineapple
+        assert(c.foo.fruit === pineapple)
       }
 
       "be handled with invalid enum value" in {
@@ -852,9 +900,9 @@ class ScalaMainSpec extends AnyWordSpec {
             |""".stripMargin))
 
         import ScalaIssue62bCfg.FruitType._
-        c.foo.fruit === pineapple
-        c.foo.someFruits === List(banana, apple)
-        c.foo.other.aFruit === apple
+        assert(c.foo.fruit === pineapple)
+        assert(c.foo.someFruits === List(banana, apple))
+        assert(c.foo.other.aFruit === apple)
       }
 
       "report correct field name when using incorrect enum value (#74)" in {
@@ -885,8 +933,8 @@ class ScalaMainSpec extends AnyWordSpec {
             |""".stripMargin))
 
         import ScalaIssue62Cfg.FruitType._
-        c.fruit === apple
-        c.fruits === List(banana, pineapple)
+        assert(c.fruit === apple)
+        assert(c.fruits === List(banana, pineapple))
       }
     }
   }
@@ -900,12 +948,14 @@ class ScalaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue64.spec.conf")
-      assert(r.classNames === Set(
-        "ScalaIssue64Cfg",
-        "BaseModelConfig",
-        "LoadModelConfig",
-        "Test"
-      ))
+      assert(
+        r.classNames === Set(
+          "ScalaIssue64Cfg",
+          "BaseModelConfig",
+          "LoadModelConfig",
+          "Test"
+        )
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -917,10 +967,12 @@ class ScalaMainSpec extends AnyWordSpec {
       }
 
       // have the correct values
-      configFromFile.test.loadModelConfig.modelBehaviour === "testBehaviour"
-      configFromFile.test.loadModelConfig.uuids === List("default")
-      configFromFile.test.loadModelConfig.scaling === 1.0
-      configFromFile.test.loadModelConfig.reference === "testReference"
+      assert(
+        configFromFile.test.loadModelConfig.modelBehaviour === "testBehaviour"
+      )
+      assert(configFromFile.test.loadModelConfig.uuids === List("default"))
+      assert(configFromFile.test.loadModelConfig.scaling === 1.0)
+      assert(configFromFile.test.loadModelConfig.reference === "testReference")
     }
   }
 
@@ -948,7 +1000,9 @@ class ScalaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue67.spec.conf")
-      r.classNames === Set("ScalaIssue67Cfg", "AbstractA", "ImplA", "Test")
+      assert(
+        r.classNames === Set("ScalaIssue67Cfg", "AbstractA", "ImplA", "Test")
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -959,8 +1013,8 @@ class ScalaMainSpec extends AnyWordSpec {
       }
 
       // have the correct values
-      configFromFile.test.impl.a === "hello"
-      configFromFile.test.impl.b === "world"
+      assert(configFromFile.test.impl.a === "hello")
+      assert(configFromFile.test.impl.b === "world")
     }
   }
 
@@ -973,12 +1027,14 @@ class ScalaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue67a.spec.conf")
-      r.classNames === Set(
-        "ScalaIssue67aCfg",
-        "AbstractA",
-        "AbstractB",
-        "ImplB",
-        "Test"
+      assert(
+        r.classNames === Set(
+          "ScalaIssue67aCfg",
+          "AbstractA",
+          "AbstractB",
+          "ImplB",
+          "Test"
+        )
       )
     }
 
@@ -995,9 +1051,9 @@ class ScalaMainSpec extends AnyWordSpec {
       }
 
       // have the correct values
-      configFromFile.test.impl.a === "hello"
-      configFromFile.test.impl.b === "world"
-      configFromFile.test.impl.c === "!"
+      assert(configFromFile.test.impl.a === "hello")
+      assert(configFromFile.test.impl.b === "world")
+      assert(configFromFile.test.impl.c === "!")
     }
   }
 
@@ -1010,13 +1066,15 @@ class ScalaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue67b.spec.conf")
-      r.classNames === Set(
-        "ScalaIssue67bCfg",
-        "AbstractA",
-        "AbstractB",
-        "AbstractC",
-        "ImplC",
-        "Test"
+      assert(
+        r.classNames === Set(
+          "ScalaIssue67bCfg",
+          "AbstractA",
+          "AbstractB",
+          "AbstractC",
+          "ImplC",
+          "Test"
+        )
       )
     }
 
@@ -1038,10 +1096,10 @@ class ScalaMainSpec extends AnyWordSpec {
       }
 
       // have the correct values
-      configFromFile.test.impl.a === "hello"
-      configFromFile.test.impl.b === "world"
-      configFromFile.test.impl.c === "!"
-      configFromFile.test.impl.d === "?"
+      assert(configFromFile.test.impl.a === "hello")
+      assert(configFromFile.test.impl.b === "world")
+      assert(configFromFile.test.impl.c === "!")
+      assert(configFromFile.test.impl.d === "?")
     }
   }
 
@@ -1076,10 +1134,10 @@ class ScalaMainSpec extends AnyWordSpec {
           |}
           |""".stripMargin))
 
-      c.example.a.c === "eac"
-      c.example.a.d.e === 10
-      c.example.b.head.c === "eb0c"
-      c.example.b.head.d.e === 20
+      assert(c.example.a.c === "eac")
+      assert(c.example.a.d.e === 10)
+      assert(c.example.b.head.c === "eb0c")
+      assert(c.example.b.head.d.e === 20)
     }
 
     "71 handled ok" in {
@@ -1109,12 +1167,12 @@ class ScalaMainSpec extends AnyWordSpec {
           |}
           |""".stripMargin))
 
-      c.example.a.c === "eac"
-      c.example.a.d.e === 10
-      c.example.b.head.c === "eb0c"
-      c.example.b.head.d.e === 20
-      c.example.c.head.dd === "ec0dd"
-      c.example.c.head.dddd.eeee === 30
+      assert(c.example.a.c === "eac")
+      assert(c.example.a.d.e === 10)
+      assert(c.example.b.head.c === "eb0c")
+      assert(c.example.b.head.d.e === 20)
+      assert(c.example.c.head.dd === "ec0dd")
+      assert(c.example.c.head.dddd.eeee === 30)
     }
   }
 }

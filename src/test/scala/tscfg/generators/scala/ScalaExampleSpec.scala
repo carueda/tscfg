@@ -19,16 +19,16 @@ class ScalaExampleSpec extends AnyWordSpec {
 
     "with good input" should {
       "capture given required values" in {
-        cfg.endpoint.path === "/var/www"
-        cfg.endpoint.intReq === 12
+        assert(cfg.endpoint.path === "/var/www")
+        assert(cfg.endpoint.intReq === 12)
       }
       "capture given optional values" in {
-        cfg.endpoint.interface.port === 9191
+        assert(cfg.endpoint.interface.port === 9191)
         assert(cfg.endpoint.interface.`type` contains "foo")
       }
 
       "capture default values" in {
-        cfg.endpoint.url === "http://example.net"
+        assert(cfg.endpoint.url === "http://example.net")
         assert(cfg.endpoint.serial.isEmpty)
       }
     }

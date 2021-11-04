@@ -19,18 +19,18 @@ class JavaExampleSpec extends AnyWordSpec {
     val cfg: JavaExampleCfg = new JavaExampleCfg(config)
 
     "capture given required values" in {
-      cfg.endpoint.path === "/var/www"
-      cfg.endpoint.intReq === 12
+      assert(cfg.endpoint.path === "/var/www")
+      assert(cfg.endpoint.intReq === 12)
     }
 
     "capture given optional values" in {
-      cfg.endpoint.interface_.port === 9191
-      cfg.endpoint.interface_.`type` === "foo"
+      assert(cfg.endpoint.interface_.port === 9191)
+      assert(cfg.endpoint.interface_.`type` === "foo")
     }
 
     "capture default values" in {
-      cfg.endpoint.url === "http://example.net"
-      cfg.endpoint.serial === null
+      assert(cfg.endpoint.url === "http://example.net")
+      assert(cfg.endpoint.serial === null)
     }
   }
 

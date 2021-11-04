@@ -21,14 +21,16 @@ class JavaMainSpec extends AnyWordSpec {
     "generate primitive types with given values as defaults" in {
       val r = JavaGen.generate("example/example0.spec.conf")
       assert(r.classNames === Set("JavaExample0Cfg", "Service"))
-      assert(r.fields === Map(
-        "service"  -> "JavaExample0Cfg.Service",
-        "url"      -> "java.lang.String",
-        "debug"    -> "boolean",
-        "doLog"    -> "boolean",
-        "factor"   -> "double",
-        "poolSize" -> "int"
-      ))
+      assert(
+        r.fields === Map(
+          "service"  -> "JavaExample0Cfg.Service",
+          "url"      -> "java.lang.String",
+          "debug"    -> "boolean",
+          "doLog"    -> "boolean",
+          "factor"   -> "double",
+          "poolSize" -> "int"
+        )
+      )
     }
 
     "example with missing entries should get their defaults" in {
@@ -59,15 +61,19 @@ class JavaMainSpec extends AnyWordSpec {
   "issue10" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue10.spec.conf")
-      assert(r.classNames === Set("JavaIssue10Cfg", "Main", "Email", "Reals$Elm"))
-      assert(r.fields.keySet === Set(
-        "server",
-        "email",
-        "main",
-        "reals",
-        "password",
-        "foo"
-      ))
+      assert(
+        r.classNames === Set("JavaIssue10Cfg", "Main", "Email", "Reals$Elm")
+      )
+      assert(
+        r.fields.keySet === Set(
+          "server",
+          "email",
+          "main",
+          "reals",
+          "password",
+          "foo"
+        )
+      )
     }
 
     "example 1" in {
@@ -108,30 +114,36 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/issue11.spec.conf")
       assert(r.classNames === Set("JavaIssue11Cfg", "Foo"))
-      assert(r.fields.keySet === Set(
-        "notify",
-        "wait",
-        "getClass",
-        "clone",
-        "finalize",
-        "notifyAll",
-        "toString",
-        "foo"
-      ))
+      assert(
+        r.fields.keySet === Set(
+          "notify",
+          "wait",
+          "getClass",
+          "clone",
+          "finalize",
+          "notifyAll",
+          "toString",
+          "foo"
+        )
+      )
     }
   }
 
   "issue12" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue12.spec.conf")
-      assert(r.classNames === Set(
-        "JavaIssue12Cfg",
-        "String",
-        "Option",
-        "Boolean",
-        "Int_"
-      ))
-      assert(r.fields.keySet === Set("String", "Option", "Boolean", "int_", "bar"))
+      assert(
+        r.classNames === Set(
+          "JavaIssue12Cfg",
+          "String",
+          "Option",
+          "Boolean",
+          "Int_"
+        )
+      )
+      assert(
+        r.fields.keySet === Set("String", "Option", "Boolean", "int_", "bar")
+      )
     }
   }
 
@@ -185,13 +197,15 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/issue15b.spec.conf")
       assert(r.classNames === Set("JavaIssue15bCfg"))
-      assert(r.fields.keySet === Set(
-        "strings",
-        "integers",
-        "doubles",
-        "longs",
-        "booleans"
-      ))
+      assert(
+        r.fields.keySet === Set(
+          "strings",
+          "integers",
+          "doubles",
+          "longs",
+          "booleans"
+        )
+      )
     }
 
     "example 1" in {
@@ -207,10 +221,12 @@ class JavaMainSpec extends AnyWordSpec {
         )
       )
       assert(c.strings.asScala.toList === List("hello", "world", "true"))
-      assert(c.integers.asScala.toList.map(_.asScala.toList) === List(
-        List(1, 2, 3),
-        List(4, 5)
-      ))
+      assert(
+        c.integers.asScala.toList.map(_.asScala.toList) === List(
+          List(1, 2, 3),
+          List(4, 5)
+        )
+      )
       assert(c.doubles.asScala.toList === List(3.14, 2.7182, 1.618))
       assert(c.longs.asScala.toList === List(1, 9999999999L))
       assert(c.booleans.asScala.toList === List(true, false))
@@ -220,25 +236,29 @@ class JavaMainSpec extends AnyWordSpec {
   "issue15c" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15c.spec.conf")
-      assert(r.classNames === Set(
-        "JavaIssue15cCfg",
-        "Qaz",
-        "Aa",
-        "Positions$Elm",
-        "Bb$Elm",
-        "Attrs$Elm"
-      ))
-      assert(r.fields.keySet === Set(
-        "positions",
-        "lat",
-        "lon",
-        "attrs",
-        "foo",
-        "qaz",
-        "aa",
-        "bb",
-        "cc"
-      ))
+      assert(
+        r.classNames === Set(
+          "JavaIssue15cCfg",
+          "Qaz",
+          "Aa",
+          "Positions$Elm",
+          "Bb$Elm",
+          "Attrs$Elm"
+        )
+      )
+      assert(
+        r.fields.keySet === Set(
+          "positions",
+          "lat",
+          "lon",
+          "attrs",
+          "foo",
+          "qaz",
+          "aa",
+          "bb",
+          "cc"
+        )
+      )
     }
 
     "example 1" in {
@@ -299,7 +319,13 @@ class JavaMainSpec extends AnyWordSpec {
   "issue15" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15.spec.conf")
-      assert(r.classNames === Set("JavaIssue15Cfg", "Positions$Elm", "Positions$Elm2"))
+      assert(
+        r.classNames === Set(
+          "JavaIssue15Cfg",
+          "Positions$Elm",
+          "Positions$Elm2"
+        )
+      )
       assert(r.fields.keySet === Set("positions", "numbers", "other", "stuff"))
     }
 
@@ -329,19 +355,21 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/duration.spec.conf")
       assert(r.classNames === Set("JavaDurationCfg", "Durations"))
-      assert(r.fields.keySet === Set(
-        "durations",
-        "days",
-        "hours",
-        "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
-      ))
+      assert(
+        r.fields.keySet === Set(
+          "durations",
+          "days",
+          "hours",
+          "millis",
+          "duration_ns",
+          "duration_µs",
+          "duration_ms",
+          "duration_se",
+          "duration_mi",
+          "duration_hr",
+          "duration_dy"
+        )
+      )
     }
 
     "example 1" in {
@@ -380,19 +408,21 @@ class JavaMainSpec extends AnyWordSpec {
       val r =
         JavaGen.generate("example/duration2.spec.conf", useDurations = true)
       assert(r.classNames === Set("JavaDuration2Cfg", "Durations"))
-      assert(r.fields.keySet === Set(
-        "durations",
-        "days",
-        "hours",
-        "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
-      ))
+      assert(
+        r.fields.keySet === Set(
+          "durations",
+          "days",
+          "hours",
+          "millis",
+          "duration_ns",
+          "duration_µs",
+          "duration_ms",
+          "duration_se",
+          "duration_mi",
+          "duration_hr",
+          "duration_dy"
+        )
+      )
     }
 
     "example 1" in {
@@ -434,19 +464,21 @@ class JavaMainSpec extends AnyWordSpec {
         genGetters = true
       )
       assert(r.classNames === Set("JavaDuration3Cfg", "Durations"))
-      assert(r.fields.keySet === Set(
-        "durations",
-        "days",
-        "hours",
-        "millis",
-        "duration_ns",
-        "duration_µs",
-        "duration_ms",
-        "duration_se",
-        "duration_mi",
-        "duration_hr",
-        "duration_dy"
-      ))
+      assert(
+        r.fields.keySet === Set(
+          "durations",
+          "days",
+          "hours",
+          "millis",
+          "duration_ns",
+          "duration_µs",
+          "duration_ms",
+          "duration_se",
+          "duration_mi",
+          "duration_hr",
+          "duration_dy"
+        )
+      )
     }
 
     "example 1" in {
@@ -484,10 +516,12 @@ class JavaMainSpec extends AnyWordSpec {
     """put underscores for key having $""" in {
       val r = JavaGen.generate("example/issue19.spec.conf")
       assert(r.classNames === Set("JavaIssue19Cfg"))
-      assert(r.fields === Map(
-        "do_log"  -> "boolean",
-        "_$_foo_" -> "java.lang.String"
-      ))
+      assert(
+        r.fields === Map(
+          "do_log"  -> "boolean",
+          "_$_foo_" -> "java.lang.String"
+        )
+      )
     }
 
     "example" in {
@@ -526,11 +560,13 @@ class JavaMainSpec extends AnyWordSpec {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
       val r       = new JavaGen(genOpts).generate(objectType)
       assert(r.classNames === Set("Classy", "Other"))
-      assert(r.fields === Map(
-        "$_baz" -> "java.lang.String",
-        "other" -> "Classy.Other",
-        "$_foo" -> "double"
-      ))
+      assert(
+        r.fields === Map(
+          "$_baz" -> "java.lang.String",
+          "other" -> "Classy.Other",
+          "$_foo" -> "double"
+        )
+      )
       // TODO actually verify the generated warnings
     }
   }
@@ -539,9 +575,11 @@ class JavaMainSpec extends AnyWordSpec {
     "generate DURATION type" in {
       val r = JavaGen.generate("example/issue22.spec.conf")
       assert(r.classNames === Set("JavaIssue22Cfg"))
-      assert(r.fields === Map(
-        "idleTimeout" -> "long"
-      ))
+      assert(
+        r.fields === Map(
+          "idleTimeout" -> "long"
+        )
+      )
     }
 
     "example with default value" in {
@@ -570,13 +608,15 @@ class JavaMainSpec extends AnyWordSpec {
     "generate SIZE type" in {
       val r = JavaGen.generate("example/issue23.spec.conf")
       assert(r.classNames === Set("JavaIssue23Cfg"))
-      assert(r.fields === Map(
-        "sizeReq"    -> "long",
-        "sizeOpt"    -> "java.lang.Long",
-        "sizeOptDef" -> "long",
-        "sizes"      -> "java.util.List<java.lang.Long>",
-        "sizes2"     -> "java.util.List<java.util.List<java.lang.Long>>"
-      ))
+      assert(
+        r.fields === Map(
+          "sizeReq"    -> "long",
+          "sizeOpt"    -> "java.lang.Long",
+          "sizeOptDef" -> "long",
+          "sizes"      -> "java.util.List<java.lang.Long>",
+          "sizes2"     -> "java.util.List<java.util.List<java.lang.Long>>"
+        )
+      )
     }
 
     "example" in {
@@ -593,11 +633,19 @@ class JavaMainSpec extends AnyWordSpec {
       assert(c.sizeReq === 2048 * 1024)
       assert(c.sizeOpt === 1024000)
       assert(c.sizeOptDef === 1024)
-      assert(c.sizes.asScala.toList === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000))
-      assert(c.sizes2.asScala.toList.map(_.asScala.toList) === List(
-        List(1000, 64 * 1024 * 1024 * 1024L),
-        List(16 * 1000)
-      ))
+      assert(
+        c.sizes.asScala.toList === List(
+          1000,
+          64 * 1024 * 1024 * 1024L,
+          16 * 1000
+        )
+      )
+      assert(
+        c.sizes2.asScala.toList.map(_.asScala.toList) === List(
+          List(1000, 64 * 1024 * 1024 * 1024L),
+          List(16 * 1000)
+        )
+      )
     }
   }
 
@@ -681,7 +729,9 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/issue41.spec.conf", useOptionals = true)
       assert(r.classNames === Set("JavaIssue41Cfg", "C", "F"))
-      assert(r.fields.keySet === Set("a", "b", "c", "d", "e", "f", "g", "h", "i"))
+      assert(
+        r.fields.keySet === Set("a", "b", "c", "d", "e", "f", "g", "h", "i")
+      )
     }
 
     "example 1" in {
@@ -893,7 +943,9 @@ class JavaMainSpec extends AnyWordSpec {
   "issue 55 - valid regexes" should {
     "be properly reflected" in {
       val c = new JavaIssue55Cfg(ConfigFactory.parseString(""))
-      assert(c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?")
+      assert(
+        c.regex === ">(RUS00),(\\d{12})(.\\d{7})(.\\d{8})(\\d{3})(\\d{3}),(\\d{1,10})((\\.)(\\d{3}))?"
+      )
       assert(c.regex2 === "foo bar: ([\\d]+)")
 
       java.util.regex.Pattern.compile(c.regex)
@@ -975,12 +1027,14 @@ class JavaMainSpec extends AnyWordSpec {
 
     "result in a valid config for java" in {
       val r = JavaGen.generate("example/issue64.spec.conf")
-      assert(r.classNames === Set(
-        "JavaIssue64Cfg",
-        "BaseModelConfig",
-        "LoadModelConfig",
-        "Test"
-      ))
+      assert(
+        r.classNames === Set(
+          "JavaIssue64Cfg",
+          "BaseModelConfig",
+          "LoadModelConfig",
+          "Test"
+        )
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -992,8 +1046,12 @@ class JavaMainSpec extends AnyWordSpec {
       }
 
       // have the correct values
-      assert(configFromFile.test.loadModelConfig.modelBehaviour === "testBehaviour")
-      assert(configFromFile.test.loadModelConfig.uuids === List("default").asJava)
+      assert(
+        configFromFile.test.loadModelConfig.modelBehaviour === "testBehaviour"
+      )
+      assert(
+        configFromFile.test.loadModelConfig.uuids === List("default").asJava
+      )
       assert(configFromFile.test.loadModelConfig.scaling === 1.0)
       assert(configFromFile.test.loadModelConfig.reference === "testReference")
     }
@@ -1023,7 +1081,9 @@ class JavaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = JavaGen.generate("example/issue67.spec.conf")
-      assert(r.classNames === Set("JavaIssue67Cfg", "AbstractA", "ImplA", "Test"))
+      assert(
+        r.classNames === Set("JavaIssue67Cfg", "AbstractA", "ImplA", "Test")
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -1048,13 +1108,15 @@ class JavaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = JavaGen.generate("example/issue67a.spec.conf")
-      assert(r.classNames === Set(
-        "JavaIssue67aCfg",
-        "AbstractA",
-        "AbstractB",
-        "ImplB",
-        "Test"
-      ))
+      assert(
+        r.classNames === Set(
+          "JavaIssue67aCfg",
+          "AbstractA",
+          "AbstractB",
+          "ImplB",
+          "Test"
+        )
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -1085,14 +1147,16 @@ class JavaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = JavaGen.generate("example/issue67b.spec.conf")
-      assert(r.classNames === Set(
-        "JavaIssue67bCfg",
-        "AbstractA",
-        "AbstractB",
-        "AbstractC",
-        "ImplC",
-        "Test"
-      ))
+      assert(
+        r.classNames === Set(
+          "JavaIssue67bCfg",
+          "AbstractA",
+          "AbstractB",
+          "AbstractC",
+          "ImplC",
+          "Test"
+        )
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
