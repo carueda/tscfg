@@ -1,5 +1,6 @@
 2021-11
 
+- 0.9.994 release
 - core handling in place for `--java:records` #75.
   This along with needed scala 2.13.7 to support record compilation.
   

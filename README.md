@@ -10,8 +10,8 @@
 tscfg is a command line tool that takes a configuration specification
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
 and generates all the boiler-plate to make the definitions
-available in type safe, immutable objects
-(POJOs for Java, case classes for Scala).
+available in type-safe, immutable objects
+(POJOs/records for Java, case classes for Scala).
 
 The generated code only depends on the Typesafe Config library.
 
@@ -199,6 +199,7 @@ Options (default):
   --java                generate java code               (the default)
   --j7                  generate code for java <= 7      (>= 8)
   --java:getters        generate getters (see #31)       (false)
+  --java:records        generate records                 (false)
   --java:optionals      use optionals                    (false)
   --scala               generate scala code              (java)
   --scala:2.12          generate code for scala 2.12     (2.13)
