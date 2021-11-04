@@ -10,7 +10,6 @@ libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.6.3",
   "com.typesafe"            % "config"                  % "1.4.1",
   "org.scalatest"          %% "scalatest"               % "3.2.10" % Test,
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0",
   "org.json4s"             %% "json4s-native"           % "4.0.3",
   "com.google.code.gson"    % "gson"                    % "2.8.9"
 )
@@ -40,11 +39,6 @@ codeDefs := {
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")
 (genCode / fork) := true
-
-/* pending stuff for when using java 16+
-
-Test / javacOptions ++= Seq("-source", "1.17")
-*/
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
 (Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value

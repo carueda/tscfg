@@ -900,12 +900,12 @@ class ScalaMainSpec extends AnyWordSpec {
 
     "result in a valid config for scala" in {
       val r = ScalaGen.generate("example/issue64.spec.conf")
-      r.classNames === Set(
+      assert(r.classNames === Set(
         "ScalaIssue64Cfg",
         "BaseModelConfig",
         "LoadModelConfig",
         "Test"
-      )
+      ))
     }
 
     "be able to process a corresponding configuration correctly" in {

@@ -1,5 +1,10 @@
 2021-11
 
+- core handling in place for `--java:records` #75.
+  This along with needed scala 2.13.7 to support record compilation.
+  
+TODO do not generate for others when generation option is only relevant for a target language
+
 - re #69 "Use consistent formatter for the generated code"
   actually decided to remove the extra libraries as they were causing more friction
   than benefit (in particular re modernization of this tool), and users can actually
@@ -10,14 +15,6 @@
 2021-10
 
 - re #75: initial --java:records handling
-  - but sbt is failing to compile the generated code ;(
-    For now, commenting out the option in issues75b.spec.conf and the test.
-
-    [error] -- Error: /Users/carueda/github/carueda/tscfg/src/test/java/tscfg/example/JavaIssue75bCfg.java:3:14
-    [error] 3 |public record JavaIssue75bCfg (
-    [error]   |              ^^^^^^^^^^^^^^^
-    [error]   |              illegal start of type declaration
-
 
 - some cleanup in generated java code related with unneeded
   `final .. parentPath = ""` in root objects;  TODO complete.
