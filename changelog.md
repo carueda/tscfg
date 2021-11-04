@@ -1,3 +1,12 @@
+2021-11
+
+- re #69 "Use consistent formatter for the generated code"
+  actually decided to remove the extra libraries as they were causing more friction
+  than benefit (in particular re modernization of this tool), and users can actually
+  do any post-generation formatting as needed.
+  For this project itself, we just use the scalafmt plugin as a common dependency.
+  We could also use it on generated files as needed/convenient.
+
 2021-10
 
 - re #75: initial --java:records handling

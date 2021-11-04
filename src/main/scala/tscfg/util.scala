@@ -24,22 +24,24 @@ object util {
 
   // $COVERAGE-OFF$
   // debugging helper
-  def setLogMinLevel(name: Option[String] = None,
-               minimumLevel: Option[scribe.Level] = Some(scribe.Level.Debug),
-              ): Unit = {
+  def setLogMinLevel(
+      name: Option[String] = None,
+      minimumLevel: Option[scribe.Level] = Some(scribe.Level.Debug),
+  ): Unit = {
     val logger = name.map(Logger(_)).getOrElse(Logger.root)
     logger
-      .clearHandlers().clearModifiers()
+      .clearHandlers()
+      .clearModifiers()
       .withHandler(
-        formatter = formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $message$mdc",
+        formatter =
+          formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $message$mdc",
         minimumLevel = minimumLevel
       )
       .replace()
   }
 
-  val doFormatting: Boolean = !sys.env.contains("NO_FORMATTER")
-
   // $COVERAGE-ON$
 
-  val TypesafeConfigClassName: String = classOf[com.typesafe.config.Config].getName
+  val TypesafeConfigClassName: String =
+    classOf[com.typesafe.config.Config].getName
 }

@@ -1,127 +1,75 @@
 package tscfg.example
 
 final case class ScalaIssue10Cfg(
-    main: ScalaIssue10Cfg.Main
+  main : ScalaIssue10Cfg.Main
 )
 object ScalaIssue10Cfg {
   final case class Main(
-      email: scala.Option[ScalaIssue10Cfg.Main.Email],
-      reals: scala.Option[scala.List[ScalaIssue10Cfg.Main.Reals$Elm]]
+    email : scala.Option[ScalaIssue10Cfg.Main.Email],
+    reals : scala.Option[scala.List[ScalaIssue10Cfg.Main.Reals$Elm]]
   )
   object Main {
     final case class Email(
-        password: java.lang.String,
-        server: java.lang.String
+      password : java.lang.String,
+      server   : java.lang.String
     )
     object Email {
-      def apply(
-          c: com.typesafe.config.Config,
-          parentPath: java.lang.String,
-          $tsCfgValidator: $TsCfgValidator
-      ): ScalaIssue10Cfg.Main.Email = {
+      def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue10Cfg.Main.Email = {
         ScalaIssue10Cfg.Main.Email(
           password = $_reqStr(parentPath, c, "password", $tsCfgValidator),
-          server = $_reqStr(parentPath, c, "server", $tsCfgValidator)
+          server   = $_reqStr(parentPath, c, "server", $tsCfgValidator)
         )
       }
-      private def $_reqStr(
-          parentPath: java.lang.String,
-          c: com.typesafe.config.Config,
-          path: java.lang.String,
-          $tsCfgValidator: $TsCfgValidator
-      ): java.lang.String = {
+      private def $_reqStr(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): java.lang.String = {
         if (c == null) null
-        else
-          try c.getString(path)
-          catch {
-            case e: com.typesafe.config.ConfigException =>
-              $tsCfgValidator.addBadPath(parentPath + path, e)
-              null
-          }
+        else try c.getString(path)
+        catch {
+          case e:com.typesafe.config.ConfigException =>
+            $tsCfgValidator.addBadPath(parentPath + path, e)
+            null
+        }
       }
-
+    
     }
-
+          
     final case class Reals$Elm(
-        foo: scala.Double
+      foo : scala.Double
     )
     object Reals$Elm {
-      def apply(
-          c: com.typesafe.config.Config,
-          parentPath: java.lang.String,
-          $tsCfgValidator: $TsCfgValidator
-      ): ScalaIssue10Cfg.Main.Reals$Elm = {
+      def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue10Cfg.Main.Reals$Elm = {
         ScalaIssue10Cfg.Main.Reals$Elm(
           foo = $_reqDbl(parentPath, c, "foo", $tsCfgValidator)
         )
       }
-      private def $_reqDbl(
-          parentPath: java.lang.String,
-          c: com.typesafe.config.Config,
-          path: java.lang.String,
-          $tsCfgValidator: $TsCfgValidator
-      ): scala.Double = {
+      private def $_reqDbl(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Double = {
         if (c == null) 0
-        else
-          try c.getDouble(path)
-          catch {
-            case e: com.typesafe.config.ConfigException =>
-              $tsCfgValidator.addBadPath(parentPath + path, e)
-              0
-          }
+        else try c.getDouble(path)
+        catch {
+          case e:com.typesafe.config.ConfigException =>
+            $tsCfgValidator.addBadPath(parentPath + path, e)
+            0
+        }
       }
-
+    
     }
-
-    def apply(
-        c: com.typesafe.config.Config,
-        parentPath: java.lang.String,
-        $tsCfgValidator: $TsCfgValidator
-    ): ScalaIssue10Cfg.Main = {
+          
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue10Cfg.Main = {
       ScalaIssue10Cfg.Main(
-        email =
-          if (c.hasPathOrNull("email"))
-            scala.Some(
-              ScalaIssue10Cfg.Main
-                .Email(c.getConfig("email"), parentPath + "email.", $tsCfgValidator)
-            )
-          else None,
-        reals =
-          if (c.hasPathOrNull("reals"))
-            scala.Some(
-              $_LScalaIssue10Cfg_Main_Reals$Elm(c.getList("reals"), parentPath, $tsCfgValidator)
-            )
-          else None
+        email = if(c.hasPathOrNull("email")) scala.Some(ScalaIssue10Cfg.Main.Email(c.getConfig("email"), parentPath + "email.", $tsCfgValidator)) else None,
+        reals = if(c.hasPathOrNull("reals")) scala.Some($_LScalaIssue10Cfg_Main_Reals$Elm(c.getList("reals"), parentPath, $tsCfgValidator)) else None
       )
     }
-    private def $_LScalaIssue10Cfg_Main_Reals$Elm(
-        cl: com.typesafe.config.ConfigList,
-        parentPath: java.lang.String,
-        $tsCfgValidator: $TsCfgValidator
-    ): scala.List[ScalaIssue10Cfg.Main.Reals$Elm] = {
+    private def $_LScalaIssue10Cfg_Main_Reals$Elm(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.List[ScalaIssue10Cfg.Main.Reals$Elm] = {
       import scala.jdk.CollectionConverters._
-      cl.asScala
-        .map(cv =>
-          ScalaIssue10Cfg.Main.Reals$Elm(
-            cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig,
-            parentPath,
-            $tsCfgValidator
-          )
-        )
-        .toList
+      cl.asScala.map(cv => ScalaIssue10Cfg.Main.Reals$Elm(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig, parentPath, $tsCfgValidator)).toList
     }
   }
-
+        
   def apply(c: com.typesafe.config.Config): ScalaIssue10Cfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
-    val parentPath: java.lang.String     = ""
+    val parentPath: java.lang.String = ""
     val $result = ScalaIssue10Cfg(
-      main = ScalaIssue10Cfg.Main(
-        if (c.hasPathOrNull("main")) c.getConfig("main")
-        else com.typesafe.config.ConfigFactory.parseString("main{}"),
-        parentPath + "main.",
-        $tsCfgValidator
-      )
+      main = ScalaIssue10Cfg.Main(if(c.hasPathOrNull("main")) c.getConfig("main") else com.typesafe.config.ConfigFactory.parseString("main{}"), parentPath + "main.", $tsCfgValidator)
     )
     $tsCfgValidator.validate()
     $result
@@ -133,11 +81,7 @@ object ScalaIssue10Cfg {
       badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 
-    def addInvalidEnumValue(
-        path: java.lang.String,
-        value: java.lang.String,
-        enumName: java.lang.String
-    ): Unit = {
+    def addInvalidEnumValue(path: java.lang.String, value: java.lang.String, enumName: java.lang.String): Unit = {
       badPaths += s"'$path': invalid value $value for enumeration $enumName"
     }
 
@@ -145,7 +89,7 @@ object ScalaIssue10Cfg {
       if (badPaths.nonEmpty) {
         throw new com.typesafe.config.ConfigException(
           badPaths.mkString("Invalid configuration:\n    ", "\n    ", "")
-        ) {}
+        ){}
       }
     }
   }

@@ -7,7 +7,6 @@ import tscfg.model._
 
 import scala.jdk.CollectionConverters._
 
-
 class ModelBuilder(assumeAllRequired: Boolean = false) {
 
   import buildWarnings._
@@ -18,94 +17,119 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     warns.clear()
     ModelBuildResult(
       objectType = fromConfig(Namespace.root, conf),
-      warnings = warns.toList.sortBy(_.line))
+      warnings = warns.toList.sortBy(_.line)
+    )
   }
 
   private val warns = collection.mutable.ArrayBuffer[Warning]()
 
-  /**
-    * Gets the [[model.ObjectType]] corresponding to the given TS Config object.
+  /** Gets the [[model.ObjectType]] corresponding to the given TS Config object.
     */
-  private def fromConfig(namespace: Namespace, conf: Config): model.ObjectType = {
+  private def fromConfig(
+      namespace: Namespace,
+      conf: Config
+  ): model.ObjectType = {
     val memberStructs: List[Struct] = Struct.getMemberStructs(namespace, conf)
 
-    val members: immutable.Map[String, model.AnnType] = memberStructs.map { childStruct =>
-      val name = childStruct.name
-      val cv = conf.getValue(name)
+    val members: immutable.Map[String, model.AnnType] = memberStructs.map {
+      childStruct =>
+        val name = childStruct.name
+        val cv   = conf.getValue(name)
 
-      val (childType, optional, default) = {
-        if (childStruct.isLeaf) {
-          val valueString = tscfg.util.escapeValue(cv.unwrapped().toString)
-          val isEnum = childStruct.isEnum
+        val (childType, optional, default) = {
+          if (childStruct.isLeaf) {
+            val valueString = tscfg.util.escapeValue(cv.unwrapped().toString)
+            val isEnum      = childStruct.isEnum
 
-          getTypeFromConfigValue(namespace, cv, isEnum) match {
-            case typ: model.STRING.type =>
-              namespace.resolveDefine(valueString) match {
-                case Some(ort) =>
-                  (ort, false, None)
+            getTypeFromConfigValue(namespace, cv, isEnum) match {
+              case typ: model.STRING.type =>
+                namespace.resolveDefine(valueString) match {
+                  case Some(ort) =>
+                    (ort, false, None)
 
-                case None =>
-                  inferAnnBasicTypeFromString(valueString) match {
-                    case Some(annBasicType) =>
-                      annBasicType
+                  case None =>
+                    inferAnnBasicTypeFromString(valueString) match {
+                      case Some(annBasicType) =>
+                        annBasicType
 
-                    case None =>
-                      (typ, true, Some(valueString))
-                  }
-              }
+                      case None =>
+                        (typ, true, Some(valueString))
+                    }
+                }
 
-            case typ: model.BasicType =>
-              (typ, true, Some(valueString))
+              case typ: model.BasicType =>
+                (typ, true, Some(valueString))
 
-            case typ =>
-              (typ, false, None)
+              case typ =>
+                (typ, false, None)
+            }
+          }
+          else {
+            (
+              fromConfig(namespace.extend(name), conf.getConfig(name)),
+              false,
+              None
+            )
           }
         }
-        else {
-          (fromConfig(namespace.extend(name), conf.getConfig(name)), false, None)
-        }
-      }
 
-      val comments = cv.origin().comments().asScala.toList
-      val optFromComments = comments.exists(_.trim.startsWith("@optional"))
-      val commentsOpt = if (comments.isEmpty) None else Some(comments.mkString("\n"))
+        val comments        = cv.origin().comments().asScala.toList
+        val optFromComments = comments.exists(_.trim.startsWith("@optional"))
+        val commentsOpt =
+          if (comments.isEmpty) None else Some(comments.mkString("\n"))
 
-      // per Lightbend Config restrictions involving $, leave the key alone if
-      // contains $, otherwise unquote the key in case is quoted.
-      val adjName = if (name.contains("$")) name else name.replaceAll("^\"|\"$", "")
+        // per Lightbend Config restrictions involving $, leave the key alone if
+        // contains $, otherwise unquote the key in case is quoted.
+        val adjName =
+          if (name.contains("$")) name else name.replaceAll("^\"|\"$", "")
 
-      // effective optional and default:
-      val (effOptional, effDefault) = if (assumeAllRequired)
-        (false, None) // that is, all strictly required.
-      // A possible variation: allow the `@optional` annotation to still take effect:
-      //(optFromComments, if (optFromComments) default else None)
-      else
-      (optional || optFromComments, default)
+        // effective optional and default:
+        val (effOptional, effDefault) =
+          if (assumeAllRequired)
+            (false, None) // that is, all strictly required.
+          // A possible variation: allow the `@optional` annotation to still take effect:
+          // (optFromComments, if (optFromComments) default else None)
+          else
+            (optional || optFromComments, default)
 
-      //println(s"ModelBuilder: effOptional=$effOptional  effDefault=$effDefault " +
-      //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
-      //  s"adjName=$adjName")
+        // println(s"ModelBuilder: effOptional=$effOptional  effDefault=$effDefault " +
+        //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
+        //  s"adjName=$adjName")
 
-      /* Get a comprehensive view of members from _all_ ancestors */
-      val parentClassMembers = Struct.ancestorClassMembers(childStruct, memberStructs, namespace)
+        /* Get a comprehensive view of members from _all_ ancestors */
+        val parentClassMembers =
+          Struct.ancestorClassMembers(childStruct, memberStructs, namespace)
 
-      /* build the annType  */
-      val annType = buildAnnType(childType, effOptional, effDefault, commentsOpt, parentClassMembers)
+        /* build the annType  */
+        val annType = buildAnnType(
+          childType,
+          effOptional,
+          effDefault,
+          commentsOpt,
+          parentClassMembers
+        )
 
-      annType.defineCase foreach { namespace.addDefine(name, annType.t, _) }
+        annType.defineCase foreach { namespace.addDefine(name, annType.t, _) }
 
-      adjName -> annType
+        adjName -> annType
 
     }.toMap
 
     /* filter abstract members from root object as they don't require an instantiation */
-    model.ObjectType(members.filterNot(fullPathWithObj =>
-      fullPathWithObj._2.default.exists(namespace.isAbstractClassDefine)))
+    model.ObjectType(
+      members.filterNot(fullPathWithObj =>
+        fullPathWithObj._2.default.exists(namespace.isAbstractClassDefine)
+      )
+    )
   }
 
-  private def buildAnnType(childType: model.Type, effOptional: Boolean, effDefault: Option[String],
-                           commentsOpt: Option[String],
-                           parentClassMembers: Option[Map[String, model.AnnType]]): AnnType = {
+  private def buildAnnType(
+      childType: model.Type,
+      effOptional: Boolean,
+      effDefault: Option[String],
+      commentsOpt: Option[String],
+      parentClassMembers: Option[Map[String, model.AnnType]]
+  ): AnnType = {
 
     // if this class is a parent class (abstract class or interface) this is indicated by the childType object
     // that is passed into the AnnType instance that is returned
@@ -114,7 +138,8 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     val updatedChildType = childType match {
       case objType: ObjectType =>
         if (commentsOpt.exists(AnnType.isAbstract))
-          AbstractObjectType(objType.members) else objType
+          AbstractObjectType(objType.members)
+        else objType
 
       case listType: ListType =>
         listType
@@ -131,7 +156,11 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     )
   }
 
-  private def getTypeFromConfigValue(namespace: Namespace, cv: ConfigValue, isEnum: Boolean): model.Type = {
+  private def getTypeFromConfigValue(
+      namespace: Namespace,
+      cv: ConfigValue,
+      isEnum: Boolean
+  ): model.Type = {
     import ConfigValueType._
     cv.valueType() match {
       case STRING => model.STRING
@@ -150,21 +179,23 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
     }
   }
 
-  private def inferAnnBasicTypeFromString(valueString: String):
-  Option[(model.BasicType, Boolean, Option[String])] = {
+  private def inferAnnBasicTypeFromString(
+      valueString: String
+  ): Option[(model.BasicType, Boolean, Option[String])] = {
 
     if (tsConfigUtil.isDurationValue(valueString))
       return Some((DURATION(ms), true, Some(valueString)))
 
-    val tokens = valueString.split("""\s*\|\s*""")
-    val typePart = tokens(0).toLowerCase
-    val hasDefault = tokens.size == 2
+    val tokens       = valueString.split("""\s*\|\s*""")
+    val typePart     = tokens(0).toLowerCase
+    val hasDefault   = tokens.size == 2
     val defaultValue = if (hasDefault) Some(tokens(1)) else None
 
-    val (baseString, isOpt) = if (typePart.endsWith("?"))
-      (typePart.substring(0, typePart.length - 1), true)
-    else
-      (typePart, hasDefault)
+    val (baseString, isOpt) =
+      if (typePart.endsWith("?"))
+        (typePart.substring(0, typePart.length - 1), true)
+      else
+        (typePart, hasDefault)
 
     val (base, qualification) = {
       val parts = baseString.split("""\s*:\s*""", 2)
@@ -185,17 +216,20 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   }
 
   private def listType(namespace: Namespace, cv: ConfigList): model.ListType = {
-    if (cv.isEmpty) throw new IllegalArgumentException("list with one element expected")
+    if (cv.isEmpty)
+      throw new IllegalArgumentException("list with one element expected")
 
     if (cv.size() > 1) {
       val line = cv.origin().lineNumber()
       val options: ConfigRenderOptions = ConfigRenderOptions.defaults
-        .setFormatted(false).setComments(false).setOriginComments(false)
+        .setFormatted(false)
+        .setComments(false)
+        .setOriginComments(false)
       warns += MultElemListWarning(line, cv.render(options))
     }
 
     val cv0: ConfigValue = cv.get(0)
-    val valueString = tscfg.util.escapeValue(cv0.unwrapped().toString)
+    val valueString      = tscfg.util.escapeValue(cv0.unwrapped().toString)
     val typ = getTypeFromConfigValue(namespace, cv0, isEnum = false)
 
     val elemType = {
@@ -210,10 +244,17 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
             inferAnnBasicTypeFromString(valueString) match {
               case Some((basicType, isOpt, defaultValue)) =>
                 if (isOpt)
-                  warns += OptListElemWarning(cv0.origin().lineNumber(), valueString)
+                  warns += OptListElemWarning(
+                    cv0.origin().lineNumber(),
+                    valueString
+                  )
 
                 if (defaultValue.isDefined)
-                  warns += DefaultListElemWarning(cv0.origin().lineNumber(), defaultValue.get, valueString)
+                  warns += DefaultListElemWarning(
+                    cv0.origin().lineNumber(),
+                    defaultValue.get,
+                    valueString
+                  )
 
                 basicType
 
@@ -229,12 +270,20 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   }
 
   private def enumType(cv: ConfigList): model.EnumObjectType = {
-    if (cv.isEmpty) throw new IllegalArgumentException("enumeration with at least one element expected")
+    if (cv.isEmpty)
+      throw new IllegalArgumentException(
+        "enumeration with at least one element expected"
+      )
 
-    model.EnumObjectType(cv.iterator().asScala.map(_.unwrapped().toString).toList)
+    model.EnumObjectType(
+      cv.iterator().asScala.map(_.unwrapped().toString).toList
+    )
   }
 
-  private def objType(namespace: Namespace, cv: ConfigObject): model.ObjectType =
+  private def objType(
+      namespace: Namespace,
+      cv: ConfigObject
+  ): model.ObjectType =
     fromConfig(namespace, cv.toConfig)
 
   private def numberType(valueString: String): model.BasicType = {
@@ -269,13 +318,19 @@ object ModelBuilder {
   import com.typesafe.config.ConfigFactory
 
   /** build model from string */
-  def apply(source: String, assumeAllRequired: Boolean = false): ModelBuildResult = {
+  def apply(
+      source: String,
+      assumeAllRequired: Boolean = false
+  ): ModelBuildResult = {
     val config = ConfigFactory.parseString(source).resolve()
     fromConfig(config, assumeAllRequired)
   }
 
   /** build model from TS Config object */
-  def fromConfig(config: Config, assumeAllRequired: Boolean = false): ModelBuildResult = {
+  def fromConfig(
+      config: Config,
+      assumeAllRequired: Boolean = false
+  ): ModelBuildResult = {
     new ModelBuilder(assumeAllRequired).build(config)
   }
 
@@ -283,16 +338,19 @@ object ModelBuilder {
   def main(args: Array[String]): Unit = {
     tscfg.util.setLogMinLevel()
 
-    val filename = args(0)
+    val filename     = args(0)
     val showTsConfig = args.length > 1 && "-ts" == args(1)
-    val file = new File(filename)
-    val bufSource = io.Source.fromFile(file)
-    val source = bufSource.mkString.trim
+    val file         = new File(filename)
+    val bufSource    = io.Source.fromFile(file)
+    val source       = bufSource.mkString.trim
     bufSource.close()
-    //println("source:\n  |" + source.replaceAll("\n", "\n  |"))
+    // println("source:\n  |" + source.replaceAll("\n", "\n  |"))
     val config = ConfigFactory.parseString(source).resolve()
     if (showTsConfig) {
-      val options = ConfigRenderOptions.defaults.setFormatted(true).setComments(true).setOriginComments(false)
+      val options = ConfigRenderOptions.defaults
+        .setFormatted(true)
+        .setComments(true)
+        .setOriginComments(false)
       println(config.root.render(options))
     }
     val result = fromConfig(config)

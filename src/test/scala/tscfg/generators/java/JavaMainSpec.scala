@@ -13,7 +13,6 @@ import model.implicits._
 import org.scalatest.wordspec.AnyWordSpec
 import tscfg.exceptions.ObjectDefinitionException
 
-
 class JavaMainSpec extends AnyWordSpec {
 
   import scala.jdk.CollectionConverters._
@@ -23,22 +22,24 @@ class JavaMainSpec extends AnyWordSpec {
       val r = JavaGen.generate("example/example0.spec.conf")
       r.classNames === Set("JavaExample0Cfg", "Service")
       r.fields === Map(
-        "service" -> "JavaExample0Cfg.Service",
-        "url" -> "java.lang.String",
-        "debug" -> "boolean",
-        "doLog" -> "boolean",
-        "factor" -> "double",
+        "service"  -> "JavaExample0Cfg.Service",
+        "url"      -> "java.lang.String",
+        "debug"    -> "boolean",
+        "doLog"    -> "boolean",
+        "factor"   -> "double",
         "poolSize" -> "int"
       )
     }
 
     "example with missing entries should get their defaults" in {
-      val c = new JavaExample0Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaExample0Cfg(
+        ConfigFactory.parseString(
+          """
           |service = {
           |}
         """.stripMargin
-      ))
+        )
+      )
       c.service.url === "http://example.net/rest"
       c.service.poolSize === 32
       c.service.debug === true
@@ -59,25 +60,35 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/issue10.spec.conf")
       r.classNames === Set("JavaIssue10Cfg", "Main", "Email", "Reals$Elm")
-      r.fields.keySet === Set("server", "email", "main", "reals", "password", "foo")
+      r.fields.keySet === Set(
+        "server",
+        "email",
+        "main",
+        "reals",
+        "password",
+        "foo"
+      )
     }
 
     "example 1" in {
-      val c = new JavaIssue10Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue10Cfg(
+        ConfigFactory.parseString(
+          """
           |main = {
           |  reals = [ { foo: 3.14 } ]
           |}
         """.stripMargin
-      ))
+        )
+      )
       c.main.email === null
       c.main.reals.size() === 1
       c.main.reals.get(0).foo === 3.14
     }
 
     "example 2" in {
-      val c = new JavaIssue10Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue10Cfg(
+        ConfigFactory.parseString(
+          """
           |main = {
           |  email = {
           |    server = "foo"
@@ -85,7 +96,8 @@ class JavaMainSpec extends AnyWordSpec {
           |  }
           |}
           |""".stripMargin
-      ))
+        )
+      )
       c.main.email.password === "pw"
       c.main.email.server === "foo"
       c.main.reals === null
@@ -96,14 +108,29 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/issue11.spec.conf")
       r.classNames === Set("JavaIssue11Cfg", "Foo")
-      r.fields.keySet === Set("notify", "wait", "getClass", "clone", "finalize", "notifyAll", "toString", "foo")
+      r.fields.keySet === Set(
+        "notify",
+        "wait",
+        "getClass",
+        "clone",
+        "finalize",
+        "notifyAll",
+        "toString",
+        "foo"
+      )
     }
   }
 
   "issue12" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue12.spec.conf")
-      r.classNames === Set("JavaIssue12Cfg", "String", "Option", "Boolean", "Int_")
+      r.classNames === Set(
+        "JavaIssue12Cfg",
+        "String",
+        "Option",
+        "Boolean",
+        "Int_"
+      )
       r.fields.keySet === Set("String", "Option", "Boolean", "int_", "bar")
     }
   }
@@ -132,20 +159,24 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaIssue15aCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue15aCfg(
+        ConfigFactory.parseString(
+          """
           |ii: [1,2 ,3 ]
         """.stripMargin
-      ))
+        )
+      )
       c.ii.asScala.toList === List(1, 2, 3)
     }
 
     "example 2" in {
-      val c = new JavaIssue15aCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue15aCfg(
+        ConfigFactory.parseString(
+          """
           |ii: []
         """.stripMargin
-      ))
+        )
+      )
       c.ii.asScala.toList === List.empty
     }
   }
@@ -154,21 +185,32 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/issue15b.spec.conf")
       r.classNames === Set("JavaIssue15bCfg")
-      r.fields.keySet === Set("strings", "integers", "doubles", "longs", "booleans")
+      r.fields.keySet === Set(
+        "strings",
+        "integers",
+        "doubles",
+        "longs",
+        "booleans"
+      )
     }
 
     "example 1" in {
-      val c = new JavaIssue15bCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue15bCfg(
+        ConfigFactory.parseString(
+          """
           |strings:  [hello, world, true]
           |integers: [[1, 2, 3], [4, 5]]
           |doubles:  [3.14, 2.7182, 1.618]
           |longs:    [1, 9999999999]
           |booleans: [true, false]
           |""".stripMargin
-      ))
+        )
+      )
       c.strings.asScala.toList === List("hello", "world", "true")
-      c.integers.asScala.toList.map(_.asScala.toList) === List(List(1, 2, 3), List(4, 5))
+      c.integers.asScala.toList.map(_.asScala.toList) === List(
+        List(1, 2, 3),
+        List(4, 5)
+      )
       c.doubles.asScala.toList === List(3.14, 2.7182, 1.618)
       c.longs.asScala.toList === List(1, 9999999999L)
       c.booleans.asScala.toList === List(true, false)
@@ -178,13 +220,31 @@ class JavaMainSpec extends AnyWordSpec {
   "issue15c" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15c.spec.conf")
-      r.classNames === Set("JavaIssue15cCfg", "Qaz", "Aa", "Positions$Elm", "Bb$Elm", "Attrs$Elm")
-      r.fields.keySet === Set("positions", "lat", "lon", "attrs", "foo", "qaz", "aa", "bb", "cc")
+      r.classNames === Set(
+        "JavaIssue15cCfg",
+        "Qaz",
+        "Aa",
+        "Positions$Elm",
+        "Bb$Elm",
+        "Attrs$Elm"
+      )
+      r.fields.keySet === Set(
+        "positions",
+        "lat",
+        "lon",
+        "attrs",
+        "foo",
+        "qaz",
+        "aa",
+        "bb",
+        "cc"
+      )
     }
 
     "example 1" in {
-      val c = new JavaIssue15cCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue15cCfg(
+        ConfigFactory.parseString(
+          """
           |positions: [
           |  { lat: 1, lon: 2, attrs = [ [ {foo: 99}          ] ] },
           |  { lat: 3, lon: 4, attrs = [ [ {foo: 3}, {foo: 0} ] ] }
@@ -193,7 +253,8 @@ class JavaMainSpec extends AnyWordSpec {
           |  aa = { bb = [ { cc: hoho } ]  }
           |}
           |""".stripMargin
-      ))
+        )
+      )
       c.positions.size() === 2
       c.positions.get(0).lat === 1
       c.positions.get(0).lon === 2
@@ -219,11 +280,13 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaIssue15dCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue15dCfg(
+        ConfigFactory.parseString(
+          """
           |baz: [ [ {dd: 1, aa: true}, {dd: 2} ] ]
           |""".stripMargin
-      ))
+        )
+      )
       c.baz.size() === 1
       c.baz.get(0).size() === 2
       c.baz.get(0).get(0).aa === true
@@ -241,8 +304,9 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaIssue15Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue15Cfg(
+        ConfigFactory.parseString(
+          """
           |positions: [
           |  {
           |    numbers: [ 1, 2, 3 ]
@@ -250,7 +314,8 @@ class JavaMainSpec extends AnyWordSpec {
           |  }
           |]
           |""".stripMargin
-      ))
+        )
+      )
       c.positions.size() === 1
       c.positions.get(0).numbers.asScala.toList === List(1, 2, 3)
       c.positions.get(0).positions.size() === 1
@@ -264,7 +329,11 @@ class JavaMainSpec extends AnyWordSpec {
     "generate code" in {
       val r = JavaGen.generate("example/duration.spec.conf")
       r.classNames === Set("JavaDurationCfg", "Durations")
-      r.fields.keySet === Set("durations", "days", "hours", "millis",
+      r.fields.keySet === Set(
+        "durations",
+        "days",
+        "hours",
+        "millis",
         "duration_ns",
         "duration_µs",
         "duration_ms",
@@ -276,8 +345,9 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaDurationCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaDurationCfg(
+        ConfigFactory.parseString(
+          """
           |durations {
           |  days  = "10d"
           |  hours = "24h"
@@ -290,7 +360,8 @@ class JavaMainSpec extends AnyWordSpec {
           |  duration_dy = "7d"
           |}
           |""".stripMargin
-      ))
+        )
+      )
       c.durations.days === 10
       c.durations.hours === 24
       c.durations.millis === 550000
@@ -306,9 +377,14 @@ class JavaMainSpec extends AnyWordSpec {
 
   "duration2" should {
     "generate code" in {
-      val r = JavaGen.generate("example/duration2.spec.conf", useDurations = true)
+      val r =
+        JavaGen.generate("example/duration2.spec.conf", useDurations = true)
       r.classNames === Set("JavaDuration2Cfg", "Durations")
-      r.fields.keySet === Set("durations", "days", "hours", "millis",
+      r.fields.keySet === Set(
+        "durations",
+        "days",
+        "hours",
+        "millis",
         "duration_ns",
         "duration_µs",
         "duration_ms",
@@ -320,8 +396,9 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaDuration2Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaDuration2Cfg(
+        ConfigFactory.parseString(
+          """
           |durations {
           |  days  = "10d"
           |  hours = "24h"
@@ -334,7 +411,8 @@ class JavaMainSpec extends AnyWordSpec {
           |  duration_dy = "7d"
           |}
           |""".stripMargin
-      ))
+        )
+      )
       c.durations.days === Duration.ofDays(10)
       c.durations.hours === Duration.ofHours(24)
       c.durations.millis === Duration.ofMillis(550000)
@@ -350,9 +428,17 @@ class JavaMainSpec extends AnyWordSpec {
 
   "duration3" should {
     "generate code" in {
-      val r = JavaGen.generate("example/duration3.spec.conf", useDurations = true, genGetters = true)
+      val r = JavaGen.generate(
+        "example/duration3.spec.conf",
+        useDurations = true,
+        genGetters = true
+      )
       r.classNames === Set("JavaDuration3Cfg", "Durations")
-      r.fields.keySet === Set("durations", "days", "hours", "millis",
+      r.fields.keySet === Set(
+        "durations",
+        "days",
+        "hours",
+        "millis",
         "duration_ns",
         "duration_µs",
         "duration_ms",
@@ -364,8 +450,9 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaDuration3Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaDuration3Cfg(
+        ConfigFactory.parseString(
+          """
           |durations {
           |  days  = "10d"
           |  hours = "24h"
@@ -378,7 +465,8 @@ class JavaMainSpec extends AnyWordSpec {
           |  duration_dy = "7d"
           |}
           |""".stripMargin
-      ))
+        )
+      )
       c.durations.getDays === Duration.ofDays(10)
       c.durations.getHours === Duration.ofHours(24)
       c.durations.getMillis === Duration.ofMillis(550000)
@@ -397,18 +485,20 @@ class JavaMainSpec extends AnyWordSpec {
       val r = JavaGen.generate("example/issue19.spec.conf")
       r.classNames === Set("JavaIssue19Cfg")
       r.fields === Map(
-        "do_log" -> "boolean",
+        "do_log"  -> "boolean",
         "_$_foo_" -> "java.lang.String"
       )
     }
 
     "example" in {
-      val c = new JavaIssue19Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue19Cfg(
+        ConfigFactory.parseString(
+          """
           |"do log" : true
           |"$_foo"  : some string
         """.stripMargin
-      ))
+        )
+      )
       c.do_log === true
       c._$_foo_ === "some string"
     }
@@ -417,7 +507,7 @@ class JavaMainSpec extends AnyWordSpec {
   "given class name starting with $_" should {
     "generate warning" in {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
-      val r = new JavaGen(genOpts).generate(ObjectType())
+      val r       = new JavaGen(genOpts).generate(ObjectType())
       r.classNames === Set("Classy")
       r.fields === Map()
       // TODO actually verify generated warning
@@ -434,7 +524,7 @@ class JavaMainSpec extends AnyWordSpec {
 
     "generate warnings" in {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
-      val r = new JavaGen(genOpts).generate(objectType)
+      val r       = new JavaGen(genOpts).generate(objectType)
       r.classNames === Set("Classy", "Other")
       r.fields === Map(
         "$_baz" -> "java.lang.String",
@@ -455,19 +545,23 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example with default value" in {
-      val c = new JavaIssue22Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue22Cfg(
+        ConfigFactory.parseString(
+          """
           |  # empty
         """.stripMargin
-      ))
+        )
+      )
       c.idleTimeout === 75000
     }
     "example with new value" in {
-      val c = new JavaIssue22Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue22Cfg(
+        ConfigFactory.parseString(
+          """
           | idleTimeout = 1 hour
         """.stripMargin
-      ))
+        )
+      )
       c.idleTimeout === 3600 * 1000
     }
   }
@@ -477,37 +571,39 @@ class JavaMainSpec extends AnyWordSpec {
       val r = JavaGen.generate("example/issue23.spec.conf")
       r.classNames === Set("JavaIssue23Cfg")
       r.fields === Map(
-        "sizeReq" -> "long",
-        "sizeOpt" -> "java.lang.Long",
+        "sizeReq"    -> "long",
+        "sizeOpt"    -> "java.lang.Long",
         "sizeOptDef" -> "long",
-        "sizes" -> "java.util.List<java.lang.Long>",
-        "sizes2" -> "java.util.List<java.util.List<java.lang.Long>>"
+        "sizes"      -> "java.util.List<java.lang.Long>",
+        "sizes2"     -> "java.util.List<java.util.List<java.lang.Long>>"
       )
     }
 
     "example" in {
-      val c = new JavaIssue23Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue23Cfg(
+        ConfigFactory.parseString(
+          """
           |sizeReq = "2048K"
           |sizeOpt = "1024000"
           |sizes   = [ 1000, "64G", "16kB" ]
           |sizes2  = [[ 1000, "64G" ], [ "16kB" ] ]
         """.stripMargin
-      ))
+        )
+      )
       c.sizeReq === 2048 * 1024
       c.sizeOpt === 1024000
       c.sizeOptDef === 1024
       c.sizes.asScala.toList === List(1000, 64 * 1024 * 1024 * 1024L, 16 * 1000)
       c.sizes2.asScala.toList.map(_.asScala.toList) === List(
         List(1000, 64 * 1024 * 1024 * 1024L),
-        List(16 * 1000))
+        List(16 * 1000)
+      )
     }
   }
 
   "issue31" should {
     "generate getters" in {
-      val r = JavaGen.generate("example/issue31.spec.conf",
-        genGetters = true)
+      val r = JavaGen.generate("example/issue31.spec.conf", genGetters = true)
 
       r.classNames === Set("JavaIssue31Cfg", "B", "D")
       r.fields.size === 5
@@ -526,12 +622,14 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "verify generated getters" in {
-      val c = new JavaIssue31Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue31Cfg(
+        ConfigFactory.parseString(
+          """
           |a = 1
           |b.c = foo
         """.stripMargin
-      ))
+        )
+      )
       c.getA === 1
       c.getB.getC === "foo"
       c.getB.getD.getE === false
@@ -564,7 +662,8 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "generate config for sub-object under required object" in {
-      val c = new JavaIssue33cCfg(ConfigFactory.parseString("endpoint.req = foo"))
+      val c =
+        new JavaIssue33cCfg(ConfigFactory.parseString("endpoint.req = foo"))
       c.endpoint.req === "foo"
       c.endpoint.optObj.key === "bar"
     }
@@ -586,11 +685,13 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 1" in {
-      val c = new JavaIssue41Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue41Cfg(
+        ConfigFactory.parseString(
+          """
           |{}
         """.stripMargin
-      ))
+        )
+      )
       c.a === Optional.empty()
       c.b === 10
       c.c.d === Optional.empty()
@@ -600,8 +701,9 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "example 2" in {
-      val c = new JavaIssue41Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue41Cfg(
+        ConfigFactory.parseString(
+          """
           |a = 5
           |b = 6
           |c = {
@@ -614,7 +716,8 @@ class JavaMainSpec extends AnyWordSpec {
           |}
           |i = [1,  2, 3]
         """.stripMargin
-      ))
+        )
+      )
       c.a === Optional.of(5)
       c.b === 6
       c.c.d === Optional.of("c.d")
@@ -630,12 +733,13 @@ class JavaMainSpec extends AnyWordSpec {
       val e = intercept[com.typesafe.config.ConfigException] {
         new JavaIssue47Cfg(ConfigFactory.parseString(""))
       }
-      assert(e.getMessage contains "'service': com.typesafe.config.ConfigException$Missing")
+      assert(
+        e.getMessage contains "'service': com.typesafe.config.ConfigException$Missing"
+      )
     }
     "fail with missing url entry" in {
       val e = intercept[com.typesafe.config.ConfigException] {
-        new JavaIssue47Cfg(ConfigFactory.parseString(
-          """
+        new JavaIssue47Cfg(ConfigFactory.parseString("""
             |service {
             |  # url = "http://example.net/rest"
             |  poolSize = 32
@@ -644,12 +748,13 @@ class JavaMainSpec extends AnyWordSpec {
             |  factor = 0.75
             |}""".stripMargin))
       }
-      assert(e.getMessage contains "'service.url': com.typesafe.config.ConfigException$Missing")
+      assert(
+        e.getMessage contains "'service.url': com.typesafe.config.ConfigException$Missing"
+      )
     }
     "fail with missing poolSize entry" in {
       val e = intercept[com.typesafe.config.ConfigException] {
-        new JavaIssue47Cfg(ConfigFactory.parseString(
-          """
+        new JavaIssue47Cfg(ConfigFactory.parseString("""
             |service {
             |  url = "http://example.net/rest"
             |  # poolSize = 32
@@ -658,20 +763,23 @@ class JavaMainSpec extends AnyWordSpec {
             |  factor = 0.75
             |}""".stripMargin))
       }
-      assert(e.getMessage contains "'service.poolSize': com.typesafe.config.ConfigException$Missing")
+      assert(
+        e.getMessage contains "'service.poolSize': com.typesafe.config.ConfigException$Missing"
+      )
     }
     "fail with all entries missing in service object" in {
       val e = intercept[com.typesafe.config.ConfigException] {
         new JavaIssue47Cfg(ConfigFactory.parseString("service {}"))
       }
       List("url", "poolSize", "debug", "doLog", "factor") foreach { k =>
-        assert(e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$Missing")
+        assert(
+          e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$Missing"
+        )
       }
     }
     "fail with wrong types" in {
       val e = intercept[com.typesafe.config.ConfigException] {
-        new JavaIssue47Cfg(ConfigFactory.parseString(
-          """
+        new JavaIssue47Cfg(ConfigFactory.parseString("""
             |service {
             |  url = 31  # anything can be a string, so not check on this one.
             |  poolSize = true
@@ -681,24 +789,26 @@ class JavaMainSpec extends AnyWordSpec {
             |}""".stripMargin))
       }
       List("poolSize", "debug", "doLog", "factor") foreach { k =>
-        assert(e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$WrongType")
+        assert(
+          e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$WrongType"
+        )
       }
     }
     "fail with wrong type for object" in {
       val e = intercept[com.typesafe.config.ConfigException] {
-        new JavaIssue47Cfg(ConfigFactory.parseString(
-          """
+        new JavaIssue47Cfg(ConfigFactory.parseString("""
             |service = 1
             |""".stripMargin))
       }
-      assert(e.getMessage contains "'service': com.typesafe.config.ConfigException$WrongType")
+      assert(
+        e.getMessage contains "'service': com.typesafe.config.ConfigException$WrongType"
+      )
     }
   }
 
   "issue 54 - shared config - example1" should {
     "be handled" in {
-      val c = new JavaIssue54Cfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue54Cfg(ConfigFactory.parseString("""
           |example {
           |  a: {
           |    c = "C1"
@@ -730,8 +840,7 @@ class JavaMainSpec extends AnyWordSpec {
 
   "issue 54 - shared config - exampleD" should {
     "be handled" in {
-      val c = new JavaIssue54exampleDCfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue54exampleDCfg(ConfigFactory.parseString("""
           |exampleD {
           |  test {
           |    a = 1
@@ -745,8 +854,7 @@ class JavaMainSpec extends AnyWordSpec {
 
   "issue 54 - shared config - exampleE" should {
     "be handled" in {
-      val c = new JavaIssue54exampleECfg(ConfigFactory.parseString(
-        """
+      val c = new JavaIssue54exampleECfg(ConfigFactory.parseString("""
           |exampleE {
           |  test {
           |    a = 1
@@ -760,8 +868,7 @@ class JavaMainSpec extends AnyWordSpec {
 
   "issue 54 - shared config - example2" should {
     "be handled" in {
-      val c = new JavaIssue54bCfg(ConfigFactory.parseString(
-        """root {
+      val c = new JavaIssue54bCfg(ConfigFactory.parseString("""root {
           |  e: {
           |    b = "B1"
           |    c.d = 1
@@ -807,8 +914,7 @@ class JavaMainSpec extends AnyWordSpec {
   "issue 62 - shared enumeration" when {
     "62a basic" should {
       "be handled with correct input" in {
-        val c = new JavaIssue62aCfg(ConfigFactory.parseString(
-          """foo {
+        val c = new JavaIssue62aCfg(ConfigFactory.parseString("""foo {
             |  fruit = pineapple
             |}
             |""".stripMargin))
@@ -819,8 +925,7 @@ class JavaMainSpec extends AnyWordSpec {
 
       "be handled with invalid enum value" in {
         val e = intercept[IllegalArgumentException] {
-          new JavaIssue62aCfg(ConfigFactory.parseString(
-            """foo {
+          new JavaIssue62aCfg(ConfigFactory.parseString("""foo {
               |  fruit = invalidFruit
               |}
               |""".stripMargin))
@@ -831,8 +936,7 @@ class JavaMainSpec extends AnyWordSpec {
 
     "62b more complete" should {
       "be handled with correct input" in {
-        val c = new JavaIssue62bCfg(ConfigFactory.parseString(
-          """foo {
+        val c = new JavaIssue62bCfg(ConfigFactory.parseString("""foo {
             |  fruit = pineapple
             |  someFruits = [banana, apple]
             |  other {
@@ -850,8 +954,7 @@ class JavaMainSpec extends AnyWordSpec {
 
     "62 enum used at first level " should {
       "be handled with correct input" in {
-        val c = new JavaIssue62Cfg(ConfigFactory.parseString(
-          """
+        val c = new JavaIssue62Cfg(ConfigFactory.parseString("""
             | fruit = apple
             | fruits = [banana, pineapple]
             |""".stripMargin))
@@ -864,11 +967,20 @@ class JavaMainSpec extends AnyWordSpec {
   }
 
   "issue 64 - template with defined abstract class" should {
-    val configFromFile = new JavaIssue64Cfg(ConfigFactory.parseFile(new File("src/main/tscfg/example/issue64.example.conf")).resolve())
+    val configFromFile = new JavaIssue64Cfg(
+      ConfigFactory
+        .parseFile(new File("src/main/tscfg/example/issue64.example.conf"))
+        .resolve()
+    )
 
     "result in a valid config for java" in {
       val r = JavaGen.generate("example/issue64.spec.conf")
-      r.classNames === Set("JavaIssue64Cfg", "BaseModelConfig", "LoadModelConfig", "Test")
+      r.classNames === Set(
+        "JavaIssue64Cfg",
+        "BaseModelConfig",
+        "LoadModelConfig",
+        "Test"
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
@@ -876,7 +988,7 @@ class JavaMainSpec extends AnyWordSpec {
       // be instance of abstract super class
       configFromFile.test.loadModelConfig match {
         case _: JavaIssue64Cfg.BaseModelConfig => assert(true)
-        case null => assert(false)
+        case null                              => assert(false)
       }
 
       // have the correct values
@@ -887,7 +999,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-/*
+  /*
   "issue 64b - template with invalid case class extension" should {
     "throw an ObjectDefinitionException" in {
       JavaGen.generate("example/issue64b.spec.conf") must throwA[ObjectDefinitionException].like {
@@ -900,11 +1012,13 @@ class JavaMainSpec extends AnyWordSpec {
       }
     }
   }
-*/
+   */
 
   "issue 67 - template with unintuitive order of shared objects" should {
     val configFromFile = new JavaIssue67Cfg(
-      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67.example.conf")).resolve()
+      ConfigFactory
+        .parseFile(new File("src/main/tscfg/example/issue67.example.conf"))
+        .resolve()
     )
 
     "result in a valid config for scala" in {
@@ -912,12 +1026,11 @@ class JavaMainSpec extends AnyWordSpec {
       r.classNames === Set("JavaIssue67Cfg", "AbstractA", "ImplA", "Test")
     }
 
-
     "be able to process a corresponding configuration correctly" in {
       // be instance of abstract super class
       configFromFile.test.impl match {
         case _: JavaIssue67Cfg.AbstractA => assert(true)
-        case null => assert(false)
+        case null                        => assert(false)
       }
 
       // have the correct values
@@ -928,24 +1041,32 @@ class JavaMainSpec extends AnyWordSpec {
 
   "issue 67a - template with second inheritance level" should {
     val configFromFile = new JavaIssue67aCfg(
-      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67a.example.conf")).resolve()
+      ConfigFactory
+        .parseFile(new File("src/main/tscfg/example/issue67a.example.conf"))
+        .resolve()
     )
 
     "result in a valid config for scala" in {
       val r = JavaGen.generate("example/issue67a.spec.conf")
-      r.classNames === Set("JavaIssue67aCfg", "AbstractA", "AbstractB", "ImplB", "Test")
+      r.classNames === Set(
+        "JavaIssue67aCfg",
+        "AbstractA",
+        "AbstractB",
+        "ImplB",
+        "Test"
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
       // be instance of abstract super class (one level above)
       configFromFile.test.impl match {
         case _: JavaIssue67aCfg.AbstractB => assert(true)
-        case null => assert(false)
+        case null                         => assert(false)
       }
       // be instance of abstract super class (second level above)
       configFromFile.test.impl match {
         case _: JavaIssue67aCfg.AbstractA => assert(true)
-        case null => assert(false)
+        case null                         => assert(false)
       }
 
       // have the correct values
@@ -957,29 +1078,38 @@ class JavaMainSpec extends AnyWordSpec {
 
   "issue 67b - template with third inheritance level" should {
     val configFromFile = new JavaIssue67bCfg(
-      ConfigFactory.parseFile(new File("src/main/tscfg/example/issue67b.example.conf")).resolve()
+      ConfigFactory
+        .parseFile(new File("src/main/tscfg/example/issue67b.example.conf"))
+        .resolve()
     )
 
     "result in a valid config for scala" in {
       val r = JavaGen.generate("example/issue67b.spec.conf")
-      r.classNames === Set("JavaIssue67bCfg", "AbstractA", "AbstractB", "AbstractC", "ImplC", "Test")
+      r.classNames === Set(
+        "JavaIssue67bCfg",
+        "AbstractA",
+        "AbstractB",
+        "AbstractC",
+        "ImplC",
+        "Test"
+      )
     }
 
     "be able to process a corresponding configuration correctly" in {
       // be instance of abstract super class (one level above)
       configFromFile.test.impl match {
         case _: JavaIssue67bCfg.AbstractB => assert(true)
-        case null => assert(false)
+        case null                         => assert(false)
       }
       // be instance of abstract super class (second level above)
       configFromFile.test.impl match {
         case _: JavaIssue67bCfg.AbstractA => assert(true)
-        case null => assert(false)
+        case null                         => assert(false)
       }
       // be instance of abstract super class (third level above)
       configFromFile.test.impl match {
         case _: JavaIssue67bCfg.AbstractC => assert(true)
-        case null => assert(false)
+        case null                         => assert(false)
       }
 
       // have the correct values
@@ -995,14 +1125,15 @@ class JavaMainSpec extends AnyWordSpec {
       val e = intercept[ObjectDefinitionException] {
         JavaGen.generate("example/issue67c.spec.conf")
       }
-      assert(e.getMessage contains "extension of struct 'AbstractC' involves circular reference")
+      assert(
+        e.getMessage contains "extension of struct 'AbstractC' involves circular reference"
+      )
     }
   }
 
   "issue 71 - shared object leading to string conversion" should {
     "71a simplified handled ok" in {
-      val c = new JavaIssue71aCfg(ConfigFactory.parseString(
-        """example {
+      val c = new JavaIssue71aCfg(ConfigFactory.parseString("""example {
           |  a = {
           |    c = "eac"
           |    d = {
@@ -1027,8 +1158,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "71 handled ok" in {
-      val c = new JavaIssue71Cfg(ConfigFactory.parseString(
-        """example {
+      val c = new JavaIssue71Cfg(ConfigFactory.parseString("""example {
           |  a = {
           |    c = "eac"
           |    d = {

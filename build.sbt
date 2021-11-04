@@ -1,22 +1,18 @@
 lazy val tscfgVersion = setVersion("0.9.994")
 
-organization := "com.github.carueda"
-name := "tscfg"
-version := tscfgVersion
-
-scalaVersion := "3.1.0"
-
+organization       := "com.github.carueda"
+name               := "tscfg"
+version            := tscfgVersion
+scalaVersion       := "3.1.0"
 crossScalaVersions := Seq("2.13.6", "3.1.0")
 
 libraryDependencies ++= Seq(
   "com.outr"               %% "scribe"                  % "3.6.3",
-  "com.typesafe"           %  "config"                  % "1.4.1",
-  "org.scalatest"          %%  "scalatest"              % "3.2.10" % Test,
+  "com.typesafe"            % "config"                  % "1.4.1",
+  "org.scalatest"          %% "scalatest"               % "3.2.10" % Test,
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.5.0",
-  "org.json4s"             %%  "json4s-native"          % "4.0.3",
-  "org.scalameta"          %%  "scalafmt-dynamic"       % "3.0.8" cross CrossVersion.for3Use2_13,
-  "com.google.googlejavaformat" % "google-java-format"  % "1.7", // note: 1.8: "The minimum supported runtime version is now JDK 11"
-  "com.google.code.gson"   %  "gson"                    % "2.8.9"
+  "org.json4s"             %% "json4s-native"           % "4.0.3",
+  "com.google.code.gson"    % "gson"                    % "2.8.9"
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
@@ -27,8 +23,8 @@ scalacOptions ++= Seq("-deprecation", "-feature")
 
 coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
 coverageMinimumStmtTotal := 80
-coverageFailOnMinimum := false
-coverageHighlighting := { scalaBinaryVersion.value == "2.11" }
+coverageFailOnMinimum    := false
+coverageHighlighting     := { scalaBinaryVersion.value == "2.11" }
 
 lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
 codeDefs := {
@@ -60,12 +56,13 @@ javaOptions ++= Seq(
 */
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
-(Test / test)     := ((Test / test)     dependsOn (codeDefs, genCode)).value
+(Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
 
-publishMavenStyle := true
+publishMavenStyle        := true
 (Test / publishArtifact) := false
 
 publishTo := sonatypePublishToBundle.value
+
 /*
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
@@ -74,11 +71,19 @@ publishTo := {
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
-*/
+ */
+
 pomIncludeRepository := { _ => false }
-homepage := Some(url("https://github.com/carueda/tscfg"))
-licenses := Seq("Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0"))
-scmInfo := Some(ScmInfo(url("http://github.com/carueda/tscfg"), "scm:git@github.com:carueda/tscfg.git"))
+homepage             := Some(url("https://github.com/carueda/tscfg"))
+licenses := Seq(
+  "Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0")
+)
+scmInfo := Some(
+  ScmInfo(
+    url("http://github.com/carueda/tscfg"),
+    "scm:git@github.com:carueda/tscfg.git"
+  )
+)
 pomExtra :=
   <developers>
     <developer>
@@ -92,7 +97,9 @@ sonatypeProfileName := "com.github.carueda"
 
 def setVersion(version: String): String = {
   println(s"setting version $version")
-  IO.write(file("src/main/resources/application.conf"),
-           s"tscfg.version = $version\n")
+  IO.write(
+    file("src/main/resources/application.conf"),
+    s"tscfg.version = $version\n"
+  )
   version
 }

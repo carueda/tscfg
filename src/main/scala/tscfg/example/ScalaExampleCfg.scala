@@ -27,7 +27,8 @@ object ScalaExampleCfg {
       ): ScalaExampleCfg.Endpoint.Interface = {
         ScalaExampleCfg.Endpoint.Interface(
           port = if (c.hasPathOrNull("port")) c.getInt("port") else 8080,
-          `type` = if (c.hasPathOrNull("type")) Some(c.getString("type")) else None
+          `type` =
+            if (c.hasPathOrNull("type")) Some(c.getString("type")) else None
         )
       }
     }
@@ -46,8 +47,11 @@ object ScalaExampleCfg {
           $tsCfgValidator
         ),
         path = $_reqStr(parentPath, c, "path", $tsCfgValidator),
-        serial = if (c.hasPathOrNull("serial")) Some(c.getInt("serial")) else None,
-        url = if (c.hasPathOrNull("url")) c.getString("url") else "http://example.net"
+        serial =
+          if (c.hasPathOrNull("serial")) Some(c.getInt("serial")) else None,
+        url =
+          if (c.hasPathOrNull("url")) c.getString("url")
+          else "http://example.net"
       )
     }
     private def $_reqInt(
@@ -99,9 +103,13 @@ object ScalaExampleCfg {
     $result
   }
   final class $TsCfgValidator {
-    private val badPaths = scala.collection.mutable.ArrayBuffer[java.lang.String]()
+    private val badPaths =
+      scala.collection.mutable.ArrayBuffer[java.lang.String]()
 
-    def addBadPath(path: java.lang.String, e: com.typesafe.config.ConfigException): Unit = {
+    def addBadPath(
+        path: java.lang.String,
+        e: com.typesafe.config.ConfigException
+    ): Unit = {
       badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 

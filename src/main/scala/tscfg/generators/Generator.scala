@@ -2,10 +2,10 @@ package tscfg.generators
 
 import tscfg.model.ObjectType
 
-/**
-  * Base generation class.
+/** Base generation class.
   *
-  * @param genOpts    Generation options
+  * @param genOpts
+  *   Generation options
   */
 abstract class Generator(genOpts: GenOpts) {
 
@@ -19,26 +19,26 @@ abstract class Generator(genOpts: GenOpts) {
   // Keep this as the empty string constant in version control.
   protected def dbg(s: String, in: Boolean = true): String =
     ""
-    //if (in) s" /*$s*/ " else s" // $s"
+  // if (in) s" /*$s*/ " else s" // $s"
 }
 
-/**
-  * Generation options
+/** Generation options
   */
-case class GenOpts(packageName: String,
-                   className: String,
-                   assumeAllRequired: Boolean = false,
-                   j7: Boolean = false,
-                   s12: Boolean =false,
-                   useBackticks: Boolean = false,
-                   genGetters: Boolean = false,
-                   genRecords: Boolean = false,
-                   useOptionals: Boolean = false,
-                   useDurations: Boolean = false
-                  )
+case class GenOpts(
+    packageName: String,
+    className: String,
+    assumeAllRequired: Boolean = false,
+    j7: Boolean = false,
+    s12: Boolean = false,
+    useBackticks: Boolean = false,
+    genGetters: Boolean = false,
+    useOptionals: Boolean = false,
+    useDurations: Boolean = false
+)
 
-case class GenResult(code: String = "?",
-                     classNames: Set[String] = Set(),
-                     fields: Map[String, String] = Map.empty,
-                     getters: Map[String, String] = Map.empty
-                    )
+case class GenResult(
+    code: String = "?",
+    classNames: Set[String] = Set(),
+    fields: Map[String, String] = Map.empty,
+    getters: Map[String, String] = Map.empty
+)

@@ -1,53 +1,38 @@
 package tscfg.example
 
 final case class ScalaIssue62aCfg(
-    foo: ScalaIssue62aCfg.Foo
+  foo       : ScalaIssue62aCfg.Foo
 )
 object ScalaIssue62aCfg {
   sealed trait FruitType
   object FruitType {
-    object apple     extends FruitType
-    object banana    extends FruitType
+    object apple extends FruitType
+    object banana extends FruitType
     object pineapple extends FruitType
-    def $resEnum(
-        name: java.lang.String,
-        path: java.lang.String,
-        $tsCfgValidator: $TsCfgValidator
-    ): FruitType = name match {
-      case "apple"     => FruitType.apple
-      case "banana"    => FruitType.banana
+    def $resEnum(name: java.lang.String, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): FruitType = name match {
+      case "apple" => FruitType.apple
+      case "banana" => FruitType.banana
       case "pineapple" => FruitType.pineapple
-      case v =>
-        $tsCfgValidator.addInvalidEnumValue(path, v, "FruitType")
-        null
+      case v => $tsCfgValidator.addInvalidEnumValue(path, v, "FruitType")
+                null
     }
   }
   final case class Foo(
-      fruit: ScalaIssue62aCfg.FruitType
+    fruit : ScalaIssue62aCfg.FruitType
   )
   object Foo {
-    def apply(
-        c: com.typesafe.config.Config,
-        parentPath: java.lang.String,
-        $tsCfgValidator: $TsCfgValidator
-    ): ScalaIssue62aCfg.Foo = {
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue62aCfg.Foo = {
       ScalaIssue62aCfg.Foo(
-        fruit = ScalaIssue62aCfg.FruitType
-          .$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator)
+        fruit = ScalaIssue62aCfg.FruitType.$resEnum(c.getString("fruit"), parentPath + "fruit", $tsCfgValidator)
       )
     }
   }
-
+        
   def apply(c: com.typesafe.config.Config): ScalaIssue62aCfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
-    val parentPath: java.lang.String     = ""
+    val parentPath: java.lang.String = ""
     val $result = ScalaIssue62aCfg(
-      foo = ScalaIssue62aCfg.Foo(
-        if (c.hasPathOrNull("foo")) c.getConfig("foo")
-        else com.typesafe.config.ConfigFactory.parseString("foo{}"),
-        parentPath + "foo.",
-        $tsCfgValidator
-      )
+      foo       = ScalaIssue62aCfg.Foo(if(c.hasPathOrNull("foo")) c.getConfig("foo") else com.typesafe.config.ConfigFactory.parseString("foo{}"), parentPath + "foo.", $tsCfgValidator)
     )
     $tsCfgValidator.validate()
     $result
@@ -59,11 +44,7 @@ object ScalaIssue62aCfg {
       badPaths += s"'$path': ${e.getClass.getName}(${e.getMessage})"
     }
 
-    def addInvalidEnumValue(
-        path: java.lang.String,
-        value: java.lang.String,
-        enumName: java.lang.String
-    ): Unit = {
+    def addInvalidEnumValue(path: java.lang.String, value: java.lang.String, enumName: java.lang.String): Unit = {
       badPaths += s"'$path': invalid value $value for enumeration $enumName"
     }
 
@@ -71,7 +52,7 @@ object ScalaIssue62aCfg {
       if (badPaths.nonEmpty) {
         throw new com.typesafe.config.ConfigException(
           badPaths.mkString("Invalid configuration:\n    ", "\n    ", "")
-        ) {}
+        ){}
       }
     }
   }

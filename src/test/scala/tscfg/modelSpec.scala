@@ -9,16 +9,20 @@ class modelSpec extends AnyWordSpec {
 
   "basic ObjectType construction" should {
     val objectType = ObjectType(
-      "positions" := "Position information" % ListType(ObjectType(
-        "lat" := DOUBLE,
-        "lon" := DOUBLE,
-        "attrs" := ListType(ObjectType(
-          "b" := BOOLEAN,
-          "d" := DURATION(hour)
-        ))
-      )),
+      "positions" := "Position information" % ListType(
+        ObjectType(
+          "lat" := DOUBLE,
+          "lon" := DOUBLE,
+          "attrs" := ListType(
+            ObjectType(
+              "b" := BOOLEAN,
+              "d" := DURATION(hour)
+            )
+          )
+        )
+      ),
       "baz" := "comments for baz..." % ~ObjectType(
-        "b" := ~ STRING | "some value",
+        "b" := ~STRING | "some value",
         "a" := LONG | "99999999",
         "i" := "i, an integer" % INTEGER
       ),
