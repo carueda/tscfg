@@ -599,7 +599,7 @@ For example, the demo programs
 [JavaUse](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java)
 and [scalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala)
 use [Gson](https://github.com/google/gson) and
-[json4s](https://github.com/json4s/json4s), respectively.
+[pprint](https://com-lihaoyi.github.io/PPrint/), respectively.
 Although you could also use Typesafe Config itself for rendering purposes, you would be
 using the original Typesafe Config parsed configuration object, so the rendering won't
 necessarily be restricted only to the elements captured in the _configuration specification_

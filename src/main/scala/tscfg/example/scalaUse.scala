@@ -30,10 +30,8 @@ object scalaUse {
     val port: Int           = cfg.endpoint.interface.port
     val typ: Option[String] = cfg.endpoint.interface.`type`
 
-    println("\n*** tscfg case class structure: *** ")
-    println("  " + cfg.toString.replaceAll("\n", "\n  "))
-    println("\n  *** in JSON format: *** ")
-    println("  " + toJson(cfg).toString.replaceAll("\n", "\n  "))
+    println("\n*** tscfg case class structure using pprint: *** ")
+    pprint.pprintln(cfg)
 
     println("\n*** Typesafe rendering of input Config object: *** ")
     val options: ConfigRenderOptions = ConfigRenderOptions.defaults
@@ -41,13 +39,5 @@ object scalaUse {
       .setComments(true)
       .setOriginComments(false)
     println("  " + tsConfig.root.render(options).replaceAll("\n", "\n  "))
-  }
-
-  def toJson(cfg: ScalaExampleCfg): String = {
-    import org.json4s._
-    import org.json4s.native.Serialization
-    import org.json4s.native.Serialization.writePretty
-    implicit val formats = Serialization.formats(NoTypeHints)
-    writePretty(cfg)
   }
 }
