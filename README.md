@@ -182,10 +182,11 @@ object ScalaExampleCfg {
 
 ## running tscfg
 
-You will need a JRE 8 and the latest fat JAR (tscfg-x.y.z.jar)
+You will need a JRE 8+ and the latest fat JAR (tscfg-x.y.z.jar)
 from the [releases](https://github.com/carueda/tscfg/releases).
 
-> Or run `sbt assembly` under a clone of this repo to generate the fat jar.
+> Or run `sbt assembly` (or `sbt ++2.13.7 assembly`) 
+> under a clone of this repo to generate the fat jar.
 
 ```
 $ java -jar tscfg-x.y.z.jar
