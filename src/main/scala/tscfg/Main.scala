@@ -33,6 +33,7 @@ object Main {
        |  --java                generate java code               (the default)
        |  --j7                  generate code for java <= 7      (8)
        |  --java:getters        generate getters (see #31)       (false)
+       |  --java:records        generate records                 (false)
        |  --java:optionals      use optionals                    (false)
        |  --scala               generate scala code              (java)
        |  --scala:2.12          generate code for scala 2.12     (2.13)
@@ -59,6 +60,7 @@ object Main {
       s12: Boolean = false,
       useBackticks: Boolean = false,
       genGetters: Boolean = false,
+      genRecords: Boolean = false,
       useOptionals: Boolean = false,
       useDurations: Boolean = false,
       tplFilename: Option[String] = None,
@@ -130,6 +132,9 @@ object Main {
         case "--java:getters" :: rest =>
           traverseList(rest, opts.copy(genGetters = true))
 
+        case "--java:records" :: rest =>
+          traverseList(rest, opts.copy(genRecords = true))
+
         case "--java:optionals" :: rest =>
           traverseList(rest, opts.copy(useOptionals = true))
 
@@ -189,6 +194,7 @@ object Main {
       s12 = opts.s12,
       useBackticks = opts.useBackticks,
       genGetters = opts.genGetters,
+      genRecords = opts.genRecords,
       useOptionals = opts.useOptionals,
       useDurations = opts.useDurations
     )

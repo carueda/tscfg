@@ -44,15 +44,6 @@ fullRunTask(genCode, Compile, "tscfg.gen4tests")
 /* pending stuff for when using java 16+
 
 Test / javacOptions ++= Seq("-source", "1.17")
-
-// google-java-format:
-javaOptions ++= Seq(
-  "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-  "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
-  "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
-  "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-  "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-)
 */
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated

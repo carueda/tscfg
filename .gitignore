@@ -3,6 +3,7 @@ src/main/resources/codeDefs/
 .metals
 metals.sbt
 .bloop
+.bsp
 
 ### Scala template
 *.class

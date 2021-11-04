@@ -109,10 +109,13 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
             }
             genResults = genResults
               .copy(fields = genResults.fields + (javaId -> type_.toString))
-            s"public final $type_ $javaId;" + dbg("<decl>")
+            if (genOpts.genRecords)
+              s"$type_ $javaId" + dbg("<decl>")
+            else
+              s"public final $type_ $javaId;" + dbg("<decl>")
           }
       }
-      .mkString("\n  ")
+      .mkString(if (genOpts.genRecords) ",\n  " else "\n  ")
 
     val classMemberGettersStr = if (genOpts.genGetters) {
       classDeclMembers
@@ -137,20 +140,33 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     implicit val listAccessors =
       collection.mutable.LinkedHashMap[String, String]()
 
-    val ctorMembersStr = results
-      .flatMap { case (symbol, res, a) =>
-        if (a.isDefine) None
-        else
-          Some {
-            val javaId = javaIdentifier(symbol)
-            "this." + javaId + " = " + instance(
-              a,
-              res,
-              path = escapeString(symbol)
-            ) + ";"
-          }
-      }
-      .mkString("\n    ")
+    val ctorMembersStr = if (genOpts.genRecords) {
+      results
+        .flatMap { case (symbol, res, a) =>
+          if (a.isDefine) None
+          else
+            Some {
+              instance(a, res, path = escapeString(symbol), isRoot = isRoot)
+            }
+        }
+        .mkString("this(\n      ", ",\n      ", "\n    );")
+    }
+    else {
+      results
+        .flatMap { case (symbol, res, a) =>
+          if (a.isDefine) None
+          else
+            Some {
+              val javaId = javaIdentifier(symbol)
+              "this." + javaId + " = " + instance(
+                a,
+                res,
+                path = escapeString(symbol)
+              ) + ";"
+            }
+        }
+        .mkString("\n    ")
+    }
 
     val elemAccessorsStr = {
       val objOnes =
@@ -185,11 +201,14 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val (ctorParams, errHandlingDecl, errHandlingDispatch) = if (isRoot) {
       (
         "com.typesafe.config.Config c",
-        """final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
-          |    final java.lang.String parentPath = "";
-          |    """.stripMargin,
+        if (genOpts.genRecords)
+          ""
+        else
+          """final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
+            |    final java.lang.String parentPath = "";
+            |    """.stripMargin,
         s"""
-           |    $$tsCfgValidator.validate();""".stripMargin
+             |    $$tsCfgValidator.validate();""".stripMargin
       )
     }
     else
@@ -207,6 +226,20 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
     val classStr =
       ot match {
+        case _: ObjectType if genOpts.genRecords =>
+          s"""public ${if (isRoot) "" else "static "}record $classNameAdjusted $extendsString(
+             |  $classDeclMembersStr$classMemberGettersStr
+             |) {
+             |${if (isRoot)
+            "  static final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();\n"
+          else ""}
+             |  $membersStr
+             |  public $classNameAdjusted($ctorParams) {$superString
+             |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
+             |  }$elemAccessorsStr
+             |$rootAuxClasses}
+             |""".stripMargin
+
         case _: ObjectType =>
           s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
@@ -317,7 +350,12 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     case other => other
   }
 
-  private def instance(a: AnnType, res: Res, path: String)(implicit
+  private def instance(
+      a: AnnType,
+      res: Res,
+      path: String,
+      isRoot: Boolean = false
+  )(implicit
       listAccessors: collection.mutable.LinkedHashMap[String, String]
   ): String = {
 
@@ -329,7 +367,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     objRefResolution.getOrElse {
       a.t match {
         case bt: BasicType    => basicInstance(a, bt, path)
-        case _: ObjectAbsType => objectInstance(a, res, path)
+        case _: ObjectAbsType => objectInstance(a, res, path, isRoot)
         case lt: ListType     => listInstance(a, lt, res, path)
       }
     }
@@ -355,12 +393,21 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     s"""$className.valueOf(c.getString("$path"))"""
   }
 
-  private def objectInstance(a: AnnType, res: Res, path: String)(implicit
+  private def objectInstance(
+      a: AnnType,
+      res: Res,
+      path: String,
+      isRoot: Boolean
+  )(implicit
       listAccessors: collection.mutable.Map[String, String]
   ): String = {
     val className = res.javaType.toString
 
-    val ppArg = s""", parentPath + "$path.", $$tsCfgValidator"""
+    val ppArg =
+      if (isRoot)
+        s""", "$path.", $$tsCfgValidator"""
+      else
+        s""", parentPath + "$path.", $$tsCfgValidator"""
 
     def reqConfigCall = {
       val methodName = "$_reqConfig"

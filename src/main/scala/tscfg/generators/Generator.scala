@@ -32,6 +32,7 @@ case class GenOpts(
     s12: Boolean = false,
     useBackticks: Boolean = false,
     genGetters: Boolean = false,
+    genRecords: Boolean = false,
     useOptionals: Boolean = false,
     useDurations: Boolean = false
 )

@@ -1193,20 +1193,16 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 75" should {
-    "work with no records" in {
-      val c0 = ConfigFactory.parseString("simple.int = 9")
-      val c = new JavaIssue75aCfg(c0)
-      c.simple.foo === "simple"
-      c.simple.int_ === 9
+  /*
+  "issue 75 - java:records" when {
+    "with simple spec" should {
+      "work " in {
+        val c0 = ConfigFactory.parseString("simple.int = 9")
+        val c  = new JavaIssue75Cfg(c0)
+        c.simple().foo() === "simple"
+        c.simple().int_() === 9
+      }
     }
   }
-//  "issue 75" should {
-//    "work with records" in {
-//      val c0 = ConfigFactory.parseString("int = 9")
-//      val c = new JavaIssue75bCfg(c0)
-//      c.simple().foo() === "simple"
-//      c.simple().int_() === 9
-//    }
-//  }
+   */
 }
