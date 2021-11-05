@@ -1,10 +1,10 @@
 package tscfg.generators.scala
 
-import tscfg.{ModelBuilder, Namespace, model, util}
+import tscfg.codeDefs.scalaDef
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
-import tscfg.codeDefs.scalaDef
+import tscfg.{ModelBuilder, Namespace, Struct, model}
 
 class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   val accessors = new Accessors
@@ -18,7 +18,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   val scalaUtil: ScalaUtil = new ScalaUtil(useBackticks = genOpts.useBackticks)
 
-  import scalaUtil.{scalaIdentifier, getClassName}
+  import scalaUtil.{getClassName, scalaIdentifier}
 
   def padScalaIdLength(implicit symbols: List[String]): Int =
     if (symbols.isEmpty) 0
@@ -44,7 +44,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       typ: Type,
       classNamesPrefix: List[String],
       className: String,
-      parentClassName: Option[String] = None,
+      annTypeForParentClassName: Option[AnnType] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None,
   ): Res = typ match {
 
@@ -55,7 +55,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ot,
         classNamesPrefix,
         className,
-        parentClassName = parentClassName,
+        annTypeForParentClassName = annTypeForParentClassName,
         parentClassMembers = parentClassMembers
       )
 
@@ -64,7 +64,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         aot,
         classNamesPrefix,
         className,
-        parentClassName,
+        annTypeForParentClassName,
         parentClassMembers
       );
 
@@ -117,7 +117,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       classNamesPrefix: List[String] = List.empty,
       className: String,
       isRoot: Boolean = false,
-      parentClassName: Option[String] = None,
+      annTypeForParentClassName: Option[AnnType] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None
   ): Res = {
 
@@ -132,7 +132,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
         className = getClassName(symbol),
-        a.abstractClass,
+        Some(a),
         a.parentClassMembers,
       )
       (symbol, res, a, false)
@@ -148,7 +148,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
             a.t,
             classNamesPrefix = className + "." :: classNamesPrefix,
             className = getClassName(symbol),
-            a.abstractClass,
+            Some(a),
             a.parentClassMembers,
           )
           (symbol, res, a, true)
@@ -159,12 +159,11 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classMembersStr =
       buildClassMembersString(parentClassMemberResults ++ results, padId)
 
-    val parentClassString = parentClassName
-      .map(
-        " extends " + _ + "(" +
-          parentClassMemberResults.map(_._1).mkString(",") + ")"
+    val parentClassString =
+      buildParentClassString(
+        annTypeForParentClassName,
+        parentClassMemberResults
       )
-      .getOrElse("")
 
     val classStr =
       s"""final case class $className(
@@ -266,11 +265,25 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     )
   }
 
+  private def buildParentClassString(
+      annTypeForParentClassName: Option[AnnType],
+      parentClassMemberResults: Seq[(String, Res, AnnType, Boolean)]
+  ) =
+    annTypeForParentClassName.flatMap(_.nameImplementsExternal) match {
+      case Some((parentClassName, _, _)) =>
+        val superClassFieldString =
+          if (parentClassMemberResults.nonEmpty)
+            "(" + parentClassMemberResults.map(_._1).mkString(",") + ")"
+          else ""
+        s" extends $parentClassName$superClassFieldString"
+      case None => ""
+    }
+
   private def generateForAbstractObj(
       aot: AbstractObjectType,
       classNamesPrefix: List[String],
       className: String,
-      parentClassName: Option[String] = None,
+      annTypeForParentClassName: Option[AnnType] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None
   ): Res = {
 
@@ -285,7 +298,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
         className = getClassName(symbol),
-        a.abstractClass,
+        Some(a),
         a.parentClassMembers,
       )
       (symbol, res, a, false)
@@ -302,7 +315,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
             a.t,
             classNamesPrefix = className + "." :: classNamesPrefix,
             className = getClassName(symbol),
-            a.abstractClass,
+            Some(a),
             a.parentClassMembers,
           )
           (symbol, res, a, true)
@@ -316,12 +329,11 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       isAbstractClass = true
     )
 
-    val parentClassString = parentClassName
-      .map(
-        " extends " + _ + "(" +
-          parentClassMemberResults.map(_._1).mkString(",") + ")"
+    val parentClassString =
+      buildParentClassString(
+        annTypeForParentClassName,
+        parentClassMemberResults
       )
-      .getOrElse("")
 
     val abstractClassStr =
       s"""sealed abstract class $className (
@@ -431,14 +443,16 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |            null
          |}""".stripMargin
 
-    val str =
+    val str = {
+      val membersStr =
+        et.members.map(m => s"object $m extends $className").mkString("\n  ")
+
       s"""|sealed trait $className
-         |object $className {
-         |  ${et.members
-        .map(m => s"object $m extends $className")
-        .mkString("\n  ")}
-         |  ${resolve.replaceAll("\n", "\n  ")}
-         |}""".stripMargin
+          |object $className {
+          |  $membersStr
+          |  ${resolve.replaceAll("\n", "\n  ")}
+          |}""".stripMargin
+    }
 
     val baseType = classNamesPrefix.reverse.mkString + className
     Res(et, scalaType = BaseScalaType(baseType + dbg("<X>")), definition = str)
@@ -447,9 +461,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
 object ScalaGen {
 
-  import _root_.java.io.{File, PrintWriter, FileWriter}
-
   import tscfg.util
+
+  import _root_.java.io.{File, FileWriter, PrintWriter}
 
   // $COVERAGE-OFF$
   def generate(
@@ -512,7 +526,7 @@ object ScalaGen {
   }
 
   def main(args: Array[String]): Unit = {
-    val filename = args(0)
+    val filename = args.headOption.getOrElse("example/example.conf")
     val results  = generate(filename, showOut = true)
     println(s"""classNames: ${results.classNames}
          |fields    : ${results.fields}

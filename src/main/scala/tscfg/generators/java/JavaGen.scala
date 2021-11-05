@@ -1,6 +1,7 @@
 package tscfg.generators.java
 
-import tscfg.Namespace
+import tscfg.DefineCase.{ExtendsDefineCase, ImplementsDefineCase}
+import tscfg.{Namespace, Struct}
 import tscfg.generators.java.javaUtil._
 import tscfg.generators._
 import tscfg.model._
@@ -29,7 +30,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       typ: Type,
       classNamePrefixOpt: Option[String],
       className: String,
-      abstractClassName: Option[String] = None
+      annTypeForAbstractClassName: Option[AnnType] = None
   ): Res = typ match {
 
     case et: EnumObjectType =>
@@ -40,7 +41,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ot,
         classNamePrefixOpt,
         className,
-        abstractClassName = abstractClassName
+        annTypeForAbstractClassName = annTypeForAbstractClassName
       )
 
     case aot: AbstractObjectType =>
@@ -48,7 +49,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         aot,
         classNamePrefixOpt,
         className,
-        abstractClassName = abstractClassName
+        annTypeForAbstractClassName = annTypeForAbstractClassName
       );
 
     case ort: ObjectRefType => generateForObjRef(ort)
@@ -63,7 +64,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       classNamePrefixOpt: Option[String] = None,
       className: String,
       isRoot: Boolean = false,
-      abstractClassName: Option[String] = None
+      annTypeForAbstractClassName: Option[AnnType] = None
   ): Res = {
 
     val classNameAdjusted = adjustClassName(className)
@@ -79,7 +80,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         a.t,
         classNamePrefixOpt = Some(classNameAdjusted + "."),
         className = javaUtil.getClassName(symbol),
-        abstractClassName = a.abstractClass
+        annTypeForAbstractClassName = Some(a)
       )
       (symbol, res, a)
     }
@@ -218,11 +219,29 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ""
       )
 
-    val extendsString =
-      abstractClassName.map(cn => s"extends $cn ").getOrElse("")
-    val superString = abstractClassName
-      .map(_ => "\n    super(c, parentPath, $tsCfgValidator);")
-      .getOrElse("") // if parent class name is defined a super call is needed
+    val (extendsString, superString) = {
+      annTypeForAbstractClassName match {
+        case None =>
+          ("", "")
+
+        case Some(annType) =>
+          annType.nameImplementsExternal match {
+            case Some((cn, isImplements, isExternal)) =>
+              if (isImplements)
+                (s"implements $cn ", "")
+              else if (isExternal)
+                (s"extends $cn ", "")
+              else
+                (
+                  s"extends $cn ",
+                  "\n    super(c, parentPath, $tsCfgValidator);"
+                )
+
+            case None =>
+              ("", "")
+          }
+      }
+    }
 
     val classStr =
       ot match {
@@ -655,7 +674,7 @@ object JavaGen {
   }
 
   def main(args: Array[String]): Unit = {
-    val filename = args(0)
+    val filename = args.headOption.getOrElse("example/example.conf")
     val results  = generate(filename, showOut = true)
     println(s"""classNames: ${results.classNames}
          |fields    : ${results.fields}

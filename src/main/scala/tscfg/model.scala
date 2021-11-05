@@ -94,10 +94,12 @@ object model {
 
     val isDefine: Boolean = defineCase.isDefined
 
-    val abstractClass: Option[String] = defineCase flatMap {
-      case ExtendsDefineCase(name, _) => Some(name)
-      case _                          => None
-    }
+    def nameImplementsExternal: Option[(String, Boolean, Boolean)] =
+      defineCase flatMap {
+        case c: ExtendsDefineCase    => Some((c.name, false, c.isExternal))
+        case c: ImplementsDefineCase => Some((c.name, true, c.isExternal))
+        case _                       => None
+      }
 
     def |(d: String): AnnType = copy(default = Some(d))
 

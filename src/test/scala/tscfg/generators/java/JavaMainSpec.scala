@@ -1257,6 +1257,42 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
+  "issue 73 - Ability to extend or implement external type" when {
+    "73a @define abstract extends java.lang.Object" should {
+      "generate AbstractA implements java.lang.Object" in {
+        val r = JavaGen.generate("example/issue73a.spec.conf")
+        assert(r.code contains "extends java.lang.Object")
+      }
+
+      "do usual parsing" in {
+        val c = new JavaIssue73aCfg(ConfigFactory.parseString("""test.impl {
+            |  a = "aa"
+            |  b = "bb"
+            |}
+            |""".stripMargin))
+        assert(c.test.impl.a === "aa")
+        assert(c.test.impl.b === "bb")
+      }
+    }
+
+    "73b @define abstract implements java.io.Serializable" should {
+      "generate AbstractA implements java.io.Serializable" in {
+        val r = JavaGen.generate("example/issue73b.spec.conf")
+        assert(r.code contains "implements java.io.Serializable")
+      }
+
+      "usual parsing" in {
+        val c = new JavaIssue73bCfg(ConfigFactory.parseString("""test.impl {
+            |  a = "aa"
+            |  b = "bb"
+            |}
+            |""".stripMargin))
+        assert(c.test.impl.a === "aa")
+        assert(c.test.impl.b === "bb")
+      }
+    }
+  }
+
   "issue 75 - java:records" when {
     "with simple spec" should {
       "work " in {

@@ -5,6 +5,7 @@ import tscfg.DefineCase.{
   AbstractDefineCase,
   EnumDefineCase,
   ExtendsDefineCase,
+  ImplementsDefineCase,
   SimpleDefineCase
 }
 import tscfg.exceptions.ObjectDefinitionException
@@ -31,8 +32,9 @@ case class Struct(
   def isDefine: Boolean = defineCaseOpt.isDefined
 
   def isExtends: Boolean = defineCaseOpt match {
-    case Some(_: ExtendsDefineCase) => true
-    case _                          => false
+    case Some(_: ExtendsDefineCase)    => true
+    case Some(_: ImplementsDefineCase) => true
+    case _                             => false
   }
 
   def isEnum: Boolean = defineCaseOpt.exists(_.isEnum)
@@ -93,12 +95,8 @@ object Struct {
     def addExtendStruct(
         s: Struct,
         othersBeingAdded: List[Struct] = List.empty
-    ): Unit = s.defineCaseOpt.get match {
-
-      case SimpleDefineCase | AbstractDefineCase | EnumDefineCase =>
-        sorted.put(s.name, s)
-
-      case ExtendsDefineCase(name, _) =>
+    ): Unit = {
+      def addExtendsOrImplements(name: String, isExternal: Boolean): Unit = {
         sorted.get(name) match {
           case Some(_) =>
             // ancestor already added. Add this descendent struct:
@@ -112,7 +110,9 @@ object Struct {
                 if (othersBeingAdded.exists(_.name == ancestor.name)) {
                   val path = s :: othersBeingAdded
                   val via =
-                    path.reverse.map("'" + _.name + "'").mkString(" -> ")
+                    path.reverseIterator
+                      .map("'" + _.name + "'")
+                      .mkString(" -> ")
                   throw ObjectDefinitionException(
                     s"extension of struct '${s.name}' involves circular reference via $via"
                   )
@@ -123,16 +123,35 @@ object Struct {
                 // and then add this struct:
                 sorted.put(s.name, s)
 
+              case None if isExternal =>
+                sorted.put(s.name, s)
+
               case None =>
                 throw ObjectDefinitionException(
                   s"struct '${s.name}' with undefined extend '$name'"
                 )
             }
         }
+      }
+
+      s.defineCaseOpt.get match {
+        case SimpleDefineCase | AbstractDefineCase | EnumDefineCase =>
+          sorted.put(s.name, s)
+
+        case c: ExtendsDefineCase =>
+          addExtendsOrImplements(c.name, c.isExternal)
+
+        case c: ImplementsDefineCase =>
+          addExtendsOrImplements(c.name, c.isExternal)
+      }
     }
+
     defineStructs.foreach(addExtendStruct(_))
 
-    assert(defineStructs.size == sorted.size)
+    assert(
+      defineStructs.size == sorted.size,
+      s"defineStructs.size=${defineStructs.size} != sorted.size=${sorted.size}"
+    )
 
     sorted.toList.map(_._2)
   }
@@ -156,35 +175,51 @@ object Struct {
       memberStructs: List[Struct],
       namespace: Namespace
   ): Option[Map[String, model.AnnType]] = {
+
+    def handleExtends(
+        parentName: String,
+        isExternal: Boolean
+    ): Option[Map[String, model.AnnType]] = {
+      val defineStructs = memberStructs.filter(_.isDefine)
+
+      val greatAncestorMembers =
+        defineStructs.find(_.name == parentName) match {
+          case Some(parentStruct) if parentStruct.isExtends =>
+            ancestorClassMembers(parentStruct, memberStructs, namespace)
+
+          case Some(_) => None
+
+          case None if isExternal => None
+
+          case None =>
+            throw new RuntimeException(
+              s"struct '${struct.name}' with undefined extend '$parentName'"
+            )
+        }
+
+      val parentMembers =
+        namespace.getRealDefine(parentName).map(_.members) match {
+          case Some(parentMembers) => parentMembers
+
+          case None if isExternal => None
+
+          case None =>
+            throw new IllegalArgumentException(
+              s"@define '${struct.name}' is invalid because '$parentName' is not @defined"
+            )
+        }
+
+      // join both member maps
+      Some(greatAncestorMembers.getOrElse(Map.empty) ++ parentMembers)
+    }
+
     struct.defineCaseOpt.flatMap {
-      case ExtendsDefineCase(parentName, _) =>
-        val defineStructs = memberStructs.filter(_.isDefine)
+      case c: ExtendsDefineCase =>
+        handleExtends(c.name, c.isExternal)
 
-        val greatAncestorMembers =
-          defineStructs.find(_.name == parentName) match {
-            case Some(parentStruct) if parentStruct.isExtends =>
-              ancestorClassMembers(parentStruct, memberStructs, namespace)
-
-            case Some(_) => None
-
-            case None =>
-              throw new RuntimeException(
-                s"struct '${struct.name}' with undefined extend '$parentName'"
-              )
-          }
-
-        val parentMembers =
-          namespace.getRealDefine(parentName).map(_.members) match {
-            case s @ Some(parentMembers) => parentMembers
-
-            case None =>
-              throw new IllegalArgumentException(
-                s"@define '${struct.name}' is invalid because '$parentName' is not @defined"
-              )
-          }
-
-        // join both member maps
-        Some(greatAncestorMembers.getOrElse(Map.empty) ++ parentMembers)
+      case c: ImplementsDefineCase =>
+        // note: handling it as an extends (todo: revisit this at some point)
+        handleExtends(c.name, c.isExternal)
 
       case _ => None
     }

@@ -1,4 +1,13 @@
-2021-11
+2021-11 - 0.9.995
+
+- resolve #73 "Ability to extend or implement external type
+  that is an interface or class with no-arg, default constructor"
+  - use "!" prefix to indicate an external extension name
+  - Besides `extends` now also `implements` accepted
+  - Examples: 
+    
+      - `#@define abstract extends !java.lang.Object`
+      - `#@define abstract implements !java.io.Serializable`
 
 - use pprint, remove json4s
 - 0.9.994 release

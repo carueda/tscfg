@@ -338,7 +338,8 @@ object ModelBuilder {
   def main(args: Array[String]): Unit = {
     tscfg.util.setLogMinLevel()
 
-    val filename     = args(0)
+    val filename =
+      args.headOption.getOrElse("src/main/tscfg/example/example.conf")
     val showTsConfig = args.length > 1 && "-ts" == args(1)
     val file         = new File(filename)
     val bufSource    = io.Source.fromFile(file)

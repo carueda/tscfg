@@ -14,7 +14,17 @@ object DefineCase {
     override val isAbstract: Boolean = true
   }
 
-  case class ExtendsDefineCase(name: String, abs: Boolean) extends DefineCase {
+  case class ExtendsDefineCase(abs: Boolean, nameGiven: String)
+      extends DefineCase {
+    val isExternal: Boolean = nameGiven.startsWith("!")
+    val name: String = if (isExternal) nameGiven.substring(1) else nameGiven
+    override val isAbstract: Boolean = abs
+  }
+
+  case class ImplementsDefineCase(abs: Boolean, nameGiven: String)
+      extends DefineCase {
+    val isExternal: Boolean = nameGiven.startsWith("!")
+    val name: String = if (isExternal) nameGiven.substring(1) else nameGiven
     override val isAbstract: Boolean = abs
   }
 
@@ -33,7 +43,6 @@ object DefineCase {
     * @return
     *   An [[Option]] on additional information of the shared object
     */
-  @throws[ObjectDefinitionException]
   def getDefineCase(commentString: String): Option[DefineCase] = {
     val str    = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
@@ -42,14 +51,26 @@ object DefineCase {
         Some(AbstractDefineCase)
 
       case "@define" :: "abstract" :: "extends" :: name :: Nil =>
-        /* This is an abstract shared object definition somewhere within the inheritance tree */
-        Some(ExtendsDefineCase(name, abs = true))
+        Some(ExtendsDefineCase(abs = true, name))
 
       case "@define" :: "extends" :: name :: Nil =>
-        Some(ExtendsDefineCase(name, abs = false))
+        Some(ExtendsDefineCase(abs = false, name))
 
       case "@define" :: "extends" :: Nil =>
-        throw ObjectDefinitionException(s"Missing name after `extends`")
+        throw ObjectDefinitionException(
+          s"Missing name after `extends`: '$commentString'"
+        )
+
+      case "@define" :: "abstract" :: "implements" :: name :: Nil =>
+        Some(ImplementsDefineCase(abs = true, name))
+
+      case "@define" :: "implements" :: name :: Nil =>
+        Some(ImplementsDefineCase(abs = false, name))
+
+      case "@define" :: "implements" :: Nil =>
+        throw ObjectDefinitionException(
+          s"Missing name after `implements`: '$commentString'"
+        )
 
       case "@define" :: "enum" :: Nil =>
         Some(EnumDefineCase)
