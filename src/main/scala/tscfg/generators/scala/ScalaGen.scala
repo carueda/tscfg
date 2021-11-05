@@ -159,12 +159,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classMembersStr =
       buildClassMembersString(parentClassMemberResults ++ results, padId)
 
-    val parentClassString = parentClassName
-      .map(
-        " extends " + _ + "(" +
-          parentClassMemberResults.map(_._1).mkString(",") + ")"
-      )
-      .getOrElse("")
+    val parentClassString =
+      buildParentClassString(parentClassName, parentClassMemberResults)
 
     val classStr =
       s"""final case class $className(
@@ -266,6 +262,20 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     )
   }
 
+  private def buildParentClassString(
+      parentClassName: Option[String],
+      parentClassMemberResults: Seq[(String, Res, AnnType, Boolean)]
+  ) =
+    parentClassName match {
+      case Some(parentClassName) =>
+        val superClassFieldString =
+          if (parentClassMemberResults.nonEmpty)
+            "(" + parentClassMemberResults.map(_._1).mkString(",") + ")"
+          else ""
+        s" extends $parentClassName$superClassFieldString"
+      case None => ""
+    }
+
   private def generateForAbstractObj(
       aot: AbstractObjectType,
       classNamesPrefix: List[String],
@@ -316,12 +326,8 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       isAbstractClass = true
     )
 
-    val parentClassString = parentClassName
-      .map(
-        " extends " + _ + "(" +
-          parentClassMemberResults.map(_._1).mkString(",") + ")"
-      )
-      .getOrElse("")
+    val parentClassString =
+      buildParentClassString(parentClassName, parentClassMemberResults)
 
     val abstractClassStr =
       s"""sealed abstract class $className (
@@ -431,14 +437,16 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
          |            null
          |}""".stripMargin
 
-    val str =
+    val str = {
+      val membersStr =
+        et.members.map(m => s"object $m extends $className").mkString("\n  ")
+
       s"""|sealed trait $className
-         |object $className {
-         |  ${et.members
-        .map(m => s"object $m extends $className")
-        .mkString("\n  ")}
-         |  ${resolve.replaceAll("\n", "\n  ")}
-         |}""".stripMargin
+          |object $className {
+          |  $membersStr
+          |  ${resolve.replaceAll("\n", "\n  ")}
+          |}""".stripMargin
+    }
 
     val baseType = classNamesPrefix.reverse.mkString + className
     Res(et, scalaType = BaseScalaType(baseType + dbg("<X>")), definition = str)

@@ -1180,7 +1180,7 @@ class ScalaMainSpec extends AnyWordSpec {
     "73a @define abstract extends java.io.Serializable" should {
       "generate AbstractA extends java.io.Serializable()" in {
         val r = ScalaGen.generate("example/issue73a.spec.conf")
-        assert(r.code.contains("extends java.io.Serializable()") === true)
+        assert(r.code.contains("extends java.io.Serializable") === true)
       }
 
       "usual parsing" in {
