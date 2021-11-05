@@ -225,18 +225,8 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
           ("", "")
 
         case Some(annType) =>
-          val nameIsImplementsOpt = annType.defineCase match {
-            case Some(ExtendsDefineCase(name, _))    => Some((name, false))
-            case Some(ImplementsDefineCase(name, _)) => Some((name, true))
-            case _                                   => None
-          }
-          nameIsImplementsOpt match {
-            case Some((className, isImplements)) =>
-              val isExternal = Struct.isExternalParent(className)
-              val cn =
-                if (isExternal) className.substring(1)
-                else className
-
+          annType.nameImplementsExternal match {
+            case Some((cn, isImplements, isExternal)) =>
               if (isImplements)
                 (s"implements $cn ", "")
               else if (isExternal)

@@ -9,8 +9,6 @@
       - `#@define abstract extends !java.lang.Object`
       - `#@define abstract implements !java.io.Serializable`
 
-    TODO capture aspect of "external" as part of the model itself.
-
 - use pprint, remove json4s
 - 0.9.994 release
 - core handling in place for `--java:records` #75.

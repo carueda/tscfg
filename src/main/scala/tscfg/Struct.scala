@@ -88,11 +88,6 @@ object Struct {
     sortedDefineStructs ++ nonDefineStructs
   }
 
-  // ad hoc;  TODO capture external aspect as part of model
-  def isExternalParent(name: String): Boolean = {
-    name.startsWith("!")
-  }
-
   private def sortDefineStructs(defineStructs: List[Struct]): List[Struct] = {
     val sorted = mutable.LinkedHashMap.empty[String, Struct]
 
@@ -101,7 +96,7 @@ object Struct {
         s: Struct,
         othersBeingAdded: List[Struct] = List.empty
     ): Unit = {
-      def addExtendsOrImplements(name: String): Unit = {
+      def addExtendsOrImplements(name: String, isExternal: Boolean): Unit = {
         sorted.get(name) match {
           case Some(_) =>
             // ancestor already added. Add this descendent struct:
@@ -128,8 +123,8 @@ object Struct {
                 // and then add this struct:
                 sorted.put(s.name, s)
 
-              case None if isExternalParent(name) =>
-                sorted.put(s.name.substring(1), s)
+              case None if isExternal =>
+                sorted.put(s.name, s)
 
               case None =>
                 throw ObjectDefinitionException(
@@ -143,11 +138,11 @@ object Struct {
         case SimpleDefineCase | AbstractDefineCase | EnumDefineCase =>
           sorted.put(s.name, s)
 
-        case ExtendsDefineCase(name, _) =>
-          addExtendsOrImplements(name)
+        case c: ExtendsDefineCase =>
+          addExtendsOrImplements(c.name, c.isExternal)
 
-        case ImplementsDefineCase(name, _) =>
-          addExtendsOrImplements(name)
+        case c: ImplementsDefineCase =>
+          addExtendsOrImplements(c.name, c.isExternal)
       }
     }
 
@@ -182,7 +177,8 @@ object Struct {
   ): Option[Map[String, model.AnnType]] = {
 
     def handleExtends(
-        parentName: String
+        parentName: String,
+        isExternal: Boolean
     ): Option[Map[String, model.AnnType]] = {
       val defineStructs = memberStructs.filter(_.isDefine)
 
@@ -193,7 +189,7 @@ object Struct {
 
           case Some(_) => None
 
-          case None if isExternalParent(parentName) => None
+          case None if isExternal => None
 
           case None =>
             throw new RuntimeException(
@@ -205,7 +201,7 @@ object Struct {
         namespace.getRealDefine(parentName).map(_.members) match {
           case Some(parentMembers) => parentMembers
 
-          case None if isExternalParent(parentName) => None
+          case None if isExternal => None
 
           case None =>
             throw new IllegalArgumentException(
@@ -218,12 +214,12 @@ object Struct {
     }
 
     struct.defineCaseOpt.flatMap {
-      case ExtendsDefineCase(parentName, _) =>
-        handleExtends(parentName)
+      case c: ExtendsDefineCase =>
+        handleExtends(c.name, c.isExternal)
 
-      case ImplementsDefineCase(parentName, _) =>
+      case c: ImplementsDefineCase =>
         // note: handling it as an extends (todo: revisit this at some point)
-        handleExtends(parentName)
+        handleExtends(c.name, c.isExternal)
 
       case _ => None
     }
