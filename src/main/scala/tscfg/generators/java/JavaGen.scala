@@ -1,6 +1,6 @@
 package tscfg.generators.java
 
-import tscfg.Namespace
+import tscfg.{Namespace, Struct}
 import tscfg.generators.java.javaUtil._
 import tscfg.generators._
 import tscfg.model._
@@ -224,11 +224,15 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     }
 
     val (extendsString, superString) = abstractClassName match {
-      case Some(cn) if isInterface(cn) =>
-        (s"implements $cn ", "")
+      case Some(className) =>
+        val cn =
+          if (Struct.isExternalParent(className)) className.substring(1)
+          else className
 
-      case Some(cn) =>
-        (s"extends $cn ", "\n    super(c, parentPath, $tsCfgValidator);")
+        if (isInterface(cn))
+          (s"implements $cn ", "")
+        else
+          (s"extends $cn ", "\n    super(c, parentPath, $tsCfgValidator);")
 
       case None =>
         ("", "")

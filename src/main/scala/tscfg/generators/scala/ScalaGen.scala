@@ -1,10 +1,10 @@
 package tscfg.generators.scala
 
-import tscfg.{ModelBuilder, Namespace, model, util}
+import tscfg.codeDefs.scalaDef
 import tscfg.generators._
 import tscfg.model._
 import tscfg.util.escapeString
-import tscfg.codeDefs.scalaDef
+import tscfg.{ModelBuilder, Namespace, Struct, model}
 
 class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   val accessors = new Accessors
@@ -18,7 +18,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   val scalaUtil: ScalaUtil = new ScalaUtil(useBackticks = genOpts.useBackticks)
 
-  import scalaUtil.{scalaIdentifier, getClassName}
+  import scalaUtil.{getClassName, scalaIdentifier}
 
   def padScalaIdLength(implicit symbols: List[String]): Int =
     if (symbols.isEmpty) 0
@@ -267,7 +267,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       parentClassMemberResults: Seq[(String, Res, AnnType, Boolean)]
   ) =
     parentClassName match {
-      case Some(parentClassName) =>
+      case Some(pcn) =>
+        val parentClassName =
+          if (Struct.isExternalParent(pcn)) pcn.substring(1) else pcn
         val superClassFieldString =
           if (parentClassMemberResults.nonEmpty)
             "(" + parentClassMemberResults.map(_._1).mkString(",") + ")"
@@ -455,9 +457,9 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
 object ScalaGen {
 
-  import _root_.java.io.{File, PrintWriter, FileWriter}
-
   import tscfg.util
+
+  import _root_.java.io.{File, FileWriter, PrintWriter}
 
   // $COVERAGE-OFF$
   def generate(

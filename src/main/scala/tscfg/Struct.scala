@@ -86,9 +86,9 @@ object Struct {
     sortedDefineStructs ++ nonDefineStructs
   }
 
-  // obviously, this is pretty ad hoc, just for initial setup
-  private def isExternalExtend(name: String): Boolean = {
-    name.startsWith("java.")
+  // ad hoc;  TODO capture external aspect as part of model
+  def isExternalParent(name: String): Boolean = {
+    name.startsWith("!")
   }
 
   private def sortDefineStructs(defineStructs: List[Struct]): List[Struct] = {
@@ -128,8 +128,8 @@ object Struct {
                 // and then add this struct:
                 sorted.put(s.name, s)
 
-              case None if isExternalExtend(name) =>
-                sorted.put(s.name, s)
+              case None if isExternalParent(name) =>
+                sorted.put(s.name.substring(1), s)
 
               case None =>
                 throw ObjectDefinitionException(
@@ -178,7 +178,7 @@ object Struct {
 
             case Some(_) => None
 
-            case None if isExternalExtend(parentName) => None
+            case None if isExternalParent(parentName) => None
 
             case None =>
               throw new RuntimeException(
@@ -190,7 +190,7 @@ object Struct {
           namespace.getRealDefine(parentName).map(_.members) match {
             case s @ Some(parentMembers) => parentMembers
 
-            case None if isExternalExtend(parentName) => None
+            case None if isExternalParent(parentName) => None
 
             case None =>
               throw new IllegalArgumentException(
