@@ -512,7 +512,7 @@ object ScalaGen {
   }
 
   def main(args: Array[String]): Unit = {
-    val filename = args(0)
+    val filename = args.headOption.getOrElse("example/example.conf")
     val results  = generate(filename, showOut = true)
     println(s"""classNames: ${results.classNames}
          |fields    : ${results.fields}
