@@ -1,20 +1,20 @@
 package tscfg.example
 
-final case class ScalaIssue73aCfg(
-  test      : ScalaIssue73aCfg.Test
+final case class ScalaIssue73bCfg(
+  test      : ScalaIssue73bCfg.Test
 )
-object ScalaIssue73aCfg {
+object ScalaIssue73bCfg {
   sealed abstract class AbstractA (
    val a : java.lang.String
-  ) extends java.lang.Object
+  ) extends java.io.Serializable
   
   final case class ImplA(
     override val a : java.lang.String,
     b : java.lang.String
   ) extends AbstractA(a)
   object ImplA {
-    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue73aCfg.ImplA = {
-      ScalaIssue73aCfg.ImplA(
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue73bCfg.ImplA = {
+      ScalaIssue73bCfg.ImplA(
         b = $_reqStr(parentPath, c, "b", $tsCfgValidator),
         a = $_reqStr(parentPath, c, "a", $tsCfgValidator)
       )
@@ -32,21 +32,21 @@ object ScalaIssue73aCfg {
   }
         
   final case class Test(
-    impl : ScalaIssue73aCfg.ImplA
+    impl : ScalaIssue73bCfg.ImplA
   )
   object Test {
-    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue73aCfg.Test = {
-      ScalaIssue73aCfg.Test(
-        impl = ScalaIssue73aCfg.ImplA(if(c.hasPathOrNull("impl")) c.getConfig("impl") else com.typesafe.config.ConfigFactory.parseString("impl{}"), parentPath + "impl.", $tsCfgValidator)
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue73bCfg.Test = {
+      ScalaIssue73bCfg.Test(
+        impl = ScalaIssue73bCfg.ImplA(if(c.hasPathOrNull("impl")) c.getConfig("impl") else com.typesafe.config.ConfigFactory.parseString("impl{}"), parentPath + "impl.", $tsCfgValidator)
       )
     }
   }
         
-  def apply(c: com.typesafe.config.Config): ScalaIssue73aCfg = {
+  def apply(c: com.typesafe.config.Config): ScalaIssue73bCfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String = ""
-    val $result = ScalaIssue73aCfg(
-      test      = ScalaIssue73aCfg.Test(if(c.hasPathOrNull("test")) c.getConfig("test") else com.typesafe.config.ConfigFactory.parseString("test{}"), parentPath + "test.", $tsCfgValidator)
+    val $result = ScalaIssue73bCfg(
+      test      = ScalaIssue73bCfg.Test(if(c.hasPathOrNull("test")) c.getConfig("test") else com.typesafe.config.ConfigFactory.parseString("test{}"), parentPath + "test.", $tsCfgValidator)
     )
     $tsCfgValidator.validate()
     $result

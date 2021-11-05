@@ -95,8 +95,9 @@ object model {
     val isDefine: Boolean = defineCase.isDefined
 
     val abstractClass: Option[String] = defineCase flatMap {
-      case ExtendsDefineCase(name, _) => Some(name)
-      case _                          => None
+      case ExtendsDefineCase(name, _)    => Some(name)
+      case ImplementsDefineCase(name, _) => Some(name)
+      case _                             => None
     }
 
     def |(d: String): AnnType = copy(default = Some(d))

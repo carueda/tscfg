@@ -1,5 +1,6 @@
 package tscfg.generators.java
 
+import tscfg.DefineCase.{ExtendsDefineCase, ImplementsDefineCase}
 import tscfg.{Namespace, Struct}
 import tscfg.generators.java.javaUtil._
 import tscfg.generators._
@@ -29,7 +30,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       typ: Type,
       classNamePrefixOpt: Option[String],
       className: String,
-      abstractClassName: Option[String] = None
+      annTypeForAbstractClassName: Option[AnnType] = None
   ): Res = typ match {
 
     case et: EnumObjectType =>
@@ -40,7 +41,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ot,
         classNamePrefixOpt,
         className,
-        abstractClassName = abstractClassName
+        annTypeForAbstractClassName = annTypeForAbstractClassName
       )
 
     case aot: AbstractObjectType =>
@@ -48,7 +49,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         aot,
         classNamePrefixOpt,
         className,
-        abstractClassName = abstractClassName
+        annTypeForAbstractClassName = annTypeForAbstractClassName
       );
 
     case ort: ObjectRefType => generateForObjRef(ort)
@@ -63,7 +64,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       classNamePrefixOpt: Option[String] = None,
       className: String,
       isRoot: Boolean = false,
-      abstractClassName: Option[String] = None
+      annTypeForAbstractClassName: Option[AnnType] = None
   ): Res = {
 
     val classNameAdjusted = adjustClassName(className)
@@ -79,7 +80,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         a.t,
         classNamePrefixOpt = Some(classNameAdjusted + "."),
         className = javaUtil.getClassName(symbol),
-        abstractClassName = a.abstractClass
+        annTypeForAbstractClassName = Some(a)
       )
       (symbol, res, a)
     }
@@ -218,24 +219,38 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ""
       )
 
-    // obviously, this is pretty ad hoc, just for initial setup
-    def isInterface(name: String): Boolean = {
-      name.startsWith("java.")
-    }
+    val (extendsString, superString) = {
+      annTypeForAbstractClassName match {
+        case None =>
+          ("", "")
 
-    val (extendsString, superString) = abstractClassName match {
-      case Some(className) =>
-        val cn =
-          if (Struct.isExternalParent(className)) className.substring(1)
-          else className
+        case Some(annType) =>
+          val nameIsImplementsOpt = annType.defineCase match {
+            case Some(ExtendsDefineCase(name, _))    => Some((name, false))
+            case Some(ImplementsDefineCase(name, _)) => Some((name, true))
+            case _                                   => None
+          }
+          nameIsImplementsOpt match {
+            case Some((className, isImplements)) =>
+              val isExternal = Struct.isExternalParent(className)
+              val cn =
+                if (isExternal) className.substring(1)
+                else className
 
-        if (isInterface(cn))
-          (s"implements $cn ", "")
-        else
-          (s"extends $cn ", "\n    super(c, parentPath, $tsCfgValidator);")
+              if (isImplements)
+                (s"implements $cn ", "")
+              else if (isExternal)
+                (s"extends $cn ", "")
+              else
+                (
+                  s"extends $cn ",
+                  "\n    super(c, parentPath, $tsCfgValidator);"
+                )
 
-      case None =>
-        ("", "")
+            case None =>
+              ("", "")
+          }
+      }
     }
 
     val classStr =

@@ -44,7 +44,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       typ: Type,
       classNamesPrefix: List[String],
       className: String,
-      parentClassName: Option[String] = None,
+      annTypeForParentClassName: Option[AnnType] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None,
   ): Res = typ match {
 
@@ -55,7 +55,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ot,
         classNamesPrefix,
         className,
-        parentClassName = parentClassName,
+        annTypeForParentClassName = annTypeForParentClassName,
         parentClassMembers = parentClassMembers
       )
 
@@ -64,7 +64,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         aot,
         classNamesPrefix,
         className,
-        parentClassName,
+        annTypeForParentClassName,
         parentClassMembers
       );
 
@@ -117,7 +117,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       classNamesPrefix: List[String] = List.empty,
       className: String,
       isRoot: Boolean = false,
-      parentClassName: Option[String] = None,
+      annTypeForParentClassName: Option[AnnType] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None
   ): Res = {
 
@@ -132,7 +132,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
         className = getClassName(symbol),
-        a.abstractClass,
+        Some(a),
         a.parentClassMembers,
       )
       (symbol, res, a, false)
@@ -148,7 +148,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
             a.t,
             classNamesPrefix = className + "." :: classNamesPrefix,
             className = getClassName(symbol),
-            a.abstractClass,
+            Some(a),
             a.parentClassMembers,
           )
           (symbol, res, a, true)
@@ -160,7 +160,10 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       buildClassMembersString(parentClassMemberResults ++ results, padId)
 
     val parentClassString =
-      buildParentClassString(parentClassName, parentClassMemberResults)
+      buildParentClassString(
+        annTypeForParentClassName,
+        parentClassMemberResults
+      )
 
     val classStr =
       s"""final case class $className(
@@ -263,10 +266,10 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
   }
 
   private def buildParentClassString(
-      parentClassName: Option[String],
+      annTypeForParentClassName: Option[AnnType],
       parentClassMemberResults: Seq[(String, Res, AnnType, Boolean)]
   ) =
-    parentClassName match {
+    annTypeForParentClassName.flatMap(_.abstractClass) match {
       case Some(pcn) =>
         val parentClassName =
           if (Struct.isExternalParent(pcn)) pcn.substring(1) else pcn
@@ -282,7 +285,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       aot: AbstractObjectType,
       classNamesPrefix: List[String],
       className: String,
-      parentClassName: Option[String] = None,
+      annTypeForParentClassName: Option[AnnType] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None
   ): Res = {
 
@@ -297,7 +300,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
         className = getClassName(symbol),
-        a.abstractClass,
+        Some(a),
         a.parentClassMembers,
       )
       (symbol, res, a, false)
@@ -314,7 +317,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
             a.t,
             classNamesPrefix = className + "." :: classNamesPrefix,
             className = getClassName(symbol),
-            a.abstractClass,
+            Some(a),
             a.parentClassMembers,
           )
           (symbol, res, a, true)
@@ -329,7 +332,10 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
     )
 
     val parentClassString =
-      buildParentClassString(parentClassName, parentClassMemberResults)
+      buildParentClassString(
+        annTypeForParentClassName,
+        parentClassMemberResults
+      )
 
     val abstractClassStr =
       s"""sealed abstract class $className (

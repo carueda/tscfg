@@ -1,10 +1,15 @@
 2021-11 - 0.9.995
 
-- toward #73 "Serialization for shared objects"
+- resolve #73 "Ability to extend or implement external type
+  that is an interface or class with no-arg, default constructor"
   - use "!" prefix to indicate an external extension name
-    e.g., `#@define abstract extends !java.io.Serializable`.
+  - Besides `extends` now also `implements` accepted
+  - Examples: 
+    
+      - `#@define abstract extends !java.lang.Object`
+      - `#@define abstract implements !java.io.Serializable`
+
     TODO capture aspect of "external" as part of the model itself.
-  - TODO accept "implements" to indicate interface, in the java case.
 
 - use pprint, remove json4s
 - 0.9.994 release

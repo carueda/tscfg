@@ -18,6 +18,11 @@ object DefineCase {
     override val isAbstract: Boolean = abs
   }
 
+  case class ImplementsDefineCase(name: String, abs: Boolean)
+      extends DefineCase {
+    override val isAbstract: Boolean = abs
+  }
+
   case object EnumDefineCase extends DefineCase {
     override val isEnum: Boolean = true
   }
@@ -33,7 +38,6 @@ object DefineCase {
     * @return
     *   An [[Option]] on additional information of the shared object
     */
-  @throws[ObjectDefinitionException]
   def getDefineCase(commentString: String): Option[DefineCase] = {
     val str    = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
@@ -42,14 +46,26 @@ object DefineCase {
         Some(AbstractDefineCase)
 
       case "@define" :: "abstract" :: "extends" :: name :: Nil =>
-        /* This is an abstract shared object definition somewhere within the inheritance tree */
         Some(ExtendsDefineCase(name, abs = true))
 
       case "@define" :: "extends" :: name :: Nil =>
         Some(ExtendsDefineCase(name, abs = false))
 
       case "@define" :: "extends" :: Nil =>
-        throw ObjectDefinitionException(s"Missing name after `extends`")
+        throw ObjectDefinitionException(
+          s"Missing name after `extends`: '$commentString'"
+        )
+
+      case "@define" :: "abstract" :: "implements" :: name :: Nil =>
+        Some(ImplementsDefineCase(name, abs = true))
+
+      case "@define" :: "implements" :: name :: Nil =>
+        Some(ImplementsDefineCase(name, abs = false))
+
+      case "@define" :: "implements" :: Nil =>
+        throw ObjectDefinitionException(
+          s"Missing name after `implements`: '$commentString'"
+        )
 
       case "@define" :: "enum" :: Nil =>
         Some(EnumDefineCase)

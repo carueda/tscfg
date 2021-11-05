@@ -1,8 +1,8 @@
 package tscfg.example;
 
-public class JavaIssue73aCfg {
-  public final JavaIssue73aCfg.Test test;
-  public abstract static class AbstractA extends java.lang.Object {
+public class JavaIssue73bCfg {
+  public final JavaIssue73bCfg.Test test;
+  public abstract static class AbstractA implements java.io.Serializable {
     public final java.lang.String a;
     
     public AbstractA(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
@@ -49,10 +49,10 @@ public class JavaIssue73aCfg {
     }
   }
   
-  public JavaIssue73aCfg(com.typesafe.config.Config c) {
+  public JavaIssue73bCfg(com.typesafe.config.Config c) {
     final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
     final java.lang.String parentPath = "";
-    this.test = c.hasPathOrNull("test") ? new JavaIssue73aCfg.Test(c.getConfig("test"), parentPath + "test.", $tsCfgValidator) : new JavaIssue73aCfg.Test(com.typesafe.config.ConfigFactory.parseString("test{}"), parentPath + "test.", $tsCfgValidator);
+    this.test = c.hasPathOrNull("test") ? new JavaIssue73bCfg.Test(c.getConfig("test"), parentPath + "test.", $tsCfgValidator) : new JavaIssue73bCfg.Test(com.typesafe.config.ConfigFactory.parseString("test{}"), parentPath + "test.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
   private static final class $TsCfgValidator  {
