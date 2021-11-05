@@ -86,6 +86,11 @@ object Struct {
     sortedDefineStructs ++ nonDefineStructs
   }
 
+  // obviously, this is pretty ad hoc, just for initial setup
+  private def isExternalExtend(name: String): Boolean = {
+    name.startsWith("java.")
+  }
+
   private def sortDefineStructs(defineStructs: List[Struct]): List[Struct] = {
     val sorted = mutable.LinkedHashMap.empty[String, Struct]
 
@@ -123,6 +128,9 @@ object Struct {
                 // and then add this struct:
                 sorted.put(s.name, s)
 
+              case None if isExternalExtend(name) =>
+                sorted.put(s.name, s)
+
               case None =>
                 throw ObjectDefinitionException(
                   s"struct '${s.name}' with undefined extend '$name'"
@@ -132,7 +140,10 @@ object Struct {
     }
     defineStructs.foreach(addExtendStruct(_))
 
-    assert(defineStructs.size == sorted.size)
+    assert(
+      defineStructs.size == sorted.size,
+      s"defineStructs.size=${defineStructs.size} != sorted.size=${sorted.size}"
+    )
 
     sorted.toList.map(_._2)
   }
@@ -167,6 +178,8 @@ object Struct {
 
             case Some(_) => None
 
+            case None if isExternalExtend(parentName) => None
+
             case None =>
               throw new RuntimeException(
                 s"struct '${struct.name}' with undefined extend '$parentName'"
@@ -176,6 +189,8 @@ object Struct {
         val parentMembers =
           namespace.getRealDefine(parentName).map(_.members) match {
             case s @ Some(parentMembers) => parentMembers
+
+            case None if isExternalExtend(parentName) => None
 
             case None =>
               throw new IllegalArgumentException(

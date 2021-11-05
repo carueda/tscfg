@@ -1175,4 +1175,23 @@ class ScalaMainSpec extends AnyWordSpec {
       assert(c.example.c.head.dddd.eeee === 30)
     }
   }
+
+  "issue 73 - Serialization for shared objects" when {
+    "73a @define abstract extends java.io.Serializable" should {
+      "generate AbstractA extends java.io.Serializable()" in {
+        val r = ScalaGen.generate("example/issue73a.spec.conf")
+        assert(r.code.contains("extends java.io.Serializable()") === true)
+      }
+
+      "usual parsing" in {
+        val c = ScalaIssue73aCfg(ConfigFactory.parseString("""test.impl {
+            |  a = "aa"
+            |  b = "bb"
+            |}
+            |""".stripMargin))
+        assert(c.test.impl.a === "aa")
+        assert(c.test.impl.b === "bb")
+      }
+    }
+  }
 }

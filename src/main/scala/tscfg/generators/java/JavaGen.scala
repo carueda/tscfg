@@ -218,11 +218,21 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
         ""
       )
 
-    val extendsString =
-      abstractClassName.map(cn => s"extends $cn ").getOrElse("")
-    val superString = abstractClassName
-      .map(_ => "\n    super(c, parentPath, $tsCfgValidator);")
-      .getOrElse("") // if parent class name is defined a super call is needed
+    // obviously, this is pretty ad hoc, just for initial setup
+    def isInterface(name: String): Boolean = {
+      name.startsWith("java.")
+    }
+
+    val (extendsString, superString) = abstractClassName match {
+      case Some(cn) if isInterface(cn) =>
+        (s"implements $cn ", "")
+
+      case Some(cn) =>
+        (s"extends $cn ", "\n    super(c, parentPath, $tsCfgValidator);")
+
+      case None =>
+        ("", "")
+    }
 
     val classStr =
       ot match {

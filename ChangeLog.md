@@ -1,4 +1,11 @@
-2021-11
+2021-11 - 0.9.995
+
+- basic preps toward #73 "Serialization for shared objects"
+  - note: pretty ad hoc logic to determine whether an extension name is an
+    "external" one (e.g., `java.io.Serializable`), and to determine whether
+    it's an interface (in the java case)
+  - moving forward, probably better to add some special syntax, so the user
+    is to determine the appropriate cases in the `extends` construct.
 
 - use pprint, remove json4s
 - 0.9.994 release
