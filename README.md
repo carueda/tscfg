@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/carueda/tscfg/actions/workflows/ci.yml/badge.svg)](https://github.com/carueda/tscfg/actions)
-[![Coverage Status](https://coveralls.io/repos/github/carueda/tscfg/badge.svg?branch=master)](https://coveralls.io/github/carueda/tscfg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/carueda/tscfg/badge.svg?branch=main)](https://coveralls.io/github/carueda/tscfg?branch=main)
 [![Known Vulnerabilities](https://snyk.io/test/github/carueda/tscfg/badge.svg?targetFile=build.sbt)](https://snyk.io/test/github/carueda/tscfg?targetFile=build.sbt)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com/)
 [![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
@@ -103,7 +103,7 @@ The tool determines the type of each field according to the given value
 in the input configuration.
 Used in this way, all fields are considered optional, with the given value as the default.
 
-But this wouldn't be flexible enough!
+**But this wouldn't be flexible enough!**
 To allow the specification of
 **required fields**,
 **explicit types**,
@@ -274,13 +274,13 @@ An object reference will never be `null` (or `Optional.empty()`) (`None` in Scal
 the specification. It will only be `null` (or `Optional.empty()`) (`None` in Scala) if it is marked optional with no default value and
 has been omitted in the input configuration.
 
-With this [example spec](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/example.spec.conf),
-the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaExampleCfg.java)
-and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java).
+With this [example spec](https://github.com/carueda/tscfg/blob/main/src/main/tscfg/example/example.spec.conf),
+the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/main/src/main/java/tscfg/example/JavaExampleCfg.java)
+and an example of use [like this](https://github.com/carueda/tscfg/blob/main/src/main/java/tscfg/example/JavaUse.java).
 
 For Scala
-the generated code looks [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/ScalaExampleCfg.scala)
-and an example of use [like this](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala).
+the generated code looks [like this](https://github.com/carueda/tscfg/blob/main/src/main/scala/tscfg/example/ScalaExampleCfg.scala)
+and an example of use [like this](https://github.com/carueda/tscfg/blob/main/src/main/scala/tscfg/example/scalaUse.scala).
 
 ## supported types
 
@@ -308,7 +308,7 @@ The following basic types are supported:
 #### size-in-bytes
 
 The `size` type corresponds to the
-[size-in-bytes formats](https://github.com/typesafehub/config/blob/master/HOCON.md#size-in-bytes-format)
+[size-in-bytes formats](https://github.com/typesafehub/config/blob/main/HOCON.md#size-in-bytes-format)
 supported by the Typesafe library.
 See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
@@ -325,9 +325,9 @@ and a desired time unit for the reported value.
 For example, with the type `"duration:day"`, the reported long value will be in day units,
 with conversion automatically performed if the actual configuration value is given in
 any other unit as supported by Typesafe Config according to the
-[duration format](https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format).
+[duration format](https://github.com/typesafehub/config/blob/main/HOCON.md#duration-format).
 
-[A more complete example](https://github.com/carueda/tscfg/blob/master/src/main/tscfg/example/duration.spec.conf)
+[A more complete example](https://github.com/carueda/tscfg/blob/main/src/main/tscfg/example/duration.spec.conf)
 with some additional explanation:
 
 ```properties
@@ -596,8 +596,8 @@ We think it's more flexible to let client code decide how to render configuratio
 while also recognizing that very likely typical serialization libraries are already being
 used in the application.
 For example, the demo programs
-[JavaUse](https://github.com/carueda/tscfg/blob/master/src/main/java/tscfg/example/JavaUse.java)
-and [scalaUse](https://github.com/carueda/tscfg/blob/master/src/main/scala/tscfg/example/scalaUse.scala)
+[JavaUse](https://github.com/carueda/tscfg/blob/main/src/main/java/tscfg/example/JavaUse.java)
+and [scalaUse](https://github.com/carueda/tscfg/blob/main/src/main/scala/tscfg/example/scalaUse.scala)
 use [Gson](https://github.com/google/gson) and
 [pprint](https://com-lihaoyi.github.io/PPrint/), respectively.
 Although you could also use Typesafe Config itself for rendering purposes, you would be
@@ -607,4 +607,4 @@ used by tscfg for the generated wrapper.
 
 ## tests
 
-https://github.com/carueda/tscfg/tree/master/src/test/scala/tscfg
+https://github.com/carueda/tscfg/tree/main/src/test/scala/tscfg
