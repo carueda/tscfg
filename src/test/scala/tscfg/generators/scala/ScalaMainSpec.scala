@@ -5,7 +5,6 @@ import org.scalatest.wordspec.AnyWordSpec
 import tscfg.example._
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.generators.GenOpts
-import tscfg.generators.java.JavaGen
 import tscfg.model._
 import tscfg.model.implicits._
 
@@ -414,7 +413,7 @@ class ScalaMainSpec extends AnyWordSpec {
   "duration2" should {
     "generate code" in {
       val r =
-        JavaGen.generate("example/duration2.spec.conf", useDurations = true)
+        ScalaGen.generate("example/duration2.spec.conf", useDurations = true)
       assert(r.classNames === Set("JavaDuration2Cfg", "Durations"))
       assert(
         r.fields.keySet === Set(

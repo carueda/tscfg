@@ -472,6 +472,7 @@ object ScalaGen {
       assumeAllRequired: Boolean = false,
       showOut: Boolean = false,
       s12: Boolean = false,
+      useDurations: Boolean = false,
       useBackticks: Boolean = false
   ): GenResult = {
     val file      = new File("src/main/tscfg/" + filename)
@@ -511,6 +512,7 @@ object ScalaGen {
       className,
       j7 = j7,
       useBackticks = useBackticks,
+      useDurations = useDurations,
       s12 = s12
     )
 
