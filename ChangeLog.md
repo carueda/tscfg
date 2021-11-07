@@ -1,3 +1,7 @@
+2021-11 - 0.9.996
+
+- more complete handling of `--java:records`
+
 2021-11 - 0.9.995
 
 - resolve #73 "Ability to extend or implement external type

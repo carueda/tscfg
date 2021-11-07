@@ -269,7 +269,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
       annTypeForParentClassName: Option[AnnType],
       parentClassMemberResults: Seq[(String, Res, AnnType, Boolean)]
   ) =
-    annTypeForParentClassName.flatMap(_.nameImplementsExternal) match {
+    annTypeForParentClassName.flatMap(_.nameIsImplementsIsExternal) match {
       case Some((parentClassName, _, _)) =>
         val superClassFieldString =
           if (parentClassMemberResults.nonEmpty)

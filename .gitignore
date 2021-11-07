@@ -1,5 +1,11 @@
 src/main/resources/codeDefs/
 
+# temporary ignores related with --java:records:
+# these are OK but currently ignored due to sbt-related issues, especially for CI
+JavaIssue75Cfg.java
+JavaIssue75bCfg.java
+JavaIssue75eCfg.java
+
 .metals
 metals.sbt
 .bloop

@@ -1,12 +1,13 @@
 package tscfg.generators.java
 
-import tscfg.DefineCase.{ExtendsDefineCase, ImplementsDefineCase}
-import tscfg.{Namespace, Struct}
-import tscfg.generators.java.javaUtil._
+import tscfg.DefineCase.ExtendsDefineCase
+import tscfg.Namespace
+import tscfg.codeDefs.javaDef
+import tscfg.exceptions.ObjectDefinitionException
 import tscfg.generators._
+import tscfg.generators.java.javaUtil._
 import tscfg.model._
 import tscfg.util.escapeString
-import tscfg.codeDefs.javaDef
 
 class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
@@ -144,11 +145,22 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val ctorMembersStr = if (genOpts.genRecords) {
       results
         .flatMap { case (symbol, res, a) =>
-          if (a.isDefine) None
-          else
-            Some {
-              instance(a, res, path = escapeString(symbol), isRoot = isRoot)
-            }
+          a.defineCase match {
+            case Some(dc) if dc.isAbstract =>
+              throw ObjectDefinitionException(
+                s"record cannot be abstract: $symbol"
+              )
+            case Some(_: ExtendsDefineCase) =>
+              throw ObjectDefinitionException(
+                s"record cannot extend classes: $symbol"
+              )
+            case Some(_) =>
+              None
+            case None =>
+              Some(
+                instance(a, res, path = escapeString(symbol), isRoot = isRoot)
+              )
+          }
         }
         .mkString("this(\n      ", ",\n      ", "\n    );")
     }
@@ -225,7 +237,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
           ("", "")
 
         case Some(annType) =>
-          annType.nameImplementsExternal match {
+          annType.nameIsImplementsIsExternal match {
             case Some((cn, isImplements, isExternal)) =>
               if (isImplements)
                 (s"implements $cn ", "")
@@ -246,12 +258,14 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
     val classStr =
       ot match {
         case _: ObjectType if genOpts.genRecords =>
-          s"""public ${if (isRoot) "" else "static "}record $classNameAdjusted $extendsString(
+          val beginningBody =
+            if (isRoot)
+              "\n  static final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();\n"
+            else ""
+
+          s"""public ${if (isRoot) "" else "static "}record $classNameAdjusted(
              |  $classDeclMembersStr$classMemberGettersStr
-             |) {
-             |${if (isRoot)
-            "  static final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();\n"
-          else ""}
+             |) $extendsString{$beginningBody
              |  $membersStr
              |  public $classNameAdjusted($ctorParams) {$superString
              |    $errHandlingDecl$ctorMembersStr$errHandlingDispatch
@@ -606,9 +620,9 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
 object JavaGen {
 
-  import _root_.java.io.{File, FileWriter, PrintWriter}
-
   import tscfg.{ModelBuilder, model, util}
+
+  import _root_.java.io.{File, FileWriter, PrintWriter}
 
   // $COVERAGE-OFF$
   def generate(
@@ -617,6 +631,7 @@ object JavaGen {
       j7: Boolean = false,
       assumeAllRequired: Boolean = false,
       genGetters: Boolean = false,
+      genRecords: Boolean = false,
       useOptionals: Boolean = false,
       useDurations: Boolean = false
   ): GenResult = {
@@ -655,6 +670,7 @@ object JavaGen {
       className,
       j7 = j7,
       genGetters = genGetters,
+      genRecords = genRecords,
       useOptionals = useOptionals,
       assumeAllRequired = assumeAllRequired,
       useDurations = useDurations

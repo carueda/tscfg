@@ -94,7 +94,7 @@ object model {
 
     val isDefine: Boolean = defineCase.isDefined
 
-    def nameImplementsExternal: Option[(String, Boolean, Boolean)] =
+    def nameIsImplementsIsExternal: Option[(String, Boolean, Boolean)] =
       defineCase flatMap {
         case c: ExtendsDefineCase    => Some((c.name, false, c.isExternal))
         case c: ImplementsDefineCase => Some((c.name, true, c.isExternal))

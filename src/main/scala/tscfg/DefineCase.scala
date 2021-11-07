@@ -5,6 +5,7 @@ import tscfg.exceptions.ObjectDefinitionException
 sealed abstract class DefineCase {
   val isAbstract: Boolean = false
   val isEnum: Boolean     = false
+  val isExternal: Boolean = false
 }
 
 object DefineCase {
@@ -16,14 +17,14 @@ object DefineCase {
 
   case class ExtendsDefineCase(abs: Boolean, nameGiven: String)
       extends DefineCase {
-    val isExternal: Boolean = nameGiven.startsWith("!")
+    override val isExternal: Boolean = nameGiven.startsWith("!")
     val name: String = if (isExternal) nameGiven.substring(1) else nameGiven
     override val isAbstract: Boolean = abs
   }
 
   case class ImplementsDefineCase(abs: Boolean, nameGiven: String)
       extends DefineCase {
-    val isExternal: Boolean = nameGiven.startsWith("!")
+    override val isExternal: Boolean = nameGiven.startsWith("!")
     val name: String = if (isExternal) nameGiven.substring(1) else nameGiven
     override val isAbstract: Boolean = abs
   }

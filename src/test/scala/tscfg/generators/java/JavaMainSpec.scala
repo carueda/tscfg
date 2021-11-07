@@ -17,7 +17,7 @@ class JavaMainSpec extends AnyWordSpec {
 
   import scala.jdk.CollectionConverters._
 
-  "literal values as types" should {
+  "(java) literal values as types" should {
     "generate primitive types with given values as defaults" in {
       val r = JavaGen.generate("example/example0.spec.conf")
       assert(r.classNames === Set("JavaExample0Cfg", "Service"))
@@ -50,7 +50,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue5" should {
+  "(java) issue5" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue5.spec.conf")
       assert(r.classNames === Set("JavaIssue5Cfg", "Foo", "Config"))
@@ -58,7 +58,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue10" should {
+  "(java) issue10" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue10.spec.conf")
       assert(
@@ -110,7 +110,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue11" should {
+  "(java) issue11" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue11.spec.conf")
       assert(r.classNames === Set("JavaIssue11Cfg", "Foo"))
@@ -129,7 +129,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue12" should {
+  "(java) issue12" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue12.spec.conf")
       assert(
@@ -147,7 +147,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue13" should {
+  "(java) issue13" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue13.spec.conf")
       assert(r.classNames === Set("JavaIssue13Cfg", "Issue"))
@@ -155,7 +155,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue14" should {
+  "(java) issue14" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue14.spec.conf")
       assert(r.classNames === Set("JavaIssue14Cfg", "_0"))
@@ -163,7 +163,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15a" should {
+  "(java) issue15a" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15a.spec.conf")
       assert(r.classNames === Set("JavaIssue15aCfg"))
@@ -193,7 +193,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15b" should {
+  "(java) issue15b" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15b.spec.conf")
       assert(r.classNames === Set("JavaIssue15bCfg"))
@@ -233,7 +233,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15c" should {
+  "(java) issue15c" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15c.spec.conf")
       assert(
@@ -292,7 +292,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15d" should {
+  "(java) issue15d" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15d.spec.conf")
       assert(r.classNames === Set("JavaIssue15dCfg", "Baz$Elm"))
@@ -316,7 +316,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15" should {
+  "(java) issue15" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue15.spec.conf")
       assert(
@@ -351,7 +351,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "duration" should {
+  "(java) duration" should {
     "generate code" in {
       val r = JavaGen.generate("example/duration.spec.conf")
       assert(r.classNames === Set("JavaDurationCfg", "Durations"))
@@ -403,7 +403,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "duration2" should {
+  "(java) duration2" should {
     "generate code" in {
       val r =
         JavaGen.generate("example/duration2.spec.conf", useDurations = true)
@@ -456,7 +456,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "duration3" should {
+  "(java) duration3" should {
     "generate code" in {
       val r = JavaGen.generate(
         "example/duration3.spec.conf",
@@ -512,7 +512,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue19" should {
+  "(java) issue19" should {
     """put underscores for key having $""" in {
       val r = JavaGen.generate("example/issue19.spec.conf")
       assert(r.classNames === Set("JavaIssue19Cfg"))
@@ -538,7 +538,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "given class name starting with $_" should {
+  "(java) given class name starting with $_" should {
     "generate warning" in {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
       val r       = new JavaGen(genOpts).generate(ObjectType())
@@ -548,7 +548,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "keys starting with $_" should {
+  "(java) keys starting with $_" should {
     val objectType = ObjectType(
       "$_baz" := STRING | "some value",
       "other" := ObjectType(
@@ -571,7 +571,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue22" should {
+  "(java) issue22" should {
     "generate DURATION type" in {
       val r = JavaGen.generate("example/issue22.spec.conf")
       assert(r.classNames === Set("JavaIssue22Cfg"))
@@ -604,7 +604,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue23" should {
+  "(java) issue23" should {
     "generate SIZE type" in {
       val r = JavaGen.generate("example/issue23.spec.conf")
       assert(r.classNames === Set("JavaIssue23Cfg"))
@@ -649,7 +649,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue31" should {
+  "(java) issue31" should {
     "generate getters" in {
       val r = JavaGen.generate("example/issue31.spec.conf", genGetters = true)
 
@@ -684,7 +684,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue33" should {
+  "(java) issue33" should {
     "generate empty config for object level" in {
       val c = new JavaIssue33Cfg(ConfigFactory.parseString(""))
       assert(c.endpoint.url === "http://example.net")
@@ -717,7 +717,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue40" should {
+  "(java) issue40" should {
     "capture explicit memory size value in spec as a long literal" in {
       val c = new JavaIssue40Cfg(ConfigFactory.parseString(""))
       // well, the actual test is that the generated class compiles
@@ -725,7 +725,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue41" should {
+  "(java) issue41" should {
     "generate code" in {
       val r = JavaGen.generate("example/issue41.spec.conf", useOptionals = true)
       assert(r.classNames === Set("JavaIssue41Cfg", "C", "F"))
@@ -778,7 +778,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 49 (using issue47.spec.conf --all-required)" should {
+  "(java) issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
       val e = intercept[com.typesafe.config.ConfigException] {
         new JavaIssue47Cfg(ConfigFactory.parseString(""))
@@ -856,7 +856,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - example1" should {
+  "(java) issue 54 - shared config - example1" should {
     "be handled" in {
       val c = new JavaIssue54Cfg(ConfigFactory.parseString("""
           |example {
@@ -888,7 +888,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - exampleD" should {
+  "(java) issue 54 - shared config - exampleD" should {
     "be handled" in {
       val c = new JavaIssue54exampleDCfg(ConfigFactory.parseString("""
           |exampleD {
@@ -902,7 +902,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - exampleE" should {
+  "(java) issue 54 - shared config - exampleE" should {
     "be handled" in {
       val c = new JavaIssue54exampleECfg(ConfigFactory.parseString("""
           |exampleE {
@@ -916,7 +916,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - example2" should {
+  "(java) issue 54 - shared config - example2" should {
     "be handled" in {
       val c = new JavaIssue54bCfg(ConfigFactory.parseString("""root {
           |  e: {
@@ -940,7 +940,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 55 - valid regexes" should {
+  "(java) issue 55 - valid regexes" should {
     "be properly reflected" in {
       val c = new JavaIssue55Cfg(ConfigFactory.parseString(""))
       assert(
@@ -953,7 +953,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "multiline strings" should {
+  "(java) multiline strings" should {
     "be properly reflected" in {
       val c = new JavaMultilinesCfg(ConfigFactory.parseString(""))
       assert(c.a === "some\nlines")
@@ -963,7 +963,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 62 - shared enumeration" when {
+  "(java) issue 62 - shared enumeration" when {
     "62a basic" should {
       "be handled with correct input" in {
         val c = new JavaIssue62aCfg(ConfigFactory.parseString("""foo {
@@ -1018,7 +1018,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 64 - template with defined abstract class" should {
+  "(java) issue 64 - template with defined abstract class" should {
     val configFromFile = new JavaIssue64Cfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue64.example.conf"))
@@ -1058,7 +1058,7 @@ class JavaMainSpec extends AnyWordSpec {
   }
 
   /*
-  "issue 64b - template with invalid case class extension" should {
+  "(java) issue 64b - template with invalid case class extension" should {
     "throw an ObjectDefinitionException" in {
       JavaGen.generate("example/issue64b.spec.conf") must throwA[ObjectDefinitionException].like {
         case e: ObjectDefinitionException =>
@@ -1072,7 +1072,7 @@ class JavaMainSpec extends AnyWordSpec {
   }
    */
 
-  "issue 67 - template with unintuitive order of shared objects" should {
+  "(java) issue 67 - template with unintuitive order of shared objects" should {
     val configFromFile = new JavaIssue67Cfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue67.example.conf"))
@@ -1099,7 +1099,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 67a - template with second inheritance level" should {
+  "(java) issue 67a - template with second inheritance level" should {
     val configFromFile = new JavaIssue67aCfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue67a.example.conf"))
@@ -1138,7 +1138,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 67b - template with third inheritance level" should {
+  "(java) issue 67b - template with third inheritance level" should {
     val configFromFile = new JavaIssue67bCfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue67b.example.conf"))
@@ -1184,7 +1184,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 67c - template with circular inheritance hierarchy" should {
+  "(java) issue 67c - template with circular inheritance hierarchy" should {
     "be refused" in {
       val e = intercept[ObjectDefinitionException] {
         JavaGen.generate("example/issue67c.spec.conf")
@@ -1195,7 +1195,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 71 - shared object leading to string conversion" should {
+  "(java) issue 71 - shared object leading to string conversion" should {
     "71a simplified handled ok" in {
       val c = new JavaIssue71aCfg(ConfigFactory.parseString("""example {
           |  a = {
@@ -1257,7 +1257,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 73 - Ability to extend or implement external type" when {
+  "(java) issue 73 - Ability to extend or implement external type" when {
     "73a @define abstract extends java.lang.Object" should {
       "generate AbstractA implements java.lang.Object" in {
         val r = JavaGen.generate("example/issue73a.spec.conf")
@@ -1293,11 +1293,47 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 75 - java:records" when {
+  "(java) issue 75 - java:records" when {
     "with simple spec" should {
       "work " in {
         val c0 = ConfigFactory.parseString("simple.int = 9")
         val c  = new JavaIssue75Cfg(c0)
+        assert(c.simple.foo === "simple")
+        assert(c.simple.int_ === 9)
+      }
+    }
+
+    "with simple @define" should {
+      "work" in {
+        val c0 = ConfigFactory.parseString("simple.int = 91")
+        val c  = new JavaIssue75bCfg(c0)
+        assert(c.simple.foo === "simple")
+        assert(c.simple.int_ === 91)
+      }
+    }
+
+    "with @define abstract" should {
+      "generate error because record cannot be abstract" in {
+        val e = intercept[ObjectDefinitionException] {
+          JavaGen.generate("example/issue75c.spec.conf", genRecords = true)
+        }
+        assert(e.getMessage startsWith "record cannot be abstract: Simple")
+      }
+    }
+
+    "with @define extends" should {
+      "generate error because record cannot extend classes" in {
+        val e = intercept[ObjectDefinitionException] {
+          JavaGen.generate("example/issue75d.spec.conf", genRecords = true)
+        }
+        assert(e.getMessage startsWith "record cannot extend classes: Simple")
+      }
+    }
+
+    "with @define implements" should {
+      "work" in {
+        val c0 = ConfigFactory.parseString("simple.int = 9")
+        val c  = new JavaIssue75eCfg(c0)
         assert(c.simple.foo === "simple")
         assert(c.simple.int_ === 9)
       }
