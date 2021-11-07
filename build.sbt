@@ -14,6 +14,8 @@ libraryDependencies ++= Seq(
   "com.google.code.gson" % "gson"          % "2.8.9"
 )
 
+scalafmtOnCompile := true
+
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 (assembly / mainClass) := Some("tscfg.Main")
