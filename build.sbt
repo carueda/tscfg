@@ -1,10 +1,9 @@
-lazy val tscfgVersion = setVersion("0.9.996")
+lazy val tscfgVersion = setVersion("1.0.0-alpha")
 
 organization       := "com.github.carueda"
 name               := "tscfg"
 version            := tscfgVersion
 scalaVersion       := "3.1.0"
-crossScalaVersions := Seq("2.13.7", "3.1.0")
 
 libraryDependencies ++= Seq(
   "com.outr"            %% "scribe"        % "3.6.3",
@@ -47,8 +46,8 @@ lazy val genCode = taskKey[Unit]("Generate classes for tests")
 fullRunTask(genCode, Compile, "tscfg.gen4tests")
 (genCode / fork) := false
 
-(Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
-(Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
+//(Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
+//(Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
 // well, this continues to be unreliable as a way to guarantee genCode is completed
 // before testing. So, for now, we will need to explicitly call `genCode;test`.
 
