@@ -142,12 +142,10 @@ object gen4tests {
     val (base, _)       = name.span(_ != '.')
     val classNameSuffix = util.upperFirst(base.replace('-', '_')) + "Cfg"
 
-    // why is ci failing to find generated files??
-//    val langs: List[String] = onlyForLang match {
-//      case Some(lang) => List(lang)
-//      case None       => List("scala", "java")
-//    }
-    val langs: List[String] = List("scala", "java")
+    val langs: List[String] = onlyForLang match {
+      case Some(lang) => List(lang)
+      case None       => List("scala", "java")
+    }
 
     langs foreach { lang =>
       val targetScalaDir = new File("src/test/" + lang + "/tscfg/example")

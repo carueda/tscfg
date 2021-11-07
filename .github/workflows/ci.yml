@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: [openjdk@1.17.0]
+        jdk: [17]
         scala: ['2.13', '3.1']
         include:
           - scala: '2.13'
@@ -18,18 +18,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v13
+      - name: Setup JDK
+        uses: actions/setup-java@v2
         with:
+          distribution: temurin
           java-version: ${{ matrix.jdk }}
 
-      - name: Compile
-        run: sbt "++${{ matrix.scala-version }} compile"
+      - name: Check and compile
+        run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll compile"
 
       - name: Test
 # due to issue with java record tests under scala3:
         if: startsWith(matrix.scala, '2')
-        run: sbt coverage ++${{ matrix.scala-version }} test
+        run: sbt ++${{ matrix.scala-version }} coverage test
 # otherwise, only coverage restricted to scala2:
 #        run: >
 #          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
