@@ -4,6 +4,9 @@ organization       := "com.github.carueda"
 name               := "tscfg"
 version            := tscfgVersion
 scalaVersion       := "3.1.0"
+crossScalaVersions := Seq("2.13.7", "3.1.0")
+// note: 2.13 only needed to run coverage and coveralls on CI
+// (while relevant scala3 support is in place)
 
 libraryDependencies ++= Seq(
   "com.outr"            %% "scribe"        % "3.6.3",
