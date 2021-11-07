@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: [1.17.0]
+        java: [17]
         scala: ['2.13', '3.1']
         include:
           - scala: '2.13'
@@ -21,8 +21,7 @@ jobs:
       - name: Setup Scala
         uses: olafurpg/setup-scala@v13
         with:
-          distribution: openjdk
-          java-version: ${{ matrix.jdk }}
+          java-version: ${{ matrix.java }}
 
       - name: Compile
         run: sbt "++${{ matrix.scala-version }} compile"
