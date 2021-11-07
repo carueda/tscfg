@@ -32,7 +32,7 @@ jobs:
           if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
             sbt ++${{ matrix.scala-version }} coverage genCode test;
           else
-            sbt "++${{ matrix.scala-version }} genCode test";
+            sbt ++${{ matrix.scala-version }} genCode test;
           fi
 
       - name: Coveralls
