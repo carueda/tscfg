@@ -44,6 +44,8 @@ fullRunTask(genCode, Compile, "tscfg.gen4tests")
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
 (Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
+// well, this continues to be unreliable as a way to guarantee genCode is completed
+// before testing. So, for now, we will need to explicitly call `genCode;test`.
 
 publishMavenStyle        := true
 (Test / publishArtifact) := false
