@@ -25,7 +25,7 @@ jobs:
           java-version: ${{ matrix.jdk }}
 
       - name: Check and compile
-        run: sbt "++${{ matrix.scala-version }} scalafmtCheckAll compile"
+        run: sbt ++${{ matrix.scala-version }} scalafmtCheckAll compile
 
       - name: Test
 # due to issue with java record tests under scala3:
