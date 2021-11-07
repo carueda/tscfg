@@ -1,5 +1,7 @@
 2021-11 - 0.9.996
 
+- 0.9.996 release
+
 - gen4test: generate only for specific language depending on given options.
   NOTE: not all CmdLineOpts are handled via options from input file.
 
