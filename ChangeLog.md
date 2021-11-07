@@ -1,5 +1,8 @@
 2021-11 - 0.9.996
 
+- gen4test: generate only for specific language depending on given options.
+  NOTE: not all CmdLineOpts are handled via options from input file.
+
 - No more a common, singleton Namespace object to make handling more self-contained and
   less error-prone, in fact, avoiding the occasional race condition among test suites.
 - more complete handling of `--java:records`
@@ -20,8 +23,6 @@
 - core handling in place for `--java:records` #75.
   This along with needed scala 2.13.7 to support record compilation.
   
-TODO do not generate for others when generation option is only relevant for a target language
-
 - re #69 "Use consistent formatter for the generated code"
   actually decided to remove the extra libraries as they were causing more friction
   than benefit (in particular re modernization of this tool), and users can actually
