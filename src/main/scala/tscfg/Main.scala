@@ -8,6 +8,7 @@ import tscfg.ns.NamespaceMan
 
 import java.io.{File, PrintWriter}
 import java.util.Date
+import scala.annotation.tailrec
 
 /** The main program. Run with no arguments to see usage.
   */
@@ -78,39 +79,48 @@ object Main {
       case list =>
         list
     }
-    generate(getOpts(argList))
+    if (argList.isEmpty) {
+      println(usage)
+    }
+    else {
+      getOpts(argList) foreach generate
+    }
   }
 
-  private def getOpts(args: List[String]): CmdLineOpts = {
-    if (args.isEmpty) {
-      println(usage)
-      sys.exit(0)
-    }
-
+  private def getOpts(args: List[String]): Option[CmdLineOpts] = {
+    @tailrec
     def traverseList(
         list: List[String],
         opts: CmdLineOpts = CmdLineOpts()
-    ): CmdLineOpts = {
-      def chkVal(v: String): String = {
-        if (!v.startsWith("-")) v
+    ): Option[CmdLineOpts] = {
+      def chkVal(v: String): Boolean = {
+        if (!v.startsWith("-")) true
         else {
           println(s"""error: argument looks like a switch: $v""")
-          sys.exit(0)
+          false
         }
       }
 
       list match {
         case "--spec" :: filename :: rest =>
-          traverseList(rest, opts.copy(inputFilename = Some(chkVal(filename))))
+          if (chkVal(filename))
+            traverseList(rest, opts.copy(inputFilename = Some(filename)))
+          else None
 
         case "--pn" :: packageName :: rest =>
-          traverseList(rest, opts.copy(packageName = chkVal(packageName)))
+          if (chkVal(packageName))
+            traverseList(rest, opts.copy(packageName = packageName))
+          else None
 
         case "--cn" :: className :: rest =>
-          traverseList(rest, opts.copy(className = chkVal(className)))
+          if (chkVal(className))
+            traverseList(rest, opts.copy(className = className))
+          else None
 
         case "--dd" :: destDir :: rest =>
-          traverseList(rest, opts.copy(destDir = chkVal(destDir)))
+          if (chkVal(destDir))
+            traverseList(rest, opts.copy(destDir = destDir))
+          else None
 
         case "--all-required" :: rest =>
           traverseList(rest, opts.copy(assumeAllRequired = true))
@@ -143,7 +153,9 @@ object Main {
           traverseList(rest, opts.copy(useDurations = true))
 
         case "--tpl" :: filename :: rest =>
-          traverseList(rest, opts.copy(tplFilename = Some(filename)))
+          if (chkVal(filename))
+            traverseList(rest, opts.copy(tplFilename = Some(filename)))
+          else None
 
         case "--tpl.ind" :: indent :: rest =>
           templateOpts = templateOpts.copy(indent = indent)
@@ -162,19 +174,21 @@ object Main {
 
         case opt :: _ =>
           println(s"""missing argument or unknown option: $opt""")
-          sys.exit(0)
+          None
 
-        case Nil => opts
+        case Nil => Some(opts)
       }
     }
 
-    val opts = traverseList(args)
-
-    opts.inputFilename.getOrElse {
-      println("--spec not given")
-      sys.exit(1)
+    traverseList(args) match {
+      case Some(opts) =>
+        if (opts.inputFilename.isEmpty) {
+          println("--spec not given")
+          None
+        }
+        else Some(opts)
+      case None => None
     }
-    opts
   }
 
   private def generate(opts: CmdLineOpts): Unit = {
