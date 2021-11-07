@@ -16,6 +16,11 @@ libraryDependencies ++= Seq(
 
 scalafmtOnCompile := true
 
+// workaround for problem compiling records, in our case under scala3.
+// (https://github.com/scala/bug/issues/11908 - issue was closed on Jul 7,
+// but apparently a workaround like this is still needed.)
+compileOrder := CompileOrder.JavaThenScala
+
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 (assembly / mainClass) := Some("tscfg.Main")

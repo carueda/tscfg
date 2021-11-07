@@ -28,16 +28,12 @@ jobs:
         run: sbt ++${{ matrix.scala-version }} scalafmtCheckAll compile
 
       - name: Test
-# due to issue with java record tests under scala3:
-        if: startsWith(matrix.scala, '2')
-        run: sbt ++${{ matrix.scala-version }} coverage genCode test
-# otherwise, only coverage restricted to scala2:
-#        run: >
-#          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
-#            sbt coverage "++${{ matrix.scala-version }} genCode test";
-#          else
-#            sbt "++${{ matrix.scala-version }} genCode test";
-#          fi
+        run: >
+          if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
+            sbt ++${{ matrix.scala-version }} coverage genCode test;
+          else
+            sbt "++${{ matrix.scala-version }} genCode test";
+          fi
 
       - name: Coveralls
         if: startsWith(matrix.scala, '2')
