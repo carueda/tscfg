@@ -165,6 +165,7 @@ object gen4tests {
       val results = generator.generate(objectType)
       val out     = new PrintWriter(new FileWriter(targetFile), true)
       out.println(results.code)
+      out.close()
       val onlyLangStr = onlyForLang.map(l => s" (only $l)").getOrElse("")
       println(fansi.Color.Green(s"  ==> $targetFile$onlyLangStr"))
     }

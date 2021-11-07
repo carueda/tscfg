@@ -692,6 +692,7 @@ object JavaGen {
     val destFile     = new File(destFilename)
     val out          = new PrintWriter(new FileWriter(destFile), true)
     out.println(results.code)
+    out.close()
     results
   }
 
