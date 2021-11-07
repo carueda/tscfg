@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit.MICROS
 
 class ScalaMainSpec extends AnyWordSpec {
 
-  "literal values as types" should {
+  "(scala) literal values as types" should {
     "generate primitive types with given values as defaults" in {
       val r = ScalaGen.generate("example/example0.spec.conf")
       assert(r.classNames === Set("ScalaExample0Cfg", "Service"))
@@ -46,7 +46,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue5" should {
+  "(scala) issue5" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue5.spec.conf")
       assert(r.classNames === Set("ScalaIssue5Cfg", "Foo", "Config"))
@@ -54,7 +54,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue10" should {
+  "(scala) issue10" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue10.spec.conf")
       assert(
@@ -102,7 +102,7 @@ class ScalaMainSpec extends AnyWordSpec {
      */
   }
 
-  "issue11" should {
+  "(scala) issue11" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue11.spec.conf")
       assert(r.classNames === Set("ScalaIssue11Cfg", "Foo"))
@@ -121,7 +121,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue12" should {
+  "(scala) issue12" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue12.spec.conf")
       assert(
@@ -139,7 +139,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue13" should {
+  "(scala) issue13" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue13.spec.conf")
       assert(r.classNames === Set("ScalaIssue13Cfg", "Issue"))
@@ -147,7 +147,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue14" should {
+  "(scala) issue14" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue14.spec.conf")
       assert(r.classNames === Set("ScalaIssue14Cfg", "_0"))
@@ -155,7 +155,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15a" should {
+  "(scala) issue15a" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15a.spec.conf")
       assert(r.classNames === Set("ScalaIssue15aCfg"))
@@ -185,7 +185,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15b" should {
+  "(scala) issue15b" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15b.spec.conf")
       assert(r.classNames === Set("ScalaIssue15bCfg"))
@@ -220,7 +220,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15c" should {
+  "(scala) issue15c" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15c.spec.conf")
       assert(
@@ -292,7 +292,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15d" should {
+  "(scala) issue15d" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15d.spec.conf")
       assert(r.classNames === Set("ScalaIssue15dCfg", "Baz$Elm"))
@@ -318,7 +318,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue15" should {
+  "(scala) issue15" should {
     "generate code" in {
       val r = ScalaGen.generate("example/issue15.spec.conf")
       assert(r.classNames === Set("ScalaIssue15Cfg", "Positions$Elm"))
@@ -354,7 +354,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "duration" should {
+  "(scala) duration" should {
     "generate code" in {
       val r = ScalaGen.generate("example/duration.spec.conf")
       assert(r.classNames === Set("ScalaDurationCfg", "Durations"))
@@ -410,11 +410,11 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "duration2" should {
+  "(scala) duration2" should {
     "generate code" in {
       val r =
         ScalaGen.generate("example/duration2.spec.conf", useDurations = true)
-      assert(r.classNames === Set("JavaDuration2Cfg", "Durations"))
+      assert(r.classNames === Set("ScalaDuration2Cfg", "Durations"))
       assert(
         r.fields.keySet === Set(
           "durations",
@@ -463,7 +463,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue19" should {
+  "(scala) issue19" should {
     """put underscores for key having $""" in {
       val r = ScalaGen.generate("example/issue19.spec.conf")
       assert(r.classNames === Set("ScalaIssue19Cfg"))
@@ -489,7 +489,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "given class name starting with $_" should {
+  "(scala) given class name starting with $_" should {
     "generate warning" in {
       val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
       val r       = new ScalaGen(genOpts).generate(ObjectType())
@@ -499,7 +499,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "keys starting with $_" should {
+  "(scala) keys starting with $_" should {
     val objectType = ObjectType(
       "$_baz" := STRING | "some value",
       "other" := ObjectType(
@@ -522,7 +522,7 @@ class ScalaMainSpec extends AnyWordSpec {
       // TODO actually verify the generated warnings
     }
   }
-  "issue22" should {
+  "(scala) issue22" should {
     "generate DURATION type" in {
       val r = ScalaGen.generate("example/issue22.spec.conf")
       assert(r.classNames === Set("ScalaIssue22Cfg"))
@@ -541,7 +541,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue23" should {
+  "(scala) issue23" should {
     "generate SIZE type" in {
       val r = ScalaGen.generate("example/issue23.spec.conf")
       assert(r.classNames === Set("ScalaIssue23Cfg"))
@@ -577,7 +577,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue30" should {
+  "(scala) issue30" should {
     "generate as indicated for useBackticks" in {
       val r =
         ScalaGen.generate("example/issue30.spec.conf", useBackticks = true)
@@ -606,7 +606,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue33" should {
+  "(scala) issue33" should {
     "generate empty config for object level" in {
       val c = ScalaIssue33Cfg(ConfigFactory.parseString(""))
       assert(c.endpoint.url === "http://example.net")
@@ -638,7 +638,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 36" should {
+  "(scala) issue 36" should {
     "report full path for missing required parameter 'obj.foo.bar'" in {
       val e = intercept[com.typesafe.config.ConfigException] {
         ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
@@ -649,7 +649,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 40" should {
+  "(scala) issue 40" should {
     "capture explicit memory size value in spec as a long literal" in {
       val c = ScalaIssue40Cfg(ConfigFactory.parseString(""))
       // well, the actual test is that the generated class compiles
@@ -657,7 +657,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 49 (using issue47.spec.conf --all-required)" should {
+  "(scala) issue 49 (using issue47.spec.conf --all-required)" should {
     "fail with missing service entry" in {
       val e = intercept[com.typesafe.config.ConfigException] {
         ScalaIssue47Cfg(ConfigFactory.parseString(""))
@@ -735,7 +735,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - example1" should {
+  "(scala) issue 54 - shared config - example1" should {
     "be handled" in {
       val c = ScalaIssue54Cfg(ConfigFactory.parseString("""example {
           |  a: {
@@ -765,7 +765,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - exampleD" should {
+  "(scala) issue 54 - shared config - exampleD" should {
     "be handled" in {
       val c = ScalaIssue54exampleDCfg(ConfigFactory.parseString("""
           |exampleD {
@@ -779,7 +779,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - exampleE" should {
+  "(scala) issue 54 - shared config - exampleE" should {
     "be handled" in {
       val c = ScalaIssue54exampleECfg(ConfigFactory.parseString("""
           |exampleE {
@@ -793,7 +793,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 54 - shared config - example2" should {
+  "(scala) issue 54 - shared config - example2" should {
     "be handled" in {
       val c = ScalaIssue54bCfg(ConfigFactory.parseString("""root {
           |  e: {
@@ -817,7 +817,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 55 - valid regexes" should {
+  "(scala) issue 55 - valid regexes" should {
     "be properly reflected" in {
       val c = ScalaIssue55Cfg(ConfigFactory.parseString(""))
       assert(
@@ -830,7 +830,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "multiline strings" should {
+  "(scala) multiline strings" should {
     "be properly reflected" in {
       val c = ScalaMultilinesCfg(ConfigFactory.parseString(""))
       assert(c.a === "some\nlines")
@@ -840,7 +840,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 59 - scala 2.12 and 2.13 switch" should {
+  "(scala) issue 59 - scala 2.12 and 2.13 switch" should {
     "generate a scala 2.13 config with corresponding imports if not indicated differently" in {
       val r = ScalaGen.generate("example/issue59.spec.conf")
       assert(
@@ -862,7 +862,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 62 - shared enumeration" when {
+  "(scala) issue 62 - shared enumeration" when {
     "62a basic" should {
       "be handled with correct input" in {
         val c = ScalaIssue62aCfg(ConfigFactory.parseString("""foo {
@@ -938,7 +938,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 64 - template with defined abstract class" should {
+  "(scala) issue 64 - template with defined abstract class" should {
     val configFromFile = ScalaIssue64Cfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue64.example.conf"))
@@ -976,7 +976,7 @@ class ScalaMainSpec extends AnyWordSpec {
   }
 
   /*
-  "issue 64b - template with invalid case class extension" should {
+  "(scala) issue 64b - template with invalid case class extension" should {
     "throw an ObjectDefinitionException" in {
       ScalaGen.generate("example/issue64b.spec.conf") must throwA[ObjectDefinitionException].like {
         case e: ObjectDefinitionException =>
@@ -990,7 +990,7 @@ class ScalaMainSpec extends AnyWordSpec {
   }
    */
 
-  "issue 67 - template with unintuitive order of shared objects" should {
+  "(scala) issue 67 - template with unintuitive order of shared objects" should {
     val configFromFile = ScalaIssue67Cfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue67.example.conf"))
@@ -1017,7 +1017,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 67a - template with second inheritance level" should {
+  "(scala) issue 67a - template with second inheritance level" should {
     val configFromFile = ScalaIssue67aCfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue67a.example.conf"))
@@ -1056,7 +1056,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 67b - template with third inheritance level" should {
+  "(scala) issue 67b - template with third inheritance level" should {
     val configFromFile = ScalaIssue67bCfg(
       ConfigFactory
         .parseFile(new File("src/main/tscfg/example/issue67b.example.conf"))
@@ -1102,7 +1102,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 67c - template with circular inheritance hierarchy" should {
+  "(scala) issue 67c - template with circular inheritance hierarchy" should {
     "be refused" in {
       val e = intercept[ObjectDefinitionException] {
         ScalaGen.generate("example/issue67c.spec.conf")
@@ -1113,7 +1113,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 71 - shared object leading to string conversion" should {
+  "(scala) issue 71 - shared object leading to string conversion" should {
     "71a simplified handled ok" in {
       val c = ScalaIssue71aCfg(ConfigFactory.parseString("""example {
           |  a = {
@@ -1175,7 +1175,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "issue 73 - Ability to extend or implement external type" when {
+  "(scala) issue 73 - Ability to extend or implement external type" when {
     "73a @define abstract extends java.lang.Object" should {
       "generate AbstractA extends java.lang.Object" in {
         val r = ScalaGen.generate("example/issue73a.spec.conf")
