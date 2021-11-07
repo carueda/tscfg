@@ -39,7 +39,7 @@ codeDefs := {
 (Compile / compile) := ((Compile / compile) dependsOn codeDefs).value
 
 lazy val genCode = taskKey[Unit]("Generate classes for tests")
-fullRunTask(genCode, Compile, "tscfg.gen4tests")
+fullRunTask(genCode, Test, "tscfg.gen4tests")
 (genCode / fork) := true
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
