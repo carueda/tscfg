@@ -3,10 +3,15 @@ package tscfg.generators.scala
 import tscfg.codeDefs.scalaDef
 import tscfg.generators._
 import tscfg.model._
+import tscfg.ns.NamespaceMan
 import tscfg.util.escapeString
-import tscfg.{ModelBuilder, Namespace, Struct, model}
+import tscfg.{ModelBuilder, model}
 
-class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
+class ScalaGen(
+    genOpts: GenOpts,
+    implicit val rootNamespace: NamespaceMan = new NamespaceMan
+) extends Generator(genOpts) {
+
   val accessors = new Accessors
 
   import defs._
@@ -362,7 +367,7 @@ class ScalaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
   private def getClassNameForObjectRefType(ot: ObjectRefType): String = {
     val className = getClassName(ot.simpleName)
-    val namespace = Namespace.resolve(ot.namespace)
+    val namespace = rootNamespace.resolve(ot.namespace)
     val fullScalaName =
       if (namespace.isRoot)
         s"${genOpts.className}.$className"
@@ -490,8 +495,14 @@ object ScalaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
+    val rootNamespace = new NamespaceMan
+
     val buildResult =
-      ModelBuilder(sourceStr, assumeAllRequired = assumeAllRequired)
+      ModelBuilder(
+        rootNamespace,
+        sourceStr,
+        assumeAllRequired = assumeAllRequired
+      )
     val objectType = buildResult.objectType
     if (showOut) {
       println(
@@ -516,7 +527,7 @@ object ScalaGen {
       s12 = s12
     )
 
-    val generator = new ScalaGen(genOpts)
+    val generator = new ScalaGen(genOpts, rootNamespace)
 
     val results = generator.generate(objectType)
 
@@ -592,7 +603,7 @@ private[scala] case class Getter(
     genOpts: GenOpts,
     hasPath: String,
     accessors: Accessors
-)(implicit val methodNames: MethodNames) {
+)(implicit val methodNames: MethodNames, val rootNamespace: NamespaceMan) {
 
   import defs._
 
@@ -619,7 +630,7 @@ private[scala] case class Getter(
       res: Res,
       path: String
   ): Option[String] = {
-    val namespace = Namespace.resolve(ort.namespace)
+    val namespace = rootNamespace.resolve(ort.namespace)
     namespace.getDefine(ort.simpleName) flatMap { t =>
       t match {
         case _: EnumObjectType => Some(enumInstance(res, path))
@@ -720,7 +731,8 @@ private[scala] class Accessors {
       s12: Boolean
   )(implicit
       listAccessors: collection.mutable.Map[String, String],
-      methodNames: MethodNames
+      methodNames: MethodNames,
+      rootNamespace: NamespaceMan
   ): String = {
 
     val (_, methodName) = rec(scalaType, lt, "", s12)
@@ -734,7 +746,8 @@ private[scala] class Accessors {
       s12: Boolean
   )(implicit
       listAccessors: collection.mutable.Map[String, String],
-      methodNames: MethodNames
+      methodNames: MethodNames,
+      rootNamespace: NamespaceMan
   ): (Boolean, String) = {
 
     val (isBasic, elemMethodName) = lst.st match {
@@ -789,7 +802,10 @@ private[scala] class Accessors {
       scalaType: ScalaType,
       s12: Boolean,
       lt: ListType
-  )(implicit methodNames: MethodNames): (String, String) = {
+  )(implicit
+      methodNames: MethodNames,
+      rootNamespace: NamespaceMan
+  ): (String, String) = {
 
     val elem = if (elemMethodName.startsWith(methodNames.listPrefix)) {
       s"$elemMethodName(cv.asInstanceOf[com.typesafe.config.ConfigList], parentPath, $$tsCfgValidator)"
@@ -801,7 +817,7 @@ private[scala] class Accessors {
       val adjusted = elemMethodName.replace("_", ".")
       val objRefResolution = lt.t match {
         case ort: ObjectRefType =>
-          val namespace = Namespace.resolve(ort.namespace)
+          val namespace = rootNamespace.resolve(ort.namespace)
           namespace.getDefine(ort.simpleName) flatMap { t =>
             t match {
               case _: EnumObjectType =>

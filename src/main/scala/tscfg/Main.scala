@@ -1,12 +1,13 @@
 package tscfg
 
-import java.io.{File, PrintWriter}
-import java.util.Date
-
 import com.typesafe.config.ConfigFactory
 import tscfg.generators.java.JavaGen
 import tscfg.generators.scala.ScalaGen
-import tscfg.generators.{GenOpts, Generator, TemplateOpts, TemplateGenerator}
+import tscfg.generators.{GenOpts, Generator, TemplateGenerator, TemplateOpts}
+import tscfg.ns.NamespaceMan
+
+import java.io.{File, PrintWriter}
+import java.util.Date
 
 /** The main program. Run with no arguments to see usage.
   */
@@ -205,8 +206,14 @@ object Main {
 
     source.close()
 
+    val rootNamespace = new NamespaceMan
+
     val buildResult =
-      ModelBuilder(sourceStr, assumeAllRequired = opts.assumeAllRequired)
+      ModelBuilder(
+        rootNamespace,
+        sourceStr,
+        assumeAllRequired = opts.assumeAllRequired
+      )
     val objectType = buildResult.objectType
 
     // println("\nobjectType:\n  |" + objectType.format().replaceAll("\n", "\n  |"))
@@ -220,8 +227,8 @@ object Main {
 
     println(s"generating: $destFile")
     val generator: Generator = opts.language match {
-      case "java"  => new JavaGen(genOpts)
-      case "scala" => new ScalaGen(genOpts)
+      case "java"  => new JavaGen(genOpts, rootNamespace)
+      case "scala" => new ScalaGen(genOpts, rootNamespace)
     }
     val results = generator.generate(objectType)
 

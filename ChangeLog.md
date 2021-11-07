@@ -1,5 +1,7 @@
 2021-11 - 0.9.996
 
+- No more a common, singleton Namespace object to make handling more self-contained and
+  less error-prone, in fact, avoiding the occasional race condition among test suites.
 - more complete handling of `--java:records`
 
 2021-11 - 0.9.995

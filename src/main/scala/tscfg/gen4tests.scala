@@ -1,42 +1,53 @@
 package tscfg
 
-import java.io.{File, FileWriter, PrintWriter}
-
 import tscfg.generators.java.JavaGen
-import tscfg.generators.{GenOpts, Generator}
 import tscfg.generators.scala.ScalaGen
+import tscfg.generators.{GenOpts, Generator}
+import tscfg.ns.NamespaceMan
+
+import java.io.{File, FileWriter, PrintWriter}
 
 // $COVERAGE-OFF$
 object gen4tests {
   def main(args: Array[String]): Unit = {
     val sourceDir = new File("src/main/tscfg/example")
-    sourceDir.listFiles().filter {
-      _.getName.endsWith(".spec.conf")
-    } foreach generate
+    sourceDir
+      .listFiles()
+      .filter { _.getName.endsWith(".spec.conf") }
+      .foreach(dispatch)
   }
 
-  private def generate(confFile: File): Unit = {
-    // println(s"gen4tests: confFile=$confFile")
-
+  private def dispatch(confFile: File): Unit = {
     val bufSource = io.Source.fromFile(confFile)
     val source    = bufSource.mkString
     bufSource.close
 
-    val opts = {
+    val optsFromFile: List[String] = {
       val linePat = """\s*//\s*GenOpts:(.*)""".r
       source
         .split("\n")
         .collect { case linePat(xs) => xs.trim }
         .flatMap(_.split("\\s+"))
+        .toList
     }
-    if (opts.contains("--skip-gen4tests")) {
-      println(s"gen4tests: skipping $confFile")
-      return
+    if (optsFromFile.contains("--skip-gen4tests")) {
+      println(s"gen4tests: ${fansi.Color.Magenta(s"SKIPPING $confFile")}")
     }
+    else {
+      generate(confFile, source, optsFromFile)
+    }
+  }
+
+  private def generate(
+      confFile: File,
+      source: String,
+      optsFromFile: List[String]
+  ): Unit = {
+    println(s"gen4tests: $confFile")
 
     val baseGenOpts: GenOpts = {
       var genOpts = GenOpts("tscfg.example", "?")
-      opts foreach {
+      optsFromFile foreach {
         case "--scala:2.12"     => genOpts = genOpts.copy(s12 = true)
         case "--scala:bt"       => genOpts = genOpts.copy(useBackticks = true)
         case "--java:getters"   => genOpts = genOpts.copy(genGetters = true)
@@ -52,8 +63,14 @@ object gen4tests {
       genOpts
     }
 
+    val rootNamespace = new NamespaceMan
+
     val buildResult =
-      ModelBuilder(source, assumeAllRequired = baseGenOpts.assumeAllRequired)
+      ModelBuilder(
+        rootNamespace,
+        source,
+        assumeAllRequired = baseGenOpts.assumeAllRequired
+      )
     val objectType = buildResult.objectType
 
     val name            = confFile.getName
@@ -73,8 +90,8 @@ object gen4tests {
         val genOpts = baseGenOpts.copy(className = className)
         // println(s"generating for $name -> $fileName")
         val generator: Generator = lang match {
-          case "Scala" => new ScalaGen(genOpts)
-          case "Java"  => new JavaGen(genOpts)
+          case "Scala" => new ScalaGen(genOpts, rootNamespace)
+          case "Java"  => new JavaGen(genOpts, rootNamespace)
         }
 
         val results = generator.generate(objectType)

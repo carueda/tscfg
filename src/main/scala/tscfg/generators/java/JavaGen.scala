@@ -1,15 +1,19 @@
 package tscfg.generators.java
 
 import tscfg.DefineCase.ExtendsDefineCase
-import tscfg.Namespace
+import tscfg.ModelBuilder
 import tscfg.codeDefs.javaDef
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.generators._
 import tscfg.generators.java.javaUtil._
 import tscfg.model._
+import tscfg.ns.NamespaceMan
 import tscfg.util.escapeString
 
-class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
+class JavaGen(
+    genOpts: GenOpts,
+    rootNamespace: NamespaceMan = new NamespaceMan
+) extends Generator(genOpts) {
 
   import defs._
 
@@ -411,7 +415,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       res: Res,
       path: String
   ): Option[String] = {
-    val namespace = Namespace.resolve(ort.namespace)
+    val namespace = rootNamespace.resolve(ort.namespace)
     namespace.getDefine(ort.simpleName) flatMap { t =>
       t match {
         case _: EnumObjectType => Some(enumInstance(res, path))
@@ -589,7 +593,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
       val adjusted = elemMethodName.replace("_", ".")
       val objRefResolution = lt.t match {
         case ort: ObjectRefType =>
-          val namespace = Namespace.resolve(ort.namespace)
+          val namespace = rootNamespace.resolve(ort.namespace)
           namespace.getDefine(ort.simpleName) flatMap { t =>
             t match {
               case _: EnumObjectType =>
@@ -620,7 +624,7 @@ class JavaGen(genOpts: GenOpts) extends Generator(genOpts) {
 
 object JavaGen {
 
-  import tscfg.{ModelBuilder, model, util}
+  import tscfg.{model, util}
 
   import _root_.java.io.{File, FileWriter, PrintWriter}
 
@@ -648,8 +652,10 @@ object JavaGen {
       util.upperFirst(symbol) + "Cfg"
     }
 
+    val rootNamespace = new NamespaceMan
+
     val buildResult =
-      ModelBuilder(source, assumeAllRequired = assumeAllRequired)
+      ModelBuilder(rootNamespace, source, assumeAllRequired = assumeAllRequired)
     val objectType = buildResult.objectType
     if (showOut) {
       println(
@@ -676,7 +682,7 @@ object JavaGen {
       useDurations = useDurations
     )
 
-    val generator = new JavaGen(genOpts)
+    val generator = new JavaGen(genOpts, rootNamespace)
 
     val results = generator.generate(objectType)
 

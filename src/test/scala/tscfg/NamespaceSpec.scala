@@ -2,10 +2,11 @@ package tscfg
 
 import org.scalatest.wordspec.AnyWordSpec
 import tscfg.model.ObjectType
+import tscfg.ns.{Namespace, NamespaceMan}
 
 class NamespaceSpec extends AnyWordSpec {
 
-  val root: Namespace  = Namespace.root
+  val root: Namespace  = new NamespaceMan().root
   val ns00: Namespace  = root.extend("ns00")
   val ns01: Namespace  = root.extend("ns01")
   val ns000: Namespace = ns00.extend("ns000")

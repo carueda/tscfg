@@ -9,6 +9,7 @@ import tscfg.buildWarnings.{
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.model._
 import tscfg.model.durations._
+import tscfg.ns.NamespaceMan
 
 class ModelBuilderSpec extends AnyWordSpec {
 
@@ -17,7 +18,7 @@ class ModelBuilderSpec extends AnyWordSpec {
     if (showOutput)
       println("\nsource:\n  |" + source.replaceAll("\n", "\n  |"))
 
-    val result     = ModelBuilder(source)
+    val result     = ModelBuilder(new NamespaceMan, source)
     val objectType = result.objectType
 
     if (showOutput) {

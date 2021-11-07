@@ -2,12 +2,16 @@ package tscfg
 
 import com.typesafe.config._
 import tscfg.generators.tsConfigUtil
-import tscfg.model.durations.ms
 import tscfg.model._
+import tscfg.model.durations.ms
+import tscfg.ns.{Namespace, NamespaceMan}
 
 import scala.jdk.CollectionConverters._
 
-class ModelBuilder(assumeAllRequired: Boolean = false) {
+class ModelBuilder(
+    rootNamespace: NamespaceMan,
+    assumeAllRequired: Boolean = false
+) {
 
   import buildWarnings._
 
@@ -16,7 +20,7 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
   def build(conf: Config): ModelBuildResult = {
     warns.clear()
     ModelBuildResult(
-      objectType = fromConfig(Namespace.root, conf),
+      objectType = fromConfig(rootNamespace.root, conf),
       warnings = warns.toList.sortBy(_.line)
     )
   }
@@ -313,25 +317,27 @@ class ModelBuilder(assumeAllRequired: Boolean = false) {
 
 object ModelBuilder {
 
-  import java.io.File
-
   import com.typesafe.config.ConfigFactory
+
+  import java.io.File
 
   /** build model from string */
   def apply(
+      rootNamespace: NamespaceMan,
       source: String,
       assumeAllRequired: Boolean = false
   ): ModelBuildResult = {
     val config = ConfigFactory.parseString(source).resolve()
-    fromConfig(config, assumeAllRequired)
+    fromConfig(rootNamespace, config, assumeAllRequired)
   }
 
   /** build model from TS Config object */
   def fromConfig(
+      rootNamespace: NamespaceMan,
       config: Config,
       assumeAllRequired: Boolean = false
   ): ModelBuildResult = {
-    new ModelBuilder(assumeAllRequired).build(config)
+    new ModelBuilder(rootNamespace, assumeAllRequired).build(config)
   }
 
   // $COVERAGE-OFF$
@@ -354,7 +360,8 @@ object ModelBuilder {
         .setOriginComments(false)
       println(config.root.render(options))
     }
-    val result = fromConfig(config)
+    val rootNamespace = new NamespaceMan
+    val result        = fromConfig(rootNamespace, config)
     println(
       s"""ModelBuilderResult:
          |${model.util.format(result.objectType)}

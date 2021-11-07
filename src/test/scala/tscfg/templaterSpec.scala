@@ -1,13 +1,14 @@
 package tscfg
 
 import org.scalatest.wordspec.AnyWordSpec
+import tscfg.ns.NamespaceMan
 
 class templaterSpec extends AnyWordSpec {
   import tscfg.generators.{TemplateGenerator, TemplateOpts}
   import tscfg.model.ObjectType
 
   def build(source: String): ObjectType = {
-    val result = ModelBuilder(source)
+    val result = ModelBuilder(new NamespaceMan, source)
     result.objectType
   }
 

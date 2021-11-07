@@ -1,14 +1,9 @@
 package tscfg
 
 import com.typesafe.config.Config
-import tscfg.DefineCase.{
-  AbstractDefineCase,
-  EnumDefineCase,
-  ExtendsDefineCase,
-  ImplementsDefineCase,
-  SimpleDefineCase
-}
+import tscfg.DefineCase._
 import tscfg.exceptions.ObjectDefinitionException
+import tscfg.ns.Namespace
 
 import scala.annotation.tailrec
 import scala.collection.{Map, mutable}
@@ -79,9 +74,9 @@ object Struct {
     val sortedDefineStructs               = sortDefineStructs(defineStructs)
 
     if (namespace.isRoot) {
-      scribe.debug(struct.format())
       scribe.debug(
-        s"sortedDefineStructs=\n${sortedDefineStructs.map(_.format()).mkString("\n")}"
+        s"root struct=${struct.format()}\n" +
+          s"sortedDefineStructs=\n${sortedDefineStructs.map(_.format()).mkString("\n")}"
       )
     }
 

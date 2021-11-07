@@ -2,6 +2,7 @@ package tscfg
 
 import tscfg.DefineCase._
 import tscfg.model.durations._
+import tscfg.ns.NamespaceMan
 
 object model {
 
@@ -122,7 +123,7 @@ object model {
 
   case class ObjectRefType(namespace: String, simpleName: String)
       extends ObjectAbsType {
-    require(Namespace.validName(namespace))
+    require(NamespaceMan.validName(namespace))
     override def toString: String =
       s"ObjectRefType(namespace='$namespace', simpleName='$simpleName')"
   }
