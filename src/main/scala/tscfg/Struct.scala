@@ -228,7 +228,11 @@ object Struct {
       structs(key)
     }
 
-    // Due to TS Config API, we traverse from the leaves to the ancestors:
+    // Note: Due to how Typesafe Config works:
+    // - we need to traverse from the leaves to the ancestors
+    // - duplicate field names under an object cannot be detected;
+    // - only one will be seen here.
+    //
     conf.entrySet().asScala foreach { e =>
       val path = e.getKey
       val leaf = Struct(path)

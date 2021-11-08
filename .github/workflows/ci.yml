@@ -35,6 +35,7 @@ jobs:
             sbt ++${{ matrix.scala-version }} genCode test;
           fi
 
+      # TODO consider an alternative -- https://github.com/scoverage/sbt-coveralls/issues/126
       - name: Coveralls
         if: startsWith(matrix.scala, '2')
         run: sbt ++${{ matrix.scala-version }} coverageAggregate coveralls
