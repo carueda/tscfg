@@ -15,7 +15,7 @@ object ScalaIssue59Cfg {
   }
 
   private def $_L$_str(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.List[java.lang.String] = {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     cl.asScala.map(cv => $_str(cv)).toList
   }
   private def $_expE(cv:com.typesafe.config.ConfigValue, exp:java.lang.String) = {

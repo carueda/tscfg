@@ -491,7 +491,7 @@ class ScalaMainSpec extends AnyWordSpec {
 
   "(scala) given class name starting with $_" should {
     "generate warning" in {
-      val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
+      val genOpts = GenOpts("tscfg.example", "Classy")
       val r       = new ScalaGen(genOpts).generate(ObjectType())
       assert(r.classNames === Set("Classy"))
       assert(r.fields === Map())
@@ -508,7 +508,7 @@ class ScalaMainSpec extends AnyWordSpec {
     )
 
     "generate warnings" in {
-      val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
+      val genOpts = GenOpts("tscfg.example", "Classy")
       val r       = new ScalaGen(genOpts).generate(objectType)
 
       assert(r.classNames === Set("Classy", "Other"))
@@ -840,24 +840,12 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "(scala) issue 59 - scala 2.12 and 2.13 switch" should {
-    "generate a scala 2.13 config with corresponding imports if not indicated differently" in {
+  "(scala) issue 59 - just 2.13+ since v1" should {
+    "generate a scala 2.13+ config with corresponding imports" in {
       val r = ScalaGen.generate("example/issue59.spec.conf")
-      assert(
-        r.code.contains("import scala.jdk.CollectionConverters._") === true
-      )
+      assert(r.code contains "import scala.jdk.CollectionConverters._")
       assert(
         r.code.contains("import scala.collection.JavaConverters._") === false
-      )
-    }
-
-    "generate a scala 2.12 config with corresponding imports if --scala:2.12 is provided" in {
-      val r = ScalaGen.generate("example/issue59.spec.conf", s12 = true)
-      assert(
-        r.code.contains("import scala.collection.JavaConverters._") === true
-      )
-      assert(
-        r.code.contains("import scala.jdk.CollectionConverters._") === false
       )
     }
   }

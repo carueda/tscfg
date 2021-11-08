@@ -473,10 +473,8 @@ object ScalaGen {
   // $COVERAGE-OFF$
   def generate(
       filename: String,
-      j7: Boolean = false,
       assumeAllRequired: Boolean = false,
       showOut: Boolean = false,
-      s12: Boolean = false,
       useDurations: Boolean = false,
       useBackticks: Boolean = false
   ): GenResult = {
@@ -521,10 +519,8 @@ object ScalaGen {
     val genOpts = GenOpts(
       "tscfg.example",
       className,
-      j7 = j7,
       useBackticks = useBackticks,
       useDurations = useDurations,
-      s12 = s12
     )
 
     val generator = new ScalaGen(genOpts, rootNamespace)
@@ -677,7 +673,7 @@ private[scala] case class Getter(
       implicit listAccessors: collection.mutable.Map[String, String]
   ): String = {
     val scalaType: ListScalaType = res.scalaType.asInstanceOf[ListScalaType]
-    val base = accessors.listMethodName(scalaType, lt, path, genOpts.s12)
+    val base                     = accessors.listMethodName(scalaType, lt, path)
     if (a.optional) {
       s"""if(c.$hasPath("$path")) scala.Some($base) else None"""
     }
@@ -729,14 +725,13 @@ private[scala] class Accessors {
       scalaType: ListScalaType,
       lt: ListType,
       path: String,
-      s12: Boolean
   )(implicit
       listAccessors: collection.mutable.Map[String, String],
       methodNames: MethodNames,
       rootNamespace: NamespaceMan
   ): String = {
 
-    val (_, methodName) = rec(scalaType, lt, "", s12)
+    val (_, methodName) = rec(scalaType, lt, "")
     methodName + s"""(c.getList("$path"), parentPath, $$tsCfgValidator)"""
   }
 
@@ -744,7 +739,6 @@ private[scala] class Accessors {
       lst: ListScalaType,
       lt: ListType,
       prefix: String,
-      s12: Boolean
   )(implicit
       listAccessors: collection.mutable.Map[String, String],
       methodNames: MethodNames,
@@ -767,12 +761,11 @@ private[scala] class Accessors {
           lst,
           lt.t.asInstanceOf[ListType],
           prefix + methodNames.listPrefix,
-          s12
         )
     }
 
     val (methodName, methodBody) =
-      listMethodDefinition(elemMethodName, lst.st, s12, lt)
+      listMethodDefinition(elemMethodName, lst.st, lt)
 
     if (isBasic)
       rootListAccessors += methodName -> methodBody
@@ -801,7 +794,6 @@ private[scala] class Accessors {
   def listMethodDefinition(
       elemMethodName: String,
       scalaType: ScalaType,
-      s12: Boolean,
       lt: ListType
   )(implicit
       methodNames: MethodNames,
@@ -838,12 +830,9 @@ private[scala] class Accessors {
     }
 
     val methodName = methodNames.listPrefix + elemMethodName
-    val scalaCollectionConverter =
-      if (s12) "scala.collection.JavaConverters._"
-      else "scala.jdk.CollectionConverters._"
     val methodDef =
       s"""  private def $methodName(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): scala.List[$scalaType] = {
-         |    import $scalaCollectionConverter
+         |    import scala.jdk.CollectionConverters._
          |    cl.asScala.map(cv => $elem).toList
          |  }""".stripMargin
     (methodName, methodDef)

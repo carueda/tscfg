@@ -1,5 +1,6 @@
 2021-11 - 1.0.0-alpha
 
+- remove --j7 option
 - cleanup, some of which related with duplicate field names in input schema:
   such duplications cannot be detected due to how Typesafe Config works;
   for example, the following is OK from Config perspective, but only

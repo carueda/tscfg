@@ -33,12 +33,10 @@ object Main {
        |  --cn <className>                                       (${defaultGenOpts.className})
        |  --dd <destDir>                                         ($defaultDestDir)
        |  --java                generate java code               (the default)
-       |  --j7                  generate code for java <= 7      (8)
        |  --java:getters        generate getters (see #31)       (false)
        |  --java:records        generate records                 (false)
        |  --java:optionals      use optionals                    (false)
        |  --scala               generate scala code              (java)
-       |  --scala:2.12          generate code for scala 2.12     (2.13)
        |  --scala:bt            use backticks (see #30)          (false)
        |  --durations           use java.time.Duration           (false)
        |  --all-required        assume all properties are required (see #47)
@@ -57,9 +55,7 @@ object Main {
       className: String = defaultGenOpts.className,
       destDir: String = defaultDestDir,
       assumeAllRequired: Boolean = false,
-      j7: Boolean = false,
       language: String = "java",
-      s12: Boolean = false,
       useBackticks: Boolean = false,
       genGetters: Boolean = false,
       genRecords: Boolean = false,
@@ -125,14 +121,8 @@ object Main {
         case "--all-required" :: rest =>
           traverseList(rest, opts.copy(assumeAllRequired = true))
 
-        case "--j7" :: rest =>
-          traverseList(rest, opts.copy(j7 = true))
-
         case "--scala" :: rest =>
           traverseList(rest, opts.copy(language = "scala"))
-
-        case "--scala:2.12" :: rest =>
-          traverseList(rest, opts.copy(s12 = true))
 
         case "--scala:bt" :: rest =>
           traverseList(rest, opts.copy(useBackticks = true))
@@ -205,8 +195,6 @@ object Main {
       opts.packageName,
       opts.className,
       assumeAllRequired = opts.assumeAllRequired,
-      j7 = opts.j7,
-      s12 = opts.s12,
       useBackticks = opts.useBackticks,
       genGetters = opts.genGetters,
       genRecords = opts.genRecords,

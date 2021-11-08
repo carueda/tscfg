@@ -185,7 +185,7 @@ object ScalaExampleCfg {
 You will need a JRE 8+ and the latest fat JAR (tscfg-x.y.z.jar)
 from the [releases](https://github.com/carueda/tscfg/releases).
 
-> Or run `sbt assembly` (or `sbt ++2.13.7 assembly`) 
+> Or run `sbt assembly` (or `sbt ++2.13.7 assembly`)
 > under a clone of this repo to generate the fat jar.
 
 ```
@@ -198,12 +198,10 @@ Options (default):
   --cn <className>                                       (ExampleCfg)
   --dd <destDir>                                         (/tmp)
   --java                generate java code               (the default)
-  --j7                  generate code for java <= 7      (>= 8)
   --java:getters        generate getters (see #31)       (false)
   --java:records        generate records                 (false)
   --java:optionals      use optionals                    (false)
   --scala               generate scala code              (java)
-  --scala:2.12          generate code for scala 2.12     (2.13)
   --scala:bt            use backticks (see #30)          (false)
   --durations           use java.time.Duration           (false)
   --all-required        assume all properties are required (see #47)
@@ -314,7 +312,7 @@ See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
 > NOTE: As of 0.0.984, a setting with a default value like
 > `memory: 50G` (or `memory: "50G"`) will no longer be inferred as with `size` type, but just as a string
-> (with default value `"50G"`). 
+> (with default value `"50G"`).
 > For the size type effect, you will need to be explicit: `memory: "size | 50G"`.
 > See [#42](https://github.com/carueda/tscfg/issues/42) and [#41](https://github.com/carueda/tscfg/issues/41).
 
@@ -552,7 +550,7 @@ public enum FruitType {
 ```
 
 ```scala
-sealed trait FruitType 
+sealed trait FruitType
 object FruitType {
   object apple     extends FruitType
   object banana    extends FruitType

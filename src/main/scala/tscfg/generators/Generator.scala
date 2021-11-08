@@ -11,8 +11,8 @@ abstract class Generator(genOpts: GenOpts) {
 
   def generate(objectType: ObjectType): GenResult
 
-  protected val className: String = genOpts.className
-  protected val hasPath: String = if (genOpts.j7) "hasPath" else "hasPathOrNull"
+  protected val className: String     = genOpts.className
+  protected val hasPath: String       = "hasPathOrNull"
   protected var genResults: GenResult = GenResult()
 
   // allows to insert special marks in generated code to facilitate debugging.
@@ -28,8 +28,6 @@ case class GenOpts(
     packageName: String,
     className: String,
     assumeAllRequired: Boolean = false,
-    j7: Boolean = false,
-    s12: Boolean = false,
     useBackticks: Boolean = false,
     genGetters: Boolean = false,
     genRecords: Boolean = false,
