@@ -8,7 +8,6 @@ import com.typesafe.config._
 //)
 //println(s"nested1: $nested1")
 
-
 val nested2 = ConfigFactory.parseString(
   """
     |nested2 = { a = [[[
@@ -21,6 +20,3 @@ val nested2 = ConfigFactory.parseString(
   """.stripMargin
 )
 println(s"nested2: $nested2")
-
-
-
