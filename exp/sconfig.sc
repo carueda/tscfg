@@ -2,19 +2,22 @@ import $ivy.`com.lihaoyi::sourcecode:0.1.4`
 import $ivy.`com.typesafe:config:1.3.0`
 import com.typesafe.config._
 
-/**
-  * From https://github.com/Krever/static-config
+/** From https://github.com/Krever/static-config
   */
 trait SConfig {
   def config: Config
 
-  def configEntry[T](extractor: Config => String => T)(implicit valName: sourcecode.Name): T =
+  def configEntry[T](extractor: Config => String => T)(implicit
+      valName: sourcecode.Name
+  ): T =
     extractor(config)(valName.value)
 
-  class LocalSConfigNode(implicit objName: sourcecode.Name) extends DConfigNode(config)(objName)
+  class LocalSConfigNode(implicit objName: sourcecode.Name)
+      extends DConfigNode(config)(objName)
 }
 
-abstract class DConfigNode(parent: Config)(implicit objName: sourcecode.Name) extends SConfig {
+abstract class DConfigNode(parent: Config)(implicit objName: sourcecode.Name)
+    extends SConfig {
   def config: Config = parent.getConfig(objName.value)
 }
 
@@ -33,13 +36,12 @@ class MySConfig(val config: Config) extends SConfig {
 
     object http extends LocalSConfigNode {
       val interface: String = configEntry(_.getString)
-      val port:      Int    = configEntry(_.getInt)
+      val port: Int         = configEntry(_.getInt)
     }
   }
 }
 
-val cfg = new MySConfig(com.typesafe.config.ConfigFactory.parseString(
-  """
+val cfg = new MySConfig(com.typesafe.config.ConfigFactory.parseString("""
     |my-app {
     |  app-name = "My Fancy App"
     |  kafka {
