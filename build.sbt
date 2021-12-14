@@ -9,7 +9,7 @@ crossScalaVersions := Seq("2.13.7", "3.1.0")
 libraryDependencies ++= Seq(
   "com.outr"            %% "scribe"    % "3.6.3",
   "com.typesafe"         % "config"    % "1.4.1",
-  "com.lihaoyi"         %% "pprint"    % "0.6.6",
+  "com.lihaoyi"         %% "pprint"    % "0.7.1",
   "org.scalatest"       %% "scalatest" % "3.2.10" % Test,
   "com.google.code.gson" % "gson"      % "2.8.9"
 )
