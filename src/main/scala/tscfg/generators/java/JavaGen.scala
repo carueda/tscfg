@@ -278,7 +278,8 @@ class JavaGen(
              |""".stripMargin
 
         case _: ObjectType =>
-          s"""public ${if (isRoot) "" else "static "}class $classNameAdjusted $extendsString{
+          s"""public ${if (isRoot) ""
+          else "static "}class $classNameAdjusted $extendsString{
              |  $classDeclMembersStr$classMemberGettersStr
              |  $membersStr
              |  public $classNameAdjusted($ctorParams) {$superString
