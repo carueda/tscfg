@@ -1297,18 +1297,18 @@ class JavaMainSpec extends AnyWordSpec {
     "with simple spec" should {
       "work " in {
         val c0 = ConfigFactory.parseString("simple.int = 9")
-        // val c  = new JavaIssue75Cfg(c0)
-        // assert(c.simple.foo === "simple")
-        // assert(c.simple.int_ === 9)
+        val c  = new JavaIssue75Cfg(c0)
+        assert(c.simple.foo === "simple")
+        assert(c.simple.int_ === 9)
       }
     }
 
     "with simple @define" should {
       "work" in {
         val c0 = ConfigFactory.parseString("simple.int = 91")
-        // val c  = new JavaIssue75bCfg(c0)
-        // assert(c.simple.foo === "simple")
-        // assert(c.simple.int_ === 91)
+        val c  = new JavaIssue75bCfg(c0)
+        assert(c.simple.foo === "simple")
+        assert(c.simple.int_ === 91)
       }
     }
 
@@ -1333,9 +1333,9 @@ class JavaMainSpec extends AnyWordSpec {
     "with @define implements" should {
       "work" in {
         val c0 = ConfigFactory.parseString("simple.int = 9")
-        // val c  = new JavaIssue75eCfg(c0)
-        // assert(c.simple.foo === "simple")
-        // assert(c.simple.int_ === 9)
+        val c  = new JavaIssue75eCfg(c0)
+        assert(c.simple.foo === "simple")
+        assert(c.simple.int_ === 9)
       }
     }
   }
