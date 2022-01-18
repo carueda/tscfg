@@ -90,10 +90,6 @@ class ScalaGen(
         if (a.isDefine) None
         else
           Some {
-            val memberType = res.scalaType
-            val typ =
-              if (a.optional && a.default.isEmpty) s"scala.Option[$memberType]"
-              else memberType
             val scalaId = scalaIdentifier(symbol)
             val modifiers = (isChildClass, isAbstractClass) match {
               case (true, _) =>
@@ -104,13 +100,17 @@ class ScalaGen(
                 "val "
               case _ => ""
             }
-            val type_ = a.t match {
+            val typeName = a.t match {
               case ot: ObjectRefType =>
                 getClassNameForObjectRefType(ot)
-              case _ => typ
+              case _ => res.scalaType.toString
             }
+            val type_ =
+              if (a.optional && a.default.isEmpty) s"scala.Option[$typeName]"
+              else typeName
+
             genResults = genResults
-              .copy(fields = genResults.fields + (scalaId -> type_.toString))
+              .copy(fields = genResults.fields + (scalaId -> type_))
             modifiers + padId(scalaId) + " : " + type_ + dbg("E")
           }
       }
