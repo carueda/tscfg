@@ -1,7 +1,7 @@
 package tscfg.example;
 
-public class JavaIssue124Cfg {
-  public final JavaIssue124Cfg.Example example;
+public class JavaIssue124aCfg {
+  public final JavaIssue124aCfg.Example example;
   public static class Shared {
     public final java.lang.String c;
     public final int d;
@@ -35,12 +35,12 @@ public class JavaIssue124Cfg {
   }
   
   public static class Example {
-    public final java.util.Optional<Shared> a;
-    public final java.util.Optional<java.util.List<Shared>> b;
+    public final Shared a;
+    public final java.util.List<Shared> b;
     
     public Example(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
-      this.a = c.hasPathOrNull("a") ? java.util.Optional.of(new Shared(c.getConfig("a"), parentPath + "a.", $tsCfgValidator)) : java.util.Optional.empty();
-      this.b = c.hasPathOrNull("b") ? java.util.Optional.of($_LShared(c.getList("b"), parentPath, $tsCfgValidator)) : java.util.Optional.empty();
+      this.a = c.hasPathOrNull("a") ? new Shared(c.getConfig("a"), parentPath + "a.", $tsCfgValidator) : null;
+      this.b = c.hasPathOrNull("b") ? $_LShared(c.getList("b"), parentPath, $tsCfgValidator) : null;
     }
     private static java.util.List<Shared> $_LShared(com.typesafe.config.ConfigList cl, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
       java.util.ArrayList<Shared> al = new java.util.ArrayList<>();
@@ -51,10 +51,10 @@ public class JavaIssue124Cfg {
     }
   }
   
-  public JavaIssue124Cfg(com.typesafe.config.Config c) {
+  public JavaIssue124aCfg(com.typesafe.config.Config c) {
     final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
     final java.lang.String parentPath = "";
-    this.example = c.hasPathOrNull("example") ? new JavaIssue124Cfg.Example(c.getConfig("example"), parentPath + "example.", $tsCfgValidator) : new JavaIssue124Cfg.Example(com.typesafe.config.ConfigFactory.parseString("example{}"), parentPath + "example.", $tsCfgValidator);
+    this.example = c.hasPathOrNull("example") ? new JavaIssue124aCfg.Example(c.getConfig("example"), parentPath + "example.", $tsCfgValidator) : new JavaIssue124aCfg.Example(com.typesafe.config.ConfigFactory.parseString("example{}"), parentPath + "example.", $tsCfgValidator);
     $tsCfgValidator.validate();
   }
   private static final class $TsCfgValidator  {

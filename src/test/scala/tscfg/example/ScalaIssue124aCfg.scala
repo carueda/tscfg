@@ -1,16 +1,16 @@
 package tscfg.example
 
-final case class ScalaIssue124Cfg(
-  example : ScalaIssue124Cfg.Example
+final case class ScalaIssue124aCfg(
+  example : ScalaIssue124aCfg.Example
 )
-object ScalaIssue124Cfg {
+object ScalaIssue124aCfg {
   final case class Shared(
     c : java.lang.String,
     d : scala.Int
   )
   object Shared {
-    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue124Cfg.Shared = {
-      ScalaIssue124Cfg.Shared(
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue124aCfg.Shared = {
+      ScalaIssue124aCfg.Shared(
         c = $_reqStr(parentPath, c, "c", $tsCfgValidator),
         d = $_reqInt(parentPath, c, "d", $tsCfgValidator)
       )
@@ -38,27 +38,27 @@ object ScalaIssue124Cfg {
   }
         
   final case class Example(
-    a : scala.Option[ScalaIssue124Cfg.Shared],
-    b : scala.Option[scala.List[ScalaIssue124Cfg.Shared]]
+    a : scala.Option[ScalaIssue124aCfg.Shared],
+    b : scala.Option[scala.List[ScalaIssue124aCfg.Shared]]
   )
   object Example {
-    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue124Cfg.Example = {
-      ScalaIssue124Cfg.Example(
-        a = if(c.hasPathOrNull("a")) scala.Some(ScalaIssue124Cfg.Shared(c.getConfig("a"), parentPath + "a.", $tsCfgValidator)) else None,
-        b = if(c.hasPathOrNull("b")) scala.Some($_LScalaIssue124Cfg_Shared(c.getList("b"), parentPath, $tsCfgValidator)) else None
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue124aCfg.Example = {
+      ScalaIssue124aCfg.Example(
+        a = if(c.hasPathOrNull("a")) scala.Some(ScalaIssue124aCfg.Shared(c.getConfig("a"), parentPath + "a.", $tsCfgValidator)) else None,
+        b = if(c.hasPathOrNull("b")) scala.Some($_LScalaIssue124aCfg_Shared(c.getList("b"), parentPath, $tsCfgValidator)) else None
       )
     }
-    private def $_LScalaIssue124Cfg_Shared(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.List[ScalaIssue124Cfg.Shared] = {
+    private def $_LScalaIssue124aCfg_Shared(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.List[ScalaIssue124aCfg.Shared] = {
       import scala.jdk.CollectionConverters._
-      cl.asScala.map(cv => ScalaIssue124Cfg.Shared(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig, parentPath, $tsCfgValidator)).toList
+      cl.asScala.map(cv => ScalaIssue124aCfg.Shared(cv.asInstanceOf[com.typesafe.config.ConfigObject].toConfig, parentPath, $tsCfgValidator)).toList
     }
   }
         
-  def apply(c: com.typesafe.config.Config): ScalaIssue124Cfg = {
+  def apply(c: com.typesafe.config.Config): ScalaIssue124aCfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String = ""
-    val $result = ScalaIssue124Cfg(
-      example = ScalaIssue124Cfg.Example(if(c.hasPathOrNull("example")) c.getConfig("example") else com.typesafe.config.ConfigFactory.parseString("example{}"), parentPath + "example.", $tsCfgValidator)
+    val $result = ScalaIssue124aCfg(
+      example = ScalaIssue124aCfg.Example(if(c.hasPathOrNull("example")) c.getConfig("example") else com.typesafe.config.ConfigFactory.parseString("example{}"), parentPath + "example.", $tsCfgValidator)
     )
     $tsCfgValidator.validate()
     $result

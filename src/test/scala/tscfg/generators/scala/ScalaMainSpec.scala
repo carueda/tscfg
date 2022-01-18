@@ -1212,17 +1212,17 @@ class ScalaMainSpec extends AnyWordSpec {
     }
   }
 
-  "(scala) issue 124 - Optional shared objects" should {
+  "(scala) issue 124a - Optional shared objects" should {
     "generate optional shared objects" in {
-      val r = ScalaGen.generate("example/issue124.spec.conf")
-      assert(r.code contains "a : scala.Option[ScalaIssue124Cfg.Shared]")
+      val r = ScalaGen.generate("example/issue124a.spec.conf")
+      assert(r.code contains "a : scala.Option[ScalaIssue124aCfg.Shared]")
       assert(
-        r.code contains "b : scala.Option[scala.List[ScalaIssue124Cfg.Shared]]"
+        r.code contains "b : scala.Option[scala.List[ScalaIssue124aCfg.Shared]]"
       )
     }
 
     "parse example 1 with single shared object" in {
-      val c = ScalaIssue124Cfg(ConfigFactory.parseString("""example {
+      val c = ScalaIssue124aCfg(ConfigFactory.parseString("""example {
           |  a: {
           |    c = "C1"
           |    d = 1
@@ -1238,7 +1238,7 @@ class ScalaMainSpec extends AnyWordSpec {
     }
 
     "parse example 2 with list of shared objects" in {
-      val c = ScalaIssue124Cfg(ConfigFactory.parseString("""example {
+      val c = ScalaIssue124aCfg(ConfigFactory.parseString("""example {
           |  b: [
           |    {
           |      c = "Apple"

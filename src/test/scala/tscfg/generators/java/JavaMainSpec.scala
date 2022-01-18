@@ -1340,10 +1340,10 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "(java) issue 124 - Optional shared objects" should {
+  "(java) issue 124b - Optional shared objects" should {
     "generate optional shared objects" in {
       val r =
-        JavaGen.generate("example/issue124.spec.conf", useOptionals = true)
+        JavaGen.generate("example/issue124b.spec.conf", useOptionals = true)
       assert(r.code contains "java.util.Optional<Shared> a")
       assert(
         r.code contains "java.util.Optional<java.util.List<Shared>> b"
@@ -1351,7 +1351,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "parse example 1 with single shared object" in {
-      val c = new JavaIssue124Cfg(ConfigFactory.parseString("""example {
+      val c = new JavaIssue124bCfg(ConfigFactory.parseString("""example {
          |  a: {
          |    c = "C1"
          |    d = 1
@@ -1367,7 +1367,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
 
     "parse example 2 with list of shared objects" in {
-      val c = new JavaIssue124Cfg(ConfigFactory.parseString("""example {
+      val c = new JavaIssue124bCfg(ConfigFactory.parseString("""example {
          |  b: [
          |    {
          |      c = "Apple"
