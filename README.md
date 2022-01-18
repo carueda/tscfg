@@ -185,7 +185,7 @@ object ScalaExampleCfg {
 You will need a JRE 8+ and the latest fat JAR (tscfg-x.y.z.jar)
 from the [releases](https://github.com/carueda/tscfg/releases).
 
-> Or run `sbt assembly` (or `sbt ++2.13.7 assembly`) 
+> Or run `sbt assembly` (or `sbt ++2.13.7 assembly`)
 > under a clone of this repo to generate the fat jar.
 
 ```
@@ -314,7 +314,7 @@ See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
 > NOTE: As of 0.0.984, a setting with a default value like
 > `memory: 50G` (or `memory: "50G"`) will no longer be inferred as with `size` type, but just as a string
-> (with default value `"50G"`). 
+> (with default value `"50G"`).
 > For the size type effect, you will need to be explicit: `memory: "size | 50G"`.
 > See [#42](https://github.com/carueda/tscfg/issues/42) and [#41](https://github.com/carueda/tscfg/issues/41).
 
@@ -468,9 +468,7 @@ In this example, the annotation will only generate the definition of the
 corresponding class `Struct` in the wrapper but not the member of that
 type itself. Then, the type can be referenced for other definitions.
 
-> Note: current support is in terms of the referenced object always being *required*.
-> In other words, `a: "Struct?"`, as an example, is not supported.
-> Also, the `@define` annotation is only supported for objects and enumerations (see below),
+> Note: The `@define` annotation is only supported for objects and enumerations (see below),
 > not for a basic types or lists.
 
 #### shared object inheritance
@@ -552,7 +550,7 @@ public enum FruitType {
 ```
 
 ```scala
-sealed trait FruitType 
+sealed trait FruitType
 object FruitType {
   object apple     extends FruitType
   object banana    extends FruitType
