@@ -1,3 +1,6 @@
+Unreleased
+- fix #124 optional references to shared objects
+
 2021-11 - 0.9.996
 
 - gen4test: generate only for specific language depending on given options.
@@ -13,8 +16,8 @@
   that is an interface or class with no-arg, default constructor"
   - use "!" prefix to indicate an external extension name
   - Besides `extends` now also `implements` accepted
-  - Examples: 
-    
+  - Examples:
+
       - `#@define abstract extends !java.lang.Object`
       - `#@define abstract implements !java.io.Serializable`
 
@@ -22,7 +25,7 @@
 - 0.9.994 release
 - core handling in place for `--java:records` #75.
   This along with needed scala 2.13.7 to support record compilation.
-  
+
 - re #69 "Use consistent formatter for the generated code"
   actually decided to remove the extra libraries as they were causing more friction
   than benefit (in particular re modernization of this tool), and users can actually

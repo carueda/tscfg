@@ -1,6 +1,7 @@
 package tscfg.generators.scala
 
 import com.typesafe.config.ConfigFactory
+import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.wordspec.AnyWordSpec
 import tscfg.example._
 import tscfg.exceptions.ObjectDefinitionException
@@ -1208,6 +1209,57 @@ class ScalaMainSpec extends AnyWordSpec {
         assert(c.test.impl.a === "aa")
         assert(c.test.impl.b === "bb")
       }
+    }
+  }
+
+  "(scala) issue 124a - Optional shared objects" should {
+    "generate optional shared objects" in {
+      val r = ScalaGen.generate("example/issue124a.spec.conf")
+      assert(r.code contains "a : scala.Option[ScalaIssue124aCfg.Shared]")
+      assert(
+        r.code contains "b : scala.Option[scala.List[ScalaIssue124aCfg.Shared]]"
+      )
+    }
+
+    "parse example 1 with single shared object" in {
+      val c = ScalaIssue124aCfg(ConfigFactory.parseString("""example {
+          |  a: {
+          |    c = "C1"
+          |    d = 1
+          |  }
+          |}
+          |""".stripMargin))
+
+      assert(c.example.a.isDefined)
+      assert(c.example.a.value.c === "C1")
+      assert(c.example.a.value.d === 1)
+
+      assert(c.example.b.isEmpty)
+    }
+
+    "parse example 2 with list of shared objects" in {
+      val c = ScalaIssue124aCfg(ConfigFactory.parseString("""example {
+          |  b: [
+          |    {
+          |      c = "Apple"
+          |      d = 4
+          |    },
+          |    {
+          |      c = "Banana"
+          |      d = 5
+          |    }
+          |  ]
+          |}
+          |""".stripMargin))
+
+      assert(c.example.a.isEmpty)
+
+      assert(c.example.b.isDefined)
+      assert(c.example.b.value.length === 2)
+      assert(c.example.b.value.head.c === "Apple")
+      assert(c.example.b.value.head.d === 4)
+      assert(c.example.b.value(1).c === "Banana")
+      assert(c.example.b.value(1).d === 5)
     }
   }
 }
