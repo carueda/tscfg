@@ -6,7 +6,7 @@ version            := "0.9.997"
 scalaVersion       := "3.1.0"
 crossScalaVersions := Seq("2.13.8", "3.1.0")
 
-buildInfoKeys := Seq[BuildInfoKey](version)
+buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
