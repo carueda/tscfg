@@ -1,6 +1,5 @@
 package tscfg
 
-import com.typesafe.config.ConfigFactory
 import tscfg.generators.java.JavaGen
 import tscfg.generators.scala.ScalaGen
 import tscfg.generators.{GenOpts, Generator, TemplateGenerator, TemplateOpts}
@@ -13,7 +12,7 @@ import scala.annotation.tailrec
 /** The main program. Run with no arguments to see usage.
   */
 object Main {
-  val version: String = ConfigFactory.load().getString("tscfg.version")
+  val version: String = BuildInfo.version
 
   val defaultGenOpts: GenOpts = GenOpts(
     packageName = "tscfg.example",

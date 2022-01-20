@@ -1,10 +1,13 @@
-lazy val tscfgVersion = setVersion("0.9.997")
+enablePlugins(BuildInfoPlugin)
 
 organization       := "com.github.carueda"
 name               := "tscfg"
-version            := tscfgVersion
+version            := "0.9.997"
 scalaVersion       := "3.1.0"
 crossScalaVersions := Seq("2.13.8", "3.1.0")
+
+buildInfoKeys := Seq[BuildInfoKey](version)
+buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
   "com.outr"            %% "scribe"    % "3.6.9",
@@ -25,7 +28,7 @@ scalacOptions ++= Seq("-deprecation", "-feature")
 
 (assembly / mainClass) := Some("tscfg.Main")
 
-(assembly / assemblyJarName) := s"tscfg-$tscfgVersion.jar"
+(assembly / assemblyJarName) := s"tscfg-${version.value}.jar"
 
 coverageExcludedPackages := "tscfg.example.*;tscfg.Main"
 coverageMinimumStmtTotal := 80
@@ -88,12 +91,3 @@ pomExtra :=
   </developers>
 
 sonatypeProfileName := "com.github.carueda"
-
-def setVersion(version: String): String = {
-  println(s"setting version $version")
-  IO.write(
-    file("src/main/resources/application.conf"),
-    s"tscfg.version = $version\n"
-  )
-  version
-}
