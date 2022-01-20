@@ -1392,6 +1392,22 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
+  "(java) issue 125: --java:getters" should {
+    val r =
+      JavaGen.generate("example/issue125.spec.conf", genGetters = true)
+
+    "not generate getter for @define annotation" in {
+      assert(r.code contains "public static class Shared")
+      assert(!(r.code contains "Shared getShared() { return Shared; }"))
+    }
+
+    "get getters for members" in {
+      assert(r.code contains "Example getExample() { return example; }")
+      assert(r.code contains "java.lang.String getC() { return c; }")
+      assert(r.code contains "int getD() { return d; }")
+    }
+  }
+
   "(java) issue 127 - @define annotation" should {
     "only generate the class, not the member" in {
       val r =

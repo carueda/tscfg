@@ -129,6 +129,7 @@ class JavaGen(
 
     val classMemberGettersStr = if (genOpts.genGetters) {
       classDeclMembers
+        .filterNot(_._3.isDefine)
         .map { case (typ, javaId, _) =>
           val getter = s"get${javaId.capitalize}"
           genResults = genResults

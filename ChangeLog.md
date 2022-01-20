@@ -2,6 +2,8 @@
 
 0.9.997
 
+- fix #125 "Getter is created for shared object definition in Java"
+
 - Re #127: just added tests as I was not able to reproduce this issue
   (maybe I had some stale stuff under my clone... weird)
 
