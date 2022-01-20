@@ -1,5 +1,9 @@
-Unreleased
+2022-01
+
+0.9.997
+
 - fix #124 optional references to shared objects
+  (thanks @sebastian-peter)
 
 2021-11 - 0.9.996
 
