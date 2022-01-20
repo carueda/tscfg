@@ -92,29 +92,33 @@ class JavaGen(
 
     val classDeclMembers = results.map { case (symbol, res, a) =>
       val memberType = res.javaType
-      val typ = if (a.optional && a.default.isEmpty) {
+      val typeFull = if (a.optional && a.default.isEmpty) {
+        val typeActual = a.t match {
+          case ObjectRefType(_, simpleName) => simpleName
+          case _                            => toObjectType(memberType).toString
+        }
+
         if (genOpts.useOptionals)
-          s"java.util.Optional<${toObjectType(memberType)}>"
-        else s"${toObjectType(memberType)}"
+          s"java.util.Optional<$typeActual>"
+        else typeActual
       }
       else {
-        memberType
+        a.t match {
+          case ObjectRefType(_, simpleName) => simpleName
+          case _                            => memberType.toString
+        }
       }
       val javaId = javaIdentifier(symbol)
-      (typ, javaId, a)
+      (typeFull, javaId, a)
     }
 
     val classDeclMembersStr = classDeclMembers
-      .flatMap { case (typ, javaId, a) =>
+      .flatMap { case (type_, javaId, a) =>
         if (a.isDefine) None
         else
           Some {
-            val type_ = a.t match {
-              case ObjectRefType(ns, simpleName) => simpleName
-              case _                             => typ
-            }
             genResults = genResults
-              .copy(fields = genResults.fields + (javaId -> type_.toString))
+              .copy(fields = genResults.fields + (javaId -> type_))
             if (genOpts.genRecords)
               s"$type_ $javaId" + dbg("<decl>")
             else
@@ -128,7 +132,7 @@ class JavaGen(
         .map { case (typ, javaId, _) =>
           val getter = s"get${javaId.capitalize}"
           genResults = genResults
-            .copy(getters = genResults.getters + (getter -> typ.toString))
+            .copy(getters = genResults.getters + (getter -> typ))
           s"public final $typ $getter() { return $javaId; }"
         }
         .mkString("\n  ", "\n  ", "")

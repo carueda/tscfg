@@ -1339,4 +1339,56 @@ class JavaMainSpec extends AnyWordSpec {
       }
     }
   }
+
+  "(java) issue 124b - Optional shared objects" should {
+    "generate optional shared objects" in {
+      val r =
+        JavaGen.generate("example/issue124b.spec.conf", useOptionals = true)
+      assert(r.code contains "java.util.Optional<Shared> a")
+      assert(
+        r.code contains "java.util.Optional<java.util.List<Shared>> b"
+      )
+    }
+
+    "parse example 1 with single shared object" in {
+      val c = new JavaIssue124bCfg(ConfigFactory.parseString("""example {
+         |  a: {
+         |    c = "C1"
+         |    d = 1
+         |  }
+         |}
+         |""".stripMargin))
+
+      assert(c.example.a.isPresent)
+      assert(c.example.a.get().c === "C1")
+      assert(c.example.a.get().d === 1)
+
+      assert(c.example.b.isEmpty)
+    }
+
+    "parse example 2 with list of shared objects" in {
+      val c = new JavaIssue124bCfg(ConfigFactory.parseString("""example {
+         |  b: [
+         |    {
+         |      c = "Apple"
+         |      d = 4
+         |    },
+         |    {
+         |      c = "Banana"
+         |      d = 5
+         |    }
+         |  ]
+         |}
+         |""".stripMargin))
+
+      assert(c.example.a.isEmpty)
+
+      assert(c.example.b.isPresent)
+      assert(c.example.b.get().size() === 2)
+      assert(c.example.b.get().get(0).c === "Apple")
+      assert(c.example.b.get().get(0).d === 4)
+      assert(c.example.b.get().get(1).c === "Banana")
+      assert(c.example.b.get().get(1).d === 5)
+    }
+  }
 }
