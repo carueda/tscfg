@@ -2,6 +2,9 @@
 
 0.9.997
 
+- Re #127: just added tests as I was not able to reproduce this issue
+  (maybe I had some stale stuff under my clone... weird)
+
 - fix #124 optional references to shared objects
   (thanks @sebastian-peter)
 

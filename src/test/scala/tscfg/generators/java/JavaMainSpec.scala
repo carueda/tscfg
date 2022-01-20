@@ -1391,4 +1391,13 @@ class JavaMainSpec extends AnyWordSpec {
       assert(c.example.b.get().get(1).d === 5)
     }
   }
+
+  "(java) issue 127 - @define annotation" should {
+    "only generate the class, not the member" in {
+      val r =
+        JavaGen.generate("example/issue127.spec.conf")
+      assert(r.code contains "public static class Shared")
+      assert(!(r.code contains "public final JavaIssue127Cfg.Shared Shared"))
+    }
+  }
 }

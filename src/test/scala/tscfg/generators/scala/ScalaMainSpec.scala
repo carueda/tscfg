@@ -1262,4 +1262,13 @@ class ScalaMainSpec extends AnyWordSpec {
       assert(c.example.b.value(1).d === 5)
     }
   }
+
+  "(scala) issue 127 - @define annotation" should {
+    "only generate the class, not the member" in {
+      val r =
+        ScalaGen.generate("example/issue127.spec.conf")
+      assert(r.code contains "final case class Shared")
+      assert(!(r.code matches ".*Shared\\s*:\\s*ScalaIssue125aCfg.Shared.*"))
+    }
+  }
 }
