@@ -6,11 +6,11 @@ version            := "0.9.997"
 scalaVersion       := "3.1.0"
 crossScalaVersions := Seq("2.13.8", "3.1.0")
 
-buildInfoKeys := Seq[BuildInfoKey](version)
+buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
-  "com.outr"            %% "scribe"    % "3.6.9",
+  "com.outr"            %% "scribe"    % "3.6.10",
   "com.typesafe"         % "config"    % "1.4.1",
   "com.lihaoyi"         %% "pprint"    % "0.7.1",
   "org.scalatest"       %% "scalatest" % "3.2.10" % Test,
