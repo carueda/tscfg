@@ -18,7 +18,7 @@ class NamespaceMan {
   ): Namespace = {
     scribe.debug(
       s"RootNamespace.create: simpleName='$simpleName' parent=${parent
-        .map(p => "'" + p.getPathString + "'")}"
+          .map(p => "'" + p.getPathString + "'")}"
     )
     val ns = new Namespace(this, simpleName, parent, allDefines)
     namespaces.put(ns.getPathString, ns)
