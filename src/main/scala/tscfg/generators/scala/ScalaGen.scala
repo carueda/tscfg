@@ -442,8 +442,8 @@ class ScalaGen(
     val resolve =
       s"""def $$resEnum(name: java.lang.String, path: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): $className = name match {
          |  ${et.members
-        .map(m => s"""case "$m" => $className.$m""")
-        .mkString("\n  ")}
+          .map(m => s"""case "$m" => $className.$m""")
+          .mkString("\n  ")}
          |  case v => $$tsCfgValidator.addInvalidEnumValue(path, v, "$className")
          |            null
          |}""".stripMargin
