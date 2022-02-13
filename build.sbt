@@ -10,7 +10,7 @@ buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
-  "com.outr"            %% "scribe"    % "3.6.10",
+  "com.outr"            %% "scribe"    % "3.7.1",
   "com.typesafe"         % "config"    % "1.4.2",
   "com.lihaoyi"         %% "pprint"    % "0.7.1",
   "org.scalatest"       %% "scalatest" % "3.2.11" % Test,
