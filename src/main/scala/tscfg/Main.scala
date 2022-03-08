@@ -19,7 +19,7 @@ object Main {
     className = "ExampleCfg"
   )
 
-  val defaultDestDir: String = "/tmp"
+  val defaultDestDir: String = System.getProperty("java.io.tmpdir")
 
   var templateOpts: TemplateOpts = TemplateOpts()
 

@@ -196,7 +196,7 @@ Usage:  tscfg.Main --spec inputFile [options]
 Options (default):
   --pn <packageName>                                     (tscfg.example)
   --cn <className>                                       (ExampleCfg)
-  --dd <destDir>                                         (/tmp)
+  --dd <destDir>                                         (OS dependent temp dir)
   --java                generate java code               (the default)
   --j7                  generate code for java <= 7      (>= 8)
   --java:getters        generate getters (see #31)       (false)
