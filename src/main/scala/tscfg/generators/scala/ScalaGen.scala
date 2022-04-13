@@ -439,14 +439,15 @@ class ScalaGen(
     //    }
     //  }
 
-    val resolve =
+    val resolve = {
+      val members =
+        et.members.map(m => s"""case "$m" => $className.$m""").mkString("\n  ")
       s"""def $$resEnum(name: java.lang.String, path: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): $className = name match {
-         |  ${et.members
-        .map(m => s"""case "$m" => $className.$m""")
-        .mkString("\n  ")}
+         |  $members
          |  case v => $$tsCfgValidator.addInvalidEnumValue(path, v, "$className")
          |            null
          |}""".stripMargin
+    }
 
     val str = {
       val membersStr =
