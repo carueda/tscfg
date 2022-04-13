@@ -34,7 +34,7 @@ object util {
       .clearModifiers()
       .withHandler(
         formatter =
-          formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $message$mdc",
+          formatter"${string("[")}$levelColored${string("]")} ${green(positionAbbreviated)} - $messages$mdc",
         minimumLevel = minimumLevel
       )
       .replace()

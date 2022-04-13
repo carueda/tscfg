@@ -19,7 +19,11 @@ object Main {
     className = "ExampleCfg"
   )
 
-  val defaultDestDir: String = System.getProperty("java.io.tmpdir")
+  val defaultDestDir: String = {
+    val tmp = new File("/tmp")
+    if (tmp.isDirectory && tmp.canWrite) "/tmp"
+    else System.getProperty("java.io.tmpdir")
+  }
 
   var templateOpts: TemplateOpts = TemplateOpts()
 

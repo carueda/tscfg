@@ -2,7 +2,7 @@ enablePlugins(BuildInfoPlugin)
 
 organization       := "com.github.carueda"
 name               := "tscfg"
-version            := "0.9.997"
+version            := "0.9.998"
 scalaVersion       := "3.1.2"
 crossScalaVersions := Seq("2.13.8", "3.1.2")
 
@@ -10,9 +10,9 @@ buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
-  "com.outr"            %% "scribe"    % "3.6.10",
+  "com.outr"            %% "scribe"    % "3.8.2",
   "com.typesafe"         % "config"    % "1.4.2",
-  "com.lihaoyi"         %% "pprint"    % "0.7.2",
+  "com.lihaoyi"         %% "pprint"    % "0.7.3",
   "org.scalatest"       %% "scalatest" % "3.2.11" % Test,
   "com.google.code.gson" % "gson"      % "2.8.9"
 )

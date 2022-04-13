@@ -1,5 +1,11 @@
 2022-01
 
+0.9.998
+
+- bumped versions for scala, scribe and pprint
+- adjusted defaultDestDir: "/tmp" if already existing; else as given by "java.io.tmpdir" property.
+  (Thanks @ckittl for motivating this adjustment.)
+
 0.9.997
 
 - use sbt-buildinfo
