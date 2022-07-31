@@ -1,3 +1,10 @@
+2022-07
+
+1.0.0
+
+- bump version to 1.0.0; No changes in functionality -- https://github.com/carueda/tscfg/issues/155
+- some dependency updates
+
 2022-01
 
 0.9.998
