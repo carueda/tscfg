@@ -73,11 +73,11 @@ publishTo := {
 pomIncludeRepository := { _ => false }
 homepage             := Some(url("https://github.com/carueda/tscfg"))
 licenses := Seq(
-  "Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0")
+  "Apache 2.0" -> url("https://www.opensource.org/licenses/Apache-2.0")
 )
 scmInfo := Some(
   ScmInfo(
-    url("http://github.com/carueda/tscfg"),
+    url("https://github.com/carueda/tscfg"),
     "scm:git@github.com:carueda/tscfg.git"
   )
 )
@@ -86,7 +86,7 @@ pomExtra :=
     <developer>
       <id>carueda</id>
       <name>Carlos Rueda</name>
-      <url>http://carueda.info</url>
+      <url>https://carueda.info</url>
     </developer>
   </developers>
 
