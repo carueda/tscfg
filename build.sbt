@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "com.typesafe"         % "config"    % "1.4.2",
   "com.lihaoyi"         %% "pprint"    % "0.7.3",
   "org.scalatest"       %% "scalatest" % "3.2.13" % Test,
-  "com.google.code.gson" % "gson"      % "2.9.0"
+  "com.google.code.gson" % "gson"      % "2.9.1"
 )
 
 scalafmtOnCompile := true
