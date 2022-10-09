@@ -34,6 +34,10 @@ class ModelBuilder(
       conf: Config
   ): model.ObjectType = {
     val memberStructs: List[Struct] = Struct.getMemberStructs(namespace, conf)
+    // Note: the returned order of this list is assumed to have taken into account any dependencies between
+    // the structs, in terms both of inheritance and member types.
+    // TODO a future revision may lessen this requirement by making the `namespace.resolveDefine` call below
+    //  and associated handling more flexible.
 
     val members: immutable.Map[String, model.AnnType] = memberStructs.map {
       childStruct =>

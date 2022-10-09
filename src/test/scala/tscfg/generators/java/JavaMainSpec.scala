@@ -1416,4 +1416,30 @@ class JavaMainSpec extends AnyWordSpec {
       assert(!(r.code contains "public final JavaIssue127Cfg.Shared Shared"))
     }
   }
+
+  "(java) issue 180" should {
+    "be handled ok" in {
+      val c = new JavaIssue180Cfg(ConfigFactory.parseString("""
+          |cfg {
+          |  typeB = {
+          |    foo = {
+          |      fizz = "fizzValueInFoo"
+          |      buzz = "buzzValueInFoo"
+          |    }
+          |    bar = {
+          |      fizz = "fizzValueInBar"
+          |      buzz = "buzzValueInBar"
+          |    }
+          |  }
+          |  additionalParam = "additionalParamValue"
+          |}
+          |""".stripMargin))
+
+      assert(c.cfg.typeB.foo.fizz === "fizzValueInFoo")
+      assert(c.cfg.typeB.foo.buzz === "buzzValueInFoo")
+      assert(c.cfg.typeB.bar.fizz === "fizzValueInBar")
+      assert(c.cfg.typeB.bar.buzz === "buzzValueInBar")
+      assert(c.cfg.additionalParam === "additionalParamValue")
+    }
+  }
 }

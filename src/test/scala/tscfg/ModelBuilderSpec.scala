@@ -1,6 +1,7 @@
 package tscfg
 
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers._
 import tscfg.buildWarnings.{
   DefaultListElemWarning,
   MultElemListWarning,
@@ -322,6 +323,61 @@ class ModelBuilderSpec extends AnyWordSpec {
             |""".stripMargin)
       }
       assert(e.getMessage contains "Unrecognized @define construct")
+    }
+  }
+
+  "#180 Wrapped Data Types" should {
+    val source = """
+        |#@define
+        |TypeA {
+        |    fizz: String
+        |    buzz: String
+        |}
+        |
+        |#@define
+        |TypeB {
+        |    foo: TypeA
+        |    bar: TypeA
+        |}
+        |
+        |cfg {
+        |    typeB: TypeB
+        |    additionalParam: String
+        |}
+        |""".stripMargin
+
+    val result = build(source)
+    // pprint.pprintln(result.objectType)
+
+    "capture expected TypeA model" in {
+      val TypeA = result.objectType.members("TypeA")
+      TypeA.t shouldBe a[ObjectType]
+      val ot = TypeA.t.asInstanceOf[ObjectType]
+      ot.members.keySet shouldBe Set("fizz", "buzz")
+      ot.members("fizz").t shouldBe STRING
+    }
+
+    "capture expected TypeB model" in {
+      val TypeB = result.objectType.members("TypeB")
+      TypeB.t shouldBe a[ObjectType]
+      val TypeB_ot = TypeB.t.asInstanceOf[ObjectType]
+      TypeB_ot.members.keySet shouldBe Set("foo", "bar")
+      val foo = TypeB_ot.members("foo")
+      // pprint.pprintln(foo)
+      foo.t shouldBe a[ObjectRefType]
+      val foo_ort = foo.t.asInstanceOf[ObjectRefType]
+      foo_ort.simpleName shouldBe "TypeA"
+    }
+
+    "capture expected cfg model" in {
+      val cfg = result.objectType.members("cfg")
+      cfg.t shouldBe a[ObjectType]
+      val cfg_ot = cfg.t.asInstanceOf[ObjectType]
+      cfg_ot.members.keySet shouldBe Set("typeB", "additionalParam")
+      val typeB = cfg_ot.members("typeB")
+      typeB.t shouldBe a[ObjectRefType]
+      val typeB_ort = typeB.t.asInstanceOf[ObjectRefType]
+      typeB_ort.simpleName shouldBe "TypeB"
     }
   }
 }

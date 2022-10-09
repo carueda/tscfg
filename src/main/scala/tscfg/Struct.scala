@@ -1,6 +1,6 @@
 package tscfg
 
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigValueType}
 import tscfg.DefineCase._
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.ns.Namespace
@@ -15,10 +15,14 @@ import scala.collection.{Map, mutable}
   *   Name of the config member
   * @param members
   *   Nested config definitions
+  * @param tsStringValue
+  *   Captures string value to support determining dependencies in terms of RHS
+  *   names (that is, when such a string may be referring to a @define)
   */
 case class Struct(
     name: String,
     members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
+    tsStringValue: Option[String] = None
 ) {
 
   // Non-None when this is a `@define`
@@ -36,17 +40,28 @@ case class Struct(
 
   def isLeaf: Boolean = members.isEmpty
 
+  def dependencies: Set[String] = {
+    tsStringValue.toSet ++ members.values.flatMap(_.dependencies)
+  }
+
   // $COVERAGE-OFF$
   def format(indent: String = ""): String = {
     val defineStr = defineCaseOpt.map(dc => s" $dc").getOrElse("")
     val nameStr   = s"${if (name.isEmpty) "(root)" else name}$defineStr"
 
+    val dependenciesStr = dependencies.toList match {
+      case Nil => ""
+      case l   => s" [dependencies=${l.mkString(", ")}]"
+    }
+
+    val nameHeading = nameStr + dependenciesStr
+
     if (members.isEmpty) {
-      nameStr
+      nameHeading
     }
     else {
       val indent2 = indent + "    "
-      s"$nameStr ->\n" + indent2 + {
+      s"$nameHeading ->\n" + indent2 + {
         members
           .map(e => s"${e._1}: " + e._2.format(indent2))
           .mkString("\n" + indent2)
@@ -73,14 +88,23 @@ object Struct {
     val (defineStructs, nonDefineStructs) = memberStructs.partition(_.isDefine)
     val sortedDefineStructs               = sortDefineStructs(defineStructs)
 
+    val sortedStructs = {
+      // but also sort the "defines" by any name (member type) dependencies:
+      val definesSortedByNameDependencies = sortByNameDependencies(
+        sortedDefineStructs
+      )
+      definesSortedByNameDependencies ++ nonDefineStructs
+    }
+
     if (namespace.isRoot) {
       scribe.debug(
-        s"root struct=${struct.format()}\n" +
-          s"sortedDefineStructs=\n${sortedDefineStructs.map(_.format()).mkString("\n")}"
+        s"root\n" +
+          s"struct=${struct.format()}\n" +
+          s"sortedStructs=\n  ${sortedStructs.map(_.format()).mkString("\n  ")}"
       )
     }
 
-    sortedDefineStructs ++ nonDefineStructs
+    sortedStructs
   }
 
   private def sortDefineStructs(defineStructs: List[Struct]): List[Struct] = {
@@ -149,6 +173,26 @@ object Struct {
     )
 
     sorted.toList.map(_._2)
+  }
+
+  private def sortByNameDependencies(structs: List[Struct]): List[Struct] = {
+    structs.sortWith((a, b) => {
+      val aDeps = a.dependencies
+      val bDeps = b.dependencies
+
+      if (aDeps.contains(b.name)) {
+        // a depends on b, so b should come first:
+        false
+      }
+      else if (bDeps.contains(a.name)) {
+        // b depends on a, so a should come first:
+        true
+      }
+      else {
+        // no dependency, so sort by name:
+        a.name < b.name
+      }
+    })
   }
 
   /** Determines the joint set of all ancestor's members to allow proper
@@ -230,8 +274,17 @@ object Struct {
 
     // Due to TS Config API, we traverse from the leaves to the ancestors:
     conf.entrySet().asScala foreach { e =>
-      val path = e.getKey
-      val leaf = Struct(path)
+      val path        = e.getKey
+      val configValue = e.getValue
+
+      // capture string value to determine possible "define" dependency
+      val tsStringValue: Option[String] = e.getValue.valueType() match {
+        case ConfigValueType.STRING => Some(configValue.unwrapped().toString)
+        case _                      => None
+      }
+      scribe.debug(s"getStruct: path=$path, tsStringValue=$tsStringValue")
+      val leaf = Struct(path, tsStringValue = tsStringValue)
+
       doAncestorsOf(path, leaf)
 
       def doAncestorsOf(childKey: String, childStruct: Struct): Unit = {
