@@ -1,6 +1,7 @@
 2022-10 - 1.0.1
 
 - fix #180 "Wrapped Data Types"
+- reapply some lib updates
 
 2022-07
 
