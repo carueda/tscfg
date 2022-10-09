@@ -448,7 +448,8 @@ a given configuration instance.
 
 ### shared objects
 
-As of 0.9.94 there's initial, experimental support for shared objects (#54).
+Since version 0.9.94 we started adding support for "shared objects" (#54),
+a feature that has been enhanced in later versions.
 This is exercised by using the `@define` annotation:
 
 ```properties
