@@ -12,7 +12,7 @@ jobs:
         scala: ['2.13', '3.2']
         include:
           - scala: '2.13'
-            scala-version: 2.13.9
+            scala-version: 2.13.10
           - scala: '3.2'
             scala-version: 3.2.0
     steps:
