@@ -20,6 +20,8 @@ object gen4tests {
 
   private case class OptFromFile(opt: String, onlyForLang: Option[String])
 
+  private val doOutput = false
+
   private def dispatch(confFile: File): Unit = {
     val bufSource = io.Source.fromFile(confFile)
     val source    = bufSource.mkString
@@ -102,7 +104,7 @@ object gen4tests {
       optsFromFile: List[String],
       onlyForLang: Option[String]
   ): Unit = {
-    println(s"gen4tests: $confFile")
+    // println(s"gen4tests: $confFile")
 
     val baseGenOpts: GenOpts = {
       var genOpts = GenOpts("tscfg.example", "?")
@@ -166,13 +168,15 @@ object gen4tests {
       val out     = new PrintWriter(new FileWriter(targetFile), true)
       out.println(results.code)
       out.close()
-      val onlyLangStr = onlyForLang.map(l => s" (only $l)").getOrElse("")
-      println(fansi.Color.Green(s"  ==> $targetFile$onlyLangStr"))
+      if doOutput then
+        val onlyLangStr = onlyForLang.map(l => s" (only $l)").getOrElse("")
+        println(fansi.Color.Green(s"  ==> $targetFile$onlyLangStr"))
     }
   }
 
   private def skip(confFile: File): Unit = {
-    println(s"gen4tests: ${fansi.Color.Magenta(s"SKIPPING $confFile")}")
+    if doOutput then
+      println(s"gen4tests: ${fansi.Color.Magenta(s"SKIPPING $confFile")}")
   }
 
   private def warn(s: String): Unit = {
