@@ -10,11 +10,11 @@ buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
-  "com.outr"            %% "scribe"    % "3.10.4",
+  "com.outr"            %% "scribe"    % "3.10.6",
   "com.typesafe"         % "config"    % "1.4.2",
   "com.lihaoyi"         %% "pprint"    % "0.8.0",
-  "org.scalatest"       %% "scalatest" % "3.2.14" % Test,
-  "com.google.code.gson" % "gson"      % "2.9.1"
+  "org.scalatest"       %% "scalatest" % "3.2.15" % Test,
+  "com.google.code.gson" % "gson"      % "2.10.1"
 )
 
 scalafmtOnCompile := true
