@@ -20,6 +20,7 @@ The generated code only depends on the Typesafe Config library.
 - [configuration spec](#configuration-spec)
 - [running tscfg](#running-tscfg)
   - [maven plugin](#maven-plugin)
+  - [gradle plugin](#gradle-plugin)
 - [configuration access](#configuration-access)
 - [supported types](#supported-types)
   - [basic types](#basic-types)
@@ -228,6 +229,10 @@ generating: /tmp/ExampleCfg.java
 
 Please see [tscfg-maven-plugin](https://github.com/timvlaer/tscfg-maven-plugin).
 Thanks [@timvlaer](https://github.com/timvlaer)!
+
+### gradle plugin
+
+Please see [tscfg-plugin-gradle](https://github.com/aleris/tscfg-plugin-gradle).
 
 ## configuration access
 
