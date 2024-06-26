@@ -12,7 +12,7 @@ buildInfoPackage := "tscfg"
 libraryDependencies ++= Seq(
   "com.outr"            %% "scribe"    % "3.11.5",
   "com.typesafe"         % "config"    % "1.4.2",
-  "com.lihaoyi"         %% "pprint"    % "0.8.1",
+  "com.lihaoyi"         %% "pprint"    % "0.9.0",
   "org.scalatest"       %% "scalatest" % "3.2.19" % Test,
   "com.google.code.gson" % "gson"      % "2.10.1"
 )
