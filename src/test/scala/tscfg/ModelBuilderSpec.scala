@@ -71,7 +71,7 @@ class ModelBuilderSpec extends AnyWordSpec {
 
     "generate warning" in {
       val warns = result.warnings.filter(_.isInstanceOf[MultElemListWarning])
-      assert(warns.map(_.source) contains "[true,false]")
+      assert(warns.map(_.source).contains("[true,false]"))
     }
   }
 
@@ -80,7 +80,7 @@ class ModelBuilderSpec extends AnyWordSpec {
 
     "generate warning" in {
       val warns = result.warnings.filter(_.isInstanceOf[OptListElemWarning])
-      assert(warns.map(_.source) contains "string?")
+      assert(warns.map(_.source).contains("string?"))
     }
   }
 
@@ -93,7 +93,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       val warns = result.warnings
         .filter(_.isInstanceOf[DefaultListElemWarning])
         .asInstanceOf[List[DefaultListElemWarning]]
-      assert(warns.map(_.default) contains "3.14")
+      assert(warns.map(_.default).contains("3.14"))
     }
   }
 
@@ -146,7 +146,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       val at = result.objectType.members("optInt")
       assert(at.t === INTEGER)
       assert(at.optional)
-      assert(at.default contains "21")
+      assert(at.default.contains("21"))
     }
   }
 
@@ -159,7 +159,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       val at = result.objectType.members("idleTimeout")
       assert(at.t === DURATION(ms))
       assert(at.optional)
-      assert(at.default contains "75 seconds")
+      assert(at.default.contains("75 seconds"))
     }
   }
 
@@ -313,7 +313,7 @@ class ModelBuilderSpec extends AnyWordSpec {
             |foo {x:int}
             |""".stripMargin)
       }
-      assert(e.getMessage contains "Missing name after `extends`")
+      assert(e.getMessage.contains("Missing name after `extends`"))
     }
 
     "check Unrecognized @define construct" in {
@@ -322,7 +322,7 @@ class ModelBuilderSpec extends AnyWordSpec {
             |foo {x:int}
             |""".stripMargin)
       }
-      assert(e.getMessage contains "Unrecognized @define construct")
+      assert(e.getMessage.contains("Unrecognized @define construct"))
     }
   }
 

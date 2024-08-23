@@ -82,9 +82,9 @@ class NamespaceSpec extends AnyWordSpec {
     "resolve" in {
       val all = root.getAllDefines
       assert(all.size === 3)
-      assert(all.get("RootDef1") contains objectType)
-      assert(all.get("ns00.n00def1") contains objectType)
-      assert(all.get("ns00.ns000.n000def1") contains objectType)
+      assert(all.get("RootDef1").contains(objectType))
+      assert(all.get("ns00.n00def1").contains(objectType))
+      assert(all.get("ns00.ns000.n000def1").contains(objectType))
     }
   }
 }

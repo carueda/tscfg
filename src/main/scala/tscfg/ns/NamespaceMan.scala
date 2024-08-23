@@ -4,7 +4,7 @@ import tscfg.generators.java.javaUtil
 import tscfg.model.Type
 
 class NamespaceMan {
-  private[this] val namespaces = collection.mutable.Map.empty[String, Namespace]
+  private val namespaces = collection.mutable.Map.empty[String, Namespace]
 
   val root: Namespace =
     create("", None, collection.mutable.HashMap[String, Type]())

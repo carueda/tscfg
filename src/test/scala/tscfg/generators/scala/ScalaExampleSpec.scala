@@ -24,7 +24,7 @@ class ScalaExampleSpec extends AnyWordSpec {
       }
       "capture given optional values" in {
         assert(cfg.endpoint.interface.port === 9191)
-        assert(cfg.endpoint.interface.`type` contains "foo")
+        assert(cfg.endpoint.interface.`type`.contains("foo"))
       }
 
       "capture default values" in {

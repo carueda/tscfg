@@ -32,7 +32,7 @@ class modelSpec extends AnyWordSpec {
     "build empty ObjectType" in {
       val baz = objectType.members("baz")
       assert(baz.optional)
-      assert(baz.comments contains "comments for baz...")
+      assert(baz.comments.contains("comments for baz..."))
     }
   }
 

@@ -1,3 +1,8 @@
+2024-08
+
+- maintenance:
+    - dependency updates, more cross-builds, expanded ci; cleanup most compile warnings.
+
 2022-10 - 1.0.2
 
 - scala 2.13.9

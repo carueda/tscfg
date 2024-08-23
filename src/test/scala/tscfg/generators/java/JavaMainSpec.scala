@@ -784,7 +784,9 @@ class JavaMainSpec extends AnyWordSpec {
         new JavaIssue47Cfg(ConfigFactory.parseString(""))
       }
       assert(
-        e.getMessage contains "'service': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'service': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
     "fail with missing url entry" in {
@@ -799,7 +801,9 @@ class JavaMainSpec extends AnyWordSpec {
             |}""".stripMargin))
       }
       assert(
-        e.getMessage contains "'service.url': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'service.url': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
     "fail with missing poolSize entry" in {
@@ -814,7 +818,9 @@ class JavaMainSpec extends AnyWordSpec {
             |}""".stripMargin))
       }
       assert(
-        e.getMessage contains "'service.poolSize': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'service.poolSize': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
     "fail with all entries missing in service object" in {
@@ -823,7 +829,9 @@ class JavaMainSpec extends AnyWordSpec {
       }
       List("url", "poolSize", "debug", "doLog", "factor") foreach { k =>
         assert(
-          e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$Missing"
+          e.getMessage.contains(
+            s"'service.$k': com.typesafe.config.ConfigException$$Missing"
+          )
         )
       }
     }
@@ -840,7 +848,9 @@ class JavaMainSpec extends AnyWordSpec {
       }
       List("poolSize", "debug", "doLog", "factor") foreach { k =>
         assert(
-          e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$WrongType"
+          e.getMessage.contains(
+            s"'service.$k': com.typesafe.config.ConfigException$$WrongType"
+          )
         )
       }
     }
@@ -851,7 +861,9 @@ class JavaMainSpec extends AnyWordSpec {
             |""".stripMargin))
       }
       assert(
-        e.getMessage contains "'service': com.typesafe.config.ConfigException$WrongType"
+        e.getMessage.contains(
+          "'service': com.typesafe.config.ConfigException$WrongType"
+        )
       )
     }
   }
@@ -982,7 +994,9 @@ class JavaMainSpec extends AnyWordSpec {
               |}
               |""".stripMargin))
         }
-        assert(e.getMessage matches "No enum constant .*FruitType.invalidFruit")
+        assert(
+          e.getMessage.matches("No enum constant .*FruitType.invalidFruit")
+        )
       }
     }
 
@@ -1190,7 +1204,9 @@ class JavaMainSpec extends AnyWordSpec {
         JavaGen.generate("example/issue67c.spec.conf")
       }
       assert(
-        e.getMessage contains "extension of struct 'AbstractC' involves circular reference"
+        e.getMessage.contains(
+          "extension of struct 'AbstractC' involves circular reference"
+        )
       )
     }
   }
@@ -1261,7 +1277,7 @@ class JavaMainSpec extends AnyWordSpec {
     "73a @define abstract extends java.lang.Object" should {
       "generate AbstractA implements java.lang.Object" in {
         val r = JavaGen.generate("example/issue73a.spec.conf")
-        assert(r.code contains "extends java.lang.Object")
+        assert(r.code.contains("extends java.lang.Object"))
       }
 
       "do usual parsing" in {
@@ -1278,7 +1294,7 @@ class JavaMainSpec extends AnyWordSpec {
     "73b @define abstract implements java.io.Serializable" should {
       "generate AbstractA implements java.io.Serializable" in {
         val r = JavaGen.generate("example/issue73b.spec.conf")
-        assert(r.code contains "implements java.io.Serializable")
+        assert(r.code.contains("implements java.io.Serializable"))
       }
 
       "usual parsing" in {
@@ -1317,7 +1333,7 @@ class JavaMainSpec extends AnyWordSpec {
         val e = intercept[ObjectDefinitionException] {
           JavaGen.generate("example/issue75c.spec.conf", genRecords = true)
         }
-        assert(e.getMessage startsWith "record cannot be abstract: Simple")
+        assert(e.getMessage.startsWith("record cannot be abstract: Simple"))
       }
     }
 
@@ -1326,7 +1342,7 @@ class JavaMainSpec extends AnyWordSpec {
         val e = intercept[ObjectDefinitionException] {
           JavaGen.generate("example/issue75d.spec.conf", genRecords = true)
         }
-        assert(e.getMessage startsWith "record cannot extend classes: Simple")
+        assert(e.getMessage.startsWith("record cannot extend classes: Simple"))
       }
     }
 
@@ -1344,9 +1360,9 @@ class JavaMainSpec extends AnyWordSpec {
     "generate optional shared objects" in {
       val r =
         JavaGen.generate("example/issue124b.spec.conf", useOptionals = true)
-      assert(r.code contains "java.util.Optional<Shared> a")
+      assert(r.code.contains("java.util.Optional<Shared> a"))
       assert(
-        r.code contains "java.util.Optional<java.util.List<Shared>> b"
+        r.code.contains("java.util.Optional<java.util.List<Shared>> b")
       )
     }
 
@@ -1397,14 +1413,14 @@ class JavaMainSpec extends AnyWordSpec {
       JavaGen.generate("example/issue125.spec.conf", genGetters = true)
 
     "not generate getter for @define annotation" in {
-      assert(r.code contains "public static class Shared")
-      assert(!(r.code contains "Shared getShared() { return Shared; }"))
+      assert(r.code.contains("public static class Shared"))
+      assert(!(r.code.contains("Shared getShared() { return Shared; }")))
     }
 
     "get getters for members" in {
-      assert(r.code contains "Example getExample() { return example; }")
-      assert(r.code contains "java.lang.String getC() { return c; }")
-      assert(r.code contains "int getD() { return d; }")
+      assert(r.code.contains("Example getExample() { return example; }"))
+      assert(r.code.contains("java.lang.String getC() { return c; }"))
+      assert(r.code.contains("int getD() { return d; }"))
     }
   }
 
@@ -1412,8 +1428,8 @@ class JavaMainSpec extends AnyWordSpec {
     "only generate the class, not the member" in {
       val r =
         JavaGen.generate("example/issue127.spec.conf")
-      assert(r.code contains "public static class Shared")
-      assert(!(r.code contains "public final JavaIssue127Cfg.Shared Shared"))
+      assert(r.code.contains("public static class Shared"))
+      assert(!(r.code.contains("public final JavaIssue127Cfg.Shared Shared")))
     }
   }
 

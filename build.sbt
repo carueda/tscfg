@@ -4,15 +4,15 @@ organization       := "com.github.carueda"
 name               := "tscfg"
 version            := "1.0.2"
 scalaVersion       := "3.3.3"
-crossScalaVersions := Seq("2.13.9", "3.3.3")
+crossScalaVersions := Seq("2.13.14", "3.3.3", "3.4.3", "3.5.0")
 
 buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
 
 libraryDependencies ++= Seq(
-  "com.outr"            %% "scribe"    % "3.11.5",
+  "com.outr"            %% "scribe"    % "3.13.2",
   "com.typesafe"         % "config"    % "1.4.3",
-  "com.lihaoyi"         %% "pprint"    % "0.8.1",
+  "com.lihaoyi"         %% "pprint"    % "0.9.0",
   "org.scalatest"       %% "scalatest" % "3.2.19" % Test,
   "com.google.code.gson" % "gson"      % "2.10.1"
 )

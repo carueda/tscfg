@@ -32,12 +32,12 @@ class templaterSpec extends AnyWordSpec {
            |""".stripMargin
       )
       val template = templater.generate(objectType)
-      assert(template contains "## 'endpoint': required section")
-      assert(template contains "path = ?")
-      assert(template contains "path = ${?ENDPOINT_PATH}")
-      assert(template contains "## 'FruitType': Enumeration")
-      assert(template contains "FruitType = [apple, banana, pineapple")
-      assert(template contains "## 'fruit': required FruitType")
+      assert(template.contains("## 'endpoint': required section"))
+      assert(template.contains("path = ?"))
+      assert(template.contains("path = ${?ENDPOINT_PATH}"))
+      assert(template.contains("## 'FruitType': Enumeration"))
+      assert(template.contains("FruitType = [apple, banana, pineapple"))
+      assert(template.contains("## 'fruit': required FruitType"))
     }
   }
 }

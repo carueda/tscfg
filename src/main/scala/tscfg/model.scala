@@ -140,7 +140,7 @@ object model {
         val adjName = if (k.contains("$")) k else k.replaceAll("^\"|\"$", "")
         adjName.replaceAll("^\"|\"$", "") -> v
       }
-      ObjectType(Map(noQuotes: _*))
+      ObjectType(Map.from(noQuotes))
     }
   }
 

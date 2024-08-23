@@ -645,7 +645,9 @@ class ScalaMainSpec extends AnyWordSpec {
         ScalaIssue36Cfg(ConfigFactory.parseString("obj.baz.bar = quz"))
       }
       assert(
-        e.getMessage contains "'obj.foo.bar': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'obj.foo.bar': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
   }
@@ -664,7 +666,9 @@ class ScalaMainSpec extends AnyWordSpec {
         ScalaIssue47Cfg(ConfigFactory.parseString(""))
       }
       assert(
-        e.getMessage contains "'service': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'service': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
     "fail with missing url entry" in {
@@ -679,7 +683,9 @@ class ScalaMainSpec extends AnyWordSpec {
             |}""".stripMargin))
       }
       assert(
-        e.getMessage contains "'service.url': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'service.url': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
     "fail with missing poolSize entry" in {
@@ -694,7 +700,9 @@ class ScalaMainSpec extends AnyWordSpec {
             |}""".stripMargin))
       }
       assert(
-        e.getMessage contains "'service.poolSize': com.typesafe.config.ConfigException$Missing"
+        e.getMessage.contains(
+          "'service.poolSize': com.typesafe.config.ConfigException$Missing"
+        )
       )
     }
     "fail with all entries missing in service object" in {
@@ -703,7 +711,9 @@ class ScalaMainSpec extends AnyWordSpec {
       }
       List("url", "poolSize", "debug", "doLog", "factor") foreach { k =>
         assert(
-          e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$Missing"
+          e.getMessage.contains(
+            s"'service.$k': com.typesafe.config.ConfigException$$Missing"
+          )
         )
       }
     }
@@ -720,7 +730,9 @@ class ScalaMainSpec extends AnyWordSpec {
       }
       List("poolSize", "debug", "doLog", "factor") foreach { k =>
         assert(
-          e.getMessage contains s"'service.$k': com.typesafe.config.ConfigException$$WrongType"
+          e.getMessage.contains(
+            s"'service.$k': com.typesafe.config.ConfigException$$WrongType"
+          )
         )
       }
     }
@@ -731,7 +743,9 @@ class ScalaMainSpec extends AnyWordSpec {
             |""".stripMargin))
       }
       assert(
-        e.getMessage contains "'service': com.typesafe.config.ConfigException$WrongType"
+        e.getMessage.contains(
+          "'service': com.typesafe.config.ConfigException$WrongType"
+        )
       )
     }
   }
@@ -883,7 +897,9 @@ class ScalaMainSpec extends AnyWordSpec {
               |""".stripMargin))
         }
         assert(
-          e.getMessage contains "'foo.fruit': invalid value invalidFruit for enumeration FruitType"
+          e.getMessage.contains(
+            "'foo.fruit': invalid value invalidFruit for enumeration FruitType"
+          )
         )
       }
     }
@@ -917,10 +933,10 @@ class ScalaMainSpec extends AnyWordSpec {
               |""".stripMargin))
         }
         val msg = e.getMessage
-        assert(msg contains "'foo.fruit': invalid value maracuyá")
-        assert(msg contains "'foo.other.aFruit': invalid value maracuyá")
+        assert(msg.contains("'foo.fruit': invalid value maracuyá"))
+        assert(msg.contains("'foo.other.aFruit': invalid value maracuyá"))
         assert(
-          msg contains "'?': invalid value maracuyá"
+          msg.contains("'?': invalid value maracuyá")
         ) // this one referring to the list member
       }
     }
@@ -1109,7 +1125,9 @@ class ScalaMainSpec extends AnyWordSpec {
         ScalaGen.generate("example/issue67c.spec.conf")
       }
       assert(
-        e.getMessage contains "extension of struct 'AbstractC' involves circular reference"
+        e.getMessage.contains(
+          "extension of struct 'AbstractC' involves circular reference"
+        )
       )
     }
   }
@@ -1180,7 +1198,7 @@ class ScalaMainSpec extends AnyWordSpec {
     "73a @define abstract extends java.lang.Object" should {
       "generate AbstractA extends java.lang.Object" in {
         val r = ScalaGen.generate("example/issue73a.spec.conf")
-        assert(r.code contains "extends java.lang.Object")
+        assert(r.code.contains("extends java.lang.Object"))
       }
 
       "usual parsing" in {
@@ -1197,7 +1215,7 @@ class ScalaMainSpec extends AnyWordSpec {
     "73b @define abstract implements java.io.Serializable" should {
       "generate AbstractA extends java.io.Serializable" in {
         val r = ScalaGen.generate("example/issue73b.spec.conf")
-        assert(r.code contains "extends java.io.Serializable")
+        assert(r.code.contains("extends java.io.Serializable"))
       }
 
       "do usual parsing" in {
@@ -1215,9 +1233,11 @@ class ScalaMainSpec extends AnyWordSpec {
   "(scala) issue 124a - Optional shared objects" should {
     "generate optional shared objects" in {
       val r = ScalaGen.generate("example/issue124a.spec.conf")
-      assert(r.code contains "a : scala.Option[ScalaIssue124aCfg.Shared]")
+      assert(r.code.contains("a : scala.Option[ScalaIssue124aCfg.Shared]"))
       assert(
-        r.code contains "b : scala.Option[scala.List[ScalaIssue124aCfg.Shared]]"
+        r.code.contains(
+          "b : scala.Option[scala.List[ScalaIssue124aCfg.Shared]]"
+        )
       )
     }
 
@@ -1267,8 +1287,8 @@ class ScalaMainSpec extends AnyWordSpec {
     "only generate the class, not the member" in {
       val r =
         ScalaGen.generate("example/issue127.spec.conf")
-      assert(r.code contains "final case class Shared")
-      assert(!(r.code matches ".*Shared\\s*:\\s*ScalaIssue125aCfg.Shared.*"))
+      assert(r.code.contains("final case class Shared"))
+      assert(!(r.code.matches(".*Shared\\s*:\\s*ScalaIssue125aCfg.Shared.*")))
     }
   }
 
