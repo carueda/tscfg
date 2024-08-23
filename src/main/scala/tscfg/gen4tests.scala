@@ -65,7 +65,7 @@ object gen4tests {
       .collect { case linePat(xs) => xs.trim }
       .flatMap(_.split("\\s+"))
       .map {
-        case opt @ "--scala:2.12" =>
+        case opt @ "--scala" =>
           OptFromFile(opt, Some("scala"))
 
         case opt @ "--scala:bt" =>
@@ -107,7 +107,7 @@ object gen4tests {
     val baseGenOpts: GenOpts = {
       var genOpts = GenOpts("tscfg.example", "?")
       optsFromFile foreach {
-        case "--scala:2.12" => genOpts = genOpts.copy(s12 = true)
+        case "--scala" => ()
 
         case "--scala:bt" => genOpts = genOpts.copy(useBackticks = true)
 

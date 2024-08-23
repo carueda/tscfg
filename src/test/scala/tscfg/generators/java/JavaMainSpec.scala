@@ -540,7 +540,7 @@ class JavaMainSpec extends AnyWordSpec {
 
   "(java) given class name starting with $_" should {
     "generate warning" in {
-      val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
+      val genOpts = GenOpts("tscfg.example", "Classy")
       val r       = new JavaGen(genOpts).generate(ObjectType())
       assert(r.classNames === Set("Classy"))
       assert(r.fields === Map())
@@ -557,7 +557,7 @@ class JavaMainSpec extends AnyWordSpec {
     )
 
     "generate warnings" in {
-      val genOpts = GenOpts("tscfg.example", "Classy", j7 = true)
+      val genOpts = GenOpts("tscfg.example", "Classy")
       val r       = new JavaGen(genOpts).generate(objectType)
       assert(r.classNames === Set("Classy", "Other"))
       assert(

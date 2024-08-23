@@ -638,7 +638,6 @@ object JavaGen {
   def generate(
       filename: String,
       showOut: Boolean = false,
-      j7: Boolean = false,
       assumeAllRequired: Boolean = false,
       genGetters: Boolean = false,
       genRecords: Boolean = false,
@@ -680,7 +679,6 @@ object JavaGen {
     val genOpts = GenOpts(
       "tscfg.example",
       className,
-      j7 = j7,
       genGetters = genGetters,
       genRecords = genRecords,
       useOptionals = useOptionals,
