@@ -8,26 +8,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jdk: [17]
-        scala: ['2.13', '3.2']
+        jdk: ['17', '21']
+        scala: ['2.13', '3.3', '3.4', '3.5']
         include:
           - scala: '2.13'
-            scala-version: 2.13.9
-          - scala: '3.2'
-            scala-version: 3.2.2
+            scala-version: 2.13.14
+          - scala: '3.3'
+            scala-version: 3.3.3  # LTS
+          - scala: '3.4'
+            scala-version: 3.4.3
+          - scala: '3.5'
+            scala-version: 3.5.0
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup JDK
-        uses: actions/setup-java@v2
+      # skip the (jdk=21, scala=2.13) combination, which has issues
+      - uses: actions/checkout@v4
+        if: ${{ !(startsWith(matrix.jdk, '21') && startsWith(matrix.scala, '2.13')) }}
+      - uses: actions/setup-java@v4
+        if: ${{ !(startsWith(matrix.jdk, '21') && startsWith(matrix.scala, '2.13')) }}
         with:
           distribution: temurin
           java-version: ${{ matrix.jdk }}
 
       - name: Check and compile
+        if: ${{ !(startsWith(matrix.jdk, '21') && startsWith(matrix.scala, '2.13')) }}
         run: sbt ++${{ matrix.scala-version }} scalafmtCheckAll compile
 
       - name: Test
+        if: ${{ !(startsWith(matrix.jdk, '21') && startsWith(matrix.scala, '2.13')) }}
         run: >
           if [[ "${{ matrix.scala }}" =~ ^2\..* ]]; then
             sbt ++${{ matrix.scala-version }} coverage genCode test;
@@ -35,8 +43,13 @@ jobs:
             sbt ++${{ matrix.scala-version }} genCode test;
           fi
 
+      - name: Assembly
+        if: ${{ !(startsWith(matrix.jdk, '21') && startsWith(matrix.scala, '2.13')) }}
+        run: sbt ++${{ matrix.scala-version }} assembly
+
+      # Coveralls only "once":
       - name: Coveralls
-        if: startsWith(matrix.scala, '2')
+        if: startsWith(matrix.jdk, '17') && startsWith(matrix.scala, '2.13')
         run: sbt ++${{ matrix.scala-version }} coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
