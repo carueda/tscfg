@@ -28,6 +28,7 @@ credentials += Credentials("Sonatype Nexus Repository Manager",
 But no luck:
 ```
 sbt clean
+export GPG_TTY=$(tty)
 sbt +publishSigned
 sbt +sonatypeBundleRelease
 ```
