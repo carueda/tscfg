@@ -1,5 +1,5 @@
 2024-08
-Trying to make this work again.
+Making this work again.
 
 Created new PGP:
 ```

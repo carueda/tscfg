@@ -1,5 +1,6 @@
 2024-08
 
+- 1.1.2: published
 - 1.1.0:  dropped support for scala 2.12 and java 7.
 
 - maintenance:
