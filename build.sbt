@@ -2,7 +2,7 @@ enablePlugins(BuildInfoPlugin)
 
 organization       := "com.github.carueda"
 name               := "tscfg"
-version            := "1.1.2"
+version            := "1.1.3"
 scalaVersion       := "3.3.3"
 crossScalaVersions := Seq("2.13.9", "3.3.3")
 
@@ -18,11 +18,6 @@ libraryDependencies ++= Seq(
 )
 
 scalafmtOnCompile := true
-
-// workaround for problem compiling records, in our case under scala3.
-// (https://github.com/scala/bug/issues/11908 - issue was closed on Jul 7,
-// but apparently a workaround like this is still needed.)
-compileOrder := CompileOrder.JavaThenScala
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
@@ -52,23 +47,11 @@ fullRunTask(genCode, Compile, "tscfg.gen4tests")
 
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
 (Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
-// well, this continues to be unreliable as a way to guarantee genCode is completed
-// before testing. So, for now, we will need to explicitly call `genCode;test`.
 
 publishMavenStyle        := true
 (Test / publishArtifact) := false
 
 publishTo := sonatypePublishToBundle.value
-
-/*
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value)
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
- */
 
 pomIncludeRepository := { _ => false }
 homepage             := Some(url("https://github.com/carueda/tscfg"))
