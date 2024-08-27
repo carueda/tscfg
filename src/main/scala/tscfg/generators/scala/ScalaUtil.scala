@@ -117,7 +117,7 @@ object ScalaUtil {
     "yield"
   )
 
-  val noArgMethodInScope: List[String] = List(
+  private val noArgMethodInScope: List[String] = List(
     "clone",
     "finalize",
     "getClass",

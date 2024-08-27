@@ -516,7 +516,7 @@ class JavaGen(
           case DURATION(_) => s"""c.$getter"""
           case _ =>
             val (methodName, methodCall) =
-              tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
+              tsConfigUtil.basicRequiredGetter(bt, path)
             listAccessors += methodName -> javaDef(methodName)
             methodCall
         }
@@ -576,7 +576,7 @@ class JavaGen(
     case DOUBLE      => methodNames.dblA
     case BOOLEAN     => methodNames.blnA
     case SIZE        => methodNames.sizA
-    case DURATION(q) => methodNames.durA
+    case DURATION(_) => methodNames.durA
 
     case _: ObjectAbsType => name.replace('.', '_')
 

@@ -33,7 +33,6 @@ object tsConfigUtil {
   def basicRequiredGetter(
       bt: BasicType,
       path: String,
-      useDurations: Boolean
   ): (String, String) = {
     val methodName = bt match {
       case STRING  => "$_reqStr"

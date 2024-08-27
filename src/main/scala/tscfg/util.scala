@@ -41,7 +41,4 @@ object util {
   }
 
   // $COVERAGE-ON$
-
-  val TypesafeConfigClassName: String =
-    classOf[com.typesafe.config.Config].getName
 }

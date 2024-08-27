@@ -707,7 +707,7 @@ private[scala] case class Getter(
           case DURATION(_) => s"""c.$getter"""
           case _ =>
             val (methodName, methodCall) =
-              tsConfigUtil.basicRequiredGetter(bt, path, genOpts.useDurations)
+              tsConfigUtil.basicRequiredGetter(bt, path)
             listAccessors += methodName -> scalaDef(methodName)
             methodCall
         }

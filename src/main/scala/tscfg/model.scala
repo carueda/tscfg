@@ -146,7 +146,7 @@ object model {
 
   // $COVERAGE-OFF$
   object util {
-    val IND = "    "
+    private val IND = "    "
 
     def format(typ: Type, ind: String = ""): String = typ match {
       case b: BasicType => b.toString

@@ -40,7 +40,7 @@ case class Struct(
 
   def isLeaf: Boolean = members.isEmpty
 
-  def dependencies: Set[String] = {
+  private def dependencies: Set[String] = {
     tsStringValue.toSet ++ members.values.flatMap(_.dependencies)
   }
 
