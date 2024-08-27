@@ -1,5 +1,6 @@
 2024-08
 
+- 1.1.4: maintenance (incorporate some generated java files (related with records) previously skipped for CI)
 - 1.1.3: maintenance (dependency updates, code cleanup)
 - 1.1.2: published
 - 1.1.0:  dropped support for scala 2.12 and java 7.
