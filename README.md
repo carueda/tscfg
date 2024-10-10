@@ -9,7 +9,7 @@
 
 tscfg is a command line tool that takes a configuration specification
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
-and generates all the boiler-plate to make the definitions
+and generates all the boilerplate to make the definitions
 available in type-safe, immutable objects
 (POJOs/records for Java, case classes for Scala).
 
