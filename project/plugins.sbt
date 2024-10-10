@@ -1,5 +1,5 @@
 addSbtPlugin("com.eed3si9n"   % "sbt-assembly"  % "2.2.0")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype"  % "3.11.3")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype"  % "3.12.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp"       % "2.1.2")
 addSbtPlugin("org.scoverage"  % "sbt-scoverage" % "2.0.10")
 addSbtPlugin("org.scoverage"  % "sbt-coveralls" % "1.3.14")
