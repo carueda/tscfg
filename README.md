@@ -517,7 +517,7 @@ The following are valid definition comments:
 
 - the current support for shared objects as field types in another shared object is unstable and not yet fully supported
 - empty structs without any fields are treated as strings. Hence, having a child struct without new fields in addition
-to its superclass is not supported yet
+to its superclass is not supported yet. See related issue [#309](https://github.com/carueda/tscfg/issues/309).
 
 
 ## enum
