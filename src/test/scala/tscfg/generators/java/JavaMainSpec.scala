@@ -1458,4 +1458,41 @@ class JavaMainSpec extends AnyWordSpec {
       assert(c.cfg.additionalParam === "additionalParamValue")
     }
   }
+
+  "(scala) issue 309a" should {
+    "generate class for empty object EmptyObj" in {
+      val r = JavaGen.generate("example/issue309a.spec.conf")
+      assert(r.classNames === Set("JavaIssue309aCfg", "EmptyObj"))
+    }
+
+    "be exercised ok" in {
+      val c = new JavaIssue309aCfg(ConfigFactory.parseString("""
+          |other = 42
+          |""".stripMargin))
+
+      assert(c.other === 42)
+      assert(c.emptyObj.getClass.getSimpleName === "EmptyObj")
+    }
+  }
+
+  "(scala) issue 309b" should {
+    "generate class for empty object SomeExtension extending SomeAbstract" in {
+      val r = JavaGen.generate("example/issue309b.spec.conf")
+      assert(
+        r.classNames === Set(
+          "JavaIssue309bCfg",
+          "SomeAbstract",
+          "SomeExtension"
+        )
+      )
+    }
+
+    "be exercised ok" in {
+      val c = new JavaIssue309bCfg(ConfigFactory.parseString("""
+          |foo.something = howdy
+          |""".stripMargin))
+
+      assert(c.foo.something === "howdy")
+    }
+  }
 }

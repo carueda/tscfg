@@ -86,12 +86,10 @@ object model {
       t: Type,
       optional: Boolean = false,
       default: Option[String] = None,
+      defineCase: Option[DefineCase] = None,
       comments: Option[String] = None,
-      parentClassMembers: Option[Map[String, model.AnnType]] = None
+      parentClassMembers: Option[Map[String, model.AnnType]] = None,
   ) {
-
-    val defineCase: Option[DefineCase] =
-      comments.flatMap(cs => getDefineCase(cs))
 
     val isDefine: Boolean = defineCase.isDefined
 

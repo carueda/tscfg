@@ -31,9 +31,31 @@ class ModelBuilder(
     */
   private def fromConfig(
       namespace: Namespace,
-      conf: Config
+      conf: Config,
   ): model.ObjectType = {
-    val memberStructs: List[Struct] = Struct.getMemberStructs(namespace, conf)
+    val struct = Struct.getStruct(conf)
+
+    // A single pass may not be sufficient to populate the namespace and get complete
+    // name resolutions, in particular, when a name (referring to a `@define`) is
+    // within some container type (like `[SomeDef]`). The effect is that `SomeDef`
+    // would be considered a string instead of resolving to the definition.
+    // An overall redesign (and much more elegant implementation) is needed,
+    // but, for now, let's do two passes as a quick trick:
+    fromStruct(namespace, struct, firstPass = true)
+    // avoid spurious duplicate warnings for the next pass:
+    val definedNames = namespace.getAllDefines.keySet
+    scribe.debug(s"definedNames = ${pprint.apply(definedNames)}")
+    namespace.setOkDuplicates(definedNames)
+    fromStruct(namespace, struct, firstPass = false)
+  }
+
+  /** Gets the [[model.ObjectType]] corresponding to the given Struct. */
+  private def fromStruct(
+      namespace: Namespace,
+      struct: Struct,
+      firstPass: Boolean,
+  ): model.ObjectType = {
+    val memberStructs = struct.members.values.toList
     // Note: the returned order of this list is assumed to have taken into account any dependencies between
     // the structs, in terms both of inheritance and member types.
     // TODO a future revision may lessen this requirement by making the `namespace.resolveDefine` call below
@@ -42,46 +64,21 @@ class ModelBuilder(
     val members: immutable.Map[String, model.AnnType] = memberStructs.map {
       childStruct =>
         val name = childStruct.name
-        val cv   = conf.getValue(name)
 
         val (childType, optional, default) = {
           if (childStruct.isLeaf) {
-            val valueString = tscfg.util.escapeValue(cv.unwrapped().toString)
-            val isEnum      = childStruct.isEnum
-
-            getTypeFromConfigValue(namespace, cv, isEnum) match {
-              case typ: model.STRING.type =>
-                namespace.resolveDefine(valueString) match {
-                  case Some(ort) =>
-                    (ort, false, None)
-
-                  case None =>
-                    inferAnnBasicTypeFromString(valueString) match {
-                      case Some(annBasicType) =>
-                        annBasicType
-
-                      case None =>
-                        (typ, true, Some(valueString))
-                    }
-                }
-
-              case typ: model.BasicType =>
-                (typ, true, Some(valueString))
-
-              case typ =>
-                (typ, false, None)
-            }
+            fromLeafStruct(namespace, childStruct)
           }
           else {
             (
-              fromConfig(namespace.extend(name), conf.getConfig(name)),
+              fromStruct(namespace.extend(name), childStruct, firstPass),
               false,
               None
             )
           }
         }
 
-        val comments        = cv.origin().comments().asScala.toList
+        val comments        = childStruct.comments
         val optFromComments = comments.exists(_.trim.startsWith("@optional"))
         val commentsOpt =
           if (comments.isEmpty) None else Some(comments.mkString("\n"))
@@ -100,21 +97,23 @@ class ModelBuilder(
           else
             (optional || optFromComments, default)
 
-        // println(s"ModelBuilder: effOptional=$effOptional  effDefault=$effDefault " +
-        //  s"assumeAllRequired=$assumeAllRequired optFromComments=$optFromComments " +
-        //  s"adjName=$adjName")
-
         /* Get a comprehensive view of members from _all_ ancestors */
         val parentClassMembers =
-          Struct.ancestorClassMembers(childStruct, memberStructs, namespace)
+          Struct.ancestorClassMembers(
+            childStruct,
+            memberStructs,
+            namespace,
+            firstPass,
+          )
 
         /* build the annType  */
         val annType = buildAnnType(
           childType,
           effOptional,
           effDefault,
+          childStruct.defineCaseOpt,
           commentsOpt,
-          parentClassMembers
+          parentClassMembers,
         )
 
         annType.defineCase foreach { namespace.addDefine(name, annType.t, _) }
@@ -131,10 +130,43 @@ class ModelBuilder(
     )
   }
 
+  private def fromLeafStruct(
+      namespace: Namespace,
+      struct: Struct,
+  ): (Type, Boolean, Option[String]) = {
+    val cv          = struct.cv
+    val valueString = tscfg.util.escapeValue(cv.unwrapped().toString)
+    val isEnum      = struct.isEnum
+
+    getTypeFromConfigValue(namespace, cv, isEnum) match {
+      case typ: model.STRING.type =>
+        namespace.resolveDefine(valueString) match {
+          case Some(ort) =>
+            (ort, false, None)
+
+          case None =>
+            inferAnnBasicTypeFromString(valueString) match {
+              case Some(annBasicType) =>
+                annBasicType
+
+              case None =>
+                (typ, true, Some(valueString))
+            }
+        }
+
+      case typ: model.BasicType =>
+        (typ, true, Some(valueString))
+
+      case typ =>
+        (typ, false, None)
+    }
+  }
+
   private def buildAnnType(
       childType: model.Type,
       effOptional: Boolean,
       effDefault: Option[String],
+      defineCase: Option[DefineCase],
       commentsOpt: Option[String],
       parentClassMembers: Option[Map[String, model.AnnType]]
   ): AnnType = {
@@ -159,8 +191,9 @@ class ModelBuilder(
       updatedChildType,
       optional = effOptional,
       default = effDefault,
+      defineCase = defineCase,
       comments = commentsOpt,
-      parentClassMembers = parentClassMembers.map(_.toMap)
+      parentClassMembers = parentClassMembers.map(_.toMap),
     )
   }
 

@@ -469,7 +469,7 @@ class ScalaMainSpec extends AnyWordSpec {
       val r = ScalaGen.generate("example/issue19.spec.conf")
       assert(r.classNames === Set("ScalaIssue19Cfg"))
       assert(
-        r.fields === Map(
+        r.fields.toSet === Set(
           "do_log"  -> "scala.Boolean",
           "_$_foo_" -> "java.lang.String"
         )
@@ -1305,6 +1305,43 @@ class ScalaMainSpec extends AnyWordSpec {
       assert(c.cfg.typeB.bar.fizz === "fizzValueInBar")
       assert(c.cfg.typeB.bar.buzz === "buzzValueInBar")
       assert(c.cfg.additionalParam === "additionalParamValue")
+    }
+  }
+
+  "(scala) issue 309a" should {
+    "generate class for empty object EmptyObj" in {
+      val r = ScalaGen.generate("example/issue309a.spec.conf")
+      assert(r.classNames === Set("ScalaIssue309aCfg", "EmptyObj"))
+    }
+
+    "be exercised ok" in {
+      val c = ScalaIssue309aCfg(ConfigFactory.parseString("""
+          |other = 42
+          |""".stripMargin))
+
+      assert(c.other === 42)
+      assert(c.emptyObj.getClass.getSimpleName === "EmptyObj")
+    }
+  }
+
+  "(scala) issue 309b" should {
+    "generate class for empty object SomeExtension extending SomeAbstract" in {
+      val r = ScalaGen.generate("example/issue309b.spec.conf")
+      assert(
+        r.classNames === Set(
+          "ScalaIssue309bCfg",
+          "SomeAbstract",
+          "SomeExtension"
+        )
+      )
+    }
+
+    "be exercised ok" in {
+      val c = ScalaIssue309bCfg(ConfigFactory.parseString("""
+          |foo.something = howdy
+          |""".stripMargin))
+
+      assert(c.foo.something === "howdy")
     }
   }
 }
