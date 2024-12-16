@@ -1,3 +1,14 @@
+2024-12
+
+1.1.5
+
+- Fixed #309 "Empty object not reflected in generated wrapper."
+  `Struct` construction now based on `Config.root.entrySet` (instead of `Config.entrySet`).
+  For model construction, two passes are now performed to have all `@define`s captured for resolution.
+  This also resolves the closely related issue of wrongly resolving a `SomeName` as string when it is
+  actually a `@define`. The two passes are in particular to address types like `[SomeName]`, that is,
+  when the name is referenced indirectly via some container type.
+
 2024-08
 
 - 1.1.4: maintenance (incorporate some generated java files (related with records) previously skipped for CI)

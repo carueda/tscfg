@@ -1,110 +1,84 @@
 package tscfg
 
-import com.typesafe.config.{Config, ConfigValueType}
+import com.typesafe.config._
 import tscfg.DefineCase._
 import tscfg.exceptions.ObjectDefinitionException
 import tscfg.ns.Namespace
 
-import scala.annotation.tailrec
+import java.util.Map.Entry
+import scala.collection.SeqMap
 import scala.collection.{Map, mutable}
+import scala.jdk.CollectionConverters._
 
 /** Supports a convenient next representation based on given TS Config object.
   * It supports nested member definitions utilizing the 'members' field
   *
   * @param name
   *   Name of the config member
+  * @param cv
+  *   Associated ConfigValue
   * @param members
   *   Nested config definitions
-  * @param tsStringValue
-  *   Captures string value to support determining dependencies in terms of RHS
-  *   names (that is, when such a string may be referring to a @define)
   */
 case class Struct(
     name: String,
-    members: mutable.HashMap[String, Struct] = mutable.HashMap.empty,
-    tsStringValue: Option[String] = None
+    cv: ConfigValue,
+    members: SeqMap[String, Struct] = SeqMap.empty,
 ) {
+  /* Captures string value to support determining dependencies in terms of RHS
+   * names (that is, when such a string may be referring to a @define)
+   */
+  private val tsStringValue: Option[String] =
+    cv.valueType() match {
+      case ConfigValueType.STRING => Some(cv.unwrapped().toString)
+      case _                      => None
+    }
+
+  val comments: List[String] =
+    cv.origin().comments().asScala.toList
 
   // Non-None when this is a `@define`
-  var defineCaseOpt: Option[DefineCase] = None
-
-  def isDefine: Boolean = defineCaseOpt.isDefined
-
-  def isExtends: Boolean = defineCaseOpt match {
-    case Some(_: ExtendsDefineCase)    => true
-    case Some(_: ImplementsDefineCase) => true
-    case _                             => false
+  val defineCaseOpt: Option[DefineCase] = {
+    val defineLines = comments.map(_.trim).filter(_.startsWith("@define"))
+    defineLines.length match {
+      case 0 => None
+      case 1 => DefineCase.getDefineCase(defineLines.head)
+      case _ =>
+        throw new IllegalArgumentException(s"multiple @define lines for $name.")
+    }
   }
 
   def isEnum: Boolean = defineCaseOpt.exists(_.isEnum)
 
   def isLeaf: Boolean = members.isEmpty
 
-  private def dependencies: Set[String] = {
+  private def dependencies: Set[String] =
     tsStringValue.toSet ++ members.values.flatMap(_.dependencies)
+
+  private def isDefine: Boolean = defineCaseOpt.isDefined
+
+  private def isExtends: Boolean = defineCaseOpt match {
+    case Some(_: ExtendsDefineCase)    => true
+    case Some(_: ImplementsDefineCase) => true
+    case _                             => false
   }
-
-  // $COVERAGE-OFF$
-  def format(indent: String = ""): String = {
-    val defineStr = defineCaseOpt.map(dc => s" $dc").getOrElse("")
-    val nameStr   = s"${if (name.isEmpty) "(root)" else name}$defineStr"
-
-    val dependenciesStr = dependencies.toList match {
-      case Nil => ""
-      case l   => s" [dependencies=${l.mkString(", ")}]"
-    }
-
-    val nameHeading = nameStr + dependenciesStr
-
-    if (members.isEmpty) {
-      nameHeading
-    }
-    else {
-      val indent2 = indent + "    "
-      s"$nameHeading ->\n" + indent2 + {
-        members
-          .map(e => s"${e._1}: " + e._2.format(indent2))
-          .mkString("\n" + indent2)
-      }
-    }
-  }
-  // $COVERAGE-ON$
 }
 
 object Struct {
-  import scala.jdk.CollectionConverters._
 
-  /** Gets all structs from the given TS Config object, sorted appropriately for
-    * subsequent processing in ModelBuilder. Any circular reference will throw a
-    * [[ObjectDefinitionException]].
+  /** Gets struct corresponding to given TS Config object, with members sorted
+    * appropriately for subsequent processing in ModelBuilder. Any circular
+    * reference will throw a [[ObjectDefinitionException]].
     */
-  def getMemberStructs(namespace: Namespace, conf: Config): List[Struct] = {
-    val struct: Struct              = getStruct(conf)
-    val memberStructs: List[Struct] = struct.members.values.toList
+  def getStruct(conf: Config): Struct = getStruct("", "", conf.root())
 
-    // set any define to each struct:
-    memberStructs.flatMap { setDefineCase(conf, _) }
-
-    val (defineStructs, nonDefineStructs) = memberStructs.partition(_.isDefine)
+  private def sortStructs(structs: List[Struct]): List[Struct] = {
+    val (defineStructs, nonDefineStructs) = structs.partition(_.isDefine)
     val sortedDefineStructs               = sortDefineStructs(defineStructs)
-
-    val sortedStructs = {
-      // but also sort the "defines" by any name (member type) dependencies:
-      val definesSortedByNameDependencies = sortByNameDependencies(
-        sortedDefineStructs
-      )
-      definesSortedByNameDependencies ++ nonDefineStructs
-    }
-
-    if (namespace.isRoot) {
-      scribe.debug(
-        s"root\n" +
-          s"struct=${struct.format()}\n" +
-          s"sortedStructs=\n  ${sortedStructs.map(_.format()).mkString("\n  ")}"
-      )
-    }
-
-    sortedStructs
+    // but also sort the "defines" by any name (member type) dependencies:
+    val definesSortedByNameDependencies =
+      sortByNameDependencies(sortedDefineStructs)
+    definesSortedByNameDependencies ++ nonDefineStructs
   }
 
   private def sortDefineStructs(defineStructs: List[Struct]): List[Struct] = {
@@ -113,7 +87,7 @@ object Struct {
     // / `othersBeingAdded` allows to check for circularity
     def addExtendStruct(
         s: Struct,
-        othersBeingAdded: List[Struct] = List.empty
+        othersBeingAdded: List[Struct] = List.empty,
     ): Unit = {
       def addExtendsOrImplements(name: String, isExternal: Boolean): Unit = {
         sorted.get(name) match {
@@ -133,7 +107,7 @@ object Struct {
                       .map("'" + _.name + "'")
                       .mkString(" -> ")
                   throw ObjectDefinitionException(
-                    s"extension of struct '${s.name}' involves circular reference via $via"
+                    s"extension of struct '${s.name}' involves circular reference via $via",
                   )
                 }
 
@@ -147,7 +121,7 @@ object Struct {
 
               case None =>
                 throw ObjectDefinitionException(
-                  s"struct '${s.name}' with undefined extend '$name'"
+                  s"struct '${s.name}' with undefined extend '$name'",
                 )
             }
         }
@@ -169,7 +143,7 @@ object Struct {
 
     assert(
       defineStructs.size == sorted.size,
-      s"defineStructs.size=${defineStructs.size} != sorted.size=${sorted.size}"
+      s"defineStructs.size=${defineStructs.size} != sorted.size=${sorted.size}",
     )
 
     sorted.toList.map(_._2)
@@ -206,25 +180,34 @@ object Struct {
     *   List to find referenced structs
     * @param namespace
     *   Current known name space
+    * @param firstPass
+    *   true for a first pass, which will be less strict in terms of name
+    *   resolution
     * @return
     *   Mapping from symbol to type definition if struct is an ExtendsDefineCase
     */
   def ancestorClassMembers(
       struct: Struct,
       memberStructs: List[Struct],
-      namespace: Namespace
+      namespace: Namespace,
+      firstPass: Boolean,
   ): Option[Map[String, model.AnnType]] = {
 
     def handleExtends(
         parentName: String,
-        isExternal: Boolean
+        isExternal: Boolean,
     ): Option[Map[String, model.AnnType]] = {
       val defineStructs = memberStructs.filter(_.isDefine)
 
       val greatAncestorMembers =
         defineStructs.find(_.name == parentName) match {
           case Some(parentStruct) if parentStruct.isExtends =>
-            ancestorClassMembers(parentStruct, memberStructs, namespace)
+            ancestorClassMembers(
+              parentStruct,
+              memberStructs,
+              namespace,
+              firstPass,
+            )
 
           case Some(_) => None
 
@@ -232,19 +215,18 @@ object Struct {
 
           case None =>
             throw new RuntimeException(
-              s"struct '${struct.name}' with undefined extend '$parentName'"
+              s"struct '${struct.name}' with undefined extend '$parentName'",
             )
         }
 
       val parentMembers =
         namespace.getRealDefine(parentName).map(_.members) match {
           case Some(parentMembers) => parentMembers
-
-          case None if isExternal => None
-
+          case None if isExternal  => None
+          case None if firstPass   => None
           case None =>
             throw new IllegalArgumentException(
-              s"@define '${struct.name}' is invalid because '$parentName' is not @defined"
+              s"@define '${struct.name}' is invalid because '$parentName' is not @defined",
             )
         }
 
@@ -264,77 +246,49 @@ object Struct {
     }
   }
 
-  private def getStruct(conf: Config): Struct = {
-    val structs = mutable.HashMap[String, Struct]("" -> Struct(""))
-
-    def resolve(key: String): Struct = {
-      if (!structs.contains(key)) structs.put(key, Struct(getSimple(key)))
-      structs(key)
+  private def getStruct(pp: String, key: String, cv: ConfigValue): Struct =
+    cv match {
+      case co: ConfigObject => getStructForObject(pp, key, co)
+      case _                => getStructForLeaf(key, cv)
     }
 
-    // Due to TS Config API, we traverse from the leaves to the ancestors:
-    conf.entrySet().asScala foreach { e =>
-      val path        = e.getKey
-      val configValue = e.getValue
-
-      // capture string value to determine possible "define" dependency
-      val tsStringValue: Option[String] = e.getValue.valueType() match {
-        case ConfigValueType.STRING => Some(configValue.unwrapped().toString)
-        case _                      => None
-      }
-      scribe.debug(s"getStruct: path=$path, tsStringValue=$tsStringValue")
-      val leaf = Struct(path, tsStringValue = tsStringValue)
-
-      doAncestorsOf(path, leaf)
-
-      def doAncestorsOf(childKey: String, childStruct: Struct): Unit = {
-        val (parent, simple) = (getParent(childKey), getSimple(childKey))
-        createParent(parent, simple, childStruct)
-
-        @tailrec
-        def createParent(
-            parentKey: String,
-            simple: String,
-            child: Struct
-        ): Unit = {
-          val parentGroup = resolve(parentKey)
-          parentGroup.members.put(simple, child)
-          if (parentKey != "") {
-            createParent(
-              getParent(parentKey),
-              getSimple(parentKey),
-              parentGroup
-            )
-          }
-        }
-      }
+  private def getStructForObject(
+      pp: String,
+      key: String,
+      co: ConfigObject,
+  ): Struct = {
+    def doEntry(e: Entry[String, ConfigValue]): Struct = {
+      val key   = e.getKey
+      val cv    = e.getValue
+      val newPp = if (pp.isEmpty) key else s"$pp.$key"
+      getStruct(newPp, key, cv)
     }
-
-    def getParent(path: String): String = {
-      val idx = path.lastIndexOf('.')
-      if (idx >= 0) path.substring(0, idx) else ""
-    }
-
-    def getSimple(path: String): String = {
-      val idx = path.lastIndexOf('.')
-      if (idx >= 0) path.substring(idx + 1) else path
-    }
-
-    structs("")
+    val structs       = co.entrySet().asScala.toList.map(doEntry)
+    val sortedStructs = sortStructs(structs)
+    val pairs         = sortedStructs.map(s => s.name -> s)
+    val members       = SeqMap(pairs: _*)
+    Struct(key, co, members)
   }
 
-  private def setDefineCase(conf: Config, s: Struct): Option[DefineCase] = {
-    val cv          = conf.getValue(s.name)
-    val comments    = cv.origin().comments().asScala.toList
-    val defineLines = comments.map(_.trim).filter(_.startsWith("@define"))
-    s.defineCaseOpt = defineLines.length match {
-      case 0 => None
-      case 1 => DefineCase.getDefineCase(defineLines.head)
-      case _ =>
-        throw new IllegalArgumentException(
-          s"multiple @define lines for ${s.name}."
-        )
-    }
-    s.defineCaseOpt
+  private def getStructForLeaf(key: String, cv: ConfigValue): Struct = {
+    val name = if (key.contains('$')) s"\"$key\"" else key
+    Struct(name, cv)
   }
+
+  // $COVERAGE-OFF$
+  def main(args: Array[String]): Unit = {
+    import java.io.File
+    // tscfg.util.setLogMinLevel()
+    val filename =
+      args.headOption.getOrElse("src/main/tscfg/example/issue309b.spec.conf")
+    println(s"filename = $filename")
+    val file      = new File(filename)
+    val bufSource = io.Source.fromFile(file)
+    val source    = bufSource.mkString.trim
+    bufSource.close()
+    val conf   = ConfigFactory.parseString(source).resolve()
+    val struct = getStruct(conf)
+    pprint.pprintln(struct)
+  }
+  // $COVERAGE-ON$
 }

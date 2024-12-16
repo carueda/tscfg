@@ -50,6 +50,12 @@ class Namespace private[ns] (
   private val defineNames              = collection.mutable.HashSet[String]()
   private val defineAbstractClassNames = collection.mutable.HashSet[String]()
 
+  private var okDuplicates: Option[Set[String]] = None
+
+  // to facilitate handling of 2nd pass
+  def setOkDuplicates(names: Set[String]): Unit =
+    okDuplicates = Some(names)
+
   def addDefine(
       simpleName: String,
       t: Type,
@@ -62,10 +68,9 @@ class Namespace private[ns] (
     assert(!simpleName.contains("."))
     assert(simpleName.nonEmpty)
 
-    if (
-      defineNames
-        .contains(simpleName) || defineAbstractClassNames.contains(simpleName)
-    ) {
+    val isDuplicate = defineNames.contains(simpleName) ||
+      defineAbstractClassNames.contains(simpleName)
+    if (isDuplicate && !okDuplicates.exists(_.contains(simpleName))) {
       val ns = if (getPath.nonEmpty) s"'$getPathString'" else "(root)"
       println(
         s"WARN: duplicate @define '$simpleName' in namespace $ns. Ignoring previous entry"
