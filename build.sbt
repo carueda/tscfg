@@ -48,6 +48,11 @@ fullRunTask(genCode, Compile, "tscfg.gen4tests")
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
 (Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
 
+addCommandAlias("fmt", "; scalafmtAll; scalafmtSbt")
+addCommandAlias("fmtCheck", "; scalafmtCheckAll; scalafmtSbtCheck")
+addCommandAlias("all", "; clean; fmt; test")
+addCommandAlias("c", "; compile")
+
 publishMavenStyle        := true
 (Test / publishArtifact) := false
 
