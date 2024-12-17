@@ -126,4 +126,13 @@ object ScalaUtil {
     "toString",
     "wait"
   )
+
+  def formatDocComment(docComments: List[String]): String = {
+    if (docComments.isEmpty) ""
+    else {
+      // TODO more appropriate formatting; this is simplistic
+      val lines = docComments.map(_.trim).filter(_.nonEmpty)
+      lines.mkString("/** ", "\n  * ", "\n  */\n")
+    }
+  }
 }

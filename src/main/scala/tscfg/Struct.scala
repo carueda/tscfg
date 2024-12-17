@@ -37,6 +37,13 @@ case class Struct(
   val comments: List[String] =
     cv.origin().comments().asScala.toList
 
+  val docComments: List[String] =
+    comments
+      .map(_.trim)
+      .filterNot(c =>
+        c.startsWith("@") || c.startsWith("!") || c.startsWith("GenOpts:")
+      )
+
   // Non-None when this is a `@define`
   val defineCaseOpt: Option[DefineCase] = {
     val defineLines = comments.map(_.trim).filter(_.startsWith("@define"))

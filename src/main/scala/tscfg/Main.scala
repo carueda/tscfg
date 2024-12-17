@@ -42,6 +42,7 @@ object Main {
        |  --scala               generate scala code              (java)
        |  --scala:bt            use backticks (see #30)          (false)
        |  --durations           use java.time.Duration           (false)
+       |  --doc-comments        reflect documentation comments   (see #312)
        |  --all-required        assume all properties are required (see #47)
        |  --tpl <filename>      generate config template         (no default)
        |  --tpl.ind <string>    template indentation string      ("${templateOpts.indent}")
@@ -57,6 +58,7 @@ object Main {
       packageName: String = defaultGenOpts.packageName,
       className: String = defaultGenOpts.className,
       destDir: String = defaultDestDir,
+      docComments: Boolean = false,
       assumeAllRequired: Boolean = false,
       language: String = "java",
       useBackticks: Boolean = false,
@@ -120,6 +122,9 @@ object Main {
           if (chkVal(destDir))
             traverseList(rest, opts.copy(destDir = destDir))
           else None
+
+        case "--doc-comments" :: rest =>
+          traverseList(rest, opts.copy(docComments = true))
 
         case "--all-required" :: rest =>
           traverseList(rest, opts.copy(assumeAllRequired = true))
@@ -197,6 +202,7 @@ object Main {
     val genOpts = GenOpts(
       opts.packageName,
       opts.className,
+      docComments = opts.docComments,
       assumeAllRequired = opts.assumeAllRequired,
       useBackticks = opts.useBackticks,
       genGetters = opts.genGetters,

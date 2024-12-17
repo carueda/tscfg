@@ -133,13 +133,20 @@ class ScalaGen(
 
     val results = symbols.map { symbol =>
       val a = ot.members(symbol)
-      val res = generate(
+      var res = generate(
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
         className = getClassName(symbol),
         Some(a),
         a.parentClassMembers,
       )
+      if (genOpts.docComments & a.t.isObject) {
+        // TODO Capture the `@param`s
+        val docComment = ScalaUtil.formatDocComment(a.docComments)
+        if (docComment.nonEmpty) {
+          res = res.copy(definition = docComment + res.definition)
+        }
+      }
       (symbol, res, a, false)
     }
 

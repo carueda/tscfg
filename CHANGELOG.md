@@ -1,5 +1,10 @@
 2024-12
 
+- preliminary partial impl of #312 "Reflect doc comments in generated code"
+    - only for scala at the moment, and only scaladoc for object, but not `@param`s yet.
+    - for now, this is an opt-in feature with `--doc-comments` flag,
+      but this should be the default behavior.
+
 1.1.5
 
 - Fixed #309 "Empty object not reflected in generated wrapper."

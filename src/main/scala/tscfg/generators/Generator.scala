@@ -27,6 +27,7 @@ abstract class Generator(genOpts: GenOpts) {
 case class GenOpts(
     packageName: String,
     className: String,
+    docComments: Boolean = false,
     assumeAllRequired: Boolean = false,
     useBackticks: Boolean = false,
     genGetters: Boolean = false,

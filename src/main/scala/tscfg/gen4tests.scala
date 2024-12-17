@@ -83,6 +83,9 @@ object gen4tests {
         case opt @ "--durations" =>
           OptFromFile(opt, None)
 
+        case opt @ "--doc-comments" =>
+          OptFromFile(opt, None)
+
         case opt @ "--all-required" =>
           OptFromFile(opt, None)
 
@@ -121,6 +124,9 @@ object gen4tests {
 
         case "--all-required" =>
           genOpts = genOpts.copy(assumeAllRequired = true)
+
+        case "--doc-comments" =>
+          genOpts = genOpts.copy(docComments = true)
 
         case opt =>
           warn(s"$confFile: ignoring unrecognized GenOpts argument: `$opt'")
