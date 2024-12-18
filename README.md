@@ -7,17 +7,18 @@
 
 ## tscfg
 
-tscfg is a command line tool that takes a configuration specification
+tscfg is a command line tool that takes a configuration _schema_
 parseable by [Typesafe Config](https://github.com/typesafehub/config)
 and generates all the boilerplate to make the definitions
 available in type-safe, immutable objects
 (POJOs/records for Java, case classes for Scala).
+Field comments are captured as well, reflected as javadoc or scala doc comments.
 
 The generated code only depends on the Typesafe Config library.
 
 
 - [status](#status)
-- [configuration spec](#configuration-spec)
+- [configuration schema](#configuration-schema)
 - [running tscfg](#running-tscfg)
   - [maven plugin](#maven-plugin)
   - [gradle plugin](#gradle-plugin)
@@ -48,9 +49,10 @@ and perhaps a revision of the syntax for types.
 Feel free to fork, enter issues/reactions, submit PRs, etc.
 
 
-## configuration spec
+## configuration schema
 
-In tscfg's approach, the configuration spec itself is any source parseable by Typesafe Config,
+In tscfg's approach, the configuration schema itself
+can be captured in any source parseable by Typesafe Config,
 so the familiar syntax/format and loading mechanisms are used.
 
 For example, from this configuration:
@@ -64,7 +66,7 @@ service {
 }
 ```
 
-tscfg will generate the following (constructors and other methods omitted):
+tscfg will generate the following (javadoc, constructors and other methods omitted):
 
 - Java:
 
@@ -112,7 +114,7 @@ and **default values**,
 a string with a simple syntax as follows can be used
 (illustrated with the integer type):
 
-| field spec | meaning | java type / default | scala type / default
+| field schema | meaning | java type / default | scala type / default
 |---|---|---|---|
 | a: "int"          | required integer | `int` / no default | `Int` / no default
 | a: "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
@@ -205,6 +207,7 @@ Options (default):
   --scala               generate scala code              (java)
   --scala:bt            use backticks (see #30)          (false)
   --durations           use java.time.Duration           (false)
+  --no-doc              do not capture doc comments      (see #312)
   --all-required        assume all properties are required (see #47)
   --tpl <filename>      generate config template         (no default)
   --tpl.ind <string>    template indentation string      ("  ")
@@ -274,10 +277,10 @@ you can:
     ```
 
 An object reference will never be `null` (or `Optional.empty()`) (`None` in Scala) if the corresponding field is required according to
-the specification. It will only be `null` (or `Optional.empty()`) (`None` in Scala) if it is marked optional with no default value and
+the schema. It will only be `null` (or `Optional.empty()`) (`None` in Scala) if it is marked optional with no default value and
 has been omitted in the input configuration.
 
-With this [example spec](https://github.com/carueda/tscfg/blob/main/src/main/tscfg/example/example.spec.conf),
+With this [example schema](schemahttps://github.com/carueda/tscfg/blob/main/src/main/tscfg/example/example.spec.conf),
 the generated Java code looks [like this](https://github.com/carueda/tscfg/blob/main/src/main/java/tscfg/example/JavaExampleCfg.java)
 and an example of use [like this](https://github.com/carueda/tscfg/blob/main/src/main/java/tscfg/example/JavaUse.java).
 
@@ -291,7 +294,7 @@ and an example of use [like this](https://github.com/carueda/tscfg/blob/main/src
 
 The following basic types are supported:
 
-| type in spec                         | java type:<br /> req / opt  | scala type:<br /> req / opt
+| type in schema                       | java type:<br /> req / opt  | scala type:<br /> req / opt
 |--------------------------------------|--------------------------|---------------------------------
 | `string`                             | `String`   / `String`    | `String`   / `Option[String]`
 | `int`                                | `int`      / `Integer`   | `Int`      / `Option[Int]`
@@ -360,7 +363,7 @@ Using the `--durations` flag, the reported value will be a `java.time.Duration` 
 With _t_ denoting a handled type, a list of elements of that type
 is denoted `[` _t_ `]`. The corresponding types in Java and Scala are:
 
-| type in spec  | java type:<br /> req / opt  | scala type:<br /> req / opt
+| type in schema | java type:<br /> req / opt  | scala type:<br /> req / opt
 |---------------|---------------------|--------------------------
 | `[` _t_ `]`   | `List<T>` / `List<T>`   | `List[T]` / `Option[List[T]]`
 
@@ -370,7 +373,7 @@ where `T` is the corresponding translation of _t_ in the target language, with
 
 ### object type
 
-As seen in examples above, each object in the given configuration spec becomes a class.
+As seen in examples above, each object in the given configuration schema becomes a class.
 
 It is of course possible to specify a field as a list of objects, for example:
 
@@ -601,7 +604,7 @@ use [Gson](https://github.com/google/gson) and
 [pprint](https://com-lihaoyi.github.io/PPrint/), respectively.
 Although you could also use Typesafe Config itself for rendering purposes, you would be
 using the original Typesafe Config parsed configuration object, so the rendering won't
-necessarily be restricted only to the elements captured in the _configuration specification_
+necessarily be restricted only to the elements captured in the _configuration schema_
 used by tscfg for the generated wrapper.
 
 ## tests
