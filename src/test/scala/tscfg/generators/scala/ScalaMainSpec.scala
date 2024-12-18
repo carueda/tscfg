@@ -1344,4 +1344,45 @@ class ScalaMainSpec extends AnyWordSpec {
       assert(c.foo.something === "howdy")
     }
   }
+
+  "(scala) issue 312a - scaladoc" should {
+    "generate expected classes" in {
+      val r =
+        ScalaGen.generate("example/issue312a.spec.conf", genDoc = true)
+      assert(
+        r.classNames === Set(
+          "ScalaIssue312aCfg",
+          "Endpoint",
+          "Notification",
+          "Emails$Elm",
+        )
+      )
+    }
+    "generate expected scaladoc" in {
+      val file =
+        new File("src/test/scala/tscfg/example/ScalaIssue312aCfg.scala")
+      val src = tscfg.files.readFile(file).get
+      assert(src.contains("/** Description of the required endpoint."))
+      assert(src.contains("* /\\* nested doc comment delimiters *\\/ escaped."))
+      assert(src.contains("* @param notification"))
+      assert(src.contains("* @param path"))
+      assert(src.contains("* @param path"))
+      assert(src.contains("* @param emails"))
+    }
+
+    "be exercised ok" in {
+      val c = ScalaIssue312aCfg(ConfigFactory.parseString("""
+          |endpoint.path = /api/v1
+          |endpoint.notification.emails = [ {email = "foo@x.net"} ]
+          |""".stripMargin))
+
+      assert(c.endpoint.path === "/api/v1")
+      assert(c.endpoint.port === 8080)
+      assert(
+        c.endpoint.notification.emails === List(
+          ScalaIssue312aCfg.Endpoint.Notification.Emails$Elm("foo@x.net", None)
+        )
+      )
+    }
+  }
 }

@@ -1,5 +1,14 @@
 2024-12
 
+1.2.0
+
+- Toward resolving #312 "Reflect doc comments in generated code"
+    - General functionality:
+        - object members with no comments are not included in the generated documentation comment(s).
+        - doc generation always done, unless `--no-doc` is given.
+    - Most cases already covered, both for scala and java records/POJOs
+    - `@define`s not yet addressed.
+
 1.1.5
 
 - Fixed #309 "Empty object not reflected in generated wrapper."

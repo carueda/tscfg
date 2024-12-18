@@ -4,6 +4,17 @@ final case class ScalaExampleCfg(
   endpoint : ScalaExampleCfg.Endpoint
 )
 object ScalaExampleCfg {
+  
+  /** 
+    * @param serial
+    *   an optional Integer with default value null
+    * @param path
+    *   a required String
+    * @param url
+    *   a String with default value "http://example.net"
+    * @param intReq
+    *   a required int
+    */
   final case class Endpoint(
     intReq    : scala.Int,
     interface : ScalaExampleCfg.Endpoint.Interface,
@@ -12,6 +23,11 @@ object ScalaExampleCfg {
     url       : java.lang.String
   )
   object Endpoint {
+    
+    /** 
+      * @param port
+      *   an int with default value 8080
+      */
     final case class Interface(
       port   : scala.Int,
       `type` : scala.Option[java.lang.String]

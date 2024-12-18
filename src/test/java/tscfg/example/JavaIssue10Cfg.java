@@ -3,8 +3,16 @@ package tscfg.example;
 public class JavaIssue10Cfg {
   public final JavaIssue10Cfg.Main main;
   public static class Main {
+      
+    /**
+     * Mail server properties if you want to enable notifications to users
+     */
     public final Main.Email email;
     public final java.util.List<Main.Reals$Elm> reals;
+    
+    /**
+     * Mail server properties if you want to enable notifications to users
+     */
     public static class Email {
       public final java.lang.String password;
       public final java.lang.String server;

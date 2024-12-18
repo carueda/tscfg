@@ -3,12 +3,32 @@ package tscfg.example;
 public class JavaExampleCfg {
   public final JavaExampleCfg.Endpoint endpoint;
   public static class Endpoint {
+      
+    /**
+     * a required int
+     */
     public final int intReq;
     public final Endpoint.Interface_ interface_;
+      
+    /**
+     * a required String
+     */
     public final java.lang.String path;
+      
+    /**
+     * an optional Integer with default value null
+     */
     public final java.lang.Integer serial;
+      
+    /**
+     * a String with default value "http://example.net"
+     */
     public final java.lang.String url;
     public static class Interface_ {
+        
+      /**
+       * an int with default value 8080
+       */
       public final int port;
       public final java.lang.String type;
       

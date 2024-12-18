@@ -4,6 +4,19 @@ final case class ScalaDurationCfg(
   durations : ScalaDurationCfg.Durations
 )
 object ScalaDurationCfg {
+  
+  /** 
+    * @param millis
+    *   optional duration with default value;
+    *   reported long (Long) is in milliseconds, either 550,000 if value is missing
+    *   or whatever is provided converted to millis
+    * @param days
+    *   optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
+    *   or whatever is provided converted to days
+    * @param hours
+    *   required duration; reported long (Long) is whatever is provided
+    *   converted to hours
+    */
   final case class Durations(
     days        : scala.Option[scala.Long],
     duration_dy : scala.Long,

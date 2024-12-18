@@ -74,6 +74,9 @@ object gen4tests {
         case opt @ "--java:getters" =>
           OptFromFile(opt, Some("java"))
 
+        case opt @ "--java" =>
+          OptFromFile(opt, Some("java"))
+
         case opt @ "--java:records" =>
           OptFromFile(opt, Some("java"))
 
@@ -81,6 +84,9 @@ object gen4tests {
           OptFromFile(opt, Some("java"))
 
         case opt @ "--durations" =>
+          OptFromFile(opt, None)
+
+        case opt @ "--no-doc" =>
           OptFromFile(opt, None)
 
         case opt @ "--all-required" =>
@@ -111,6 +117,8 @@ object gen4tests {
 
         case "--scala:bt" => genOpts = genOpts.copy(useBackticks = true)
 
+        case "--java" => ()
+
         case "--java:getters" => genOpts = genOpts.copy(genGetters = true)
 
         case "--java:records" => genOpts = genOpts.copy(genRecords = true)
@@ -121,6 +129,9 @@ object gen4tests {
 
         case "--all-required" =>
           genOpts = genOpts.copy(assumeAllRequired = true)
+
+        case "--no-doc" =>
+          genOpts = genOpts.copy(genDoc = false)
 
         case opt =>
           warn(s"$confFile: ignoring unrecognized GenOpts argument: `$opt'")

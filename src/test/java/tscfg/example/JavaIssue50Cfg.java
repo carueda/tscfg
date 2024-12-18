@@ -1,6 +1,10 @@
 package tscfg.example;
 
 public class JavaIssue50Cfg {
+    
+  /**
+   * not supported yet, see #50
+   */
   public final int parameter;
   
   public JavaIssue50Cfg(com.typesafe.config.Config c) {

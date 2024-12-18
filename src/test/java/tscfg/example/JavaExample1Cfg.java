@@ -1,6 +1,10 @@
 package tscfg.example;
 
 public class JavaExample1Cfg {
+    
+  /**
+   * same as:  "string | hello"
+   */
   public final java.lang.String bazOptionalWithDefault;
   public final java.lang.String bazOptionalWithNoDefault;
   public final java.lang.String fooRequired;

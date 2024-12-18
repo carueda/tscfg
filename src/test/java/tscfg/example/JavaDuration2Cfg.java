@@ -3,6 +3,11 @@ package tscfg.example;
 public class JavaDuration2Cfg {
   public final JavaDuration2Cfg.Durations durations;
   public static class Durations {
+      
+    /**
+     * optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
+     * or whatever is provided converted to days
+     */
     public final java.time.Duration days;
     public final java.time.Duration duration_dy;
     public final java.time.Duration duration_hr;
@@ -11,7 +16,18 @@ public class JavaDuration2Cfg {
     public final java.time.Duration duration_ns;
     public final java.time.Duration duration_se;
     public final java.time.Duration duration_µs;
+      
+    /**
+     * required duration; reported long (Long) is whatever is provided
+     * converted to hours
+     */
     public final java.time.Duration hours;
+      
+    /**
+     * optional duration with default value;
+     * reported long (Long) is in milliseconds, either 550,000 if value is missing
+     * or whatever is provided converted to millis
+     */
     public final java.time.Duration millis;
     
     public Durations(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
