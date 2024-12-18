@@ -2,12 +2,14 @@
 
 1.2.0
 
-- Toward resolving #312 "Reflect doc comments in generated code"
-    - General functionality:
-        - No generated documentation elements for object members with no comments.
-        - Doc generation processing always done, unless `--no-doc` is given.
+- Advancing #312 "Reflect doc comments in generated code"
     - Most cases already covered, both for scala and java records/POJOs
-    - `@define`s not yet addressed.
+    - Note: `@define`s not yet addressed.
+    - Comments used for annotations, i.e., starting with `@`, are not considered.
+    - Also ignored are comments starting with `!`.
+    - Doc generation processing is always performed.
+      (In retrospect, this should have been implemented long ago, but better late than never 😅)
+        - however, for now, `--no-doc` can be used to opt out of doc generation
 
 1.1.5
 

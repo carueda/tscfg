@@ -1,13 +1,25 @@
 package tscfg.example;
 
 public class JavaExampleCfg {
+    
+  /**
+   * Description of the required endpoint section.
+   */
   public final JavaExampleCfg.Endpoint endpoint;
+  
+  /**
+   * Description of the required endpoint section.
+   */
   public static class Endpoint {
       
     /**
      * a required int
      */
     public final int intReq;
+      
+    /**
+     * Interface definition
+     */
     public final Endpoint.Interface_ interface_;
       
     /**
@@ -21,15 +33,23 @@ public class JavaExampleCfg {
     public final java.lang.Integer serial;
       
     /**
-     * a String with default value "http://example.net"
+     * a String with default value "https://example.net"
      */
     public final java.lang.String url;
+    
+    /**
+     * Interface definition
+     */
     public static class Interface_ {
         
       /**
        * an int with default value 8080
        */
       public final int port;
+        
+      /**
+       * Interface type
+       */
       public final java.lang.String type;
       
       public Interface_(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
@@ -43,7 +63,7 @@ public class JavaExampleCfg {
       this.interface_ = c.hasPathOrNull("interface") ? new Endpoint.Interface_(c.getConfig("interface"), parentPath + "interface.", $tsCfgValidator) : new Endpoint.Interface_(com.typesafe.config.ConfigFactory.parseString("interface{}"), parentPath + "interface.", $tsCfgValidator);
       this.path = $_reqStr(parentPath, c, "path", $tsCfgValidator);
       this.serial = c.hasPathOrNull("serial") ? c.getInt("serial") : null;
-      this.url = c.hasPathOrNull("url") ? c.getString("url") : "http://example.net";
+      this.url = c.hasPathOrNull("url") ? c.getString("url") : "https://example.net";
     }
     private static int $_reqInt(java.lang.String parentPath, com.typesafe.config.Config c, java.lang.String path, $TsCfgValidator $tsCfgValidator) {
       if (c == null) return 0;
