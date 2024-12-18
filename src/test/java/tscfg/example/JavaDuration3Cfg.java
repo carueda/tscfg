@@ -4,6 +4,11 @@ public class JavaDuration3Cfg {
   public final JavaDuration3Cfg.Durations durations;
   public final JavaDuration3Cfg.Durations getDurations() { return durations; }
   public static class Durations {
+      
+    /**
+     * optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
+     * or whatever is provided converted to days
+     */
     public final java.time.Duration days;
     public final java.time.Duration duration_dy;
     public final java.time.Duration duration_hr;
@@ -12,7 +17,18 @@ public class JavaDuration3Cfg {
     public final java.time.Duration duration_ns;
     public final java.time.Duration duration_se;
     public final java.time.Duration duration_µs;
+      
+    /**
+     * required duration; reported long (Long) is whatever is provided
+     * converted to hours
+     */
     public final java.time.Duration hours;
+      
+    /**
+     * optional duration with default value;
+     * reported long (Long) is in milliseconds, either 550,000 if value is missing
+     * or whatever is provided converted to millis
+     */
     public final java.time.Duration millis;
     public final java.time.Duration getDays() { return days; }
     public final java.time.Duration getDuration_dy() { return duration_dy; }

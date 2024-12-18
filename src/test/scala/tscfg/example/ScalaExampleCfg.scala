@@ -4,6 +4,20 @@ final case class ScalaExampleCfg(
   endpoint : ScalaExampleCfg.Endpoint
 )
 object ScalaExampleCfg {
+  
+  /** Description of the required endpoint section.
+    * 
+    * @param serial
+    *   an optional Integer with default value null
+    * @param path
+    *   a required String
+    * @param url
+    *   a String with default value "https://example.net"
+    * @param interface
+    *   Interface definition
+    * @param intReq
+    *   a required int
+    */
   final case class Endpoint(
     intReq    : scala.Int,
     interface : ScalaExampleCfg.Endpoint.Interface,
@@ -12,6 +26,14 @@ object ScalaExampleCfg {
     url       : java.lang.String
   )
   object Endpoint {
+    
+    /** Interface definition
+      * 
+      * @param `type`
+      *   Interface type
+      * @param port
+      *   an int with default value 8080
+      */
     final case class Interface(
       port   : scala.Int,
       `type` : scala.Option[java.lang.String]
@@ -31,7 +53,7 @@ object ScalaExampleCfg {
         interface = ScalaExampleCfg.Endpoint.Interface(if(c.hasPathOrNull("interface")) c.getConfig("interface") else com.typesafe.config.ConfigFactory.parseString("interface{}"), parentPath + "interface.", $tsCfgValidator),
         path      = $_reqStr(parentPath, c, "path", $tsCfgValidator),
         serial    = if(c.hasPathOrNull("serial")) Some(c.getInt("serial")) else None,
-        url       = if(c.hasPathOrNull("url")) c.getString("url") else "http://example.net"
+        url       = if(c.hasPathOrNull("url")) c.getString("url") else "https://example.net"
       )
     }
     private def $_reqInt(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.Int = {

@@ -112,6 +112,7 @@ class ModelBuilder(
           effOptional,
           effDefault,
           childStruct.defineCaseOpt,
+          docComments = childStruct.docComments,
           commentsOpt,
           parentClassMembers,
         )
@@ -167,6 +168,7 @@ class ModelBuilder(
       effOptional: Boolean,
       effDefault: Option[String],
       defineCase: Option[DefineCase],
+      docComments: List[String],
       commentsOpt: Option[String],
       parentClassMembers: Option[Map[String, model.AnnType]]
   ): AnnType = {
@@ -192,6 +194,7 @@ class ModelBuilder(
       optional = effOptional,
       default = effDefault,
       defineCase = defineCase,
+      docComments = docComments,
       comments = commentsOpt,
       parentClassMembers = parentClassMembers.map(_.toMap),
     )
@@ -369,7 +372,7 @@ object ModelBuilder {
   }
 
   /** build model from TS Config object */
-  def fromConfig(
+  private def fromConfig(
       rootNamespace: NamespaceMan,
       config: Config,
       assumeAllRequired: Boolean = false

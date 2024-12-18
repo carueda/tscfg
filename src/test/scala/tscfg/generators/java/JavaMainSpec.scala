@@ -1093,7 +1093,7 @@ class JavaMainSpec extends AnyWordSpec {
         .resolve()
     )
 
-    "result in a valid config for scala" in {
+    "result in a valid config for java" in {
       val r = JavaGen.generate("example/issue67.spec.conf")
       assert(
         r.classNames === Set("JavaIssue67Cfg", "AbstractA", "ImplA", "Test")
@@ -1120,7 +1120,7 @@ class JavaMainSpec extends AnyWordSpec {
         .resolve()
     )
 
-    "result in a valid config for scala" in {
+    "result in a valid config for java" in {
       val r = JavaGen.generate("example/issue67a.spec.conf")
       assert(
         r.classNames === Set(
@@ -1159,7 +1159,7 @@ class JavaMainSpec extends AnyWordSpec {
         .resolve()
     )
 
-    "result in a valid config for scala" in {
+    "result in a valid config for java" in {
       val r = JavaGen.generate("example/issue67b.spec.conf")
       assert(
         r.classNames === Set(
@@ -1459,7 +1459,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "(scala) issue 309a" should {
+  "(java) issue 309a" should {
     "generate class for empty object EmptyObj" in {
       val r = JavaGen.generate("example/issue309a.spec.conf")
       assert(r.classNames === Set("JavaIssue309aCfg", "EmptyObj"))
@@ -1475,7 +1475,7 @@ class JavaMainSpec extends AnyWordSpec {
     }
   }
 
-  "(scala) issue 309b" should {
+  "(java) issue 309b" should {
     "generate class for empty object SomeExtension extending SomeAbstract" in {
       val r = JavaGen.generate("example/issue309b.spec.conf")
       assert(
@@ -1493,6 +1493,100 @@ class JavaMainSpec extends AnyWordSpec {
           |""".stripMargin))
 
       assert(c.foo.something === "howdy")
+    }
+  }
+
+  "(java) issue 312a - javadoc (record)" should {
+    "generate expected classes" in {
+      val r =
+        JavaGen.generate(
+          "example/issue312a.spec.conf",
+          genDoc = true,
+          genRecords = true
+        )
+      assert(
+        r.classNames === Set(
+          "JavaIssue312aCfg",
+          "Endpoint",
+          "Notification",
+          "Emails$Elm",
+        )
+      )
+    }
+    "generate expected javadoc" in {
+      val file =
+        new File("src/test/java/tscfg/example/JavaIssue312aCfg.java")
+      val src = tscfg.files.readFile(file).get
+      assert(src.contains("* Description of the required endpoint."))
+      assert(src.contains("* /\\* nested doc comment delimiters *\\/ escaped."))
+      assert(src.contains("* @param notification"))
+      assert(src.contains("* @param path"))
+      assert(src.contains("* @param path"))
+      assert(src.contains("* @param emails"))
+    }
+
+    "be exercised ok" in {
+      val c = new JavaIssue312aCfg(ConfigFactory.parseString("""
+          |endpoint.path = /api/v1
+          |endpoint.notification.emails = [ {email = "foo@x.net"} ]
+          |""".stripMargin))
+
+      assert(c.endpoint.path === "/api/v1")
+      assert(c.endpoint.port === 8080)
+      val emails = c.endpoint.notification.emails.asScala
+      assert(
+        emails === List(
+          new JavaIssue312aCfg.Endpoint.Notification.Emails$Elm(
+            "foo@x.net",
+            null
+          )
+        )
+      )
+    }
+  }
+
+  "(java) issue 312b - javadoc (regular class)" should {
+    "generate expected classes" in {
+      val r =
+        JavaGen.generate(
+          "example/issue312b.spec.conf",
+          genDoc = true,
+          genRecords = false
+        )
+      assert(
+        r.classNames === Set(
+          "JavaIssue312bCfg",
+          "Endpoint",
+          "Notification",
+          "Emails$Elm",
+        )
+      )
+    }
+    "generate expected javadoc" in {
+      val file =
+        new File("src/test/java/tscfg/example/JavaIssue312bCfg.java")
+      val src = tscfg.files.readFile(file).get
+      assert(src.contains("* Description of the required endpoint."))
+      assert(src.contains("* /\\* nested doc comment delimiters *\\/ escaped."))
+      assert(src.contains("* The associated path."))
+      assert(src.contains("* For example, \"/home/foo/bar\""))
+      assert(src.contains("* Port for the endpoint service."))
+      assert(src.contains("* Configuration for notifications."))
+    }
+
+    "be exercised ok" in {
+      val c = new JavaIssue312bCfg(ConfigFactory.parseString("""
+          |endpoint.path = /api/v1
+          |endpoint.notification.emails = [ {email = "foo@x.net"} ]
+          |""".stripMargin))
+
+      assert(c.endpoint.path === "/api/v1")
+      assert(c.endpoint.port === 8080)
+      val emails = c.endpoint.notification.emails.asScala
+      assert(emails.length === 1)
+      val email = emails.head
+      assert(email.email === "foo@x.net")
+      assert(email.name === null)
     }
   }
 }

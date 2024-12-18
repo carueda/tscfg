@@ -4,6 +4,19 @@ final case class ScalaExample4tplCfg(
   endpoint : ScalaExample4tplCfg.Endpoint
 )
 object ScalaExample4tplCfg {
+  
+  /** Description of the required endpoint section.
+    * 
+    * @param path
+    *   The path associated with the endpoint.
+    *   For example, "/home/foo/bar"
+    * @param stuff
+    *   Some optional stuff.
+    * @param port
+    *   Port for the endpoint service.
+    * @param notifications
+    *   Configuration for notifications
+    */
   final case class Endpoint(
     notifications : ScalaExample4tplCfg.Endpoint.Notifications,
     path          : java.lang.String,
@@ -11,6 +24,12 @@ object ScalaExample4tplCfg {
     stuff         : scala.Option[ScalaExample4tplCfg.Endpoint.Stuff]
   )
   object Endpoint {
+    
+    /** Configuration for notifications
+      * 
+      * @param emails
+      *   Emails to send notifications to.
+      */
     final case class Notifications(
       emails : scala.List[ScalaExample4tplCfg.Endpoint.Notifications.Emails$Elm]
     )
@@ -49,6 +68,12 @@ object ScalaExample4tplCfg {
       }
     }
           
+    
+    /** Some optional stuff.
+      * 
+      * @param coefs
+      *   Coeficient matrix
+      */
     final case class Stuff(
       coefs : scala.List[scala.List[scala.Double]],
       port2 : scala.Int

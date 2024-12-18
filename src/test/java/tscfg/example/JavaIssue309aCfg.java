@@ -1,8 +1,20 @@
 package tscfg.example;
 
 public class JavaIssue309aCfg {
+    
+  /**
+   * comment1
+   */
   public final JavaIssue309aCfg.EmptyObj emptyObj;
+    
+  /**
+   * comment2
+   */
   public final int other;
+  
+  /**
+   * comment1
+   */
   public static class EmptyObj {
     
     

@@ -5,6 +5,9 @@ final case class ScalaIssue309aCfg(
   other    : scala.Int
 )
 object ScalaIssue309aCfg {
+  
+  /** comment1
+    */
   final case class EmptyObj(
     
   )

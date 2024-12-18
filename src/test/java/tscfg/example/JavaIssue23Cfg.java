@@ -1,10 +1,30 @@
 package tscfg.example;
 
 public class JavaIssue23Cfg {
+    
+  /**
+   * optional size, no default
+   */
   public final java.lang.Long sizeOpt;
+    
+  /**
+   * optional size with default value 1024 bytes
+   */
   public final long sizeOptDef;
+    
+  /**
+   * required size
+   */
   public final long sizeReq;
+    
+  /**
+   * list of sizes
+   */
   public final java.util.List<java.lang.Long> sizes;
+    
+  /**
+   * list of lists of sizes
+   */
   public final java.util.List<java.util.List<java.lang.Long>> sizes2;
   
   public JavaIssue23Cfg(com.typesafe.config.Config c) {

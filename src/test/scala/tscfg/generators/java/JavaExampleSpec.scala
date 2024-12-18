@@ -29,7 +29,7 @@ class JavaExampleSpec extends AnyWordSpec {
     }
 
     "capture default values" in {
-      assert(cfg.endpoint.url === "http://example.net")
+      assert(cfg.endpoint.url === "https://example.net")
       assert(cfg.endpoint.serial === null)
     }
   }

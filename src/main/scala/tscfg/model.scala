@@ -87,6 +87,7 @@ object model {
       optional: Boolean = false,
       default: Option[String] = None,
       defineCase: Option[DefineCase] = None,
+      docComments: List[String] = Nil,
       comments: Option[String] = None,
       parentClassMembers: Option[Map[String, model.AnnType]] = None,
   ) {

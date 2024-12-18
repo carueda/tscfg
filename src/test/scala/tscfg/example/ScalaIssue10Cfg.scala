@@ -4,11 +4,19 @@ final case class ScalaIssue10Cfg(
   main : ScalaIssue10Cfg.Main
 )
 object ScalaIssue10Cfg {
+  
+  /** 
+    * @param email
+    *   Mail server properties if you want to enable notifications to users
+    */
   final case class Main(
     email : scala.Option[ScalaIssue10Cfg.Main.Email],
     reals : scala.Option[scala.List[ScalaIssue10Cfg.Main.Reals$Elm]]
   )
   object Main {
+    
+    /** Mail server properties if you want to enable notifications to users
+      */
     final case class Email(
       password : java.lang.String,
       server   : java.lang.String

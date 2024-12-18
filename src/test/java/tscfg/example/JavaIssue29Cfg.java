@@ -1,6 +1,10 @@
 package tscfg.example;
 
 public class JavaIssue29Cfg {
+    
+  /**
+   * 测试 is test in Chinese.
+   */
   public final java.lang.String test;
   
   public JavaIssue29Cfg(com.typesafe.config.Config c) {

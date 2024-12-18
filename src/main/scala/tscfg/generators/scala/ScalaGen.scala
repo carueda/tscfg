@@ -132,14 +132,16 @@ class ScalaGen(
     symbols.foreach(checkUserSymbol)
 
     val results = symbols.map { symbol =>
-      val a = ot.members(symbol)
-      val res = generate(
+      val a   = ot.members(symbol)
+      val doc = docUtil.getDoc(a, genOpts, scalaIdentifier, genScala = true)
+      var res = generate(
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
         className = getClassName(symbol),
         Some(a),
         a.parentClassMembers,
       )
+      res = res.copy(definition = doc + res.definition)
       (symbol, res, a, false)
     }
 
@@ -474,6 +476,7 @@ object ScalaGen {
   // $COVERAGE-OFF$
   def generate(
       filename: String,
+      genDoc: Boolean = true,
       assumeAllRequired: Boolean = false,
       showOut: Boolean = false,
       useDurations: Boolean = false,
@@ -520,6 +523,7 @@ object ScalaGen {
     val genOpts = GenOpts(
       "tscfg.example",
       className,
+      genDoc = genDoc,
       useBackticks = useBackticks,
       useDurations = useDurations,
     )

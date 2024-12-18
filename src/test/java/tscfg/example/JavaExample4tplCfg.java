@@ -1,13 +1,46 @@
 package tscfg.example;
 
 public class JavaExample4tplCfg {
+    
+  /**
+   * Description of the required endpoint section.
+   */
   public final JavaExample4tplCfg.Endpoint endpoint;
+  
+  /**
+   * Description of the required endpoint section.
+   */
   public static class Endpoint {
+      
+    /**
+     * Configuration for notifications
+     */
     public final Endpoint.Notifications notifications;
+      
+    /**
+     * The path associated with the endpoint.
+     * For example, "/home/foo/bar"
+     */
     public final java.lang.String path;
+      
+    /**
+     * Port for the endpoint service.
+     */
     public final int port;
+      
+    /**
+     * Some optional stuff.
+     */
     public final Endpoint.Stuff stuff;
+    
+    /**
+     * Configuration for notifications
+     */
     public static class Notifications {
+        
+      /**
+       * Emails to send notifications to.
+       */
       public final java.util.List<Notifications.Emails$Elm> emails;
       public static class Emails$Elm {
         public final java.lang.String email;
@@ -42,7 +75,15 @@ public class JavaExample4tplCfg {
       }
     }
     
+    
+    /**
+     * Some optional stuff.
+     */
     public static class Stuff {
+        
+      /**
+       * Coeficient matrix
+       */
       public final java.util.List<java.util.List<java.lang.Double>> coefs;
       public final int port2;
       

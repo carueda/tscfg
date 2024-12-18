@@ -80,13 +80,15 @@ class JavaGen(
     symbols.foreach(methodNames.checkUserSymbol)
 
     val results = symbols.map { symbol =>
-      val a = ot.members(symbol)
-      val res = generate(
+      val a   = ot.members(symbol)
+      val doc = docUtil.getDoc(a, genOpts, javaIdentifier)
+      var res = generate(
         a.t,
         classNamePrefixOpt = Some(classNameAdjusted + "."),
         className = javaUtil.getClassName(symbol),
         annTypeForAbstractClassName = Some(a)
       )
+      res = res.copy(definition = doc + res.definition)
       (symbol, res, a)
     }
 
@@ -121,8 +123,17 @@ class JavaGen(
               .copy(fields = genResults.fields + (javaId -> type_))
             if (genOpts.genRecords)
               s"$type_ $javaId" + dbg("<decl>")
-            else
-              s"public final $type_ $javaId;" + dbg("<decl>")
+            else {
+              val doc =
+                docUtil.getDoc(
+                  a,
+                  genOpts,
+                  javaIdentifier,
+                  onlyField = true,
+                  indent = "  "
+                )
+              doc + s"public final $type_ $javaId;" + dbg("<decl>")
+            }
           }
       }
       .mkString(if (genOpts.genRecords) ",\n  " else "\n  ")
@@ -637,6 +648,7 @@ object JavaGen {
   // $COVERAGE-OFF$
   def generate(
       filename: String,
+      genDoc: Boolean = true,
       showOut: Boolean = false,
       assumeAllRequired: Boolean = false,
       genGetters: Boolean = false,
@@ -679,6 +691,7 @@ object JavaGen {
     val genOpts = GenOpts(
       "tscfg.example",
       className,
+      genDoc = genDoc,
       genGetters = genGetters,
       genRecords = genRecords,
       useOptionals = useOptionals,
