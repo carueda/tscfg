@@ -50,7 +50,7 @@ fullRunTask(genCode, Compile, "tscfg.gen4tests")
 
 addCommandAlias("fmt", "; scalafmtAll; scalafmtSbt")
 addCommandAlias("fmtCheck", "; scalafmtCheckAll; scalafmtSbtCheck")
-addCommandAlias("all", "; clean; fmt; test")
+addCommandAlias("a", "; clean; fmt; test")
 addCommandAlias("c", "; compile")
 
 publishMavenStyle        := true
