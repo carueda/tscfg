@@ -16,9 +16,9 @@ object model {
       def :=(a: AnnType): (String, AnnType) = s -> a
 
       def %(a: AnnType): AnnType =
-        a.copy(comments = Some(s + a.comments.getOrElse("")))
+        a.copy(comments = List(s) ++ a.comments)
 
-      def %(t: Type): AnnType = AnnType(t, comments = Some(s))
+      def %(t: Type): AnnType = AnnType(t, comments = List(s))
     }
 
   }
@@ -88,7 +88,7 @@ object model {
       default: Option[String] = None,
       defineCase: Option[DefineCase] = None,
       docComments: List[String] = Nil,
-      comments: Option[String] = None,
+      comments: List[String] = Nil,
       parentClassMembers: Option[Map[String, model.AnnType]] = None,
   ) {
 
@@ -163,7 +163,7 @@ object model {
             val cmn =
               if (a.comments.isEmpty) ""
               else {
-                val lines = a.comments.get.split("\n")
+                val lines = a.comments
                 val noOptComments =
                   lines.filterNot(_.trim.startsWith("@optional"))
                 if (noOptComments.isEmpty) ""

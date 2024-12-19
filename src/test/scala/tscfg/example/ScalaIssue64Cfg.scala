@@ -4,6 +4,9 @@ final case class ScalaIssue64Cfg(
   test            : ScalaIssue64Cfg.Test
 )
 object ScalaIssue64Cfg {
+  
+  /** Comment for (abstract) BaseModelConfig
+    */
   sealed abstract class BaseModelConfig (
    val scaling : scala.Double,
     val uuids   : scala.List[java.lang.String]

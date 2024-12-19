@@ -4,12 +4,15 @@
 
 - Advancing #312 "Reflect doc comments in generated code"
     - Most cases already covered, both for scala and java records/POJOs
-    - Note: `@define`s not yet addressed.
+    - Those include `@define`, except `#define enum`.
     - Comments used for annotations, i.e., starting with `@`, are not considered.
     - Also ignored are comments starting with `!`.
+    - Scala: For the root class, for which we don't have a general description, only
+      the params are generated. For simplicity in initial implementation, only first
+      non-empty comment line for each param is used.
     - Doc generation processing is always performed.
       (In retrospect, this should have been implemented long ago, but better late than never 😅)
-        - however, for now, `--no-doc` can be used to opt out of doc generation
+      - however, for now, `--no-doc` can be used to opt out of doc generation
 
 1.1.5
 

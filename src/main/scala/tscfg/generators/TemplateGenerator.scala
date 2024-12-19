@@ -25,10 +25,11 @@ class TemplateGenerator(opts: TemplateOpts) {
       .map { symbol =>
         val a = o.members(symbol)
 
+        // TODO simplify after having changed to List from Option for a.comments
         val (annotations, comments) = a.comments match {
-          case None => (List.empty, List.empty)
-          case Some(str) =>
-            val lines = str.split("\n").toList.filterNot(_.startsWith("!"))
+          case Nil => (List.empty, List.empty)
+          case comments =>
+            val lines = comments.filterNot(_.startsWith("!"))
             lines.partition(_.startsWith("@"))
         }
 

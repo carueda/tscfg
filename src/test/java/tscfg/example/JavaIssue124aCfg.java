@@ -1,7 +1,15 @@
 package tscfg.example;
 
 public class JavaIssue124aCfg {
+    
+  /**
+   * Comment for example
+   */
   public final JavaIssue124aCfg.Example example;
+  
+  /**
+   * Comment for Shared
+   */
   public static class Shared {
     public final java.lang.String c;
     public final int d;
@@ -34,6 +42,10 @@ public class JavaIssue124aCfg {
   
   }
   
+  
+  /**
+   * Comment for example
+   */
   public static class Example {
     public final Shared a;
     public final java.util.List<Shared> b;

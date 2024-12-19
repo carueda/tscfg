@@ -1,25 +1,29 @@
 package tscfg.generators
 
-import tscfg.model.{AnnType, ObjectType}
+import tscfg.model.{AnnType, ObjectRealType}
 
 object docUtil {
 
   /** This is only for scala. For the root class, for which we don't have a
-    * description, only the params are generated (and, for simplicity at this
-    * time, only first non-empty comment line for each):
+    * general description, only the params are generated. For simplicity in
+    * initial implementation, only first non-empty comment line for each is
+    * used.
     */
   def getRootClassDoc(
-      objectType: ObjectType,
+      objectType: ObjectRealType,
       genOpts: GenOpts,
       symbol2id: String => String,
   ): String = {
     if (genOpts.genDoc) {
-      val docLines = objectType.members.toList.flatMap { case (symbol, a) =>
-        a.docComments.map(_.trim).filterNot(_.isEmpty).headOption map {
-          firstLine =>
-            List(s"@param ${symbol2id(symbol)}", s"  $firstLine")
+      val docLines = objectType.members.toList
+        .filterNot(_._2.isDefine)
+        .flatMap { case (symbol, a) =>
+          a.docComments.map(_.trim).filterNot(_.isEmpty).headOption map {
+            firstLine =>
+              List(s"@param ${symbol2id(symbol)}", s"  $firstLine")
+          }
         }
-      }.flatten
+        .flatten
       if (docLines.nonEmpty) {
         docLines.mkString(s"/** ", "\n  * ", "\n  */\n")
       }
@@ -40,7 +44,7 @@ object docUtil {
     else {
       val withParams = !onlyField && (genScala || genOpts.genRecords)
       a.t match {
-        case ot: ObjectType =>
+        case ot: ObjectRealType =>
           val paramDocs = if (withParams) {
             // only reflect params with comments
             ot.members.toList.flatMap { case (k, memberAnnType) =>

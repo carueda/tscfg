@@ -80,8 +80,6 @@ class ModelBuilder(
 
         val comments        = childStruct.comments
         val optFromComments = comments.exists(_.trim.startsWith("@optional"))
-        val commentsOpt =
-          if (comments.isEmpty) None else Some(comments.mkString("\n"))
 
         // per Lightbend Config restrictions involving $, leave the key alone if
         // contains $, otherwise unquote the key in case is quoted.
@@ -113,7 +111,7 @@ class ModelBuilder(
           effDefault,
           childStruct.defineCaseOpt,
           docComments = childStruct.docComments,
-          commentsOpt,
+          comments = comments,
           parentClassMembers,
         )
 
@@ -169,7 +167,7 @@ class ModelBuilder(
       effDefault: Option[String],
       defineCase: Option[DefineCase],
       docComments: List[String],
-      commentsOpt: Option[String],
+      comments: List[String],
       parentClassMembers: Option[Map[String, model.AnnType]]
   ): AnnType = {
 
@@ -179,7 +177,7 @@ class ModelBuilder(
     // TODO review the following
     val updatedChildType = childType match {
       case objType: ObjectType =>
-        if (commentsOpt.exists(AnnType.isAbstract))
+        if (comments.exists(AnnType.isAbstract))
           AbstractObjectType(objType.members)
         else objType
 
@@ -195,7 +193,7 @@ class ModelBuilder(
       default = effDefault,
       defineCase = defineCase,
       docComments = docComments,
-      comments = commentsOpt,
+      comments = comments,
       parentClassMembers = parentClassMembers.map(_.toMap),
     )
   }

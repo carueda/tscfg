@@ -40,7 +40,7 @@ class ModelBuilderSpec extends AnyWordSpec {
       t: Type,
       optional: Boolean = false,
       default: Option[String] = None,
-      comments: Option[String] = None
+      comments: List[String] = Nil
   ): Unit = {
     val at = objType.members(memberName)
     assert(at.t === t)

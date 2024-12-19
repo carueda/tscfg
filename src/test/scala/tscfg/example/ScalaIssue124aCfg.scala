@@ -1,9 +1,15 @@
 package tscfg.example
 
+/** @param example
+  *   Comment for example
+  */
 final case class ScalaIssue124aCfg(
   example : ScalaIssue124aCfg.Example
 )
 object ScalaIssue124aCfg {
+  
+  /** Comment for Shared
+    */
   final case class Shared(
     c : java.lang.String,
     d : scala.Int
@@ -37,6 +43,9 @@ object ScalaIssue124aCfg {
   
   }
         
+  
+  /** Comment for example
+    */
   final case class Example(
     a : scala.Option[ScalaIssue124aCfg.Shared],
     b : scala.Option[scala.List[ScalaIssue124aCfg.Shared]]

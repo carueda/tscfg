@@ -2,6 +2,10 @@ package tscfg.example;
 
 public class JavaIssue64Cfg {
   public final JavaIssue64Cfg.Test test;
+  
+  /**
+   * Comment for (abstract) BaseModelConfig
+   */
   public abstract static class BaseModelConfig {
     public final double scaling;
     public final java.util.List<java.lang.String> uuids;
