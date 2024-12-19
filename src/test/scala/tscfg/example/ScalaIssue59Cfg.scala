@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param foolist
+  *   option `--scala:2.12` removed in tscfg 1.1.0
+  */
 final case class ScalaIssue59Cfg(
   foolist : scala.List[java.lang.String]
 )

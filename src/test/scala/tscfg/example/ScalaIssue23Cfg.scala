@@ -1,5 +1,16 @@
 package tscfg.example
 
+/** @param sizes2
+  *   list of lists of sizes
+  * @param sizeReq
+  *   required size
+  * @param sizes
+  *   list of sizes
+  * @param sizeOptDef
+  *   optional size with default value 1024 bytes
+  * @param sizeOpt
+  *   optional size, no default
+  */
 final case class ScalaIssue23Cfg(
   sizeOpt    : scala.Option[scala.Long],
   sizeOptDef : scala.Long,

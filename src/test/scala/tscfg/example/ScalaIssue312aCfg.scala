@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param endpoint
+  *   Description of the required endpoint.
+  */
 final case class ScalaIssue312aCfg(
   endpoint : ScalaIssue312aCfg.Endpoint
 )

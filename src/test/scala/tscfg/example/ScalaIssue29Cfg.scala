@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param test
+  *   测试 is test in Chinese.
+  */
 final case class ScalaIssue29Cfg(
   test : java.lang.String
 )

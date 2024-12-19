@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param bazOptionalWithDefault
+  *   same as:  "string | hello"
+  */
 final case class ScalaExample1Cfg(
   bazOptionalWithDefault   : java.lang.String,
   bazOptionalWithNoDefault : scala.Option[java.lang.String],

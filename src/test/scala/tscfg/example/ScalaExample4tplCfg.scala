@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param endpoint
+  *   Description of the required endpoint section.
+  */
 final case class ScalaExample4tplCfg(
   endpoint : ScalaExample4tplCfg.Endpoint
 )

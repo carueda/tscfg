@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param endpoint
+  *   Description of the required endpoint section.
+  */
 final case class ScalaExampleCfg(
   endpoint : ScalaExampleCfg.Endpoint
 )
@@ -8,7 +11,7 @@ object ScalaExampleCfg {
   /** Description of the required endpoint section.
     * 
     * @param serial
-    *   an optional Integer with default value null
+    *   an optional Integer with default value null (None is scala)
     * @param path
     *   a required String
     * @param url

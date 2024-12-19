@@ -1,6 +1,6 @@
 2024-12
 
-1.2.0
+1.2.1, 1.2.0
 
 - Advancing #312 "Reflect doc comments in generated code"
     - Most cases already covered, both for scala and java records/POJOs

@@ -1,5 +1,8 @@
 package tscfg.example
 
+/** @param parameter
+  *   not supported yet, see #50
+  */
 final case class ScalaIssue50Cfg(
   parameter : scala.Int
 )

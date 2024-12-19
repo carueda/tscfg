@@ -28,7 +28,7 @@ public class JavaExampleCfg {
     public final java.lang.String path;
       
     /**
-     * an optional Integer with default value null
+     * an optional Integer with default value null (None is scala)
      */
     public final java.lang.Integer serial;
       

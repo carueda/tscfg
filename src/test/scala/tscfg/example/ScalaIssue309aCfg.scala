@@ -1,5 +1,10 @@
 package tscfg.example
 
+/** @param emptyObj
+  *   comment1
+  * @param other
+  *   comment2
+  */
 final case class ScalaIssue309aCfg(
   emptyObj : ScalaIssue309aCfg.EmptyObj,
   other    : scala.Int

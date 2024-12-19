@@ -3,6 +3,31 @@ package tscfg.generators
 import tscfg.model.{AnnType, ObjectType}
 
 object docUtil {
+
+  /** This is only for scala. For the root class, for which we don't have a
+    * description, only the params are generated (and, for simplicity at this
+    * time, only first non-empty comment line for each):
+    */
+  def getRootClassDoc(
+      objectType: ObjectType,
+      genOpts: GenOpts,
+      symbol2id: String => String,
+  ): String = {
+    if (genOpts.genDoc) {
+      val docLines = objectType.members.toList.flatMap { case (symbol, a) =>
+        a.docComments.map(_.trim).filterNot(_.isEmpty).headOption map {
+          firstLine =>
+            List(s"@param ${symbol2id(symbol)}", s"  $firstLine")
+        }
+      }.flatten
+      if (docLines.nonEmpty) {
+        docLines.mkString(s"/** ", "\n  * ", "\n  */\n")
+      }
+      else ""
+    }
+    else ""
+  }
+
   def getDoc(
       a: AnnType,
       genOpts: GenOpts,
@@ -13,7 +38,7 @@ object docUtil {
   ): String = {
     if (!genOpts.genDoc) ""
     else {
-      val withParams = genScala || genOpts.genRecords
+      val withParams = !onlyField && (genScala || genOpts.genRecords)
       a.t match {
         case ot: ObjectType =>
           val paramDocs = if (withParams) {
