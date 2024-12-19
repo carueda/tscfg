@@ -5,7 +5,7 @@ public record JavaIssue75Cfg(
 ) {
   static final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();
 
-  public static record Simple(
+  public record Simple(
     java.lang.String foo,
     int int_
   ) {

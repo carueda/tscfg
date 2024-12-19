@@ -283,7 +283,7 @@ class JavaGen(
               "\n  static final $TsCfgValidator $tsCfgValidator = new $TsCfgValidator();\n"
             else ""
 
-          s"""public ${if (isRoot) "" else "static "}record $classNameAdjusted(
+          s"""public record $classNameAdjusted(
              |  $classDeclMembersStr$classMemberGettersStr
              |) $extendsString{$beginningBody
              |  $membersStr

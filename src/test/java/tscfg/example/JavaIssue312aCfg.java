@@ -18,7 +18,7 @@ public record JavaIssue312aCfg(
    * @param port
    *   Port for the endpoint service.
    */
-  public static record Endpoint(
+  public record Endpoint(
     Endpoint.Notification notification,
     java.lang.String path,
     int port
@@ -30,10 +30,10 @@ public record JavaIssue312aCfg(
      * @param emails
      *   Emails to send notifications to.
      */
-    public static record Notification(
+    public record Notification(
       java.util.List<Notification.Emails$Elm> emails
     ) {
-      public static record Emails$Elm(
+      public record Emails$Elm(
         java.lang.String email,
         java.lang.String name
       ) {
