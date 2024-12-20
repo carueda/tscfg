@@ -5,10 +5,12 @@ final case class ScalaIssue62bCfg(
 )
 object ScalaIssue62bCfg {
   sealed trait FruitType
+  
   object FruitType {
     object apple extends FruitType
     object banana extends FruitType
     object pineapple extends FruitType
+  
     def $resEnum(name: java.lang.String, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): FruitType = name match {
       case "apple" => FruitType.apple
       case "banana" => FruitType.banana

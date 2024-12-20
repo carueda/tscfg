@@ -311,14 +311,21 @@ class ModelBuilder(
     model.ListType(elemType)
   }
 
-  private def enumType(cv: ConfigList): model.EnumObjectType = {
-    if (cv.isEmpty)
+  private def enumType(cl: ConfigList): model.EnumObjectType = {
+    if (cl.isEmpty)
       throw new IllegalArgumentException(
         "enumeration with at least one element expected"
       )
 
     model.EnumObjectType(
-      cv.iterator().asScala.map(_.unwrapped().toString).toList
+      cl.iterator()
+        .asScala
+        .map { cv =>
+          val comments = cv.origin().comments().asScala.toList
+          val name     = cv.unwrapped().toString
+          EnumElement(name, comments)
+        }
+        .toList
     )
   }
 

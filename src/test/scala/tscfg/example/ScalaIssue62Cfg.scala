@@ -1,15 +1,34 @@
 package tscfg.example
 
+/** @param fruit
+  *   Use of the enum at first level
+  * @param fruits
+  *   Use of the enum in a list
+  */
 final case class ScalaIssue62Cfg(
   fruit     : ScalaIssue62Cfg.FruitType,
   fruits    : scala.List[ScalaIssue62Cfg.FruitType]
 )
 object ScalaIssue62Cfg {
+  
+  /** Comment for enum FruitType
+    */
   sealed trait FruitType
+  
   object FruitType {
+      
+    /** comment for element apple
+      */
     object apple extends FruitType
+      
+    /** comment for element banana
+      */
     object banana extends FruitType
+      
+    /** comment for element pineapple
+      */
     object pineapple extends FruitType
+  
     def $resEnum(name: java.lang.String, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): FruitType = name match {
       case "apple" => FruitType.apple
       case "banana" => FruitType.banana

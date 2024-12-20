@@ -108,7 +108,13 @@ object model {
 
   sealed abstract class ObjectAbsType extends Type
 
-  case class EnumObjectType(members: List[String]) extends ObjectAbsType
+  case class EnumObjectType(members: List[EnumElement]) extends ObjectAbsType
+
+  case class EnumElement(name: String, comments: List[String]) {
+    override def toString: String = throw new AssertionError(
+      "should not be called"
+    )
+  }
 
   sealed abstract class ObjectRealType(val members: Map[String, AnnType])
       extends ObjectAbsType

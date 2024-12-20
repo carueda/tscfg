@@ -2,14 +2,10 @@
 
 1.2.1, 1.2.0
 
-- Advancing #312 "Reflect doc comments in generated code"
-    - Most cases already covered, both for scala and java records/POJOs
-    - Those include `@define`, except `#define enum`.
-    - Comments used for annotations, i.e., starting with `@`, are not considered.
-    - Also ignored are comments starting with `!`.
-    - Scala: For the root class, for which we don't have a general description, only
-      the params are generated. For simplicity in initial implementation, only first
-      non-empty comment line for each param is used.
+- Resolved #312 "Reflect doc comments in generated code"
+    - All comment lines are considered for documentation, except those starting with `@` or `!`.
+    - Note that for the root class, tscfg does not capture a general description, so its
+      doc comment will be empty for Java and only with `@param` entries for Scala.
     - Doc generation processing is always performed.
       (In retrospect, this should have been implemented long ago, but better late than never 😅)
       - however, for now, `--no-doc` can be used to opt out of doc generation
@@ -219,21 +215,6 @@ fix #71 "Two shared objects leading to string conversion"
 
 - partial implementation of #62 "Ability to set enums in config"
   This is initially working in general for java and for references in nested objects for scala.
-  TODO(scala) proper reference at first level. See generated `ScalaIssue62Cfg` upon running:
-
-      > runMain tscfg.Main --spec src/main/tscfg/example/issue62.spec.conf --scala --cn ScalaIssue62Cfg --dd src/test/scala/tscfg/example
-
-    where it should generate:
-
-            final case class ScalaIssue62Cfg(
-              fruit     : ScalaIssue62Cfg.FruitType
-            )
-
-    instead of:
-
-            final case class ScalaIssue62Cfg(
-              fruit     : FruitType
-            )
 
 - some refact for more general `@define` handling,
   and in preparation for #62 "Ability to set enums in config"

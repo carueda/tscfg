@@ -66,6 +66,16 @@ object docUtil {
     }
   }
 
+  def getEnumDoc(
+      docComments: List[String],
+      genScala: Boolean = false,
+      indent: String = ""
+  ): String =
+    if (docComments.nonEmpty) {
+      formatDocComment(docComments, Nil, genScala = genScala, indent = indent)
+    }
+    else ""
+
   private case class ParamDoc(name: String, docLines: List[String])
 
   private def formatDocComment(

@@ -48,6 +48,8 @@ fullRunTask(genCode, Compile, "tscfg.gen4tests")
 (Test / testOnly) := ((Test / testOnly) dependsOn (codeDefs, genCode)).evaluated
 (Test / test)     := ((Test / test) dependsOn (codeDefs, genCode)).value
 
+Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oF")
+
 addCommandAlias("fmt", "; scalafmtAll; scalafmtSbt")
 addCommandAlias("fmtCheck", "; scalafmtCheckAll; scalafmtSbtCheck")
 addCommandAlias("a", "; clean; fmt; test")

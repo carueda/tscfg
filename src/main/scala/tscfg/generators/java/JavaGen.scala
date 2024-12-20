@@ -39,7 +39,12 @@ class JavaGen(
   ): Res = typ match {
 
     case et: EnumObjectType =>
-      generateForEnum(et, classNamePrefixOpt, className)
+      generateForEnum(
+        et,
+        classNamePrefixOpt,
+        className,
+        annTypeForAbstractClassName
+      )
 
     case ot: ObjectType =>
       generateForObj(
@@ -359,15 +364,25 @@ class JavaGen(
       et: EnumObjectType,
       classNamePrefixOpt: Option[String] = None,
       className: String,
+      annTypeForParentClassName: Option[AnnType],
   ): Res = {
 
     val classNameAdjusted = adjustClassName(className)
-    val members           = et.members.mkString("", ",\n  ", ";")
-    val str =
-      s"""|public enum $classNameAdjusted {
-         |  $members
-         |}""".stripMargin
+    val membersStr =
+      et.members
+        .map { m =>
+          docUtil.getEnumDoc(m.comments, indent = "  ") + m.name
+        }
+        .mkString("", ",\n  ", ";")
 
+    val str = {
+      val doc = docUtil.getEnumDoc(
+        annTypeForParentClassName.map(_.docComments).getOrElse(Nil)
+      )
+      doc + s"""|public enum $classNameAdjusted {
+          |  $membersStr
+          |}""".stripMargin
+    }
     val baseType = classNamePrefixOpt.getOrElse("") + classNameAdjusted
     Res(et, javaType = BaseJavaType(baseType), definition = str)
   }

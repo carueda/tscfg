@@ -8,7 +8,8 @@ class TemplateGenerator(opts: TemplateOpts) {
   def generate(o: ObjectType): String = genObjectTypeMembers(o)
 
   private def genEnumType(et: EnumObjectType): String = {
-    s"[${et.members.mkString(", ")}]"
+    // TODO reflect comments
+    s"[${et.members.map(_.name).mkString(", ")}]"
   }
 
   private def genObjectType(o: ObjectRealType): String = {

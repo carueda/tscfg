@@ -1,11 +1,35 @@
 package tscfg.example;
 
 public class JavaIssue62Cfg {
+    
+  /**
+   * Use of the enum at first level
+   */
   public final FruitType fruit;
+    
+  /**
+   * Use of the enum in a list
+   */
   public final java.util.List<FruitType> fruits;
+  
+  /**
+   * Comment for enum FruitType
+   */
   public enum FruitType {
+      
+    /**
+     * comment for element apple
+     */
     apple,
+      
+    /**
+     * comment for element banana
+     */
     banana,
+      
+    /**
+     * comment for element pineapple
+     */
     pineapple;
   }
   public JavaIssue62Cfg(com.typesafe.config.Config c) {

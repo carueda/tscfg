@@ -58,7 +58,13 @@ class ScalaGen(
       parentClassMembers: Option[Map[String, model.AnnType]] = None,
   ): Res = typ match {
 
-    case et: EnumObjectType => generateForEnum(et, classNamesPrefix, className)
+    case et: EnumObjectType =>
+      generateForEnum(
+        et,
+        classNamesPrefix,
+        className,
+        annTypeForParentClassName
+      )
 
     case ot: ObjectType =>
       generateForObj(
@@ -425,30 +431,19 @@ class ScalaGen(
       et: EnumObjectType,
       classNamesPrefix: List[String] = List.empty,
       className: String,
+      annTypeForParentClassName: Option[AnnType],
   ): Res = {
     scribe.debug(
       s"generateForEnum: className=$className classNamesPrefix=$classNamesPrefix"
     )
     genResults = genResults.copy(classNames = genResults.classNames + className)
 
-    // / Example:
-    //  sealed trait FruitType
-    //  object FruitType {
-    //    object apple extends FruitType
-    //    object banana extends FruitType
-    //    object pineapple extends FruitType
-    //    def $resEnum(name: java.lang.String, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): FruitType = name match {
-    //      case "apple" => FruitType.apple
-    //      case "banana" => FruitType.banana
-    //      case "pineapple" => FruitType.pineapple
-    //      case v => $tsCfgValidator.addInvalidEnumValue(path, v, "FruitType")
-    //                null
-    //    }
-    //  }
-
     val resolve = {
       val members =
-        et.members.map(m => s"""case "$m" => $className.$m""").mkString("\n  ")
+        et.members
+          .map(m => s"""case "${m.name}" => $className.${m.name}""")
+          .mkString("\n  ")
+
       s"""def $$resEnum(name: java.lang.String, path: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): $className = name match {
          |  $members
          |  case v => $$tsCfgValidator.addInvalidEnumValue(path, v, "$className")
@@ -458,11 +453,23 @@ class ScalaGen(
 
     val str = {
       val membersStr =
-        et.members.map(m => s"object $m extends $className").mkString("\n  ")
+        et.members
+          .map { m =>
+            val doc =
+              docUtil.getEnumDoc(m.comments, genScala = true, indent = "  ")
+            doc + s"object ${m.name} extends $className"
+          }
+          .mkString("\n  ")
 
-      s"""|sealed trait $className
+      val doc = docUtil.getEnumDoc(
+        annTypeForParentClassName.map(_.docComments).getOrElse(Nil),
+        genScala = true
+      )
+      doc + s"""|sealed trait $className
+          |
           |object $className {
           |  $membersStr
+          |
           |  ${resolve.replaceAll("\n", "\n  ")}
           |}""".stripMargin
     }
