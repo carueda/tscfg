@@ -11,7 +11,15 @@ public class JavaIssue124aCfg {
    * Comment for Shared
    */
   public static class Shared {
+      
+    /**
+     * comment for c
+     */
     public final java.lang.String c;
+      
+    /**
+     * comment for d
+     */
     public final int d;
     
     public Shared(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
@@ -47,7 +55,15 @@ public class JavaIssue124aCfg {
    * Comment for example
    */
   public static class Example {
+      
+    /**
+     * comment for a
+     */
     public final Shared a;
+      
+    /**
+     * comment for b
+     */
     public final java.util.List<Shared> b;
     
     public Example(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {

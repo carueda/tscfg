@@ -6,12 +6,25 @@ final case class ScalaIssue64Cfg(
 object ScalaIssue64Cfg {
   
   /** Comment for (abstract) BaseModelConfig
+    * 
+    * @param scaling
+    *   comment for scaling
+    * @param uuids
+    *   comment for uuids
     */
   sealed abstract class BaseModelConfig (
    val scaling : scala.Double,
     val uuids   : scala.List[java.lang.String]
   )
   
+  
+  /** Comment for LoadModelConfig
+    * 
+    * @param modelBehaviour
+    *   comment for modelBehaviour
+    * @param reference
+    *   comment for reference
+    */
   final case class LoadModelConfig(
     override val scaling        : scala.Double,
     override val uuids          : scala.List[java.lang.String],

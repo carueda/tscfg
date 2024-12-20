@@ -7,7 +7,15 @@ public class JavaIssue64Cfg {
    * Comment for (abstract) BaseModelConfig
    */
   public abstract static class BaseModelConfig {
+      
+    /**
+     * comment for scaling
+     */
     public final double scaling;
+      
+    /**
+     * comment for uuids
+     */
     public final java.util.List<java.lang.String> uuids;
     
     public BaseModelConfig(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
@@ -27,8 +35,20 @@ public class JavaIssue64Cfg {
   
   }
   
+  
+  /**
+   * Comment for LoadModelConfig
+   */
   public static class LoadModelConfig extends BaseModelConfig {
+      
+    /**
+     * comment for modelBehaviour
+     */
     public final java.lang.String modelBehaviour;
+      
+    /**
+     * comment for reference
+     */
     public final java.lang.String reference;
     
     public LoadModelConfig(com.typesafe.config.Config c, java.lang.String parentPath, $TsCfgValidator $tsCfgValidator) {
