@@ -1,5 +1,9 @@
 2024-12
 
+Unreleased
+
+- crosscompile to scala 2.13.15
+
 1.2.1, 1.2.0
 
 - Resolved #312 "Reflect doc comments in generated code"
