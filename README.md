@@ -120,7 +120,7 @@ a string with a simple syntax as follows can be used
 | a: "int &vert; 3" | optional integer with default value `3` | `int` / `3` | `Int`/ `3`
 | a: "int?"         | optional integer | `Integer` / `null`(*) | `Option[Int]` / `None`
 
-> **NOTE**
+> [!note]
 > - (*) You can use the `--java:optionals` flag to generate `Optional<T>` instead of `null`.
 > - The type syntax is still subject to change.
 
@@ -229,7 +229,6 @@ generating: /tmp/ExampleCfg.java
 ### maven plugin
 
 Please see [tscfg-maven-plugin](https://github.com/timvlaer/tscfg-maven-plugin).
-Thanks [@timvlaer](https://github.com/timvlaer)!
 
 ### gradle plugin
 
@@ -305,7 +304,7 @@ The following basic types are supported:
 | `duration`                           | `long`     / `Long`      | `Long`     / `Option[Long]`
 | `duration` (using `--durations` flag) | `Duration` / `Duration`  | `Duration` / `Option[Duration]`
 
-> **NOTE**
+> [!note]
 > - please read `Optional<T>` instead of the `T` values in the
     java "opt" column above if using the `--java:optionals` flag.
 > - using the `--durations` flag, `java.time.Duration` is used instead of `long` / `Long`. See [durations](#durations) for further information.
@@ -318,11 +317,12 @@ The `size` type corresponds to the
 supported by the Typesafe library.
 See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
-> NOTE: As of 0.0.984, a setting with a default value like
-> `memory: 50G` (or `memory: "50G"`) will no longer be inferred as with `size` type, but just as a string
+> [!note]
+> A setting with a default value like
+> `memory: 50G` (or `memory: "50G"`) will not be inferred as with `size` type, but just as a string
 > (with default value `"50G"`).
-> For the size type effect, you will need to be explicit: `memory: "size | 50G"`.
-> See [#42](https://github.com/carueda/tscfg/issues/42) and [#41](https://github.com/carueda/tscfg/issues/41).
+> For the `size` type effect, you will need to be explicit: `memory: "size | 50G"`.
+> See [#42](https://github.com/carueda/tscfg/issues/42).
 
 #### durations
 
