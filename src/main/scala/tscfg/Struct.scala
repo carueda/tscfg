@@ -270,7 +270,12 @@ object Struct {
       val newPp = if (pp.isEmpty) key else s"$pp.$key"
       getStruct(newPp, key, cv)
     }
-    val structs       = co.entrySet().asScala.toList.map(doEntry)
+    val structs = co
+      .entrySet()
+      .asScala
+      .toList
+      .filterNot(_.getKey.startsWith("__"))
+      .map(doEntry)
     val sortedStructs = sortStructs(structs)
     val pairs         = sortedStructs.map(s => s.name -> s)
     val members       = SeqMap(pairs: _*)

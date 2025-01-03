@@ -1385,4 +1385,26 @@ class ScalaMainSpec extends AnyWordSpec {
       )
     }
   }
+
+  "(scala) issue 320a" should {
+    "ignore __ prefixed elements" in {
+      val r = ScalaGen.generate("example/issue320a.spec.conf")
+      assert(
+        r.classNames === Set(
+          "ScalaIssue320aCfg",
+          "SomeAB",
+        )
+      )
+    }
+
+    "be exercised ok" in {
+      val c = ScalaIssue320aCfg(ConfigFactory.parseString("""
+          |someAB.a = "hi"
+          |someAB.b = true
+          |""".stripMargin))
+
+      assert(c.someAB.a === "hi")
+      assert(c.someAB.b)
+    }
+  }
 }

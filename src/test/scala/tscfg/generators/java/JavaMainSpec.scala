@@ -1589,4 +1589,26 @@ class JavaMainSpec extends AnyWordSpec {
       assert(email.name === null)
     }
   }
+
+  "(scala) issue 320a" should {
+    "ignore __ prefixed elements" in {
+      val r = JavaGen.generate("example/issue320a.spec.conf")
+      assert(
+        r.classNames === Set(
+          "JavaIssue320aCfg",
+          "SomeAB",
+        )
+      )
+    }
+
+    "be exercised ok" in {
+      val c = new JavaIssue320aCfg(ConfigFactory.parseString("""
+          |someAB.a = "hi"
+          |someAB.b = true
+          |""".stripMargin))
+
+      assert(c.someAB.a === "hi")
+      assert(c.someAB.b)
+    }
+  }
 }

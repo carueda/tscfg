@@ -1,8 +1,10 @@
+2025-01
+
+1.2.2
+
+- Resolved #320 "Handle __ prefixed field name as ignored element".
+
 2024-12
-
-Unreleased
-
-- crosscompile to scala 2.13.15
 
 1.2.1, 1.2.0
 
