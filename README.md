@@ -8,7 +8,7 @@
 ## tscfg
 
 tscfg is a command line tool that takes a configuration _schema_
-parseable by [Typesafe Config](https://github.com/typesafehub/config)
+parseable by [Typesafe Config](https://github.com/lightbend/config)
 and generates all the boilerplate to make the definitions
 available in type-safe, immutable objects
 (POJOs/records for Java, case classes for Scala).
@@ -57,7 +57,7 @@ so the familiar syntax/format and loading mechanisms are used.
 
 For example, from this configuration:
 
-```properties
+```hocon
 service {
   url = "http://example.net/rest"
   poolSize = 32
@@ -126,7 +126,7 @@ a string with a simple syntax as follows can be used
 
 The following is a complete example exercising this mechanism.
 
-```properties
+```hocon
 endpoint {
   path: "string"
   url: "String | http://example.net"
@@ -336,7 +336,7 @@ any other unit as supported by Typesafe Config according to the
 [A more complete example](https://github.com/carueda/tscfg/blob/main/src/main/tscfg/example/duration.spec.conf)
 with some additional explanation:
 
-```properties
+```hocon
 durations {
   # optional duration; reported Long (Option[Long] in scala) is null (None) if value is missing
   # or whatever is provided converted to days
@@ -377,7 +377,7 @@ As seen in examples above, each object in the given configuration schema becomes
 
 It is of course possible to specify a field as a list of objects, for example:
 
-```properties
+```hocon
 positions: [
   {
     lat: double
@@ -418,7 +418,7 @@ object Cfg {
 An object or a list in the input configuration can be marked optional with
 the `@optional` annotation (in a comment):
 
-```properties
+```hocon
 #@optional
 email {
   server: string
@@ -458,7 +458,7 @@ Since version 0.9.94 we started adding support for "shared objects" (#54),
 a feature that has been enhanced in later versions.
 This is exercised by using the `@define` annotation:
 
-```properties
+```hocon
 #@define
 Struct {
   c: string
@@ -483,7 +483,7 @@ type itself. Then, the type can be referenced for other definitions.
 As of 0.9.98 shared objects now support simple inheritance by an abstract superclass. The following syntax can be used
 to define a simple inheritance:
 
-```properties
+```hocon
 #@define abstract
 BaseStruct {
   a: [string]
@@ -525,7 +525,7 @@ The following are valid definition comments:
 Enumerations can also be defined and this is done through the
 `@define enum` annotation:
 
-```properties
+```hocon
 #@define enum
 FruitType = [apple, banana, pineapple]
 
