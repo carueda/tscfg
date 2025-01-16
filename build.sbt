@@ -4,7 +4,7 @@ organization       := "com.github.carueda"
 name               := "tscfg"
 version            := "1.2.2"
 scalaVersion       := "3.3.4"
-crossScalaVersions := Seq("2.13.9", "3.3.4")
+crossScalaVersions := Seq("2.13.16", "3.3.4")
 
 buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
