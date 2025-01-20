@@ -32,7 +32,7 @@ object ScalaDurationCfg {
   object Durations {
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaDurationCfg.Durations = {
       ScalaDurationCfg.Durations(
-        days        = if(c.hasPathOrNull("days")) Some(c.getDuration("days", java.util.concurrent.TimeUnit.DAYS)) else None,
+        days        = if(c.hasPathOrNull("days")) scala.Some(c.getDuration("days", java.util.concurrent.TimeUnit.DAYS)) else scala.None,
         duration_dy = if(c.hasPathOrNull("duration_dy")) c.getDuration("duration_dy", java.util.concurrent.TimeUnit.DAYS) else 0,
         duration_hr = if(c.hasPathOrNull("duration_hr")) c.getDuration("duration_hr", java.util.concurrent.TimeUnit.HOURS) else 0,
         duration_mi = if(c.hasPathOrNull("duration_mi")) c.getDuration("duration_mi", java.util.concurrent.TimeUnit.MINUTES) else 0,

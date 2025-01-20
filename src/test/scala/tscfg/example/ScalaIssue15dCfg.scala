@@ -11,7 +11,7 @@ object ScalaIssue15dCfg {
   object Baz$Elm {
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue15dCfg.Baz$Elm = {
       ScalaIssue15dCfg.Baz$Elm(
-        aa = if(c.hasPathOrNull("aa")) Some(c.getBoolean("aa")) else None,
+        aa = if(c.hasPathOrNull("aa")) scala.Some(c.getBoolean("aa")) else scala.None,
         dd = $_reqDbl(parentPath, c, "dd", $tsCfgValidator)
       )
     }

@@ -1,5 +1,9 @@
 2025-01
 
+1.2.3
+
+- Resolved #328 "Scala gen: Conflict with Some/None".
+
 1.2.2
 
 - Resolved #320 "Handle __ prefixed field name as ignored element".

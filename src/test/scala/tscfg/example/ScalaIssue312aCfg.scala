@@ -43,7 +43,7 @@ object ScalaIssue312aCfg {
         def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue312aCfg.Endpoint.Notification.Emails$Elm = {
           ScalaIssue312aCfg.Endpoint.Notification.Emails$Elm(
             email = $_reqStr(parentPath, c, "email", $tsCfgValidator),
-            name  = if(c.hasPathOrNull("name")) Some(c.getString("name")) else None
+            name  = if(c.hasPathOrNull("name")) scala.Some(c.getString("name")) else scala.None
           )
         }
         private def $_reqStr(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): java.lang.String = {

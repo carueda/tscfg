@@ -45,7 +45,7 @@ object ScalaExample4tplCfg {
         def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaExample4tplCfg.Endpoint.Notifications.Emails$Elm = {
           ScalaExample4tplCfg.Endpoint.Notifications.Emails$Elm(
             email = $_reqStr(parentPath, c, "email", $tsCfgValidator),
-            name  = if(c.hasPathOrNull("name")) Some(c.getString("name")) else None
+            name  = if(c.hasPathOrNull("name")) scala.Some(c.getString("name")) else scala.None
           )
         }
         private def $_reqStr(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): java.lang.String = {
@@ -105,7 +105,7 @@ object ScalaExample4tplCfg {
         notifications = ScalaExample4tplCfg.Endpoint.Notifications(if(c.hasPathOrNull("notifications")) c.getConfig("notifications") else com.typesafe.config.ConfigFactory.parseString("notifications{}"), parentPath + "notifications.", $tsCfgValidator),
         path          = $_reqStr(parentPath, c, "path", $tsCfgValidator),
         port          = if(c.hasPathOrNull("port")) c.getInt("port") else 8080,
-        stuff         = if(c.hasPathOrNull("stuff")) scala.Some(ScalaExample4tplCfg.Endpoint.Stuff(c.getConfig("stuff"), parentPath + "stuff.", $tsCfgValidator)) else None
+        stuff         = if(c.hasPathOrNull("stuff")) scala.Some(ScalaExample4tplCfg.Endpoint.Stuff(c.getConfig("stuff"), parentPath + "stuff.", $tsCfgValidator)) else scala.None
       )
     }
     private def $_reqStr(parentPath: java.lang.String, c: com.typesafe.config.Config, path: java.lang.String, $tsCfgValidator: $TsCfgValidator): java.lang.String = {

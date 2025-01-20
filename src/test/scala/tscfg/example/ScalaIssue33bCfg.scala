@@ -24,7 +24,7 @@ object ScalaIssue33bCfg {
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue33bCfg.Endpoint = {
       ScalaIssue33bCfg.Endpoint(
         baz = ScalaIssue33bCfg.Endpoint.Baz(if(c.hasPathOrNull("baz")) c.getConfig("baz") else com.typesafe.config.ConfigFactory.parseString("baz{}"), parentPath + "baz.", $tsCfgValidator),
-        foo = if(c.hasPathOrNull("foo")) Some(c.getInt("foo")) else None,
+        foo = if(c.hasPathOrNull("foo")) scala.Some(c.getInt("foo")) else scala.None,
         url = if(c.hasPathOrNull("url")) c.getString("url") else "http://example.net"
       )
     }

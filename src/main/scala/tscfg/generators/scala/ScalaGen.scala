@@ -678,7 +678,7 @@ private[scala] case class Getter(
     if (genOpts.assumeAllRequired)
       s"""$className($reqConfigCall$ppArg)"""
     else if (a.optional) {
-      s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path")$ppArg)) else None"""
+      s"""if(c.$hasPath("$path")) scala.Some($className(c.getConfig("$path")$ppArg)) else scala.None"""
     }
     else {
       // TODO revisit #33 handling of object as always optional
@@ -692,7 +692,7 @@ private[scala] case class Getter(
     val scalaType: ListScalaType = res.scalaType.asInstanceOf[ListScalaType]
     val base                     = accessors.listMethodName(scalaType, lt, path)
     if (a.optional) {
-      s"""if(c.$hasPath("$path")) scala.Some($base) else None"""
+      s"""if(c.$hasPath("$path")) scala.Some($base) else scala.None"""
     }
     else base
   }
@@ -716,7 +716,7 @@ private[scala] case class Getter(
         }
 
       case None if a.optional =>
-        s"""if(c.$hasPath("$path")) Some(c.$getter) else None"""
+        s"""if(c.$hasPath("$path")) scala.Some(c.$getter) else scala.None"""
 
       case _ =>
         bt match {

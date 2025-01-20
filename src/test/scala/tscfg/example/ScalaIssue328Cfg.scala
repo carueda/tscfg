@@ -1,25 +1,25 @@
 package tscfg.example
 
-final case class ScalaIssue13Cfg(
-  issue : ScalaIssue13Cfg.Issue
+final case class ScalaIssue328Cfg(
+  Some : ScalaIssue328Cfg.Some
 )
-object ScalaIssue13Cfg {
-  final case class Issue(
-    optionalFoo : scala.Option[java.lang.String]
+object ScalaIssue328Cfg {
+  final case class Some(
+    intOpt : scala.Option[scala.Int]
   )
-  object Issue {
-    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue13Cfg.Issue = {
-      ScalaIssue13Cfg.Issue(
-        optionalFoo = if(c.hasPathOrNull("optionalFoo")) scala.Some(c.getString("optionalFoo")) else scala.None
+  object Some {
+    def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue328Cfg.Some = {
+      ScalaIssue328Cfg.Some(
+        intOpt = if(c.hasPathOrNull("intOpt")) scala.Some(c.getInt("intOpt")) else scala.None
       )
     }
   }
         
-  def apply(c: com.typesafe.config.Config): ScalaIssue13Cfg = {
+  def apply(c: com.typesafe.config.Config): ScalaIssue328Cfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String = ""
-    val $result = ScalaIssue13Cfg(
-      issue = ScalaIssue13Cfg.Issue(if(c.hasPathOrNull("issue")) c.getConfig("issue") else com.typesafe.config.ConfigFactory.parseString("issue{}"), parentPath + "issue.", $tsCfgValidator)
+    val $result = ScalaIssue328Cfg(
+      Some = ScalaIssue328Cfg.Some(if(c.hasPathOrNull("Some")) c.getConfig("Some") else com.typesafe.config.ConfigFactory.parseString("Some{}"), parentPath + "Some.", $tsCfgValidator)
     )
     $tsCfgValidator.validate()
     $result

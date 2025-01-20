@@ -63,8 +63,8 @@ object ScalaIssue10Cfg {
           
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue10Cfg.Main = {
       ScalaIssue10Cfg.Main(
-        email = if(c.hasPathOrNull("email")) scala.Some(ScalaIssue10Cfg.Main.Email(c.getConfig("email"), parentPath + "email.", $tsCfgValidator)) else None,
-        reals = if(c.hasPathOrNull("reals")) scala.Some($_LScalaIssue10Cfg_Main_Reals$Elm(c.getList("reals"), parentPath, $tsCfgValidator)) else None
+        email = if(c.hasPathOrNull("email")) scala.Some(ScalaIssue10Cfg.Main.Email(c.getConfig("email"), parentPath + "email.", $tsCfgValidator)) else scala.None,
+        reals = if(c.hasPathOrNull("reals")) scala.Some($_LScalaIssue10Cfg_Main_Reals$Elm(c.getList("reals"), parentPath, $tsCfgValidator)) else scala.None
       )
     }
     private def $_LScalaIssue10Cfg_Main_Reals$Elm(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.List[ScalaIssue10Cfg.Main.Reals$Elm] = {

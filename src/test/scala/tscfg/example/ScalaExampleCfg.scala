@@ -45,7 +45,7 @@ object ScalaExampleCfg {
       def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaExampleCfg.Endpoint.Interface = {
         ScalaExampleCfg.Endpoint.Interface(
           port   = if(c.hasPathOrNull("port")) c.getInt("port") else 8080,
-          `type` = if(c.hasPathOrNull("type")) Some(c.getString("type")) else None
+          `type` = if(c.hasPathOrNull("type")) scala.Some(c.getString("type")) else scala.None
         )
       }
     }
@@ -55,7 +55,7 @@ object ScalaExampleCfg {
         intReq    = $_reqInt(parentPath, c, "intReq", $tsCfgValidator),
         interface = ScalaExampleCfg.Endpoint.Interface(if(c.hasPathOrNull("interface")) c.getConfig("interface") else com.typesafe.config.ConfigFactory.parseString("interface{}"), parentPath + "interface.", $tsCfgValidator),
         path      = $_reqStr(parentPath, c, "path", $tsCfgValidator),
-        serial    = if(c.hasPathOrNull("serial")) Some(c.getInt("serial")) else None,
+        serial    = if(c.hasPathOrNull("serial")) scala.Some(c.getInt("serial")) else scala.None,
         url       = if(c.hasPathOrNull("url")) c.getString("url") else "https://example.net"
       )
     }

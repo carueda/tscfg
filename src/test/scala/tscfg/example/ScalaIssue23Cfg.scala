@@ -23,7 +23,7 @@ object ScalaIssue23Cfg {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String = ""
     val $result = ScalaIssue23Cfg(
-      sizeOpt    = if(c.hasPathOrNull("sizeOpt")) Some(c.getBytes("sizeOpt").longValue()) else None,
+      sizeOpt    = if(c.hasPathOrNull("sizeOpt")) scala.Some(c.getBytes("sizeOpt").longValue()) else scala.None,
       sizeOptDef = if(c.hasPathOrNull("sizeOptDef")) c.getBytes("sizeOptDef").longValue() else 1024L,
       sizeReq    = $_reqSiz(parentPath, c, "sizeReq", $tsCfgValidator),
       sizes      = $_L$_siz(c.getList("sizes"), parentPath, $tsCfgValidator),

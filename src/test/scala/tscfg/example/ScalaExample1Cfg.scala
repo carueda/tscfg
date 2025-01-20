@@ -14,7 +14,7 @@ object ScalaExample1Cfg {
     val parentPath: java.lang.String = ""
     val $result = ScalaExample1Cfg(
       bazOptionalWithDefault   = if(c.hasPathOrNull("bazOptionalWithDefault")) c.getString("bazOptionalWithDefault") else "hello",
-      bazOptionalWithNoDefault = if(c.hasPathOrNull("bazOptionalWithNoDefault")) Some(c.getString("bazOptionalWithNoDefault")) else None,
+      bazOptionalWithNoDefault = if(c.hasPathOrNull("bazOptionalWithNoDefault")) scala.Some(c.getString("bazOptionalWithNoDefault")) else scala.None,
       fooRequired              = $_reqStr(parentPath, c, "fooRequired", $tsCfgValidator)
     )
     $tsCfgValidator.validate()

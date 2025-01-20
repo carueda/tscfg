@@ -63,8 +63,8 @@ object ScalaIssue124aCfg {
   object Example {
     def apply(c: com.typesafe.config.Config, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): ScalaIssue124aCfg.Example = {
       ScalaIssue124aCfg.Example(
-        a = if(c.hasPathOrNull("a")) scala.Some(ScalaIssue124aCfg.Shared(c.getConfig("a"), parentPath + "a.", $tsCfgValidator)) else None,
-        b = if(c.hasPathOrNull("b")) scala.Some($_LScalaIssue124aCfg_Shared(c.getList("b"), parentPath, $tsCfgValidator)) else None
+        a = if(c.hasPathOrNull("a")) scala.Some(ScalaIssue124aCfg.Shared(c.getConfig("a"), parentPath + "a.", $tsCfgValidator)) else scala.None,
+        b = if(c.hasPathOrNull("b")) scala.Some($_LScalaIssue124aCfg_Shared(c.getList("b"), parentPath, $tsCfgValidator)) else scala.None
       )
     }
     private def $_LScalaIssue124aCfg_Shared(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $tsCfgValidator: $TsCfgValidator): scala.List[ScalaIssue124aCfg.Shared] = {
