@@ -1,3 +1,9 @@
+2025-01
+
+I've been publishing with `misc/publish.sh`.
+
+----
+
 2024-08
 Making this work again.
 
