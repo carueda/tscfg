@@ -3,6 +3,8 @@
 1.2.4
 
 - `@param` documentation also for top-level java record.
+   Note that for the root class, tscfg does not capture a general description, so its doc
+   will be empty for POJO, and only with `@param` entries for `record` and `case class`.
 
 1.2.3
 
@@ -18,8 +20,6 @@
 
 - Resolved #312 "Reflect doc comments in generated code"
     - All comment lines are considered for documentation, except those starting with `@` or `!`.
-    - Note that for the root class, tscfg does not capture a general description, so its
-      doc comment will be empty for Java and only with `@param` entries for Scala.
     - Doc generation processing is always performed.
       (In retrospect, this should have been implemented long ago, but better late than never 😅)
       - however, for now, `--no-doc` can be used to opt out of doc generation
