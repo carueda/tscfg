@@ -5,8 +5,7 @@ final case class ScalaIssue10Cfg(
 )
 object ScalaIssue10Cfg {
   
-  /** 
-    * @param email
+  /** @param email
     *   Mail server properties if you want to enable notifications to users
     */
   final case class Main(

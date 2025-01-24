@@ -5,8 +5,7 @@ final case class ScalaDuration2Cfg(
 )
 object ScalaDuration2Cfg {
   
-  /** 
-    * @param millis
+  /** @param millis
     *   optional duration with default value;
     *   reported long (Long) is in milliseconds, either 550,000 if value is missing
     *   or whatever is provided converted to millis

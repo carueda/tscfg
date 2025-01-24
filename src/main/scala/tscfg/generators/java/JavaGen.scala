@@ -21,12 +21,17 @@ class JavaGen(
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
-
     methodNames.checkUserSymbol(className)
-    val res = generateForObj(objectType, className = className, isRoot = true)
+    var res = generateForObj(objectType, className = className, isRoot = true)
+
+    if (genOpts.genRecords) {
+      val doc = docUtil.getRootClassDoc(objectType, genOpts, javaIdentifier)
+      if (doc.nonEmpty) {
+        res = res.copy(definition = doc + res.definition)
+      }
+    }
 
     val packageStr = s"package ${genOpts.packageName};\n\n"
-
     val definition = (packageStr + res.definition).trim
     genResults.copy(code = definition)
   }

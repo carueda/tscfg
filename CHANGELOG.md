@@ -1,5 +1,9 @@
 2025-01
 
+1.2.4
+
+- `@param` documentation also for top-level java record.
+
 1.2.3
 
 - Resolved #328 "Scala gen: Conflict with Some/None".

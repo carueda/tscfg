@@ -4,30 +4,30 @@ import tscfg.model.{AnnType, ObjectRealType}
 
 object docUtil {
 
-  /** This is only for scala. For the root class, for which we don't have a
-    * general description, only the params are generated. For simplicity in
-    * initial implementation, only first non-empty comment line for each is
-    * used.
+  /** This is only for `case class` (scala) and `record` (java). For the root
+    * class, for which we don't have a general description, only the params are
+    * generated in these cases. For simplicity in initial implementation, only
+    * first non-empty comment line for each is used.
     */
   def getRootClassDoc(
       objectType: ObjectRealType,
       genOpts: GenOpts,
       symbol2id: String => String,
+      genScala: Boolean = false,
   ): String = {
     if (genOpts.genDoc) {
-      val docLines = objectType.members.toList
+      val paramDocs = objectType.members.toList
         .filterNot(_._2.isDefine)
-        .flatMap { case (symbol, a) =>
-          a.docComments.map(_.trim).filterNot(_.isEmpty).headOption map {
-            firstLine =>
-              List(s"@param ${symbol2id(symbol)}", s"  $firstLine")
-          }
+        .flatMap { case (k, memberAnnType) =>
+          // only first comment line:
+          memberAnnType.docComments
+            .map(_.trim)
+            .filterNot(_.isEmpty)
+            .headOption
+            .map(comment => ParamDoc(symbol2id(k), List(comment)))
         }
-        .flatten
-      if (docLines.nonEmpty) {
-        docLines.mkString(s"/** ", "\n  * ", "\n  */\n")
-      }
-      else ""
+      if (paramDocs.isEmpty) ""
+      else formatDocComment(Nil, paramDocs, genScala, "").trim + "\n"
     }
     else ""
   }
@@ -84,21 +84,30 @@ object docUtil {
       genScala: Boolean = false,
       indent: String,
   ): String = {
+    val docBodyComments = docComments
+      .map(_.trim)
+      .dropWhile(_.isEmpty)
+      .reverse
+      .dropWhile(_.isEmpty)
+      .reverse
     val lines = collection.mutable.ArrayBuffer[String]()
-    val (start, sep, end) = if (genScala) {
-      ("\n/** ", "\n  * ", "\n  */\n")
-    }
-    else {
+    lines.addAll(docBodyComments)
+
+    if (docBodyComments.nonEmpty && paramDocs.nonEmpty) {
       lines += ""
-      ("\n/**", "\n * ", "\n */\n")
     }
-    lines.addAll(docComments.map(_.trim).filter(_.nonEmpty))
+
     if (paramDocs.nonEmpty) {
-      lines += ""
       paramDocs foreach { pd =>
         lines += s"@param ${pd.name}"
         pd.docLines.foreach(lines += "  " + _)
       }
+    }
+    val (start, sep, end) = if (genScala) {
+      ("\n/** ", "\n  * ", "\n  */\n")
+    }
+    else {
+      ("\n/**\n * ", "\n * ", "\n */\n")
     }
     val res = lines.map(escapeForDoc).mkString(start, sep, end)
     if (res.isEmpty) ""

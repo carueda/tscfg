@@ -35,17 +35,20 @@ class ScalaGen(
 
   def generate(objectType: ObjectType): GenResult = {
     genResults = GenResult()
-
     checkUserSymbol(className)
-    val packageStr = s"package ${genOpts.packageName}\n\n"
-
     var res = generateForObj(objectType, className = className, isRoot = true)
 
-    val doc = docUtil.getRootClassDoc(objectType, genOpts, scalaIdentifier)
+    val doc = docUtil.getRootClassDoc(
+      objectType,
+      genOpts,
+      scalaIdentifier,
+      genScala = true
+    )
     if (doc.nonEmpty) {
       res = res.copy(definition = doc + res.definition)
     }
 
+    val packageStr = s"package ${genOpts.packageName}\n\n"
     val definition = (packageStr + res.definition).trim
     genResults.copy(code = definition)
   }

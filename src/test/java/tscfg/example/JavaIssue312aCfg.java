@@ -1,5 +1,9 @@
 package tscfg.example;
 
+/**
+ * @param endpoint
+ *   Description of the required endpoint.
+ */
 public record JavaIssue312aCfg(
   JavaIssue312aCfg.Endpoint endpoint
 ) {
