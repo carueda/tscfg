@@ -313,7 +313,7 @@ The following basic types are supported:
 #### size-in-bytes
 
 The `size` type corresponds to the
-[size-in-bytes formats](https://github.com/typesafehub/config/blob/main/HOCON.md#size-in-bytes-format)
+[size-in-bytes formats](https://github.com/lightbend/config/blob/main/HOCON.md#size-in-bytes-format)
 supported by the Typesafe library.
 See [#23](https://github.com/carueda/tscfg/issues/23) for various examples.
 
@@ -331,7 +331,7 @@ and a desired time unit for the reported value.
 For example, with the type `"duration:day"`, the reported long value will be in day units,
 with conversion automatically performed if the actual configuration value is given in
 any other unit as supported by Typesafe Config according to the
-[duration format](https://github.com/typesafehub/config/blob/main/HOCON.md#duration-format).
+[duration format](https://github.com/lightbend/config/blob/main/HOCON.md#duration-format).
 
 [A more complete example](https://github.com/carueda/tscfg/blob/main/src/main/tscfg/example/duration.spec.conf)
 with some additional explanation:
@@ -575,7 +575,7 @@ See [this wiki](https://github.com/carueda/tscfg/wiki/template-generation).
 and even put them in my own classes**
 
 Sure. However, as the number of configuration properties and levels of nesting increase,
-the benefits of automated generation of the typesafe, immutable objects,
+the benefits of automated generation of the type-safe, immutable objects,
 along with the centralized verification, shall become more apparent. All of this
 –worth emphasizing– **based on an explicit *schema* for the configuration.**
 
