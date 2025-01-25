@@ -59,7 +59,7 @@ For example, from this configuration:
 
 ```hocon
 service {
-  url = "http://example.net/rest"
+  url = "https://example.net/rest"
   poolSize = 32
   debug = true
   factor = 0.75
@@ -70,19 +70,35 @@ tscfg will generate the following (javadoc, constructors and other methods omitt
 
 - Java:
 
-    ```java
-    public class Cfg {
-      public final Service service;
-      public static class Service {
-        public final boolean debug;
-        public final double factor;
-        public final int poolSize;
-        public final String url;
-      }
-    }
-    ```
+    - With records (`--java:records`):
 
-    Nesting of configuration properties is captured via inner static classes.
+        ```java
+        public record Cfg(Service service) {
+            public record Service(
+                boolean debug,
+                double factor,
+                int poolSize,
+                String url
+            ) {}
+        }
+        ```
+        Nesting of configuration properties is captured via inner records.
+
+    - POJOs:
+
+        ```java
+        public class Cfg {
+          public final Service service;
+          public static class Service {
+            public final boolean debug;
+            public final double factor;
+            public final int poolSize;
+            public final String url;
+          }
+        }
+        ```
+        Nesting of configuration properties is captured via inner static classes.
+
 
 - Scala:
 
@@ -99,7 +115,6 @@ tscfg will generate the following (javadoc, constructors and other methods omitt
       )
     }
     ```
-
     Nesting of configuration properties is captured via nested companion objects.
 
 The tool determines the type of each field according to the given value
