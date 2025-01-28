@@ -84,13 +84,8 @@ object docUtil {
       genScala: Boolean = false,
       indent: String,
   ): String = {
-    val docBodyComments = docComments
-      .map(_.trim)
-      .dropWhile(_.isEmpty)
-      .reverse
-      .dropWhile(_.isEmpty)
-      .reverse
-    val lines = collection.mutable.ArrayBuffer[String]()
+    val docBodyComments = adjustComments(docComments)
+    val lines           = collection.mutable.ArrayBuffer[String]()
     lines.addAll(docBodyComments)
 
     if (docBodyComments.nonEmpty && paramDocs.nonEmpty) {
@@ -112,6 +107,24 @@ object docUtil {
     val res = lines.map(escapeForDoc).mkString(start, sep, end)
     if (res.isEmpty) ""
     else indent + res.replaceAll("\n", "\n" + indent)
+  }
+
+  /** Ignores leading and trailing empty lines, and dedents the remaining
+    * non-empty lines.
+    */
+  private def adjustComments(commentLines: List[String]): List[String] = {
+    val body = commentLines
+      .dropWhile(_.trim.isEmpty)
+      .reverse
+      .dropWhile(_.trim.isEmpty)
+      .reverse
+    if (body.nonEmpty) {
+      val leadingSpaces =
+        body.filterNot(_.trim.isEmpty).map(_.takeWhile(_.isWhitespace))
+      val commonLeadingSpace = leadingSpaces.minBy(_.length)
+      body.map(_.stripPrefix(commonLeadingSpace))
+    }
+    else body
   }
 
   private def escapeForDoc(content: String): String = content

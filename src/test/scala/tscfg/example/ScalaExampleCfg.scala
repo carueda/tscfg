@@ -11,15 +11,15 @@ object ScalaExampleCfg {
   /** Description of the required endpoint section.
     * 
     * @param serial
-    *   an optional Integer with default value null (None is scala)
+    *    an optional Integer with default value null (None is scala)
     * @param path
-    *   a required String
+    *    a required String
     * @param url
-    *   a String with default value "https://example.net"
+    *    a String with default value "https://example.net"
     * @param interface
-    *   Interface definition
+    *    Interface definition
     * @param intReq
-    *   a required int
+    *    a required int
     */
   final case class Endpoint(
     intReq    : scala.Int,
@@ -33,9 +33,9 @@ object ScalaExampleCfg {
     /** Interface definition
       * 
       * @param `type`
-      *   Interface type
+      *    Interface type
       * @param port
-      *   an int with default value 8080
+      *    an int with default value 8080
       */
     final case class Interface(
       port   : scala.Int,

@@ -11,9 +11,9 @@ object ScalaIssue124aCfg {
   /** Comment for Shared
     * 
     * @param c
-    *   comment for c
+    *    comment for c
     * @param d
-    *   comment for d
+    *    comment for d
     */
   final case class Shared(
     c : java.lang.String,
@@ -52,9 +52,9 @@ object ScalaIssue124aCfg {
   /** Comment for example
     * 
     * @param a
-    *   comment for a
+    *    comment for a
     * @param b
-    *   comment for b
+    *    comment for b
     */
   final case class Example(
     a : scala.Option[ScalaIssue124aCfg.Shared],

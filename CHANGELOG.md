@@ -5,6 +5,7 @@
 - `@param` documentation also for top-level java record.
    Note that for the root class, tscfg does not capture a general description, so its doc
    will be empty for POJO, and only with `@param` entries for `record` and `case class`.
+- Improved comment transfer to javadoc/scaladoc (also with a fix as lines were all trimmed)
 
 1.2.3
 

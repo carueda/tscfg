@@ -15,12 +15,12 @@ public record JavaIssue312aCfg(
    * /\* nested doc comment delimiters *\/ escaped.
    * 
    * @param notification
-   *   Configuration for notifications.
+   *    Configuration for notifications.
    * @param path
-   *   The associated path.
-   *   For example, "/home/foo/bar"
+   *    The associated path.
+   *    For example, "/home/foo/bar"
    * @param port
-   *   Port for the endpoint service.
+   *    Port for the endpoint service.
    */
   public record Endpoint(
     Endpoint.Notification notification,
@@ -32,7 +32,7 @@ public record JavaIssue312aCfg(
      * Configuration for notifications.
      * 
      * @param emails
-     *   Emails to send notifications to.
+     *    Emails to send notifications to.
      */
     public record Notification(
       java.util.List<Notification.Emails$Elm> emails

@@ -8,9 +8,9 @@ object ScalaIssue64Cfg {
   /** Comment for (abstract) BaseModelConfig
     * 
     * @param scaling
-    *   comment for scaling
+    *    comment for scaling
     * @param uuids
-    *   comment for uuids
+    *    comment for uuids
     */
   sealed abstract class BaseModelConfig (
    val scaling : scala.Double,
@@ -21,9 +21,9 @@ object ScalaIssue64Cfg {
   /** Comment for LoadModelConfig
     * 
     * @param modelBehaviour
-    *   comment for modelBehaviour
+    *    comment for modelBehaviour
     * @param reference
-    *   comment for reference
+    *    comment for reference
     */
   final case class LoadModelConfig(
     override val scaling        : scala.Double,

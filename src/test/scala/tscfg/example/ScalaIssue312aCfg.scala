@@ -12,12 +12,12 @@ object ScalaIssue312aCfg {
     * /\* nested doc comment delimiters *\/ escaped.
     * 
     * @param notification
-    *   Configuration for notifications.
+    *    Configuration for notifications.
     * @param path
-    *   The associated path.
-    *   For example, "/home/foo/bar"
+    *    The associated path.
+    *    For example, "/home/foo/bar"
     * @param port
-    *   Port for the endpoint service.
+    *    Port for the endpoint service.
     */
   final case class Endpoint(
     notification : ScalaIssue312aCfg.Endpoint.Notification,
@@ -29,7 +29,7 @@ object ScalaIssue312aCfg {
     /** Configuration for notifications.
       * 
       * @param emails
-      *   Emails to send notifications to.
+      *    Emails to send notifications to.
       */
     final case class Notification(
       emails : scala.List[ScalaIssue312aCfg.Endpoint.Notification.Emails$Elm]
