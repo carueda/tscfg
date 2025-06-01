@@ -11,8 +11,8 @@ class modelSpec extends AnyWordSpec {
     val objectType = ObjectType(
       "positions" := "Position information" % ListType(
         ObjectType(
-          "lat" := DOUBLE,
-          "lon" := DOUBLE,
+          "lat"   := DOUBLE,
+          "lon"   := DOUBLE,
           "attrs" := ListType(
             ObjectType(
               "b" := BOOLEAN,

@@ -62,7 +62,7 @@ publishTo := sonatypePublishToBundle.value
 
 pomIncludeRepository := { _ => false }
 homepage             := Some(url("https://github.com/carueda/tscfg"))
-licenses := Seq(
+licenses             := Seq(
   "Apache 2.0" -> url("https://www.opensource.org/licenses/Apache-2.0")
 )
 scmInfo := Some(

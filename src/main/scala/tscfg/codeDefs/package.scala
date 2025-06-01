@@ -24,7 +24,7 @@ package object codeDefs {
       // $COVERAGE-OFF$
       case NonFatal(e) =>
         val keys = map.keySet.toList.sorted
-        val msg =
+        val msg  =
           s"Unexpected: undefined key '$key' for $lang. Defined keys: $keys. Please report this bug"
         throw new RuntimeException(msg, e)
       // $COVERAGE-ON$

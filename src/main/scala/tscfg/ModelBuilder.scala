@@ -262,7 +262,7 @@ class ModelBuilder(
       throw new IllegalArgumentException("list with one element expected")
 
     if (cv.size() > 1) {
-      val line = cv.origin().lineNumber()
+      val line                         = cv.origin().lineNumber()
       val options: ConfigRenderOptions = ConfigRenderOptions.defaults
         .setFormatted(false)
         .setComments(false)
