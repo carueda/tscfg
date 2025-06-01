@@ -116,7 +116,7 @@ object ScalaExampleCfg {
   def apply(c: com.typesafe.config.Config): ScalaExampleCfg = {
     val $tsCfgValidator: $TsCfgValidator = new $TsCfgValidator()
     val parentPath: java.lang.String     = ""
-    val $result = ScalaExampleCfg(
+    val $result                          = ScalaExampleCfg(
       endpoint = ScalaExampleCfg.Endpoint(
         if (c.hasPathOrNull("endpoint")) c.getConfig("endpoint")
         else com.typesafe.config.ConfigFactory.parseString("endpoint{}"),
