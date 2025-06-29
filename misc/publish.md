@@ -1,3 +1,8 @@
+2025-06
+
+- Now using https://github.com/sbt/sbt-ci-release
+- Release starts showing up at https://central.sonatype.com/search?namespace=com.github.carueda
+
 2025-01
 
 I've been publishing with `misc/publish.sh`.
