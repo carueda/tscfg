@@ -167,7 +167,7 @@ object gen4tests {
       val fileName   = className + "." + lang
       val targetFile = new File(targetScalaDir, fileName)
 
-      val genOpts = baseGenOpts.copy(className = className)
+      val genOpts              = baseGenOpts.copy(className = className)
       val generator: Generator = lang match {
         case "scala" => new ScalaGen(genOpts, rootNamespace)
         case "java"  => new JavaGen(genOpts, rootNamespace)
