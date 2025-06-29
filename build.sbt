@@ -2,7 +2,6 @@ enablePlugins(BuildInfoPlugin)
 
 organization       := "com.github.carueda"
 name               := "tscfg"
-version            := "1.2.5"
 scalaVersion       := "3.3.6"
 crossScalaVersions := Seq("2.13.16", "3.3.6")
 
@@ -55,10 +54,7 @@ addCommandAlias("fmtCheck", "; scalafmtCheckAll; scalafmtSbtCheck")
 addCommandAlias("a", "; clean; fmt; test")
 addCommandAlias("c", "; compile")
 
-publishMavenStyle        := true
 (Test / publishArtifact) := false
-
-publishTo := sonatypePublishToBundle.value
 
 pomIncludeRepository := { _ => false }
 homepage             := Some(url("https://github.com/carueda/tscfg"))
@@ -80,4 +76,4 @@ pomExtra :=
     </developer>
   </developers>
 
-sonatypeProfileName := "com.github.carueda"
+useGpgPinentry := true
