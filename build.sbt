@@ -29,6 +29,8 @@ coverageMinimumStmtTotal := 80
 coverageFailOnMinimum    := false
 coverageHighlighting     := { scalaBinaryVersion.value == "2.11" }
 
+coverageEnabled := scalaVersion.value.startsWith("3.")
+
 lazy val codeDefs = taskKey[Unit]("Copies code definitions to resources/")
 codeDefs := {
   for (ext <- Seq("java", "scala")) {
