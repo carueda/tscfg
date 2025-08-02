@@ -104,7 +104,7 @@ class JavaGen(
 
     val classDeclMembers = results.map { case (symbol, res, a) =>
       val memberType = res.javaType
-      val typeFull = if (a.optional && a.default.isEmpty) {
+      val typeFull   = if (a.optional && a.default.isEmpty) {
         val typeActual = a.t match {
           case ObjectRefType(_, simpleName) => simpleName
           case _                            => toObjectType(memberType).toString
@@ -353,12 +353,12 @@ class JavaGen(
     Res(
       b,
       javaType = BaseJavaType(name = b match {
-        case STRING  => "java.lang.String"
-        case INTEGER => "int"
-        case LONG    => "long"
-        case DOUBLE  => "double"
-        case BOOLEAN => "boolean"
-        case SIZE    => "long"
+        case STRING      => "java.lang.String"
+        case INTEGER     => "int"
+        case LONG        => "long"
+        case DOUBLE      => "double"
+        case BOOLEAN     => "boolean"
+        case SIZE        => "long"
         case DURATION(_) =>
           if (genOpts.useDurations) "java.time.Duration" else "long"
       })
@@ -373,7 +373,7 @@ class JavaGen(
   ): Res = {
 
     val classNameAdjusted = adjustClassName(className)
-    val membersStr =
+    val membersStr        =
       et.members
         .map { m =>
           docUtil.getEnumDoc(m.comments, indent = "  ") + m.name
@@ -545,7 +545,7 @@ class JavaGen(
       case _ =>
         bt match {
           case DURATION(_) => s"""c.$getter"""
-          case _ =>
+          case _           =>
             val (methodName, methodCall) =
               tsConfigUtil.basicRequiredGetter(bt, path)
             listAccessors += methodName -> javaDef(methodName)
@@ -627,7 +627,7 @@ class JavaGen(
       s"$elemMethodName(cv)"
     }
     else {
-      val adjusted = elemMethodName.replace("_", ".")
+      val adjusted         = elemMethodName.replace("_", ".")
       val objRefResolution = lt.t match {
         case ort: ObjectRefType =>
           val namespace = rootNamespace.resolve(ort.namespace)
@@ -647,7 +647,7 @@ class JavaGen(
     }
 
     val methodName = methodNames.listPrefix + elemMethodName
-    val methodDef =
+    val methodDef  =
       s"""  private static java.util.List<$javaType> $methodName(com.typesafe.config.ConfigList cl, java.lang.String parentPath, $$TsCfgValidator $$tsCfgValidator) {
          |    java.util.ArrayList<$javaType> al = new java.util.ArrayList<>();
          |    for (com.typesafe.config.ConfigValue cv: cl) {

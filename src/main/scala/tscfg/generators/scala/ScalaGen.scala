@@ -104,7 +104,7 @@ class ScalaGen(
         if (a.isDefine) None
         else
           Some {
-            val scalaId = scalaIdentifier(symbol)
+            val scalaId   = scalaIdentifier(symbol)
             val modifiers = (isChildClass, isAbstractClass) match {
               case (true, _) =>
                 /* The field will be overridden, therefore it needs override modifier and "val" keyword */
@@ -164,7 +164,7 @@ class ScalaGen(
       .map(parentSymbols => {
         parentSymbols.foreach(checkUserSymbol)
         parentSymbols.map { symbol =>
-          val a = parentClassMembers.get(symbol)
+          val a   = parentClassMembers.get(symbol)
           val res = generate(
             a.t,
             classNamesPrefix = className + "." :: classNamesPrefix,
@@ -267,7 +267,7 @@ class ScalaGen(
       )
 
     val fullClassName = classNamesPrefix.reverse.mkString + className
-    val objectString = {
+    val objectString  = {
       s"""object $className {$innerClassesStr
          |  def apply($ctorParams): $fullClassName = {
          |    $errHandlingDecl$fullClassName(
@@ -314,7 +314,7 @@ class ScalaGen(
     symbols.foreach(checkUserSymbol)
 
     val results = symbols.map { symbol =>
-      val a = aot.members(symbol)
+      val a   = aot.members(symbol)
       val res = generate(
         a.t,
         classNamesPrefix = className + "." :: classNamesPrefix,
@@ -331,7 +331,7 @@ class ScalaGen(
       .map(parentSymbols => {
         parentSymbols.foreach(checkUserSymbol)
         parentSymbols.map { symbol =>
-          val a = parentClassMembers.get(symbol)
+          val a   = parentClassMembers.get(symbol)
           val res = generate(
             a.t,
             classNamesPrefix = className + "." :: classNamesPrefix,
@@ -382,8 +382,8 @@ class ScalaGen(
   }
 
   private def getClassNameForObjectRefType(ot: ObjectRefType): String = {
-    val className = getClassName(ot.simpleName)
-    val namespace = rootNamespace.resolve(ot.namespace)
+    val className     = getClassName(ot.simpleName)
+    val namespace     = rootNamespace.resolve(ot.namespace)
     val fullScalaName =
       if (namespace.isRoot)
         s"${genOpts.className}.$className"
@@ -418,12 +418,12 @@ class ScalaGen(
     Res(
       b,
       scalaType = BaseScalaType(name = b match {
-        case STRING  => "java.lang.String"
-        case INTEGER => "scala.Int"
-        case LONG    => "scala.Long"
-        case DOUBLE  => "scala.Double"
-        case BOOLEAN => "scala.Boolean"
-        case SIZE    => "scala.Long"
+        case STRING      => "java.lang.String"
+        case INTEGER     => "scala.Int"
+        case LONG        => "scala.Long"
+        case DOUBLE      => "scala.Double"
+        case BOOLEAN     => "scala.Boolean"
+        case SIZE        => "scala.Long"
         case DURATION(_) =>
           if (genOpts.useDurations) "java.time.Duration" else "scala.Long"
       })
@@ -724,7 +724,7 @@ private[scala] case class Getter(
       case _ =>
         bt match {
           case DURATION(_) => s"""c.$getter"""
-          case _ =>
+          case _           =>
             val (methodName, methodCall) =
               tsConfigUtil.basicRequiredGetter(bt, path)
             listAccessors += methodName -> scalaDef(methodName)
@@ -827,7 +827,7 @@ private[scala] class Accessors {
       s"$elemMethodName(cv)"
     }
     else {
-      val adjusted = elemMethodName.replace("_", ".")
+      val adjusted         = elemMethodName.replace("_", ".")
       val objRefResolution = lt.t match {
         case ort: ObjectRefType =>
           val namespace = rootNamespace.resolve(ort.namespace)
@@ -851,7 +851,7 @@ private[scala] class Accessors {
 
     val methodName               = methodNames.listPrefix + elemMethodName
     val scalaCollectionConverter = "scala.jdk.CollectionConverters._"
-    val methodDef =
+    val methodDef                =
       s"""  private def $methodName(cl:com.typesafe.config.ConfigList, parentPath: java.lang.String, $$tsCfgValidator: $$TsCfgValidator): scala.List[$scalaType] = {
          |    import $scalaCollectionConverter
          |    cl.asScala.map(cv => $elem).toList
