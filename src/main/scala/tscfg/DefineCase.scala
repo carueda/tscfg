@@ -47,7 +47,7 @@ object DefineCase {
   def getDefineCase(commentString: String): Option[DefineCase] = {
     val str    = commentString.trim
     val tokens = str.split("\\s+", Int.MaxValue).toList
-    val res = tokens match {
+    val res    = tokens match {
       case "@define" :: "abstract" :: Nil =>
         Some(AbstractDefineCase)
 

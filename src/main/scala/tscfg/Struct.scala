@@ -110,7 +110,7 @@ object Struct {
                 // check for any circularity:
                 if (othersBeingAdded.exists(_.name == ancestor.name)) {
                   val path = s :: othersBeingAdded
-                  val via =
+                  val via  =
                     path.reverseIterator
                       .map("'" + _.name + "'")
                       .mkString(" -> ")
@@ -232,7 +232,7 @@ object Struct {
           case Some(parentMembers) => parentMembers
           case None if isExternal  => None
           case None if firstPass   => None
-          case None =>
+          case None                =>
             throw new IllegalArgumentException(
               s"@define '${struct.name}' is invalid because '$parentName' is not @defined",
             )

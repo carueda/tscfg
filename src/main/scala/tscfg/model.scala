@@ -161,7 +161,7 @@ object model {
       case EnumObjectType(members) => s"ENUM: ${members.mkString(", ")}"
 
       case o: ObjectRealType =>
-        val symbols = o.members.keys.toList.sorted
+        val symbols    = o.members.keys.toList.sorted
         val membersStr = symbols
           .map { symbol =>
             val a = o.members(symbol)
@@ -169,7 +169,7 @@ object model {
             val cmn =
               if (a.comments.isEmpty) ""
               else {
-                val lines = a.comments
+                val lines         = a.comments
                 val noOptComments =
                   lines.filterNot(_.trim.startsWith("@optional"))
                 if (noOptComments.isEmpty) ""
@@ -211,8 +211,8 @@ object modelMain {
     val objectType = ObjectType(
       "positions" := "Position information" % ListType(
         ObjectType(
-          "lat" := DOUBLE,
-          "lon" := DOUBLE,
+          "lat"   := DOUBLE,
+          "lon"   := DOUBLE,
           "attrs" := ListType(
             ObjectType(
               "b" := BOOLEAN,
