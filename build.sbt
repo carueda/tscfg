@@ -3,7 +3,7 @@ enablePlugins(BuildInfoPlugin)
 organization       := "com.github.carueda"
 name               := "tscfg"
 scalaVersion       := "3.3.6"
-crossScalaVersions := Seq("2.13.16", "3.3.6")
+crossScalaVersions := Seq("2.13.18", "3.3.6")
 
 buildInfoKeys    := Seq[BuildInfoKey](version)
 buildInfoPackage := "tscfg"
