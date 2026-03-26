@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "com.outr"            %% "scribe"    % "3.17.0",
   "com.typesafe"         % "config"    % "1.4.3",
   "com.lihaoyi"         %% "pprint"    % "0.9.6",
-  "org.scalatest"       %% "scalatest" % "3.2.19" % Test,
+  "org.scalatest"       %% "scalatest" % "3.2.20" % Test,
   "com.google.code.gson" % "gson"      % "2.10.1"
 )
 
